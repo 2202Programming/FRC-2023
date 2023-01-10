@@ -13,6 +13,12 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  /* 
+   * ========================================
+   * SECTION 1: Overall Robot Constants
+   * ========================================
+   */
+  public static final double deltaT = 0.01; // TODO: back off rom 100hz?
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
