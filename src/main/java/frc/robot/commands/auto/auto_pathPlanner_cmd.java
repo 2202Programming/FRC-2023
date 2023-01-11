@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
+import frc.robot.subsystems.sensors.Sensors_Subsystem;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 
 
@@ -122,16 +122,17 @@ public class auto_pathPlanner_cmd extends CommandBase {
     return true;
   }
 
-  //for first path only
-  public static Command PathFactory(double maxVel, double maxAcc, String pathname){
-    SwerveDrivetrain m_robotDrive = RobotContainer.RC().drivetrain;
+  public static Command PathFactory(SwerveDrivetrain dt, Sensors_Subsystem sensors, double maxVel, double maxAcc, String pathname, int pathNum){
+    SwerveDrivetrain m_robotDrive = dt;
+    Sensors_Subsystem m_sensors = sensors;
+
     var path = PathPlanner.loadPath(pathname, maxVel, maxAcc); //last two parameters are max velocity and max accelleration
 
     if (path == null) {
       return new InstantCommand();  // no path selected
     }
     
-    RobotContainer.RC().drivetrain.m_field.getObject("Path1").setTrajectory(path);
+    dt.m_field.getObject("Path" + pathNum).setTrajectory(path);
 
     // get initial state from the trajectory
     PathPlannerState initialState = path.getInitialState();
@@ -161,107 +162,9 @@ public class auto_pathPlanner_cmd extends CommandBase {
     return new SequentialCommandGroup(
       new InstantCommand(()-> {
         m_robotDrive.setPose(startingPose);
-        RobotContainer.RC().sensors.setAutoStartPose(startingPose);
+        if (pathNum == 1) m_sensors.setAutoStartPose(startingPose);
       }),
-      new PrintCommand("***Factory1: Running Path " + pathname),
-      swerveControllerCommand,
-      new InstantCommand(m_robotDrive::stop),
-      new PrintCommand("***Done Running Path " + pathname)
-      );
-  }
-  
-  //for a subsequent path
-  public static Command PathFactory2(double maxVel, double maxAcc, String pathname){
-    SwerveDrivetrain m_robotDrive = RobotContainer.RC().drivetrain;
-    var path = PathPlanner.loadPath(pathname, maxVel, maxAcc); //last two parameters are max velocity and max accelleration
-
-    if (path == null) {
-      return new InstantCommand();  // no path selected
-    }
-    
-    RobotContainer.RC().drivetrain.m_field.getObject("Path2").setTrajectory(path);
-
-    // get initial state from the trajectory
-    PathPlannerState initialState = path.getInitialState();
-    Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
-
-    PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.deltaT);   // [m]
-    PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.deltaT);   // [m]
-    PIDController thetaController = new PIDController(4, 0, 0, Constants.deltaT);     // [rad]
-      //Units are radians for thetaController; PPSwerveController is using radians internally.
-      thetaController.enableContinuousInput(-Math.PI, Math.PI); //prevent piroutte paths over continuity
-
-      PPSwerveControllerCommand swerveControllerCommand =
-      new PPSwerveControllerCommand(
-          path,
-          m_robotDrive::getPose, // Functional interface to feed supplier
-          m_robotDrive.getKinematics(),
-          // Position controllers 
-          xController,
-          yController,
-          thetaController,
-          m_robotDrive::drive,
-          m_robotDrive
-      );
-
-        // Reset odometry to the starting pose of the trajectory.
-        //m_robotDrive.setPose(path.getInitialPose());
-
-    // Run path following command, then stop at the end.
-    return new SequentialCommandGroup(
-      new InstantCommand(()-> {  
-        m_robotDrive.setPose(startingPose);  //may not need path pose reset on secondary paths
-      }), //should allow robot to "drive" to beginning of second path (which should just correct rotation to current gryo)
-      new PrintCommand("***Factory2: Running Path " + pathname),
-      swerveControllerCommand,
-      new InstantCommand(m_robotDrive::stop),
-      new PrintCommand("***Done Running Path " + pathname)
-      );
-  }
-
-  //for a subsequent path
-  public static Command PathFactory3(double maxVel, double maxAcc, String pathname){
-    SwerveDrivetrain m_robotDrive = RobotContainer.RC().drivetrain;
-    var path = PathPlanner.loadPath(pathname, maxVel, maxAcc); //last two parameters are max velocity and max accelleration
-
-    if (path == null) {
-      return new InstantCommand();  // no path selected
-    }
-      
-    RobotContainer.RC().drivetrain.m_field.getObject("Path3").setTrajectory(path);
-
-    // get initial state from the trajectory
-    PathPlannerState initialState = path.getInitialState();
-    Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
-
-    PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.deltaT);   // [m]
-    PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.deltaT);   // [m]
-    PIDController thetaController = new PIDController(4, 0, 0, Constants.deltaT);     // [rad]
-      //Units are radians for thetaController; PPSwerveController is using radians internally.
-      thetaController.enableContinuousInput(-Math.PI, Math.PI); //prevent piroutte paths over continuity
-
-      PPSwerveControllerCommand swerveControllerCommand =
-      new PPSwerveControllerCommand(
-          path,
-          m_robotDrive::getPose, // Functional interface to feed supplier
-          m_robotDrive.getKinematics(),
-          // Position controllers 
-          xController,
-          yController,
-          thetaController,
-          m_robotDrive::drive,
-          m_robotDrive
-      );
-
-        // Reset odometry to the starting pose of the trajectory.
-        //m_robotDrive.setPose(path.getInitialPose());
-
-    // Run path following command, then stop at the end.
-    return new SequentialCommandGroup(
-      new InstantCommand(()-> {  
-        m_robotDrive.setPose(startingPose);  //may not need path pose reset on secondary paths
-      }), //should allow robot to "drive" to beginning of second path (which should just correct rotation to current gryo)
-      new PrintCommand("***Factory3: Running Path " + pathname),
+      new PrintCommand("***Factory: Running Path " + pathname),
       swerveControllerCommand,
       new InstantCommand(m_robotDrive::stop),
       new PrintCommand("***Done Running Path " + pathname)
