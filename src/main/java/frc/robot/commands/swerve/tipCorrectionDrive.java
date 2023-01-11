@@ -8,9 +8,9 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
-import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.ifx.DriverControls;
+import frc.robot.subsystems.swerve.SwerveDrivetrain;
+import frc.robot.subsystems.sensors.Sensors_Subsystem;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 /* Current driving behavior:
   Starts in field centric
@@ -24,6 +24,8 @@ import frc.robot.subsystems.ifx.DriverControls;
 public class tipCorrectionDrive extends FieldCentricDrive {
 
   double log_counter = 0;
+
+  Sensors_Subsystem sensors;
 
   PIDController tipRollPid;
   double roll_kP = 0.05;
@@ -50,8 +52,9 @@ public class tipCorrectionDrive extends FieldCentricDrive {
   NetworkTableEntry nt_pitch_factor;
   public final String NT_Name = "DC"; 
 
-  public tipCorrectionDrive(SwerveDrivetrain drivetrain, DriverControls dc) {
+  public tipCorrectionDrive(SwerveDrivetrain drivetrain, HID_Xbox_Subsystem dc, Sensors_Subsystem sensors) {
     super(drivetrain, dc);
+    this.sensors = sensors;
     addRequirements(drivetrain);
     tipRollPid = new PIDController(roll_kP, roll_kI, roll_kD);
     tipPitchPid = new PIDController(pitch_kP, pitch_kI, pitch_kD);
@@ -65,8 +68,7 @@ public class tipCorrectionDrive extends FieldCentricDrive {
     SmartDashboard.putNumber("Requested Pitch D", requested_pitch_D);
     SmartDashboard.putNumber("Requested Roll P", requested_roll_P);
     SmartDashboard.putNumber("Requested Roll I", requested_roll_I);
-    SmartDashboard.putNumber("Requested Roll D", requested_roll_D);
-    
+    SmartDashboard.putNumber("Requested Roll D", requested_roll_D); 
   }
 
   @Override
@@ -120,8 +122,8 @@ public class tipCorrectionDrive extends FieldCentricDrive {
     //NOTE: ROLL IS POSITIVE WITH CLOCKWISE ROTATION (LOOKING FROM BACK TOWARDS INTAKE)
     //Y direction is left/right, positive towards left when facing intake from back
 
-    double pitchAngleDegrees = RobotContainer.RC().sensors.getPitch();
-    double rollAngleDegrees = RobotContainer.RC().sensors.getRoll();
+    double pitchAngleDegrees = sensors.getPitch();
+    double rollAngleDegrees = sensors.getRoll();
     SmartDashboard.putNumber("Actual Pitch", pitchAngleDegrees);
     SmartDashboard.putNumber("Actual Roll", rollAngleDegrees);
 

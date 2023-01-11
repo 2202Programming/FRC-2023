@@ -5,14 +5,13 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.sensors;
 
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
-import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.hal.can.CANJNI;
 import edu.wpi.first.hal.can.CANStatus;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,18 +19,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.CAN;
-import frc.robot.Constants.NTStrings;
+import frc.robot.Constants.Sensors.EncoderID;
+import frc.robot.Constants.Sensors.GyroStatus;
 import frc.robot.util.ModMath;
 
-public class Sensors_Subsystem extends SubsystemBase { 
-  public enum YawSensor {
-    kNavX, kPigeon
-  };
+public class Sensors_Subsystem extends SubsystemBase {
 
   /**
    * Creates a new Sensors_Subsystem.
@@ -48,9 +43,6 @@ public class Sensors_Subsystem extends SubsystemBase {
 
   private NetworkTable table;
   private NetworkTable positionTable;
-  private NetworkTableEntry nt_accelX;
-  private NetworkTableEntry nt_accelY;
-  private NetworkTableEntry nt_accelZ;
   private NetworkTableEntry nt_yaw_navx;
   private NetworkTableEntry nt_yaw_navx_dot;
   private NetworkTableEntry nt_yaw_blend;
@@ -85,22 +77,6 @@ public class Sensors_Subsystem extends SubsystemBase {
     public double front_right;
   }
 
-  public enum EncoderID {
-    BackLeft, BackRight, FrontLeft, FrontRight
-  }
-
-  public enum GyroStatus {
-    UsingNavx("Navx"),
-    UsingPigeon("Pigeon");
-    private String name;
-    private GyroStatus(String name) {
-      this.name = name;
-    }
-    public String toString() {
-      return name;
-    }
-  }
-
   // CANCoders - monitor dt angles
   CANCoder rot_encoder_bl = init(new CANCoder(CAN.DT_BL_CANCODER));
   CANCoder rot_encoder_br = init(new CANCoder(CAN.DT_BR_CANCODER));
@@ -124,12 +100,10 @@ public class Sensors_Subsystem extends SubsystemBase {
   final RotationPositions m_rot = new RotationPositions();
 
   // configurion setting
-  YawSensor c_yaw_type = YawSensor.kPigeon;
   GyroStatus c_gryo_status = GyroStatus.UsingPigeon;
 
   double log_counter = 0;
   //set this to true to default to pigeon
-  private boolean navxManuallyDisabled = true;
   public Pose2d autoStartPose;
   public Pose2d autoEndPose;
 
@@ -153,10 +127,7 @@ public class Sensors_Subsystem extends SubsystemBase {
 
     // setup network table
     table = NetworkTableInstance.getDefault().getTable("Sensors");
-    positionTable = NetworkTableInstance.getDefault().getTable(NTStrings.NT_Name_Position);
-    nt_accelX = table.getEntry("x_dd");
-    nt_accelY = table.getEntry("y_dd");
-    nt_accelZ = table.getEntry("z_dd");
+    positionTable = NetworkTableInstance.getDefault().getTable(Constants.NT_NAME_POSITION);
 
     nt_yaw_navx = table.getEntry("yaw_navx");
     nt_yaw_navx_dot = table.getEntry("yaw_navx_d");
@@ -178,49 +149,13 @@ public class Sensors_Subsystem extends SubsystemBase {
     nt_pitch = positionTable.getEntry("Pitch");
     nt_roll = positionTable.getEntry("Roll");
 
-    //allow Navx to calibrate in it's own thread
-    new Thread(()->{
-      try {
-        Thread.sleep(1000); //wait a second so gyro is done booting before calibrating.
-        calibrate();
-      } catch (Exception e){}
-    }).start();
-
     log(20);
-  }
-
-  public void setSensorType(YawSensor type) {
-      this.c_yaw_type = type;
-  }
-
-  // public AHRS getAHRS(){
-  //   return m_ahrs;
-  // }
-
-  //@Override
-  public void calibrate() {
-
-    // if (m_ahrs.isConnected()) {
-    //   m_ahrs.enableBoardlevelYawReset(true);
-
-    //   m_ahrs.calibrate();
-    //   System.out.print("\ncalibrating AHRS ");
-    //   while (m_ahrs.isCalibrating()) { // wait to zero yaw if calibration is still running
-    //     Timer.delay(0.25);
-    //     System.out.print(".");
-    //   }
-    //   System.out.println(" done.");
-    //   Timer.delay(0.1);
-    // }
-
-    reset();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     updateYaw();
-    setActiveGryo();
     getRotationPositions(m_rot);
     m_pigeon.getRawGyro(m_xyz_dps);
 
@@ -228,65 +163,21 @@ public class Sensors_Subsystem extends SubsystemBase {
   }
 
   void updateYaw(){
-    // if(m_ahrs.isMagnetometerCalibrated()){ // We will only get valid fused headings if the magnetometer is calibrated
-    //   m_yaw_navx = m_ahrs.getFusedHeading(); //returns 0-360 deg; CW positive
-    //   m_yaw_navx -= 180; //convert to -180 to 180
-    // } else {
-    //   m_yaw_navx = m_ahrs.getYaw(); //gryo only, returns -180 to 180; CW positive
-    // }
-    // m_yaw_navx_d = m_ahrs.getRate();
 
     //pigeon yaw is not modulated so needs modmath to get -180 to 180
-    m_yaw_pigeon = ModMath.fmod360_2(-m_pigeon.getYaw()); //CCW positive, inverting here to match all the NavX code previously written. 
+    m_yaw_pigeon = ModMath.fmod360_2(-m_pigeon.getYaw()); //CCW positive, inverting here to match all the NavX code previously written.
 
     // // simple average, but could become weighted estimator.
-    // m_yaw_blend = 0.5 * (m_yaw_navx + m_yaw_pigeon);
-  }
-
-  void setActiveGryo(){
-    setSensorType(YawSensor.kPigeon);
-    // switch(c_gryo_status){
-    //   case UsingNavx:
-    //   //   if(!navxManuallyDisabled || !m_ahrs.isConnected() ){
-    //   //     setSensorType(YawSensor.kPigeon);
-    //   //     c_gryo_status = GyroStatus.UsingPigeon;
-    //   //     System.out.println("***NAVX COM LOST (or manually disabled), SWITCHING TO PIGEON***");
-    //   //   } else {
-    //   //     if((log_counter % 10)==0) {
-    //   //       m_pigeon.setYaw(m_yaw_navx); //check, does this need to be inverted?
-    //   //       // keep pigeon calibrated to navx as long as navx is working, so when if it switches over there is no jump in yaw, 
-    //   //       //but every 10 cycles not to hammer CAN.  
-    //   //     }
-    //   //   }
-    //   // break;
-
-    //   case UsingPigeon:
-    //       setSensorType(YawSensor.kNavX);
-    //       c_gryo_status = GyroStatus.UsingNavx;
-    //       System.out.println("***NAVX COM RESTORED (or manually renabled), SWITCHING TO NAVX***");
-    //     }
-    //   break;
-    // }
-  }
-
-  void setupSimulation() {
-    // m_gyroSim_ahrs = new AHRS_GyroSim(m_ahrs);
-    // m_gyroSim SimDevice
   }
 
   @Override
   public void simulationPeriodic() {
-    // m_gyroSim.setAngle(-m_drivetrainSimulator.getHeading().getDegrees());
   }
 
   public void log(double mod) {
 
     log_counter++;
     if ((log_counter % mod)==0) {
-      // nt_accelX.setDouble(m_ahrs.getWorldLinearAccelX());
-      // nt_accelY.setDouble(m_ahrs.getWorldLinearAccelY());
-      // nt_accelZ.setDouble(m_ahrs.getWorldLinearAccelZ());
-
       nt_yaw_navx.setDouble(m_yaw_navx);
       nt_yaw_navx_dot.setDouble(m_yaw_navx_d);
       nt_yaw_pigeon.setDouble(m_yaw_pigeon);
@@ -304,48 +195,22 @@ public class Sensors_Subsystem extends SubsystemBase {
       nt_cancoder_fr.setDouble(m_rot.front_right);
       nt_activeIMU.setString(c_gryo_status.toString());
       nt_yaw.setDouble(getYaw());
+      nt_pitch.setDouble(getPitch());
+      nt_roll.setDouble(getRoll());
       nt_rotation.setDouble(getRotation2d().getDegrees());
-      // nt_roll.setDouble(m_ahrs.getRoll());
-      // nt_pitch.setDouble(m_ahrs.getPitch());
     }
-  }
-
-  public void reset() {
-
-    // if (m_ahrs.isConnected()) {
-    //   m_ahrs.reset();
-    //   m_ahrs.resetDisplacement();
-    // }
   }
 
   public double getRoll() {
     double temp_roll = 0;
-
-    switch(c_yaw_type){
-      case kNavX:
-      //   temp_roll = m_ahrs.getRoll();
-      // break;
-
-      case kPigeon:
-        temp_roll = m_pigeon.getRoll();
-      break;
-    }
-      return temp_roll;
+    temp_roll = m_pigeon.getRoll();
+    return temp_roll;
   }
 
   public double getPitch() {
     double temp_pitch = 0;
-
-    switch(c_yaw_type){
-      case kNavX:
-      //   temp_pitch = m_ahrs.getPitch();
-      // break;
-
-      case kPigeon:
-        temp_pitch = m_pigeon.getPitch();
-      break;
-    }
-      return temp_pitch;
+    temp_pitch = m_pigeon.getPitch();
+    return temp_pitch;
   }
   
   public double getPitchRate() {
@@ -385,14 +250,7 @@ public class Sensors_Subsystem extends SubsystemBase {
    * @return the current heading of the robot in degrees.
    */
   public double getYaw() {
-    switch (c_yaw_type) {
-      case kNavX:
-        // return m_yaw_navx;
-      
-      case kPigeon:
-      default:
-        return m_yaw_pigeon;
-    }
+    return m_yaw_pigeon;
   }
 
   public void setYaw(Rotation2d rot){
@@ -498,11 +356,6 @@ public class Sensors_Subsystem extends SubsystemBase {
     return c;
   }
 
-  //if true, navx should not be used
-  public void disableNavx(boolean disabled){
-    navxManuallyDisabled = disabled;
-  }
-
   public void setAutoStartPose(Pose2d pose){
     autoStartPose = new Pose2d(pose.getTranslation(), pose.getRotation());
     setYaw(pose.getRotation()); //set gyro to starting heading so it's in field coordinates.
@@ -524,7 +377,7 @@ public class Sensors_Subsystem extends SubsystemBase {
     System.out.println("***Rotation difference per Gyro: " + getYaw());
     System.out.println("***Difference: " + rotError.getDegrees());
 
-    /*Idea below for correcting pose angle
+    /*TODO Idea below for correcting pose angle
     Since before we run each path we set our pose to the starting position,
     it's possible that our "true" heading (as determined by gryo) is not exactly the starting heading of the new path.
     The end of the prior path should be the start of the new path, but presumably the rotation is not perfectly aligned (PID errors)

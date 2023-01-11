@@ -11,16 +11,11 @@ import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
-// import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
-import frc.robot.subsystems.hid.CommandSideboardController.SBButton;
+import frc.robot.subsystems.hid.SwitchboardController.SBButton;
 
 
 /**
@@ -51,49 +46,14 @@ import frc.robot.subsystems.hid.CommandSideboardController.SBButton;
  */
 public class HID_Xbox_Subsystem extends SubsystemBase {
 
-  static class ActionOnEdge {
-    boolean prev;
-    boolean toggle;
-    final Trigger button;
-    final String name;
-
-    public ActionOnEdge(String name, Trigger b) {
-      this.name = name;
-      toggle = false;
-      button = b;
-      read();
-    }
-    
-    private boolean read() {
-      prev = button.getAsBoolean();
-      return prev;
-    }
-
-    boolean risingEdge() {
-      if (prev == true) {
-          read();
-          return false;
-        }
-      else if (read()) {
-        toggle = !toggle;
-        return true;
-      }
-      return false;
-    }
-    boolean get() {return toggle;}
-  }
-
 
 
   /**
    * Creates a new HID_Subsystem.
    */
   private final CommandXboxController driver;
-  private final CommandXboxController assistant;
-  private final CommandSideboardController switchBoard;
-  // private final XboxController phantom = new XboxController(3);
-  private final JoystickButton fieldRelativeButton;
-  ActionOnEdge fieldRel;
+  private final CommandXboxController operator;
+  private final CommandSwitchboardController switchBoard;
 
   // Buttons onStartup - in case you want to do something based on controls
   // being held at power up or on switchboard.
@@ -123,8 +83,8 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
 
     // register the devices
     driver = (CommandXboxController) registerController(Id.Driver, new CommandXboxController(Id.Driver.value));
-    assistant = (CommandXboxController) registerController(Id.Assistant, new CommandXboxController(Id.Assistant.value));
-    switchBoard = (CommandSideboardController) registerController(Id.SwitchBoard, new CommandSideboardController(Id.SwitchBoard.value));
+    operator = (CommandXboxController) registerController(Id.Operator, new CommandXboxController(Id.Operator.value));
+    switchBoard = (CommandSwitchboardController) registerController(Id.SwitchBoard, new CommandSwitchboardController(Id.SwitchBoard.value));
 
    
 
@@ -138,9 +98,7 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
     // Rotation on Left-X axis,  X-Y throttle on Right
     velXShaper = new ExpoShaper(velExpo,  () -> driver.getRightY()); // X robot is Y axis on Joystick
     velYShaper = new ExpoShaper(velExpo,  () -> driver.getRightX()); // Y robot is X axis on Joystick
-    swRotShaper = new ExpoShaper(rotExpo, () -> driver.getLeftX());  
-    fieldRelativeButton = (deviceMap.get(Id.Driver) != null) ? new JoystickButton(deviceMap.get(Id.Driver).getHID(), XboxController.Button.kLeftBumper.value) : null;
-    fieldRel = new ActionOnEdge("field-relative", fieldRelativeButton);
+    swRotShaper = new ExpoShaper(rotExpo, () -> driver.getLeftX());
 
     // deadzone for swerve
     velXShaper.setDeadzone(deadzone);
@@ -149,12 +107,12 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
 
     // read some values to remove unused warning
     // CHANGED for 2022
-    assistant.getRightX();
+    operator.getRightX();
     switchBoard.getRawAxis(0);
 
     // read initial buttons for each device - maybe used for configurions
     initDriverButtons = getButtonsRaw(Id.Driver);
-    initAssistentButtons = getButtonsRaw(Id.Assistant);
+    initAssistentButtons = getButtonsRaw(Id.Operator);
     initSwitchBoardButtons = getButtonsRaw(Id.SwitchBoard);
   }
 
@@ -192,38 +150,10 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
     velX = -velXShaper.get();    //invert, so right stick moves robot, right, lowering Y 
     velY = -velYShaper.get();    //invert, so forward stick is positive, increase X
     xyRot = -swRotShaper.get();  //invert, so positive is CCW 
-
-    fieldRel.risingEdge();
   }
   
   public void setLimitRotation(boolean enableLimit) {
     this.limitRotation = enableLimit;
-  }
-
-  private void limitTankRotation() {
-    if (limitRotation == false) return;
-
-    // Apply a rotation limit on tank based on command
-    double Kv = 33.0;
-    double avg = (velRight + velLeft) / 2.0;
-    double absV = Math.abs(avg);
-
-    double maxDelta = 1.0 / (Kv * absV * absV * absV + 1.0);
-    double absDelta = Math.abs(velLeft - velRight);
-
-    // Handle the different quadrents of the stick for tank drive
-    if ((velLeft > 0) && (velRight > 0) || (velLeft < 0) && (velRight < 0)) {
-      // Commanding forward or reverse, sticks in same direction
-
-      if (absDelta > maxDelta) {
-        // equalize the sticks so no rotation
-        velLeft = avg;
-        velRight = avg;
-      }
-    }
-    else {
-      //Sticks in opposite direction
-    }
   }
 
   public double getVelocityX() {
@@ -254,17 +184,13 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
     switch (id) {
     case Driver:
       return initSwitchBoardButtons;
-    case Assistant:
+    case Operator:
       return initAssistentButtons;
     case SwitchBoard:
       return initSwitchBoardButtons;
     default:
       return 0;
     }
-  }
-
-  public boolean useFieldRelative() {
-    return fieldRel.get();
   }
 
 public boolean initialSideboard(SBButton buttonId) {
@@ -279,10 +205,10 @@ public void turnOnRumble(Id id){
     case Driver:
       driver.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 1);
       driver.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 1);
-    case Assistant:
-      assistant.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 1);
-      assistant.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 1);
-    case SwitchBoard:
+    case Operator:
+      operator.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 1);
+      operator.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 1);
+    default:
       break;
   }
 }
@@ -292,10 +218,10 @@ public void turnOffRumble(Id id){
     case Driver:
       driver.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 0);
       driver.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 0);
-    case Assistant:
-      assistant.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 0);
-      assistant.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 0);
-    case SwitchBoard:
+    case Operator:
+      operator.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 0);
+      operator.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 0);
+    default:
       break;
   }
 }
@@ -304,8 +230,8 @@ public boolean isConnected(Id id){
   switch (id){
     case Driver:
       return driver.getHID().isConnected();
-    case Assistant:
-      return assistant.getHID().isConnected();
+    case Operator:
+      return operator.getHID().isConnected();
     case SwitchBoard:
       return switchBoard.getHID().isConnected();
     default:

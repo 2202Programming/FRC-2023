@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -19,6 +20,12 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
 
+  int disabledTimer = 0;
+
+  Robot() {
+    super(Constants.DELTA_T);
+  }
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -28,6 +35,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    m_robotContainer.drivetrain.setCoastMode(); //make robot easier to push around to set up correctly
   }
 
   /**
@@ -48,14 +56,24 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    disabledTimer = 0;
+    m_robotContainer.limelight.disableLED();
+  }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    disabledTimer++;
+    if(disabledTimer == 200){ //wait a few seconds to stop momementum before releasing brakes
+      m_robotContainer.drivetrain.setCoastMode(); //make robot easier to push around to set up correctly
+      m_robotContainer.limelight.disableLED();
+    }
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    m_robotContainer.drivetrain.setBrakeMode(); //brake mode for gameplay
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -70,6 +88,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    m_robotContainer.limelight.enableLED();
+    m_robotContainer.drivetrain.setBrakeMode(); //brake mode for gameplay
+    CommandScheduler.getInstance().cancelAll();
+    if(m_robotContainer.drivetrainCommand != null){
+      CommandScheduler.getInstance().schedule(m_robotContainer.drivetrainCommand); //start driverController
+    }
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -85,13 +109,17 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+    LiveWindow.setEnabled(false);
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+    CommandScheduler.getInstance().schedule(m_robotContainer.drivetrainCommand); //start driverController
   }
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    CommandScheduler.getInstance().run();
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override

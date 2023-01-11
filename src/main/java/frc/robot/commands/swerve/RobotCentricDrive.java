@@ -5,11 +5,10 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveTrain;
-import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.ifx.DriverControls;
+import frc.robot.subsystems.swerve.SwerveDrivetrain;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 /* Current driving behavior:
   Starts in field centric
@@ -20,10 +19,10 @@ import frc.robot.subsystems.ifx.DriverControls;
 */
 
 
-public class RobotCentricDrive extends CommandBase {
+public class RobotCentricDrive extends DriveCmdClass {
 
   final SwerveDrivetrain drivetrain;
-  final DriverControls dc;
+  final HID_Xbox_Subsystem dc;
   final SwerveDriveKinematics kinematics;
 
   // output to Swerve Drivetrain
@@ -37,10 +36,10 @@ public class RobotCentricDrive extends CommandBase {
 
   double log_counter = 0;
 
-  public RobotCentricDrive(SwerveDrivetrain drivetrain, DriverControls dc2) {
+  public RobotCentricDrive(SwerveDrivetrain drivetrain, HID_Xbox_Subsystem dc) {
     this.drivetrain = drivetrain;
     addRequirements(drivetrain);
-    this.dc = dc2;
+    this.dc = dc;
     this.kinematics = drivetrain.getKinematics();
   }
 
@@ -52,8 +51,8 @@ public class RobotCentricDrive extends CommandBase {
   void calculate() {
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
-    xSpeed = xspeedLimiter.calculate(dc.getVelocityX()) * DriveTrain.kMaxSpeed;
-    ySpeed = yspeedLimiter.calculate(dc.getVelocityY()) * DriveTrain.kMaxSpeed;
+    xSpeed = xspeedLimiter.calculate(dc.getVelocityX()) * DriveTrain.kMaxSpeed + pitch_correction;
+    ySpeed = yspeedLimiter.calculate(dc.getVelocityY()) * DriveTrain.kMaxSpeed + roll_correction;
     rot = rotLimiter.calculate(dc.getXYRotation()) * DriveTrain.kMaxAngularSpeed;
 
     // Clamp speeds/rot from the Joysticks

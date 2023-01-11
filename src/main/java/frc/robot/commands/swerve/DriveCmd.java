@@ -15,8 +15,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveTrain;
-import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.ifx.DriverControls;
+import frc.robot.subsystems.swerve.SwerveDrivetrain;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 public class DriveCmd extends CommandBase {
 
@@ -38,7 +38,7 @@ public class DriveCmd extends CommandBase {
   }
 
   final SwerveDrivetrain drivetrain;
-  final DriverControls dc;
+  final HID_Xbox_Subsystem dc;
   final SwerveDriveKinematics kinematics;
   // command behaviors
   DriveModeTypes driveMode = DriveModeTypes.fieldCentric;
@@ -79,8 +79,6 @@ public class DriveCmd extends CommandBase {
   private NetworkTableEntry NTangleError;
   private NetworkTableEntry xJoystick;
   private NetworkTableEntry yJoystick;
-  
-  public final String NT_Name = "DT"; // expose data under DriveTrain table
 
   double log_counter = 0;
 
@@ -90,17 +88,17 @@ public class DriveCmd extends CommandBase {
   private LinearFilter bearingFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
   private double filteredBearing = 0;
 
-  public DriveCmd(SwerveDrivetrain drivetrain, DriverControls dc2) {
+  public DriveCmd(SwerveDrivetrain drivetrain, HID_Xbox_Subsystem dc) {
     this.drivetrain = drivetrain;
     addRequirements(drivetrain);
-    this.dc = dc2;
+    this.dc = dc;
     this.kinematics = drivetrain.getKinematics();
 
     anglePid = new PIDController(angle_kp, angle_ki, angle_kd);
     intakeAnglePid = new PIDController(angle_kp, angle_ki, angle_kd);
     intakeAnglePid.enableContinuousInput(-180, 180);
 
-    table = NetworkTableInstance.getDefault().getTable(NT_Name);
+    table = NetworkTableInstance.getDefault().getTable(DriveTrain.NT_NAME_DT);
     hubCentricTarget = table.getEntry("/hubCentricTarget");;
     fieldMode = table.getEntry("/FieldMode");
 
@@ -114,7 +112,7 @@ public class DriveCmd extends CommandBase {
     //NTLastDriveMode = table.getEntry("/LastDriveMode");
   }
 
-  public DriveCmd(SwerveDrivetrain drivetrain, DriverControls dc, boolean fieldRelativeMode) {
+  public DriveCmd(SwerveDrivetrain drivetrain, HID_Xbox_Subsystem dc, boolean fieldRelativeMode) {
     this(drivetrain, dc);
     this.fieldRelativeMode = fieldRelativeMode;
   }

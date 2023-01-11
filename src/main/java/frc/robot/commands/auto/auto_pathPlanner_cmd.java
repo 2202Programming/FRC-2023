@@ -80,9 +80,9 @@ public class auto_pathPlanner_cmd extends CommandBase {
     PathPlannerState initialState = path.getInitialState();
     Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
 
-      PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.deltaT);   // [m]
-      PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.deltaT);   // [m]
-      PIDController thetaController = new PIDController(4, 0, 0, Constants.deltaT);     // [rad]
+      PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.DELTA_T);   // [m]
+      PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.DELTA_T);   // [m]
+      PIDController thetaController = new PIDController(4, 0, 0, Constants.DELTA_T);     // [rad]
        /*
       DPL - 10/26/22 profiled pid not allowed in PPSwerveController..
       ProfiledPIDController thetaController = new ProfiledPIDController(4, 0, 0, new TrapezoidProfile.Constraints(3, 3));
@@ -138,9 +138,9 @@ public class auto_pathPlanner_cmd extends CommandBase {
     PathPlannerState initialState = path.getInitialState();
     Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
 
-    PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.deltaT);   // [m]
-    PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.deltaT);   // [m]
-    PIDController thetaController = new PIDController(4, 0, 0, Constants.deltaT);     // [rad]
+    PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.DELTA_T);   // [m]
+    PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.DELTA_T);   // [m]
+    PIDController thetaController = new PIDController(4, 0, 0, Constants.DELTA_T);     // [rad]
       //Units are radians for thetaController; PPSwerveController is using radians internally.
       thetaController.enableContinuousInput(-Math.PI, Math.PI); //prevent piroutte paths over continuity
 

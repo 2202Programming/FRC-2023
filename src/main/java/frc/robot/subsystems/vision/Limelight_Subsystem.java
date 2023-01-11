@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.networktables.NetworkTable;
@@ -10,7 +10,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.Shooter;
+import frc.robot.Constants.Vision;
 
 public class Limelight_Subsystem extends SubsystemBase {
   /** Creates a new Limelight_Subsystem. */
@@ -45,8 +45,8 @@ public class Limelight_Subsystem extends SubsystemBase {
   private int log_counter = 0;
 
   public Limelight_Subsystem() {
-    x_iir = LinearFilter.singlePoleIIR(filterTC, Constants.Tperiod);
-    area_iir = LinearFilter.singlePoleIIR(filterTC, Constants.Tperiod);
+    x_iir = LinearFilter.singlePoleIIR(filterTC, Constants.T_PERIOD);
+    area_iir = LinearFilter.singlePoleIIR(filterTC, Constants.T_PERIOD);
     table = NetworkTableInstance.getDefault().getTable("limelight");
     outputTable = NetworkTableInstance.getDefault().getTable(NT_Name);
     shooterTable = NetworkTableInstance.getDefault().getTable(NT_Shooter_Name);
@@ -84,10 +84,10 @@ public class Limelight_Subsystem extends SubsystemBase {
 
 
     // both because why not (and that's what the copy-pasta had)
-    double angleToGoalDegrees = Shooter.LL_MOUNT_ANGLE_DEG + targetOffsetAngle_Vertical; 
+    double angleToGoalDegrees = Vision.LL_MOUNT_ANGLE_DEG + targetOffsetAngle_Vertical; 
     double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
     //calculate distance
-    return (((Shooter.GOAL_HEIGHT_TO_FLOOR_INCHES - Shooter.LL_LENS_HEIGHT_INCHES)/Math.tan(angleToGoalRadians) + Shooter.EDGE_TO_CENTER_INCHES) / Shooter.METERS_TO_INCHES);
+    return (((Vision.GOAL_HEIGHT_TO_FLOOR_INCHES - Vision.LL_LENS_HEIGHT_INCHES)/Math.tan(angleToGoalRadians) + Vision.EDGE_TO_CENTER_INCHES) / Constants.IN_PER_M);
   }
 
   public double getX() {

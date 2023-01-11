@@ -2,18 +2,17 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.hid;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.RobotContainer;
-import frc.robot.subsystems.ifx.DriverControls;
-import frc.robot.subsystems.ifx.DriverControls.Id;
+import frc.robot.Constants.DriverControls.Id;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 public class JoystickRumble extends CommandBase {
   /** Creates a new JoystickRumble. */
 
-  DriverControls dc;
+  HID_Xbox_Subsystem dc;
   Timer timer;
   Id id;
   double duration;
@@ -25,13 +24,14 @@ public class JoystickRumble extends CommandBase {
   boolean silent_segment = false;
 
   //rumble the joystick given by id, duration in sec
-  public JoystickRumble(Id id, double duration) {
-    this(id, duration, 1);
+  public JoystickRumble(HID_Xbox_Subsystem driverControls, Id id, double duration) {
+    this(driverControls, id, duration, 1);
   }
 
   //divide duration up into equal SEGMENTS with a fixed length silent gap between.  Segments are the # of rumble segments.
-  public JoystickRumble(Id id, double duration, int segments) {
-    dc = RobotContainer.RC().driverControls;
+  public JoystickRumble(HID_Xbox_Subsystem driverControls, Id id, double duration, int segments) {
+    dc = driverControls;
+    addRequirements(driverControls);
     this.id = id;
     this.duration = duration;
     this.segments = segments;
@@ -45,7 +45,7 @@ public class JoystickRumble extends CommandBase {
     timer.start();
     current_segment = 1;
     segment_duration = duration/segments;
-    RobotContainer.RC().driverControls.turnOnRumble(id);
+    dc.turnOnRumble(id);
     silent_segment = false;
   }
 
@@ -57,7 +57,7 @@ public class JoystickRumble extends CommandBase {
         silent_segment = false;
         timer.reset();
         timer.start();
-        RobotContainer.RC().driverControls.turnOnRumble(id);
+        dc.turnOnRumble(id);
       }
     }
     else if (timer.hasElapsed(segment_duration)){ 
@@ -67,7 +67,7 @@ public class JoystickRumble extends CommandBase {
       }
       else { //more segments to go, start a silent segment (these don't count against total segment count)
         silent_segment = true;
-        RobotContainer.RC().driverControls.turnOffRumble(id);
+        dc.turnOffRumble(id);
         timer.reset();
         timer.start();
       }
@@ -77,7 +77,7 @@ public class JoystickRumble extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.RC().driverControls.turnOffRumble(id);
+    dc.turnOffRumble(id);
     timer.stop();
   }
 

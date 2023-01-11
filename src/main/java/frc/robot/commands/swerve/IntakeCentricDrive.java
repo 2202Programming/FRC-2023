@@ -11,11 +11,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveTrain;
-import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.ifx.DriverControls;
+import frc.robot.subsystems.swerve.SwerveDrivetrain;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 /* Current driving behavior:
   Starts in field centric
@@ -29,7 +28,7 @@ import frc.robot.subsystems.ifx.DriverControls;
 public class IntakeCentricDrive extends DriveCmdClass {
 
   final SwerveDrivetrain drivetrain;
-  final DriverControls dc;
+  final HID_Xbox_Subsystem dc;
   final SwerveDriveKinematics kinematics;
 
   boolean lastShootMode = false;
@@ -54,7 +53,7 @@ public class IntakeCentricDrive extends DriveCmdClass {
   NetworkTable table;
   private NetworkTableEntry NTangleError;
   private NetworkTableEntry NTTargetAngle;
-  public final String NT_Name = "Shooter"; 
+  public final String NT_Name = "Driver"; 
 
   double log_counter = 0;
 
@@ -67,7 +66,7 @@ public class IntakeCentricDrive extends DriveCmdClass {
   private LinearFilter bearingFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
   private double filteredBearing = 0;
 
-  public IntakeCentricDrive(SwerveDrivetrain drivetrain, DriverControls dc) {
+  public IntakeCentricDrive(SwerveDrivetrain drivetrain, HID_Xbox_Subsystem dc) {
     this.drivetrain = drivetrain;
     addRequirements(drivetrain);
     this.dc = dc;

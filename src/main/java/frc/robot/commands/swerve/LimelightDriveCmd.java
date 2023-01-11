@@ -4,9 +4,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.subsystems.Limelight_Subsystem;
-import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.ifx.DriverControls;
+import frc.robot.subsystems.vision.Limelight_Subsystem;
+import frc.robot.subsystems.swerve.SwerveDrivetrain;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 public class LimelightDriveCmd extends DriveCmd {
   PIDController limelightPid;
@@ -19,7 +19,7 @@ public class LimelightDriveCmd extends DriveCmd {
   Limelight_Subsystem limelight;
   SlewRateLimiter llLimiter = new SlewRateLimiter(3);
 
-  public LimelightDriveCmd(SwerveDrivetrain drivetrain, DriverControls dc, Limelight_Subsystem limelight) {
+  public LimelightDriveCmd(SwerveDrivetrain drivetrain, HID_Xbox_Subsystem dc, Limelight_Subsystem limelight) {
     super(drivetrain, dc);
     this.limelight = limelight;
     limelightPid = new PIDController(limelight_kP, limelight_kI, limelight_kD);

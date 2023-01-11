@@ -6,11 +6,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveTrain;
-import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.ifx.DriverControls;
+import frc.robot.subsystems.swerve.SwerveDrivetrain;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 /* Current driving behavior:
   Starts in field centric
@@ -21,10 +20,10 @@ import frc.robot.subsystems.ifx.DriverControls;
 */
 
 
-public class FieldCentricDrive extends CommandBase {
+public class FieldCentricDrive extends DriveCmdClass {
 
   final SwerveDrivetrain drivetrain;
-  final DriverControls dc;
+  final HID_Xbox_Subsystem dc;
   final SwerveDriveKinematics kinematics;
 
   // output to Swerve Drivetrain
@@ -38,10 +37,10 @@ public class FieldCentricDrive extends CommandBase {
   final SlewRateLimiter rotLimiter = new SlewRateLimiter(3);
 
   double log_counter = 0;
-
-  public FieldCentricDrive(SwerveDrivetrain drivetrain, DriverControls dc) {
+  
+  public FieldCentricDrive(SwerveDrivetrain drivetrain, HID_Xbox_Subsystem dc) {
     this.drivetrain = drivetrain;
-    addRequirements(drivetrain);
+    addRequirements(drivetrain, dc);
     this.dc = dc;
     this.kinematics = drivetrain.getKinematics();
   }
@@ -63,8 +62,15 @@ public class FieldCentricDrive extends CommandBase {
     rot = MathUtil.clamp(rot, -Constants.DriveTrain.kMaxAngularSpeed, Constants.DriveTrain.kMaxAngularSpeed);
 
     currrentHeading = drivetrain.getPose().getRotation();
+    //convert field centric speeds to robot centric
+    ChassisSpeeds tempChassisSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, currrentHeading);
+
+    //tip correction is in robot centric
+    tempChassisSpeed.vxMetersPerSecond += pitch_correction;
+    tempChassisSpeed.vyMetersPerSecond += roll_correction;
+
     output_states = kinematics
-        .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, currrentHeading));
+        .toSwerveModuleStates(tempChassisSpeed);
   }
 
   @Override
