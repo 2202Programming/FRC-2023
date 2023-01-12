@@ -7,6 +7,7 @@ package frc.robot;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -32,8 +33,8 @@ public class RobotContainer {
 
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  public final CommandXboxController m_driverController =
-      new CommandXboxController(0);
+  public final HID_Xbox_Subsystem m_driverController =
+      new HID_Xbox_Subsystem(0.3,0.9,0.05);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
