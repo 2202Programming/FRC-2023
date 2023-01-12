@@ -4,10 +4,13 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Sensors_Subsystem;
+import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.util.RobotSpecs;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -19,15 +22,35 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
+  static RobotContainer rc;
+
+  public RobotSpecs m_robotSpecs;
+  public Sensors_Subsystem sensors = null;
+  public SwerveDrivetrain drivetrain = null;
+
+  public static RobotContainer RC() { //bad practice probably but super convenient.
+    return rc;
+  }
+
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  public final CommandXboxController m_driverController =
+      new CommandXboxController(0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    RobotContainer.rc = this;
+
+    m_robotSpecs = new RobotSpecs(System.getenv("serialnum"));  //mechanism to pull different specs based on roborio serial
+
+  // these can get created on any hardware setup
+  sensors = new Sensors_Subsystem();
+  drivetrain = new SwerveDrivetrain();
+  drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
+
     // Configure the trigger bindings
     configureBindings();
   }
