@@ -26,6 +26,7 @@ import frc.robot.Constants.CAN;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.Constants.NTStrings;
 import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
+import frc.robot.util.ModMath;
 import frc.robot.util.PoseMath;
 
 public class SwerveDrivetrain extends SubsystemBase {
@@ -174,6 +175,29 @@ public class SwerveDrivetrain extends SubsystemBase {
     */
     m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
     old_pose = m_pose;
+
+    offsetDebug();
+  }
+
+  private void offsetDebug() {
+    double offsetFL = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FL_OFFSET;
+    double measuredFL = modules[0].m_externalAngle;
+
+    double offsetFR = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FR_OFFSET;
+    double measuredFR = modules[1].m_externalAngle;
+
+    double offsetBL = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BL_OFFSET;
+    double measuredBL = modules[2].m_externalAngle;
+
+    double offsetBR = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BR_OFFSET;
+    double measuredBR = modules[3].m_externalAngle;
+
+    System.out.println("================Offsets==================");
+    System.out.println("FL: offset " + offsetFL + ", measured " + measuredFL + ", should be " + ModMath.fmod360_2(offsetFL - measuredFL));
+    System.out.println("FR: offset " + offsetFR + ", measured " + measuredFR + ", should be " + ModMath.fmod360_2(offsetFR - measuredFR));
+    System.out.println("BL: offset " + offsetBL + ", measured " + measuredBL + ", should be " + ModMath.fmod360_2(offsetBL - measuredBL));
+    System.out.println("BR: offset " + offsetBR + ", measured " + measuredBR + ", should be " + ModMath.fmod360_2(offsetBR - measuredBR));
+    System.out.println("============Offsets Done==============");
   }
 
   public void drive(SwerveModuleState[] states) {
