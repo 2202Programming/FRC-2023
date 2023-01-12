@@ -180,17 +180,18 @@ public class SwerveDrivetrain extends SubsystemBase {
   }
 
   private void offsetDebug() {
+    periodic(); //run to initialize module values
     double offsetFL = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FL_OFFSET;
-    double measuredFL = modules[0].m_externalAngle;
+    double measuredFL = modules[0].m_internalAngle;
 
     double offsetFR = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FR_OFFSET;
-    double measuredFR = modules[1].m_externalAngle;
+    double measuredFR = modules[1].m_internalAngle;
 
     double offsetBL = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BL_OFFSET;
-    double measuredBL = modules[2].m_externalAngle;
+    double measuredBL = modules[2].m_internalAngle;
 
     double offsetBR = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BR_OFFSET;
-    double measuredBR = modules[3].m_externalAngle;
+    double measuredBR = modules[3].m_internalAngle;
 
     System.out.println("================Offsets==================");
     System.out.println("FL: offset " + offsetFL + ", measured " + measuredFL + ", should be " + ModMath.fmod360_2(offsetFL - measuredFL));

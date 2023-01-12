@@ -51,9 +51,9 @@ public class FieldCentricDrive extends CommandBase {
   void calculate() {
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
-    xSpeed = xspeedLimiter.calculate(RobotContainer.RC().m_driverController.getLeftX()) * DriveTrain.kMaxSpeed;
+    xSpeed = xspeedLimiter.calculate(-RobotContainer.RC().m_driverController.getLeftX()) * DriveTrain.kMaxSpeed;
     ySpeed = yspeedLimiter.calculate(RobotContainer.RC().m_driverController.getLeftY()) * DriveTrain.kMaxSpeed;
-    rot = rotLimiter.calculate(RobotContainer.RC().m_driverController.getRightX()) * DriveTrain.kMaxAngularSpeed;
+    rot = rotLimiter.calculate(-RobotContainer.RC().m_driverController.getRightX()) * DriveTrain.kMaxAngularSpeed;
 
     // Clamp speeds/rot from the Joysticks
     xSpeed = MathUtil.clamp(xSpeed, -Constants.DriveTrain.kMaxSpeed, Constants.DriveTrain.kMaxSpeed);

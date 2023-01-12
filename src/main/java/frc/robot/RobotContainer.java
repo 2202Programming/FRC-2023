@@ -44,8 +44,9 @@ public class RobotContainer {
   // these can get created on any hardware setup
   sensors = new Sensors_Subsystem();
   drivetrain = new SwerveDrivetrain();
-  drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
-
+  //if (m_driverController.getHID().isConnected()) {  //doesn't work for some reason to see if controller is connected
+    drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
+  //}
     // Configure the trigger bindings
     configureBindings();
   }

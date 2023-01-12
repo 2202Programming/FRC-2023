@@ -43,11 +43,13 @@ public class RobotSpecs {
                 myWheelOffsets = Constants.DriveTrain.swerveBotOffsets;
                 myChassisConfig = Constants.DriveTrain.swerveBotChassisConfig;
                 mySubsystemConfig = Constants.swerveBotSubsystemConfig;
+                System.out.println("***I'm a Swervebot***");
                 break;
             case CompetitionBot:
                 myWheelOffsets = Constants.DriveTrain.compBotOffsets;
                 myChassisConfig = Constants.DriveTrain.compBotChassisConfig;
                 mySubsystemConfig = Constants.compBotSubsystemConfig;
+                System.out.println("***I'm a CompetitionBot***");
                 break;
             case UnknownBot:
                 myWheelOffsets = Constants.DriveTrain.swerveBotOffsets;
@@ -79,7 +81,7 @@ public class RobotSpecs {
 
     if (serialNo.compareTo("031b7511")==0)
         tempRobotName = RobotNames.SwerveBot;
-    if (serialNo.compareTo("03238151")==0)
+    else if (serialNo.compareTo("03238151")==0)
         tempRobotName = RobotNames.CompetitionBot;
     else tempRobotName = RobotNames.UnknownBot;
 
