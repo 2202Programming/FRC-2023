@@ -128,6 +128,10 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
     return DriverStation.getStickButtons(id.value);
   }
 
+  public CommandXboxController getDriver(){
+    return driver;
+  }
+
   /**
    * constructor of the implementing class.
    * 

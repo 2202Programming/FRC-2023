@@ -4,12 +4,15 @@
 
 package frc.robot;
 
+import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -69,6 +72,9 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+
+    //Y button to reset current facing to zero
+    m_driverController.getDriver().y().whileTrue(new InstantCommand(()->{drivetrain.resetAnglePose(new Rotation2d(0));}));
   }
 
   /**
