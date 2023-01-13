@@ -198,11 +198,17 @@ public class SwerveModuleMK3 {
     // adjust magnetic offset in absEncoder, measured constants.
     absEncoderConfiguration = new CANCoderConfiguration();
     absEncoder.getAllConfigs(absEncoderConfiguration);
+
+    System.out.println("Module "+myprefix+": Set Offset="+offsetDegrees+". Initial CANCODER absolute angle="+absEncoder.getAbsolutePosition()+", Initial CANCODER angle="+absEncoder.getPosition());
+
     // if different, update
     if (offsetDegrees != absEncoderConfiguration.magnetOffsetDegrees) {
       absEncoderConfiguration.magnetOffsetDegrees = offsetDegrees;
       absEncoder.configAllSettings(absEncoderConfiguration, 50);
     }
+
+    System.out.println("Module "+myprefix+": CANCODER Angle after offset programmed="+absEncoder.getPosition());
+
   }
 
   /**
@@ -218,6 +224,8 @@ public class SwerveModuleMK3 {
     sleep(10);
     pos_deg = (pos_deg + absEncoder.getAbsolutePosition())/2.0;
     
+    System.out.println("Module "+myprefix+": NEO startup angle="+angleEncoder.getPosition());
+
     angleEncoder.setPosition(angleCmdInvert * pos_deg);
     sleep(100); // sparkmax gremlins
     double temp = angleEncoder.getPosition();
@@ -236,6 +244,8 @@ public class SwerveModuleMK3 {
     }
 
     realityCheckSparkMax(angleCmdInvert * pos_deg, temp);
+
+    System.out.println("Module "+myprefix+": NEO post-calibrate angle="+angleEncoder.getPosition());
 
   }
 
