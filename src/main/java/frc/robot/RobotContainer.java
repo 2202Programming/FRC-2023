@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -29,6 +30,7 @@ public class RobotContainer {
   public RobotSpecs m_robotSpecs;
   public Sensors_Subsystem sensors = null;
   public SwerveDrivetrain drivetrain = null;
+  public PhotonVision photonVision;
 
   public static RobotContainer RC() { //bad practice probably but super convenient.
     return rc;
@@ -48,6 +50,8 @@ public class RobotContainer {
   // these can get created on any hardware setup
   sensors = new Sensors_Subsystem();
   drivetrain = new SwerveDrivetrain();
+  photonVision = new PhotonVision();
+  
   //if (m_driverController.getHID().isConnected()) {  //doesn't work for some reason to see if controller is connected
     drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
   //}
