@@ -24,36 +24,44 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  static RobotContainer rc;       
+  //singleton accessor for robot public sub-systems
+  public static RobotContainer RC() {  return rc;  }
 
-  static RobotContainer rc;
-
-  public RobotSpecs m_robotSpecs;
-  public Sensors_Subsystem sensors = null;
-  public SwerveDrivetrain drivetrain = null;
+  //Sub-systems 
+  public final RobotSpecs robotSpecs;
+  public final Sensors_Subsystem sensors;
+  public final SwerveDrivetrain drivetrain;
+  public final HID_Xbox_Subsystem dc;           //short for driver controls
+  // Note: we may replace HID_Xbox with CommandPS4Controller or CommandJoystick if needed
+ 
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public PhotonVision photonVision;
   public Limelight_Subsystem limelight;
 
-  public static RobotContainer RC() { //bad practice probably but super convenient.
-    return rc;
-  }
-
-
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  public final HID_Xbox_Subsystem m_driverController =
-      new HID_Xbox_Subsystem(0.3,0.9,0.05);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    RobotContainer.rc = this;
+    RobotContainer.rc = this;         //for singleton accesor
 
-    m_robotSpecs = new RobotSpecs(System.getenv("serialnum"));  //mechanism to pull different specs based on roborio serial
+    //initialize all the sub-systems
+    robotSpecs = new RobotSpecs(System.getenv("serialnum")); // mechanism to pull different specs based on roborio                                                               
+    dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05);   //TODO: deal with driver prefs
 
+    // these can get created on any hardware setup
+    sensors = new Sensors_Subsystem();
+    drivetrain = new SwerveDrivetrain();
   // these can get created on any hardware setup
   photonVision = new PhotonVision();
   limelight = new Limelight_Subsystem();
@@ -70,35 +78,31 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * Use this method to define your trigger->command mappings. Triggers can be
+   * created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
+   * an arbitrary
    * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
+   * {@link
+   * CommandXboxController
+   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or
+   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    //new Trigger(m_exampleSubsystem::exampleCondition)
-    //    .onTrue(new ExampleCommand(m_exampleSubsystem));
+    // new Trigger(mySubsystem::exampleCondition).onTrue(new ExampleCommand(mySubsystem));
+    //
+    // Schedule `exampleMethodCommand` when the Xbox controller's B button is
+    // pressed, cancelling on release.
+    //    dc.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-
-    //X button to change LL pipeline
-    m_driverController.getDriver().x().onTrue(new InstantCommand(()->{limelight.togglePipeline();}));
-
-    if (m_robotSpecs.myRobotName != RobotNames.BotOnBoard){
-    //Y button to reset current facing to zero
-    m_driverController.getDriver().y().whileTrue(new InstantCommand(()->{drivetrain.resetAnglePose(new Rotation2d(0));}));
-    m_driverController.getDriver().a().whileTrue(new CenterTapeYaw());
-    m_driverController.getDriver().b().whileTrue(new CenterTapeSkew());
-    m_driverController.getDriver().x().whileTrue(new CenterTapeYawSkew());
-    }
-
-
+    // Y button to reset current facing to zero
+    dc.Driver().y().whileTrue(new InstantCommand(() -> {
+      drivetrain.resetAnglePose(new Rotation2d(0));
+    }));
   }
 
   /**
