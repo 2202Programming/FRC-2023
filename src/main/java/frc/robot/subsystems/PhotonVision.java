@@ -5,19 +5,29 @@
 package frc.robot.subsystems;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.RobotPoseEstimator;
+import org.photonvision.RobotPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -45,13 +55,15 @@ public class PhotonVision extends SubsystemBase {
   private double skew;
   private Transform3d targetPose;
   private List<TargetCorner> corners;
-
+  private Transform3d robotToCam;
   private int targetID;
   private double poseAmbiguity;
   private Transform3d bestCameraToTarget;
   private Transform3d alternateCameraToTarget;
-
   private AprilTagFieldLayout fieldLayout;
+  private RobotPoseEstimator robotPoseEstimator;
+  private Pose2d currentPoseEstimate = new Pose2d();
+  private Pose2d previousPoseEstimate = new Pose2d();
 
   public PhotonVision() {
     // table = NetworkTableInstance.getDefault().getTable("photonvision");
@@ -60,24 +72,46 @@ public class PhotonVision extends SubsystemBase {
     // targetPixelsArea = table.getEntry("Global_Shutter_Camera/targetArea");
     // hasTarget = table.getEntry("Global_Shutter_Camera/hasTarget");
 
-    camera = new PhotonCamera("Global_Shutter_Camera");
-    
     //build path to apriltag json file in deploy directory
     File deploy = Filesystem.getDeployDirectory();
     String path = deploy.getPath() + "/aprilTags.json";
-    
+
     //load apriltag field layout
     try {
       fieldLayout = new AprilTagFieldLayout(path);
     } catch (Exception e) {
       System.out.println("***FAILED TO LOAD APRILTAG LIST***");
     };
+
+    // Assemble the list of cameras & mount locations
+    camera = new PhotonCamera("Global_Shutter_Camera");
+    robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+    var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
+    camList.add(new Pair<PhotonCamera, Transform3d>(camera, robotToCam));
+    robotPoseEstimator = new RobotPoseEstimator(fieldLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, camList);
     
   
     // Query the latest result from PhotonVision
     var result = camera.getLatestResult();
 
   }
+
+      /**
+     * @param estimatedRobotPose The current best guess at robot pose
+     * @return A pair of the fused camera observations to a single Pose2d on the field, and the time
+     *     of the observation. Assumes a planar field and the robot is always firmly on the ground
+     */
+  public Pair<Pose2d, Double> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+    robotPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+
+    double currentTime = Timer.getFPGATimestamp();
+    Optional<Pair<Pose3d, Double>> result = robotPoseEstimator.update();
+    if (result.isPresent()) {
+        return new Pair<Pose2d, Double>(result.get().getFirst().toPose2d(), currentTime - result.get().getSecond());
+    } else {
+        return new Pair<Pose2d, Double>(null, 0.0);
+    }
+}
 
   @Override
   public void periodic() {
@@ -118,6 +152,9 @@ public class PhotonVision extends SubsystemBase {
       Transform3d bestCameraToTarget = bestTarget.getBestCameraToTarget();
       Transform3d alternateCameraToTarget = bestTarget.getAlternateCameraToTarget();
 
+      previousPoseEstimate = currentPoseEstimate;
+      currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate).getFirst();
+
     }    
     
 
@@ -127,7 +164,8 @@ public class PhotonVision extends SubsystemBase {
     SmartDashboard.putNumber("area", area);
     SmartDashboard.putNumber("skew", skew);
     SmartDashboard.putNumber("targetID", targetID);
-    
+    SmartDashboard.putNumber("Estimated Pose X", currentPoseEstimate.getX());
+    SmartDashboard.putNumber("Estimated Pose Y", currentPoseEstimate.getY());
 
   }
 }
