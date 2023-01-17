@@ -14,25 +14,27 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 
 public class FollowPPTrajectory extends CommandBase {
-    private final SwerveDrivetrain m_robotDrive;
 
   // Since a PathPlannerTrajectory extends the WPILib Trajectory, it can be referenced as one
   // This will load the file "Example Path.path" and generate it with a max velocity of 8 m/s and a max acceleration of 5 m/s^2
   PathPlannerTrajectory path;
   Command runcommand;
+  boolean useOdo;
+  SwerveDrivetrain sdt;
+  Sensors_Subsystem sensors;
 
-  public FollowPPTrajectory(SwerveDrivetrain drive, PathPlannerTrajectory path) {
-    m_robotDrive = drive;
+  public FollowPPTrajectory(PathPlannerTrajectory path, boolean useOdo) {
+    sdt = RobotContainer.RC().drivetrain;
+    sensors = RobotContainer.RC().sensors;
     this.path = path;
         // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(drive);
+    addRequirements(sdt, sensors);
   }
 
   // Called when the command is initially scheduled.
@@ -43,7 +45,7 @@ public class FollowPPTrajectory extends CommandBase {
       // Reset odometry to the starting pose of the trajectory.
       //IMPORTANT: Pathplanner heading of first point is the assumed starting heading of your bot
       //If first point has a non-zero heading, the gryo will get offset with this setPose
-      m_robotDrive.setPose(path.getInitialPose());
+      sdt.setPose(path.getInitialPose());
     }
   }
 
@@ -52,52 +54,6 @@ public class FollowPPTrajectory extends CommandBase {
   public void execute() {
     Command runcommand = getPathCommand();
     runcommand.schedule();
-  }
-
-  public Command getPathCommand() {
-    if (path == null) {
-      System.out.println("No path");
-      return new InstantCommand();  // no path selected
-    }
-      
-    // get initial state from the trajectory
-    PathPlannerState initialState = path.getInitialState();
-    Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
-
-      PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.DT);   // [m]
-      PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.DT);   // [m]
-      PIDController thetaController = new PIDController(4, 0, 0, Constants.DT);     // [rad]
-       /*
-      DPL - 10/26/22 profiled pid not allowed in PPSwerveController..
-      ProfiledPIDController thetaController = new ProfiledPIDController(4, 0, 0, new TrapezoidProfile.Constraints(3, 3));
-      */
-
-      //Units are radians for thetaController; PPSwerveController is using radians internally.
-      thetaController.enableContinuousInput(-Math.PI, Math.PI); //prevent piroutte paths over continuity
-
-      PPSwerveControllerCommand swerveControllerCommand =
-      new PPSwerveControllerCommand(
-          path,
-          m_robotDrive::getPose, // Functional interface to feed supplier
-          m_robotDrive.getKinematics(),
-          // Position controllers 
-          xController,
-          yController,
-          thetaController,
-          m_robotDrive::drive,
-          (Subsystem)m_robotDrive
-      );
-        
-    // Run path following command, then stop at the end.
-    return new SequentialCommandGroup(
-      new InstantCommand(()-> {
-        m_robotDrive.setPose(startingPose);
-      }),
-      new PrintCommand("***Running Path "),
-      swerveControllerCommand,
-      new InstantCommand(m_robotDrive::stop),
-      new PrintCommand("***Done Running Path ")
-      );
   }
 
   public static PathPlannerTrajectory getPPPath(String pathName) {
@@ -109,17 +65,14 @@ public class FollowPPTrajectory extends CommandBase {
    *                       when false, use the path's starting point as the true robot position.
    *         First auto path (or when going from a known position), useOdo should be false, otherwise true
    */
-  public static Command pathFactoryAuto(PathConstraints constraints, String pathname, boolean useOdo){
-    SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
-    Sensors_Subsystem sensors = RobotContainer.RC().sensors;
-
-    var path = PathPlanner.loadPath(pathname, constraints);
+  public Command getPathCommand() {
 
     if (path == null) {
       return new InstantCommand();  // no path selected
     }
     
-    sdt.m_field.getObject(pathname).setTrajectory(path);
+    //TODO: wtf does htis do
+    //sdt.m_field.getObject(pathname).setTrajectory(path);
 
     // get initial state from the trajectory
     PathPlannerState initialState = path.getInitialState();
@@ -151,11 +104,15 @@ public class FollowPPTrajectory extends CommandBase {
         if (!useOdo) // useOdo is false, starting pose is position/heading as defined in path. Otherwise go from where we are
           sensors.setAutoStartPose(startingPose);
       }),
-      new PrintCommand("***Factory: Running Path " + pathname),
+      new PrintCommand("***Running Path"),
       swerveControllerCommand,
       new InstantCommand(sdt::stop),
-      new PrintCommand("***Done Running Path " + pathname)
+      new PrintCommand("***Done Running Path")
       );
+  }
+
+  public static PathPlannerTrajectory pathFactoryAuto(PathConstraints constraints, String pathName) {
+    return PathPlanner.loadPath(pathName, constraints); 
   }
 
   public static PathPlannerTrajectory pathFactoryTele(PathConstraints constraints, Pose2d finalPoint) {
