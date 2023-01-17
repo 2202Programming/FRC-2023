@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -34,11 +35,13 @@ public class RobotContainer {
   public final Sensors_Subsystem sensors;
   public final SwerveDrivetrain drivetrain;
   public final HID_Xbox_Subsystem dc;           //short for driver controls
+  public final PhotonVision photonVision;
   // Note: we may replace HID_Xbox with CommandPS4Controller or CommandJoystick if needed
  
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
+ 
   public RobotContainer() {
     RobotContainer.rc = this;         //for singleton accesor
 
@@ -49,6 +52,7 @@ public class RobotContainer {
     // these can get created on any hardware setup
     sensors = new Sensors_Subsystem();
     drivetrain = new SwerveDrivetrain();
+    photonVision = new PhotonVision();
     drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
     
     // Configure the trigger bindings
