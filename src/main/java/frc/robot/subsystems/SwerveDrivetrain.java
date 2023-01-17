@@ -4,12 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.PathPoint;
-import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -30,19 +24,23 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ChassisConfig;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.Constants.NTStrings;
 import frc.robot.Constants.WheelOffsets;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
 import frc.robot.util.ModMath;
 import frc.robot.util.PoseMath;
@@ -275,6 +273,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     // update pose
     old_pose = m_pose;
+    m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
+//TODO: get the math out of here
     m_pose = updateOdometry();
    
 
@@ -336,7 +336,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     m_pose = new_pose;
     m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);
   }
-
+//TODO: do we REALLY think this is where we need to go? field coords???
   // resets X,Y, and set current angle to be 0
   public void resetPose() {
     m_pose = new Pose2d(0, 0, new Rotation2d(0));
@@ -356,7 +356,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   public void printPose(){
     System.out.println("***POSE X:" + m_pose.getX() + ", Y:" + m_pose.getY() + ", Rot:" + m_pose.getRotation().getDegrees());
   }
-
+//TODO: bearing should be to or from *what*? split out?
   public double getBearing(){
     return filteredBearing;
   }
@@ -407,9 +407,6 @@ public class SwerveDrivetrain extends SubsystemBase {
     System.out.println("***BRAKES RELEASED***");
   }
 
-  public static PathPlannerTrajectory getPPPath(String pathName) {
-    return PathPlanner.loadPath(pathName, 1, 1); //last two parameters are max velocity and max accelleration
-  }
 
   public static Command pathFactoryAuto(SwerveDrivetrain dt, Sensors_Subsystem sensors, double maxVel, double maxAcc, String pathname, int pathNum){
     SwerveDrivetrain m_robotDrive = dt;
