@@ -4,6 +4,12 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPoint;
+import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -11,6 +17,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,7 +27,12 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ChassisConfig;
@@ -369,6 +381,63 @@ public class SwerveDrivetrain extends SubsystemBase {
       modules[i].setCoastMode();
     }
     System.out.println("***BRAKES RELEASED***");
+  }
+
+  public static PathPlannerTrajectory getPPPath(String pathName) {
+    return PathPlanner.loadPath(pathName, 1, 1); //last two parameters are max velocity and max accelleration
+  }
+
+  public static Command pathFactoryAuto(SwerveDrivetrain dt, Sensors_Subsystem sensors, double maxVel, double maxAcc, String pathname, int pathNum){
+    SwerveDrivetrain m_robotDrive = dt;
+    Sensors_Subsystem m_sensors = sensors;
+
+    var path = PathPlanner.loadPath(pathname, maxVel, maxAcc); //last two parameters are max velocity and max accelleration
+
+    if (path == null) {
+      return new InstantCommand();  // no path selected
+    }
+    
+    dt.m_field.getObject("Path" + pathNum).setTrajectory(path);
+
+    // get initial state from the trajectory
+    PathPlannerState initialState = path.getInitialState();
+    Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
+
+    PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController thetaController = new PIDController(4, 0, 0, Constants.DT);     // [rad]
+      //Units are radians for thetaController; PPSwerveController is using radians internally.
+      thetaController.enableContinuousInput(-Math.PI, Math.PI); //prevent piroutte paths over continuity
+
+      PPSwerveControllerCommand swerveControllerCommand =
+      new PPSwerveControllerCommand(
+          path,
+          m_robotDrive::getPose, // Functional interface to feed supplier
+          m_robotDrive.getKinematics(),
+          // Position controllers 
+          xController,
+          yController,
+          thetaController,
+          m_robotDrive::drive,
+          m_robotDrive
+      );
+
+
+    // Run path following command, then stop at the end.
+    return new SequentialCommandGroup(
+      new InstantCommand(()-> {
+        m_robotDrive.setPose(startingPose);
+        if (pathNum == 1) m_sensors.setAutoStartPose(startingPose);
+      }),
+      new PrintCommand("***Factory: Running Path " + pathname),
+      swerveControllerCommand,
+      new InstantCommand(m_robotDrive::stop),
+      new PrintCommand("***Done Running Path " + pathname)
+      );
+  }
+
+  public PathPlannerTrajectory pathFactoryTele(Pose2d finalPoint) {
+    return PathPlanner.generatePath(new PathConstraints(1, 1), new PathPoint(m_pose.getTranslation(), finalPoint.getRotation(), m_pose.getRotation()), new PathPoint(finalPoint.getTranslation(), finalPoint.getRotation(), finalPoint.getRotation()));
   }
 
   //  TODO: Move to a TEST/Tuning command  - DPL 2/21/22
