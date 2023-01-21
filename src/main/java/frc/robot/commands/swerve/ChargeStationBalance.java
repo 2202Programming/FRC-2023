@@ -86,6 +86,9 @@ public class ChargeStationBalance extends CommandBase {
         // pid setpoint is always 0.0, aka level, include tolerances
         csBalancePID.setSetpoint(0.0);
         csBalancePID.setTolerance(rollPosTol, rollRateTol);
+        
+        // reset filter
+        rollFilter.reset();
     }
 
     @Override
