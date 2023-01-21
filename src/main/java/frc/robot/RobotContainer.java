@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
@@ -85,6 +86,8 @@ public class RobotContainer {
     dc.Driver().y().whileTrue(new InstantCommand(() -> {
       drivetrain.resetAnglePose(new Rotation2d(0));
     }));
+
+    dc.Driver().x().onTrue(new ChargeStationBalance());
   }
 
   /**
