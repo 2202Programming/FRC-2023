@@ -141,14 +141,14 @@ public class PhotonVision extends SubsystemBase {
       Transform3d bestCameraToTarget = bestTarget.getBestCameraToTarget();
       Transform3d alternateCameraToTarget = bestTarget.getAlternateCameraToTarget();
 
-      double range =
-      PhotonUtils.calculateDistanceToTargetMeters(
-              CAMERA_HEIGHT_METERS,
-              TARGET_HEIGHT_METERS,
-              CAMERA_PITCH_RADIANS,
-              Units.degreesToRadians(result.getBestTarget().getPitch()));
+      // double range =
+      // PhotonUtils.calculateDistanceToTargetMeters(
+      //         CAMERA_HEIGHT_METERS,
+      //         TARGET_HEIGHT_METERS,
+      //         CAMERA_PITCH_RADIANS,
+      //         Units.degreesToRadians(result.getBestTarget().getPitch()));
 
-      SmartDashboard.putNumber("Range", range);
+      // SmartDashboard.putNumber("Range", range);
 
       previousPoseEstimate = currentPoseEstimate;
       currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate).getFirst();
@@ -173,6 +173,7 @@ public class PhotonVision extends SubsystemBase {
    * @param estimatedRobotPose The current best guess at robot pose
    * @return A pair of the fused camera observations to a single Pose2d on the field, and the time
    *     of the observation. Assumes a planar field and the robot is always firmly on the ground
+   *  NOTE - APRIL TAG NEEDS TO BE IN 3D mode
    */
   public Pair<Pose2d, Double> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
     robotPoseEstimator.setReferencePose(prevEstimatedRobotPose);
