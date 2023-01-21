@@ -75,13 +75,19 @@ public class ArmGeometry {
         stringLength = xStringLength;
     }
     double width = w1 + w2 + w3;
-    //method to find the 3 lengths
-    public double[] lengthDimensions() {
-        double lengthX = width*Math.sin(angle) + stringLength*Math.sin(angle) + geoX;
-        double lengthY = geoY;
-        double lengthZ = width*Math.cos(angle) + stringLength*Math.cos(angle) + geoZ;
-        double[] lengths = {lengthX,lengthY,lengthZ};
-        return lengths;
-    } 
+    //array to find the 3 lengths
+    double lengthX = width*Math.sin(angle) + stringLength*Math.sin(angle) + geoX;
+    double lengthY = geoY;
+    double lengthZ = width*Math.cos(angle) + stringLength*Math.cos(angle) + geoZ;
+    double[] lengths = {lengthX,lengthY,lengthZ};
+    public double getLengthX() {
+        return lengthX;
+    }
+    public double getLengthY() {
+        return lengthY;
+    }
+    public double getLengthZ() {
+        return lengthZ;
+    }
 }
 
