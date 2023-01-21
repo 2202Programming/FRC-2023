@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.commands.swerve.ChargeStationBalance;
 import com.pathplanner.lib.PathConstraints;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.Automation.CenterTapeSkew;
@@ -106,6 +107,8 @@ public class RobotContainer {
     dc.Driver().y().whileTrue(new InstantCommand(() -> {
       drivetrain.resetAnglePose(new Rotation2d(0));
     }));
+
+    dc.Driver().x().onTrue(new ChargeStationBalance());
   }
 
   /**
