@@ -119,6 +119,10 @@ public final class Constants {
     public static final int CMB_LEFT_Rotate = 36;
     public static final int CMB_RIGHT_Rotate = 37;
 
+    //Arms
+    public static final int ARM_LEFT_Motor = -30; //TODO number
+    public static final int ARM_RIGHT_Motor = -30; //TODO number
+
     //IMU
     public static final int PIGEON_IMU_CAN = 60;
 
@@ -161,6 +165,9 @@ public final class Constants {
   public static final class Magazine {
   }
 
+  public static final class ArmSettings{
+
+  }
   public static final class ClimbSettings {
     // Hardware Controller constants for velocity and position modes, each gets hw
     // slot
