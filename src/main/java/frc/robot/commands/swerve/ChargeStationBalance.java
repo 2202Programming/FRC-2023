@@ -71,6 +71,7 @@ public class ChargeStationBalance extends CommandBase {
     // state vars, cleared on init()
     int levelCount;
     PIDController csBalancePID = new PIDController(0.02, 0.0, 0.0); // kp [m/s per deg]
+    LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.05, Constants.DT);
 
     public ChargeStationBalance() {
         this(true);
@@ -119,9 +120,8 @@ public class ChargeStationBalance extends CommandBase {
         // double yaw = Math.toRadians(sensors.getYaw()); //sensor are in degrees, just keep that for intuition
         
         //TODO: filter magic number to constants
-        LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.05, Constants.DT);
+        
         // try simple 1-D around roll
-
         double roll = rollFilter.calculate(sensors.getRoll() - roll_offset); // simple best guess of our roll after physical alignment
 
         // pid speed + min speed in proper direction, then clamp to our max
