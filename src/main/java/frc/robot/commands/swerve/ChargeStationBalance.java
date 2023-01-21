@@ -8,15 +8,10 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class ChargeStationBalance extends CommandBase {
     //TODO: move this stuff to constants
-    PIDController csDegBalancePID;
-    double deg_kP = 0.01;
-    double deg_kI = 0.0;
-    double deg_kD = 0.0;
-    double deg_output = 0.0;
+    PIDController csBalancePID = new PIDController(0.01, 0.0, 0.0);
 
     SwerveDrivetrain sdt;
     Sensors_Subsystem sensors;
@@ -24,6 +19,7 @@ public class ChargeStationBalance extends CommandBase {
     public ChargeStationBalance() {
         sdt = RobotContainer.RC().drivetrain;
         sensors = RobotContainer.RC().sensors;
+        csBalancePID.setSetpoint(0);
     }
 
     @Override
@@ -57,7 +53,7 @@ public class ChargeStationBalance extends CommandBase {
 
         // TODO: magic numbers into constants
         // these values are small b/c don't want to overadjust
-        double speed = MathUtil.clamp(csDegBalancePID.calculate(tilt), -0.5, 0.5);
+        double speed = MathUtil.clamp(csBalancePID.calculate(tilt), -0.5, 0.5);
         double xSpeed = MathUtil.clamp(speed * Math.cos(yaw), -0.5, 0.5);
         double ySpeed = MathUtil.clamp(speed * Math.sin(yaw), -0.5, 0.5);
 
