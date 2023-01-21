@@ -42,6 +42,9 @@ import frc.robot.subsystems.SwerveDrivetrain;
  *      Exit-on-level : false --> keep running 
  *                      true --> command ends when level
  * 
+ *      TODO: look at PID atSetpoint() see why we don't exit
+ *      TODO: calibrate all the angles somewhere?
+ * 
  *      TODO: may need to correct roll and roll with any offsets due to alignment
  *      if it is really badly aligned, back out corrected angles with eular angles for coupling
  *      TODO: look at pigeon2 docs for mounting corections, there may be some calibration to help.
@@ -86,15 +89,13 @@ public class ChargeStationBalance extends CommandBase {
         // pid setpoint is always 0.0, aka level, include tolerances
         csBalancePID.setSetpoint(0.0);
         csBalancePID.setTolerance(rollPosTol, rollRateTol);
-        
-        // reset filter
-        rollFilter.reset();
     }
 
     @Override
     public void initialize() {
         levelCount = 0;
         csBalancePID.reset();
+        rollFilter.reset();
         System.out.println("***Starting automatic charging station balancing***");
     }
 
@@ -140,7 +141,7 @@ public class ChargeStationBalance extends CommandBase {
          */
 
         // check for level using PID's tolerance, failure resets counter
-        levelCount = (csBalancePID.atSetpoint()) ? levelCount++ : 0;
+        levelCount = (csBalancePID.atSetpoint()) ? ++levelCount : 0;
 
         // move the robot our desired speed, forward, zero y, and keep
         // current heading, no rotation
