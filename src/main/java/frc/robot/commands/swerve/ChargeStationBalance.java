@@ -2,9 +2,11 @@ package frc.robot.commands.swerve;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
@@ -17,8 +19,8 @@ import frc.robot.subsystems.SwerveDrivetrain;
  *  so it won't work to catch changing direction or running from different sides.
  *  Angles don't blend that way.
  * 
- * I recommend we decouple the problem first. Don't use roll and pitch.  pick one, and
- * alingn the robot to the ChargeStn.  Here's a first cut using pitch.
+ * I recommend we decouple the problem first. Don't use roll and roll.  pick one, and
+ * alingn the robot to the ChargeStn.  Here's a first cut using roll.
  * 
  * 
  * Description:
@@ -29,18 +31,18 @@ import frc.robot.subsystems.SwerveDrivetrain;
  *
  *  Assumptions:
  *      Robot is on the ramp, with an initial tilt.
- *      Robot is aligned, forward/back, only pitch[theta] is used
- *      Either side of charge station can work, pitch angle used to determin which way to move.
- *      Robot moves only in forward/back directions based on sign of pitch.
- *      PID around pitch controls speed, may need vmin for friction?
+ *      Robot is aligned, forward/back, only roll[theta] is used
+ *      Either side of charge station can work, roll angle used to determin which way to move.
+ *      Robot moves only in forward/back directions based on sign of roll.
+ *      PID around roll controls speed, may need vmin for friction?
  *              vmin could just be a bang-bang control and no pid.
  *  
  *      We detect level for N frames then exit.
- *      May want to low-pass filter pitch for level detection
+ *      May want to low-pass filter roll for level detection
  *      Exit-on-level : false --> keep running 
  *                      true --> command ends when level
  * 
- *      TODO: may need to correct pitch and roll with any offsets due to alignment
+ *      TODO: may need to correct roll and roll with any offsets due to alignment
  *      if it is really badly aligned, back out corrected angles with eular angles for coupling
  *      TODO: look at pigeon2 docs for mounting corections, there may be some calibration to help.
  * 
@@ -52,15 +54,15 @@ public class ChargeStationBalance extends CommandBase {
 
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java
-    final double vmax = 0.5; // [m/s] fastest speed we allow
+    final double vmax = 0.25; // [m/s] fastest speed we allow
     final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected
     // also could be simple bang-bang...
-    final double pitch_offset = 0.8349609375; // [deg] simple sensor correction
+    final double roll_offset = -0.8349609375; // [deg] simple sensor correction
 
     // tolerance limits
-    final double pitchPosTol = 1.5; // [deg] level more or less
-    final double pitchRateTol = 0.5; // [deg/s] little motion
-    final int levelN = 5; // [frame-counts] stable pitch for n frames, maybe use FIR?                          
+    final double rollPosTol = 1.5; // [deg] level more or less
+    final double rollRateTol = 3.0; // [deg/s] little motion TODO: tell it to stop being annoying
+    final int levelN = 5; // [frame-counts] stable roll for n frames, maybe use FIR?                          
 
     // Subsystems
     SwerveDrivetrain sdt; // required
@@ -68,7 +70,7 @@ public class ChargeStationBalance extends CommandBase {
 
     // state vars, cleared on init()
     int levelCount;
-    PIDController csBalancePID = new PIDController(0.2, 0.0, 0.0); // kp [m/s per deg]
+    PIDController csBalancePID = new PIDController(0.02, 0.0, 0.0); // kp [m/s per deg]
 
     public ChargeStationBalance() {
         this(true);
@@ -82,7 +84,7 @@ public class ChargeStationBalance extends CommandBase {
 
         // pid setpoint is always 0.0, aka level, include tolerances
         csBalancePID.setSetpoint(0.0);
-        csBalancePID.setTolerance(pitchPosTol, pitchRateTol);
+        csBalancePID.setTolerance(rollPosTol, rollRateTol);
     }
 
     @Override
@@ -106,7 +108,7 @@ public class ChargeStationBalance extends CommandBase {
     /**
      * 
      * Calculates swerve module command vales based on PID loop around
-     * pitch.
+     * roll.
      * 
      * @return SwerveModuleState[] swerve speeds to command
      */
@@ -115,12 +117,15 @@ public class ChargeStationBalance extends CommandBase {
         // feedback loop when this is always >0
         // double tilt = sensors.getTotalTilt(); // dito no indication of direction, really want net tilt in direction of ramp-plane (a bit hard)
         // double yaw = Math.toRadians(sensors.getYaw()); //sensor are in degrees, just keep that for intuition
+        
+        //TODO: filter magic number to constants
+        LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.05, Constants.DT);
+        // try simple 1-D around roll
 
-        // try simple 1-D around pitch
-        double pitch = sensors.getPitch() - pitch_offset; // simple best guess of our pitch after physical alignment
+        double roll = rollFilter.calculate(sensors.getRoll() - roll_offset); // simple best guess of our roll after physical alignment
 
         // pid speed + min speed in proper direction, then clamp to our max
-        double xSpeed = csBalancePID.calculate(pitch) + Math.copySign(vmin, pitch);
+        double xSpeed = csBalancePID.calculate(roll) + Math.copySign(vmin, roll);
         xSpeed = MathUtil.clamp(xSpeed, -vmax, vmax);
 
         /**
