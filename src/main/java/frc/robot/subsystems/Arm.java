@@ -22,6 +22,7 @@ public class Arm extends SubsystemBase {
 
     }
 
+    // DPL - TODO: reads the motor's postion to indicate where the arm is at
     public double getCurrent_pos(){
         return Current_pos;
     }
@@ -32,6 +33,14 @@ public class Arm extends SubsystemBase {
     
     public double getDesired_pos(){
         return Desired_pos;
+    }
+
+    /*
+     * Looks at various pids and desired positions to see if we are there
+     */
+    public boolean isAtPosition()
+    {
+        return false;  //TODO fix me
     }
 
     @Override

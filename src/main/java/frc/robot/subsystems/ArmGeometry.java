@@ -1,5 +1,23 @@
 package frc.robot.subsystems;
 import java.lang.Math;
+
+// Comments from MrL
+// TODO  Add information about what this class does why it exists
+// if it is just contstants and offset consider a Matrix formulation
+// or just a simple data class.
+// Use public final values, see our Constants.java
+//  Infact this could be just put in there. either way I would simplifiy it
+//
+// my personal pref, avoid most use of get/set prefixes. Context tells you 
+// setters here should not be needed, these are CONSTANTS, example:
+//
+//   public final double w1 = 32.5; // [mm] string length for segment 1...
+//
+// consider moving to Constants.java or a class inside the Arm itself
+// 
+
+
+
 public class ArmGeometry {
     //Passive -> Extend, Active <- Retreat
     //Length of string -> motion -> position servo + 2 spark max + spring
@@ -9,7 +27,8 @@ public class ArmGeometry {
     //geometry-derived length in all three directions
     private double geoX; //wheel and chassis height in x-direction
     private double geoY; //wheel and chassis height in y-direction
-    private double geoZ; //wheel and chassis height in z-direction
+    public static final double geoZ = 3333.3333; //wheel and chassis height in z-direction (example)
+
     //length of string
     private double stringLength;
     //angle between the lengths
@@ -36,9 +55,12 @@ public class ArmGeometry {
     public double getGeoZ() {
         return geoZ;
     }
+    /*
     public void setGeoZ(double geoZ) {
         this.geoZ = geoZ;
     }
+    */
+
     public double getWidth1() {
         return w1;
     }
@@ -64,13 +86,14 @@ public class ArmGeometry {
         this.stringLength = stringLength;
     }
     //constructor
+    //MrL - a many arg constructo doesn't add much value, just set the constants
     public ArmGeometry (double xW1, double xW2, double xW3, double xAngle, double xStringLength, double xGeoX, double xGeoY,double xGeoZ) {
         w1 = xW1;
         w2 = xW2;
         w3 = xW3;
         geoX = xGeoX;
         geoY = xGeoY;
-        geoZ = xGeoZ;
+        //geoZ = xGeoZ; 
         angle = xAngle;
         stringLength = xStringLength;
     }
