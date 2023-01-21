@@ -256,6 +256,14 @@ public class Sensors_Subsystem extends SubsystemBase {
     return m_xyz_dps[2];
   }
 
+  public double getTotalTilt() {
+    return Math.sqrt(Math.pow(getPitch(), 2) + Math.pow(getRoll(), 2));
+  }
+
+  public double getTotalTiltRate() {
+    return Math.sqrt(Math.pow(getPitchRate(), 2) + Math.pow(getRollRate(), 2));
+  }
+
   // @Override
   public void close() throws Exception {
     // //m_gyro.close();
