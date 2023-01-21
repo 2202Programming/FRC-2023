@@ -55,7 +55,7 @@ public class ChargeStationBalance extends CommandBase {
     final double vmax = 0.5; // [m/s] fastest speed we allow
     final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected
     // also could be simple bang-bang...
-    final double pitch_offset = 0.0; // [deg] simple sensor correction
+    final double pitch_offset = 0.8349609375; // [deg] simple sensor correction
 
     // tolerance limits
     final double pitchPosTol = 1.5; // [deg] level more or less
