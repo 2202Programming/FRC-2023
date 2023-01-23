@@ -5,6 +5,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -89,6 +92,9 @@ public class ChargeStationBalance extends CommandBase {
         // pid setpoint is always 0.0, aka level, include tolerances
         csBalancePID.setSetpoint(0.0);
         csBalancePID.setTolerance(rollPosTol, rollRateTol);
+
+        // NT creation
+        ntcreate();
     }
 
     @Override
@@ -101,6 +107,7 @@ public class ChargeStationBalance extends CommandBase {
 
     @Override
     public void execute() {
+        ntupdates();
         sdt.drive(calculate());
     }
 
@@ -157,5 +164,40 @@ public class ChargeStationBalance extends CommandBase {
     @Override
     public boolean isFinished() {
         return exitOnLevel && isLevel();
+    }
+
+
+    /**
+     * ==================
+     * NT stuff
+     * ==================
+     */
+
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("csBalance");
+
+    NetworkTableEntry nt_rollOffset;
+    NetworkTableEntry nt_framesStable;
+    NetworkTableEntry nt_atSetpoint;
+    NetworkTableEntry nt_kP;
+    NetworkTableEntry nt_kI;
+    NetworkTableEntry nt_kD;
+
+    private void ntcreate() {
+        nt_framesStable = table.getEntry("Frames Stable");
+        nt_atSetpoint = table.getEntry("At Setpoint?");
+        nt_kP = table.getEntry("kP");
+        nt_kI = table.getEntry("kI");
+        nt_kD = table.getEntry("kD");
+    }
+
+    private void ntupdates() {
+        // info
+        nt_framesStable.setDouble(levelCount);
+        nt_atSetpoint.setBoolean(csBalancePID.atSetpoint());
+
+        // setters
+        csBalancePID.setP(nt_kP.getDouble(0.02));
+        csBalancePID.setI(nt_kI.getDouble(0.0));
+        csBalancePID.setD(nt_kD.getDouble(0.0));
     }
 }
