@@ -9,23 +9,16 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 public class OpenCloseClaw extends CommandBase {
   final Claw claw;
   final String name;
-  final boolean openClaw;
-  final boolean closeClaw;
-  /** Creates a new OpenClaw. */
-  public OpenCloseClaw(Claw claw, String name, boolean openClaw) {
+  final double clawWidth;
+  public OpenCloseClaw(Claw claw, String name, double clawWidth) {
     this.claw = claw;
     this.name = name;
-    this.openClaw = openClaw;
+    this.clawWidth = clawWidth;
 
     // Use addRequirements() here to declare subsystem dependencies.
   }
   //Don't know if this can be done in the same class/file or if it needs separate class/files
-  public OpenCloseClaw(Claw claw, String name, boolean closeClaw){
-    this.claw = claw;
-    this.name = name;
-    this.closeClaw = closeClaw;
-    return closeClaw;
-  }
+
 
   // Called when the command is initially scheduled.
   @Override

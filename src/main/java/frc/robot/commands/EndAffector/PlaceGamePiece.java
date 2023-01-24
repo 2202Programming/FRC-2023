@@ -21,8 +21,9 @@ public class PlaceGamePiece extends SequentialCommandGroup {
       new GamePieceAngle(claw, "nonbottomgrid", 50.0),
       new GamePieceAngle(claw, "bottomgrid", 30.0),
       new GamePieceAngle(claw, "grab", 25.0),
-      new OpenCloseClaw(claw, "openclaw", true),
-      new OpenCloseClaw(claw, "closeclaw", false)
+      new OpenCloseClaw(claw, "closedclaw", 0.0),
+      new OpenCloseClaw(claw, "cubepick-up", 2.5),
+      new OpenCloseClaw(claw, "conepick-up", 2.0) 
     );
     this.claw = claw;
 
