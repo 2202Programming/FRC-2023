@@ -371,4 +371,8 @@ public final class Constants {
         }
       }
     }
+    public static final class Claw {
+      
+      public static final double GEAR_RATIO = 1; //TODO: Find actual gear ratio value
+      }
 }
