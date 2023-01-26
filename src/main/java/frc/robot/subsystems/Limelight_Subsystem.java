@@ -30,6 +30,8 @@ public class Limelight_Subsystem extends SubsystemBase {
   private NetworkTableEntry outputTx;
   private NetworkTableEntry outputTv;
 
+  private NetworkTableEntry nt_botpose;
+
   private double x;
   private double filteredX;
   private double y;
@@ -37,6 +39,16 @@ public class Limelight_Subsystem extends SubsystemBase {
   private boolean target;
   private boolean ledStatus; // true = ON
   private double filteredArea;
+
+  private double[] botpose;
+  private double botpose_x;
+  private double botpose_y;
+  private double botpose_z;
+  private double botpose_rx;
+  private double botpose_ry;
+  private double botpose_rz;
+
+
 
   private LinearFilter x_iir;
   private LinearFilter area_iir;
@@ -59,6 +71,8 @@ public class Limelight_Subsystem extends SubsystemBase {
     leds = table.getEntry("ledMode");
     booleanLeds = table.getEntry("booleanLeds");
 
+    nt_botpose = table.getEntry("botpose");
+
     NT_hasTarget = shooterTable.getEntry("LL_Has_Target");
 
     outputTv = outputTable.getEntry("Limelight Valid");
@@ -76,6 +90,17 @@ public class Limelight_Subsystem extends SubsystemBase {
     filteredX = x_iir.calculate(x);
     filteredArea = area_iir.calculate(area);
     ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
+    botpose = nt_botpose.getDoubleArray(new double[]{0,0,0,0,0,0});
+    botpose_x = botpose[0];
+    botpose_y = botpose[1];
+    botpose_z = botpose[2];
+    botpose_rx = botpose[3];
+    botpose_ry = botpose[4];
+    botpose_rz = botpose[5];
+
+    SmartDashboard.putNumber("botpose X", botpose_x);
+    SmartDashboard.putNumber("botpose Y", botpose_y);
+    SmartDashboard.putNumber("botpose Z", botpose_z);
 
   }
 

@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
@@ -31,6 +32,7 @@ public class RobotContainer {
   public Sensors_Subsystem sensors = null;
   public SwerveDrivetrain drivetrain = null;
   public PhotonVision photonVision;
+  public Limelight_Subsystem limelight;
 
   public static RobotContainer RC() { //bad practice probably but super convenient.
     return rc;
@@ -51,6 +53,7 @@ public class RobotContainer {
   sensors = new Sensors_Subsystem();
   drivetrain = new SwerveDrivetrain();
   photonVision = new PhotonVision();
+  limelight = new Limelight_Subsystem();
   
   //if (m_driverController.getHID().isConnected()) {  //doesn't work for some reason to see if controller is connected
     drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
