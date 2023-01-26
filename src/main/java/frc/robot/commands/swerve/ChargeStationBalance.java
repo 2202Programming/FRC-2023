@@ -60,7 +60,7 @@ public class ChargeStationBalance extends CommandBase {
 
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java
-    final double vmax = 0.25; // [m/s] fastest speed we allow
+    final double vmax = 0.4; // [m/s] fastest speed we allow
     final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected
     // also could be simple bang-bang...
     final double roll_offset = -0.8349609375; // [deg] simple sensor correction
@@ -76,8 +76,10 @@ public class ChargeStationBalance extends CommandBase {
 
     // state vars, cleared on init()
     int levelCount;
+    double unfilteredRoll;
+    double filteredRoll;
     PIDController csBalancePID = new PIDController(0.02, 0.0, 0.0); // kp [m/s per deg]
-    LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.05, Constants.DT);
+    LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.07, Constants.DT);
 
     public ChargeStationBalance() {
         this(true);
@@ -133,10 +135,11 @@ public class ChargeStationBalance extends CommandBase {
         //TODO: filter magic number to constants
         
         // try simple 1-D around roll
-        double roll = rollFilter.calculate(sensors.getRoll() - roll_offset); // simple best guess of our roll after physical alignment
+        unfilteredRoll = sensors.getRoll() - roll_offset;
+        filteredRoll = rollFilter.calculate(unfilteredRoll); // simple best guess of our roll after physical alignment
 
         // pid speed + min speed in proper direction, then clamp to our max
-        double xSpeed = csBalancePID.calculate(roll) + Math.copySign(vmin, roll);
+        double xSpeed = csBalancePID.calculate(filteredRoll) + Math.copySign(vmin, filteredRoll);
         xSpeed = MathUtil.clamp(xSpeed, -vmax, vmax);
 
         /**
@@ -149,6 +152,9 @@ public class ChargeStationBalance extends CommandBase {
 
         // check for level using PID's tolerance, failure resets counter
         levelCount = (csBalancePID.atSetpoint()) ? ++levelCount : 0;
+
+        // if at setpoint force xSpeed to 0
+        xSpeed = csBalancePID.atSetpoint() ? 0 : xSpeed;
 
         // move the robot our desired speed, forward, zero y, and keep
         // current heading, no rotation
@@ -181,6 +187,8 @@ public class ChargeStationBalance extends CommandBase {
     NetworkTableEntry nt_kP;
     NetworkTableEntry nt_kI;
     NetworkTableEntry nt_kD;
+    NetworkTableEntry nt_filteredGyro;
+    NetworkTableEntry nt_unfilteredGyro;
 
     private void ntcreate() {
         nt_framesStable = table.getEntry("Frames Stable");
@@ -188,12 +196,20 @@ public class ChargeStationBalance extends CommandBase {
         nt_kP = table.getEntry("kP");
         nt_kI = table.getEntry("kI");
         nt_kD = table.getEntry("kD");
+        nt_filteredGyro = table.getEntry("Filtered Roll");
+        nt_unfilteredGyro = table.getEntry("Unfiltered Roll");
+
+        nt_kP.setDouble(0.02);
+        nt_kI.setDouble(0.0);
+        nt_kD.setDouble(0.0);
     }
 
     private void ntupdates() {
         // info
         nt_framesStable.setDouble(levelCount);
         nt_atSetpoint.setBoolean(csBalancePID.atSetpoint());
+        nt_filteredGyro.setDouble(filteredRoll);
+        nt_unfilteredGyro.setDouble(unfilteredRoll);
 
         // setters
         csBalancePID.setP(nt_kP.getDouble(0.02));
