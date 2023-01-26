@@ -16,8 +16,11 @@ public class Arm extends SubsystemBase {
     private PIDController right_arm_controller = new PIDController(0.0, 0.0, 0.0);
     private PIDController arm_sync_controller = new PIDController(0.0, 0.0, 0.0);
     //TODO values of velocity PID, do we need different PID controllers because it is spring loaded?
-    private double Current_pos; //current extension of arm in mm
-    private double Desired_pos; // desired extension of arm in mm
+    private double current_pos; //current extension of arm in mm
+    private double desired_pos; // desired extension of arm in mm
+    private double current_vel; //current velocity of arm
+    private double desired_vel; //desired velocity of arm
+    private double tolerance; //tolerance
     private CANSparkMax left_motor = new CANSparkMax(CAN.ARM_LEFT_Motor, MotorType.kBrushless); //TODO motor type
     private CANSparkMax right_motor = new CANSparkMax(CAN.ARM_RIGHT_Motor, MotorType.kBrushless); 
     public Arm(){
@@ -29,16 +32,16 @@ public class Arm extends SubsystemBase {
     }
 
     // DPL - TODO: reads the motor's postion to indicate where the arm is at
-    public double getCurrent_pos(){
-        return Current_pos;
+    public double getCurrentPos(){
+        return current_pos;
     }
 
-    public void setDesired_pos(double Desired_pos){
-        this.Desired_pos = Desired_pos;
+    public void setDesiredPos(double Desired_pos){
+        this.desired_pos = Desired_pos;
     }
     
-    public double getDesired_pos(){
-        return Desired_pos;
+    public double getDesiredPos(){
+        return desired_pos;
     }
 
     /*
@@ -61,9 +64,15 @@ public class Arm extends SubsystemBase {
 //TODO updates
      NetworkTable table = NetworkTableInstance.getDefault().getTable("arm");
 
-     NetworkTableEntry nt_kP;
-     NetworkTableEntry nt_kI;
-     NetworkTableEntry nt_kD;
+     NetworkTableEntry nt_left_kP;
+     NetworkTableEntry nt_left_kI;
+     NetworkTableEntry nt_left_kD;
+     NetworkTableEntry nt_right_kP;
+     NetworkTableEntry nt_right_kI;
+     NetworkTableEntry nt_right_kD;
+     NetworkTableEntry nt_sync_kP;
+     NetworkTableEntry nt_sync_kI;
+     NetworkTableEntry nt_sync_kD;
      NetworkTableEntry nt_desiredPos;
      NetworkTableEntry nt_currentPos;
      NetworkTableEntry nt_desiredVel;
@@ -72,20 +81,38 @@ public class Arm extends SubsystemBase {
 
 
      public void ntcreate(){
-        nt_kP = table.getEntry("kP");
-        nt_kI = table.getEntry("kI");
-        nt_kD = table.getEntry("kD");
+        nt_left_kP = table.getEntry("Left kP");
+        nt_left_kI = table.getEntry("Left kI");
+        nt_left_kD = table.getEntry("Left kD");
+        nt_right_kP = table.getEntry("Right kP");
+        nt_right_kI = table.getEntry("Right kI");
+        nt_right_kD = table.getEntry("Right kD");
+        nt_sync_kP = table.getEntry("Sync kP");
+        nt_sync_kI = table.getEntry("Sync kI");
+        nt_sync_kD = table.getEntry("Sync kD");
         nt_desiredPos = table.getEntry("Desired Position");
         nt_currentPos = table.getEntry("Current Position");
         nt_desiredVel = table.getEntry("Desired Velocity");
         nt_currentVel = table.getEntry("Current Velocity");
         nt_tolerance = table.getEntry("Tolerance");
-        nt_kP.setDouble(-1.0);
-        nt_kI.setDouble(-1.0);
-        nt_kD.setDouble(-1.0);
+        nt_left_kP.setDouble(0.0);
+        nt_left_kI.setDouble(0.0);
+        nt_left_kD.setDouble(0.0);
+        nt_right_kP.setDouble(0.0);
+        nt_right_kI.setDouble(0.0);
+        nt_right_kD.setDouble(0.0);
+        nt_sync_kP.setDouble(0.0);
+        nt_sync_kI.setDouble(0.0);
+        nt_sync_kD.setDouble(0.0);
      }
 
      private void ntUpdates(){
+        //info (set)
+        nt_desiredPos.setDouble(desired_pos);
+        nt_currentPos.setDouble(current_pos);
+        nt_desiredVel.setDouble(desired_vel);
+        nt_currentVel.setDouble(current_vel);
+        nt_tolerance.setDouble(tolerance);
 
      }
         
