@@ -14,7 +14,7 @@ public class Arm extends SubsystemBase {
     //instance variables
     private PIDController left_arm_controller = new PIDController(0.0, 0.0, 0.0);
     private PIDController right_arm_controller = new PIDController(0.0, 0.0, 0.0);
-    private PIDController arm_sync_controller = new PIDController(0.0, 0.0, 0.0);
+    private PIDController sync_arms_controller = new PIDController(0.0, 0.0, 0.0);
     //TODO values of velocity PID, do we need different PID controllers because it is spring loaded?
     private double current_pos; //current extension of arm in mm
     private double desired_pos; // desired extension of arm in mm
@@ -121,9 +121,9 @@ public class Arm extends SubsystemBase {
         right_arm_controller.setP(nt_right_kP.getDouble(0.0));
         right_arm_controller.setI(nt_right_kI.getDouble(0.0));
         right_arm_controller.setD(nt_right_kD.getDouble(0.0));   
-        sync_arm_controller.setP(nt_sync_kP.getDouble(0.0));
-        sync_arm_controller.setI(nt_sync_kI.getDouble(0.0));
-        sync_arm_controller.setD(nt_sync_kD.getDouble(0.0));
+        sync_arms_controller.setP(nt_sync_kP.getDouble(0.0));
+        sync_arms_controller.setI(nt_sync_kI.getDouble(0.0));
+        sync_arms_controller.setD(nt_sync_kD.getDouble(0.0));
 
 
      }
