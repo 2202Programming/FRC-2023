@@ -32,6 +32,18 @@ public class Arm extends SubsystemBase {
     }
 
     // DPL - TODO: reads the motor's postion to indicate where the arm is at
+    public double getCurrentVel(){
+        return current_vel;
+    }
+    public double getDesiredVel(){
+        return desired_vel;
+    }
+    public double getTolerance(){
+        return tolerance;
+    }
+    public void setDesiredVel(double Desired_vel){
+        this.desired_vel = Desired_vel;
+    }
     public double getCurrentPos(){
         return current_pos;
     }
@@ -61,7 +73,6 @@ public class Arm extends SubsystemBase {
     /******************
      *Network Table Stuff 
      *************/
-//TODO updates
      NetworkTable table = NetworkTableInstance.getDefault().getTable("arm");
 
      NetworkTableEntry nt_left_kP;
