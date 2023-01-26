@@ -364,4 +364,9 @@ public final class Constants {
         }
       }
     }
+    public static final class Claw {
+      public enum GamePieceHeld{
+        Cube,Cone,Empty
+      }
+    }
 }
