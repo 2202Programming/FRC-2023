@@ -18,6 +18,7 @@ public class Arm extends SubsystemBase {
     private CANSparkMax right_motor = new CANSparkMax(CAN.ARM_RIGHT_Motor, MotorType.kBrushless); 
 
     public Arm(){
+        //pid (kp ki kd, desired positon curr pos des vel, curr vel)
         //TODO networktable?
 
     }
