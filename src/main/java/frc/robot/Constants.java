@@ -100,7 +100,7 @@ public final class Constants {
     public static final int MAG_L_SIDE_MTR = 13;
     public static final int MAG_TOP_WHEEL = 16;
     
-    // Intake motor
+   // Intake motor
     public static final int INTAKE_MTR = 14;
 
     // drive train drive / angle motors - sparkmax neo
@@ -129,7 +129,9 @@ public final class Constants {
   // PWM assignments on the Rio
   public static final class PWM {
     //dpl unused public static final int INTAKE = 0;
+    
   }
+
 
   // Digital IO on the RIO
   public static final class DigitalIO {
