@@ -7,31 +7,38 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import java.lang.Math;
 
 
 public class Arm extends SubsystemBase {
     //TODO use the Controllrt.calculate and Controller.setpoint
     //instance variables
-    private PIDController left_arm_controller = new PIDController(0.0, 0.0, 0.0);
-    private PIDController right_arm_controller = new PIDController(0.0, 0.0, 0.0);
-    private PIDController sync_arms_controller = new PIDController(0.0, 0.0, 0.0);
-    //TODO values of velocity PID, do we need different PID controllers because it is spring loaded?
-    private double current_pos; //current extension of arm in mm
-    private double desired_pos; // desired extension of arm in mm
+    //private PIDController left_arm_controller = new PIDController(0.0, 0.0, 0.0);
+    //private PIDController right_arm_controller = new PIDController(0.0, 0.0, 0.0);
+    //private PIDController arm_sync_controller = new PIDController(0.0, 0.0, 0.0);
+    private double currentPos; //current extension of arm in mm
+    private double desiredPos; // desired extension of arm in mm
+    private CANSparkMax leftMotor = new CANSparkMax(CAN.ARM_LEFT_Motor, MotorType.kBrushless); //TODO motor type
+    private CANSparkMax rightMotor = new CANSparkMax(CAN.ARM_RIGHT_Motor, MotorType.kBrushless); 
+    private double motorSpeed;
     private double current_vel; //current velocity of arm
     private double desired_vel; //desired velocity of arm
     private double tolerance; //tolerance
-    private CANSparkMax left_motor = new CANSparkMax(CAN.ARM_LEFT_Motor, MotorType.kBrushless); //TODO motor type
-    private CANSparkMax right_motor = new CANSparkMax(CAN.ARM_RIGHT_Motor, MotorType.kBrushless); 
-    public Arm(){
-        
+    public Arm(double currentPos, double desiredPos, CANSparkMax leftMotor, CANSparkMax rightMotor, double armMargin, double motorSpeed){
         //TODO networktable?
-
-
-
+        this.motorSpeed = motorSpeed;
+        this.armMargin = armMargin;
+        this.leftMotor = leftMotor;
+        this.rightMotor = rightMotor;
+        this.currentPos = currentPos;
+        this.desiredPos = desiredPos;
+        rightMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        leftMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
     }
 
     // DPL - TODO: reads the motor's postion to indicate where the arm is at
+    public double getCurrentPos(){
+        return currentPos;
     public double getCurrentVel(){
         return current_vel;
     }
@@ -48,25 +55,43 @@ public class Arm extends SubsystemBase {
         return current_pos;
     }
 
-    public void setDesiredPos(double Desired_pos){
-        this.desired_pos = Desired_pos;
+    public void setDesiredPos(double desiredPos){
+        this.desiredPos = desiredPos;
     }
     
-    public double getDesiredPos(){
-        return desired_pos;
+    public double getdesiredPos(){
+        return desiredPos;
     }
 
     /*
      * Looks at various pids and desired positions to see if we are there
      */
-    public boolean isAtPosition()
-    {
-        return false;  //TODO fix me
+    public boolean isAtPosition(){
+        return (Math.abs(currentPos - desiredPos) >= armMargin);
+    }
+
+    public boolean motorDirectionForwards(){
+        return (currentPos < desiredPos);
     }
 
     @Override
     public void periodic(){
-
+        boolean armCheck = isAtPosition();
+        if(armCheck = true){
+            leftMotor.stopMotor();
+            rightMotor.stopMotor();
+        }
+        if (armCheck = false){
+            boolean forward = motorDirectionForwards();
+            if (forward = true){
+                leftMotor.set(motorSpeed);
+                rightMotor.set(motorSpeed);
+            }
+            if (forward = false){
+                leftMotor.set(0 - motorSpeed);
+                rightMotor.set(0 - motorSpeed);
+            }
+        }
     }
 
 
