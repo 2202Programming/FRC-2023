@@ -449,9 +449,12 @@ public final class Constants {
     public double getLengthY() {
       return lengthY;
     }
-
     public double getLengthZ() {
       return armLength;
     }
   }
+    public static final class Claw {
+      public static final double GEAR_RATIO = 1; //TODO: Find actual gear ratio value
+      
+      }
 }
