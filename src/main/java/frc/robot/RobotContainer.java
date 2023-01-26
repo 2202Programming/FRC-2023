@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.Constants.Intake;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import com.pathplanner.lib.PathConstraints;
 import frc.robot.Constants.DriverControls.Id;
@@ -45,6 +46,7 @@ public class RobotContainer {
   public final RobotSpecs robotSpecs;
   public final Sensors_Subsystem sensors;
   public final SwerveDrivetrain drivetrain;
+  public final Intake intake;
   public final HID_Xbox_Subsystem dc;           //short for driver controls
   // Note: we may replace HID_Xbox with CommandPS4Controller or CommandJoystick if needed
  
@@ -65,6 +67,7 @@ public class RobotContainer {
 
     // these can get created on any hardware setup
     sensors = new Sensors_Subsystem();
+    intake = new Intake();
     drivetrain = new SwerveDrivetrain();
   // these can get created on any hardware setup
   photonVision = new PhotonVision();
