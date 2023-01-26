@@ -24,10 +24,10 @@ public class Arm extends SubsystemBase {
     private double current_vel; //current velocity of arm
     private double desired_vel; //desired velocity of arm
     private double tolerance; //tolerance
-    public Arm(double currentPos, double desiredPos, CANSparkMax leftMotor, CANSparkMax rightMotor, double armMargin, double motorSpeed){
+    public Arm(double currentPos, double desiredPos, CANSparkMax leftMotor, CANSparkMax rightMotor, double tolerance, double motorSpeed){
         //TODO networktable?
         this.motorSpeed = motorSpeed;
-        this.armMargin = armMargin;
+        this.tolerance = tolerance;
         this.leftMotor = leftMotor;
         this.rightMotor = rightMotor;
         this.currentPos = currentPos;
@@ -37,8 +37,7 @@ public class Arm extends SubsystemBase {
     }
 
     // DPL - TODO: reads the motor's postion to indicate where the arm is at
-    public double getCurrentPos(){
-        return currentPos;
+
     public double getCurrentVel(){
         return current_vel;
     }
@@ -52,7 +51,7 @@ public class Arm extends SubsystemBase {
         this.desired_vel = Desired_vel;
     }
     public double getCurrentPos(){
-        return current_pos;
+        return currentPos;
     }
 
     public void setDesiredPos(double desiredPos){
@@ -67,7 +66,7 @@ public class Arm extends SubsystemBase {
      * Looks at various pids and desired positions to see if we are there
      */
     public boolean isAtPosition(){
-        return (Math.abs(currentPos - desiredPos) >= armMargin);
+        return (Math.abs(currentPos - desiredPos) >= tolerance);
     }
 
     public boolean motorDirectionForwards(){
@@ -144,13 +143,14 @@ public class Arm extends SubsystemBase {
 
      private void ntUpdates(){
         //info (set)
-        nt_desiredPos.setDouble(desired_pos);
-        nt_currentPos.setDouble(current_pos);
+        nt_desiredPos.setDouble(desiredPos);
+        nt_currentPos.setDouble(currentPos);
         nt_desiredVel.setDouble(desired_vel);
         nt_currentVel.setDouble(current_vel);
         nt_tolerance.setDouble(tolerance);
 
         //PID setters
+        /**
         left_arm_controller.setP(nt_left_kP.getDouble(0.0));
         left_arm_controller.setI(nt_left_kI.getDouble(0.0));
         left_arm_controller.setD(nt_left_kD.getDouble(0.0));
@@ -160,6 +160,7 @@ public class Arm extends SubsystemBase {
         sync_arms_controller.setP(nt_sync_kP.getDouble(0.0));
         sync_arms_controller.setI(nt_sync_kI.getDouble(0.0));
         sync_arms_controller.setD(nt_sync_kD.getDouble(0.0));
+         */
 
 
      }
