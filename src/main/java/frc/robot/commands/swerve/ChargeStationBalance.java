@@ -63,7 +63,7 @@ public class ChargeStationBalance extends CommandBase {
     final double vmax = 0.4; // [m/s] fastest speed we allow
     final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected
     // also could be simple bang-bang...
-    final double roll_offset = -0.8349609375; // [deg] simple sensor correction
+    final double roll_offset = -0.8349609375; // [deg] simple sensor correction TODO:calibrate in sensor_SS
 
     // tolerance limits
     final double rollPosTol = 1.5; // [deg] level more or less
@@ -74,12 +74,22 @@ public class ChargeStationBalance extends CommandBase {
     SwerveDrivetrain sdt; // required
     Sensors_Subsystem sensors; // read-only, not require
 
+    //measured & output values
+    double rollRate;                    //[deg/s]
+    double xSpeed_r;                    //[m/s]  controller on roll
+    double xSpeed_rr;                   //[m/s]  controller on rollRate
+    double xSpeed;                      //[m/s]  output vel
+    double unfilteredRoll;              //[deg/s]
+    double filteredRoll;                //[deg/s]
+    double prev_filteredRoll;           //[deg/s]
+
     // state vars, cleared on init()
     int levelCount;
-    double unfilteredRoll;
-    double filteredRoll;
-    PIDController csBalancePID = new PIDController(0.02, 0.0, 0.0); // kp [m/s per deg]
+    PIDController csBalancePID = new PIDController(0.025, 0.0, 0.0); // kp [m/s per deg]
+    double kpRR = 0.0;   //[m/s/deg/s] vel compensation based on direct rollRate
+
     LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.07, Constants.DT);
+    LinearFilter rollRateFilter = LinearFilter.singlePoleIIR(0.06, Constants.DT);
 
     public ChargeStationBalance() {
         this(true);
@@ -102,8 +112,20 @@ public class ChargeStationBalance extends CommandBase {
     @Override
     public void initialize() {
         levelCount = 0;
+        unfilteredRoll = sensors.getRoll() - roll_offset;
+        rollRate = sensors.getRollRate();
         csBalancePID.reset();
+        
+        //reset, use current measured roll & rollRate to initialize
+        rollFilter.calculate(unfilteredRoll);
+        rollFilter.calculate(unfilteredRoll);
+
+        // Same for roll Rate
         rollFilter.reset();
+        rollRateFilter.calculate(rollRate);
+        rollRateFilter.calculate(rollRate);
+
+        rollRateFilter.reset();
         System.out.println("***Starting automatic charging station balancing***");
     }
 
@@ -137,10 +159,12 @@ public class ChargeStationBalance extends CommandBase {
         // try simple 1-D around roll
         unfilteredRoll = sensors.getRoll() - roll_offset;
         filteredRoll = rollFilter.calculate(unfilteredRoll); // simple best guess of our roll after physical alignment
+        rollRate = rollRateFilter.calculate(sensors.getRollRate());
 
         // pid speed + min speed in proper direction, then clamp to our max
-        double xSpeed = csBalancePID.calculate(filteredRoll) + Math.copySign(vmin, filteredRoll);
-        xSpeed = MathUtil.clamp(xSpeed, -vmax, vmax);
+        xSpeed_r = csBalancePID.calculate(filteredRoll);
+        xSpeed_rr = kpRR*rollRate;
+        xSpeed = MathUtil.clamp(xSpeed + xSpeed_rr, -vmax, vmax);
 
         /**
          * if we use an unaligned start, decouple the desired speed into components
@@ -189,6 +213,12 @@ public class ChargeStationBalance extends CommandBase {
     NetworkTableEntry nt_kD;
     NetworkTableEntry nt_filteredGyro;
     NetworkTableEntry nt_unfilteredGyro;
+    NetworkTableEntry nt_rollRate;
+    NetworkTableEntry nt_xSpeed;
+    NetworkTableEntry nt_xSpeedR;
+    NetworkTableEntry nt_xSpeedRR;
+    NetworkTableEntry nt_KPRR;
+
 
     private void ntcreate() {
         nt_framesStable = table.getEntry("Frames Stable");
@@ -198,10 +228,15 @@ public class ChargeStationBalance extends CommandBase {
         nt_kD = table.getEntry("kD");
         nt_filteredGyro = table.getEntry("Filtered Roll");
         nt_unfilteredGyro = table.getEntry("Unfiltered Roll");
+        nt_rollRate = table.getEntry("fRollRate");
+        nt_xSpeed = table.getEntry("xSpeed");
+        nt_xSpeedR = table.getEntry("xSpeedRoll");
+        nt_xSpeedRR = table.getEntry("xSpeedRR");
+        nt_KPRR = table.getEntry("KPRR");
 
-        nt_kP.setDouble(0.02);
-        nt_kI.setDouble(0.0);
-        nt_kD.setDouble(0.0);
+        nt_kP.setDouble(csBalancePID.getP());
+        nt_kI.setDouble(csBalancePID.getI());
+        nt_kD.setDouble(csBalancePID.getD());
     }
 
     private void ntupdates() {
@@ -210,10 +245,18 @@ public class ChargeStationBalance extends CommandBase {
         nt_atSetpoint.setBoolean(csBalancePID.atSetpoint());
         nt_filteredGyro.setDouble(filteredRoll);
         nt_unfilteredGyro.setDouble(unfilteredRoll);
+        nt_rollRate.setDouble(rollRate);
+        nt_xSpeed.setDouble(xSpeed);
+        nt_xSpeed.setDouble(xSpeed_r);
+        nt_xSpeedRR.setDouble(xSpeed_rr);
 
         // setters
         csBalancePID.setP(nt_kP.getDouble(0.02));
         csBalancePID.setI(nt_kI.getDouble(0.0));
         csBalancePID.setD(nt_kD.getDouble(0.0));
+        
+        //rollrate kp
+        kpRR = nt_kD.getDouble(0.0);
+
     }
 }
