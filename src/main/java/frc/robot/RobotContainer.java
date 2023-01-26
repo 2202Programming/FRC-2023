@@ -87,7 +87,7 @@ public class RobotContainer {
       drivetrain.resetAnglePose(new Rotation2d(0));
     }));
 
-    dc.Driver().x().onTrue(new ChargeStationBalance());
+    dc.Driver().x().whileTrue(new ChargeStationBalance(false));
   }
 
   /**
