@@ -89,7 +89,7 @@ public class ChargeStationBalance extends CommandBase {
     double kpRR = 0.0;   //[m/s/deg/s] vel compensation based on direct rollRate
 
     LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.07, Constants.DT);
-    LinearFilter rollRateFilter = LinearFilter.singlePoleIIR(0.06, Constants.DT);
+    LinearFilter rollRateFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
 
     public ChargeStationBalance() {
         this(true);
@@ -164,7 +164,7 @@ public class ChargeStationBalance extends CommandBase {
         // pid speed + min speed in proper direction, then clamp to our max
         xSpeed_r = csBalancePID.calculate(filteredRoll);
         xSpeed_rr = kpRR*rollRate;
-        xSpeed = MathUtil.clamp(xSpeed + xSpeed_rr, -vmax, vmax);
+        xSpeed = MathUtil.clamp(xSpeed_r + xSpeed_rr, -vmax, vmax);
 
         /**
          * if we use an unaligned start, decouple the desired speed into components
@@ -237,6 +237,7 @@ public class ChargeStationBalance extends CommandBase {
         nt_kP.setDouble(csBalancePID.getP());
         nt_kI.setDouble(csBalancePID.getI());
         nt_kD.setDouble(csBalancePID.getD());
+        nt_KPRR.setDouble(kpRR);
     }
 
     private void ntupdates() {
@@ -247,7 +248,7 @@ public class ChargeStationBalance extends CommandBase {
         nt_unfilteredGyro.setDouble(unfilteredRoll);
         nt_rollRate.setDouble(rollRate);
         nt_xSpeed.setDouble(xSpeed);
-        nt_xSpeed.setDouble(xSpeed_r);
+        nt_xSpeedR.setDouble(xSpeed_r);
         nt_xSpeedRR.setDouble(xSpeed_rr);
 
         // setters
@@ -256,7 +257,7 @@ public class ChargeStationBalance extends CommandBase {
         csBalancePID.setD(nt_kD.getDouble(0.0));
         
         //rollrate kp
-        kpRR = nt_kD.getDouble(0.0);
+        kpRR = nt_KPRR.getDouble(0.0);
 
     }
 }
