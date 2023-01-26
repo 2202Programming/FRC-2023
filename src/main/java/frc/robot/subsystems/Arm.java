@@ -114,6 +114,18 @@ public class Arm extends SubsystemBase {
         nt_currentVel.setDouble(current_vel);
         nt_tolerance.setDouble(tolerance);
 
+        //PID setters
+        left_arm_controller.setP(nt_left_kP.getDouble(0.0));
+        left_arm_controller.setI(nt_left_kI.getDouble(0.0));
+        left_arm_controller.setD(nt_left_kD.getDouble(0.0));
+        right_arm_controller.setP(nt_right_kP.getDouble(0.0));
+        right_arm_controller.setI(nt_right_kI.getDouble(0.0));
+        right_arm_controller.setD(nt_right_kD.getDouble(0.0));   
+        sync_arm_controller.setP(nt_sync_kP.getDouble(0.0));
+        sync_arm_controller.setI(nt_sync_kI.getDouble(0.0));
+        sync_arm_controller.setD(nt_sync_kD.getDouble(0.0));
+
+
      }
         
      }
