@@ -24,6 +24,7 @@ public class Claw extends SubsystemBase {
   private GamePieceHeld piece_held; 
   /** Creates a new Claw. */
   public Claw() {
+    //TODO Find out motor then update
     piece_held = GamePieceHeld.Empty;
   }
 
