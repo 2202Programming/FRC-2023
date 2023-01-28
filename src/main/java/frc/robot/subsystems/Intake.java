@@ -14,7 +14,6 @@ import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
 
 public class Intake extends SubsystemBase {
-  /** Creates a new Intake. */
 
   final double IntakeMotorStrength = 0.6; //used for default ON
 
@@ -29,6 +28,9 @@ public class Intake extends SubsystemBase {
               PCM1.INTAKE_UP_SOLENOID_PCM,
               PCM1.INTAKE_DOWN_SOLENOID_PCM);
 
+  //TODO: dpl  1/27/23 possible lightgate for triggering - check with mechanical team
+  
+  /** Creates a new Intake. */
   public Intake() {
     intake_mtr.clearFaults();
     intake_mtr.restoreFactoryDefaults();
@@ -45,7 +47,7 @@ public class Intake extends SubsystemBase {
     intake_mtr.set(intakeMotorStrength);
   }
 
-  public void defaultOn(){
+  public void on(){    //on() with no-args is default
     on(IntakeMotorStrength);
   }   
 
