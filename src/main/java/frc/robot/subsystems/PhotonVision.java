@@ -8,46 +8,26 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
 import org.photonvision.RobotPoseEstimator;
 import org.photonvision.RobotPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class PhotonVision extends SubsystemBase {
-  /** Creates a new PhotonVision. */
 
-  // private NetworkTable table;
-  // private NetworkTableEntry targetPixelsX;
-  // private NetworkTableEntry targetPixelsY;
-  // private NetworkTableEntry targetPixelsArea;
-  // private NetworkTableEntry hasTarget;
-  
-  // private double m_targetPixelsX;
-  // private double m_targetPixelsY;
-  // private double m_targetPixelsArea;
-  // private boolean m_hasTarget;
-
-  private PhotonCamera camera;
+  private PhotonCamera camera_global;
   private PhotonCamera camera_microsoft;
   private boolean hasTargets;
   private List<PhotonTrackedTarget> targets;
@@ -69,11 +49,6 @@ public class PhotonVision extends SubsystemBase {
   private Pose2d previousPoseEstimate = new Pose2d();
 
   public PhotonVision() {
-    // table = NetworkTableInstance.getDefault().getTable("photonvision");
-    // targetPixelsX = table.getEntry("Global_Shutter_Camera/targetPixelsX");
-    // targetPixelsY = table.getEntry("Global_Shutter_Camera/targetPixelsY");
-    // targetPixelsArea = table.getEntry("Global_Shutter_Camera/targetArea");
-    // hasTarget = table.getEntry("Global_Shutter_Camera/hasTarget");
 
     //build path to apriltag json file in deploy directory
     File deploy = Filesystem.getDeployDirectory();
@@ -87,47 +62,28 @@ public class PhotonVision extends SubsystemBase {
     };
 
     // Assemble the list of cameras & mount locations
-    camera = new PhotonCamera("Global_Shutter_Camera");
+    camera_global = new PhotonCamera("Global_Shutter_Camera");
     camera_microsoft = new PhotonCamera("Microsoft_LifeCam_HD-3000");
-    robotToCam = new Transform3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+    robotToCam = new Transform3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d(0,0,0)); //Cam mounted facing forward
     var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
-    camList.add(new Pair<PhotonCamera, Transform3d>(camera, robotToCam));
+    camList.add(new Pair<PhotonCamera, Transform3d>(camera_global, robotToCam));
     robotPoseEstimator = new RobotPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, camList);
-    
-  
-    // Query the latest result from PhotonVision
-    var result = camera.getLatestResult();
-
   }
-
+  
   @Override
   public void periodic() {
-    // // This method will be called once per scheduler run
-    // m_targetPixelsX = targetPixelsX.getDouble(0);
-    // m_targetPixelsY = targetPixelsY.getDouble(0);
-    // m_targetPixelsArea = targetPixelsArea.getDouble(0);
-    // m_hasTarget = hasTarget.getBoolean(false);
-
-    // SmartDashboard.putNumber("targetX", m_targetPixelsX);
-    // SmartDashboard.putNumber("targetY", m_targetPixelsY);
-    // SmartDashboard.putNumber("targetArea", m_targetPixelsArea);
-    // SmartDashboard.putBoolean("hasTarget", m_hasTarget);
-
-    double CAMERA_HEIGHT_METERS = 0.0;
-    double TARGET_HEIGHT_METERS = 0.0;
-    double CAMERA_PITCH_RADIANS = 0.0;
 
     // Query the latest result from PhotonVision
-    var result = camera.getLatestResult();
+    var result_global = camera_global.getLatestResult();
 
     // Check if the latest result has any targets.
-    hasTargets = result.hasTargets(); 
+    hasTargets = result_global.hasTargets(); 
     
     if(hasTargets) {
       // Get a list of currently tracked targets.
-      targets = result.getTargets();
+      targets = result_global.getTargets();
       // Get the current best target.
-      bestTarget = result.getBestTarget();
+      bestTarget = result_global.getBestTarget();
 
       // Get information from target.
       yaw = bestTarget.getYaw();
@@ -139,46 +95,24 @@ public class PhotonVision extends SubsystemBase {
 
       // Get information from target.
       targetID = bestTarget.getFiducialId();
-      double poseAmbiguity = bestTarget.getPoseAmbiguity();
-      Transform3d bestCameraToTarget = bestTarget.getBestCameraToTarget();
-      Transform3d alternateCameraToTarget = bestTarget.getAlternateCameraToTarget();
-
-      // double range =
-      // PhotonUtils.calculateDistanceToTargetMeters(
-      //         CAMERA_HEIGHT_METERS,
-      //         TARGET_HEIGHT_METERS,
-      //         CAMERA_PITCH_RADIANS,
-      //         Units.degreesToRadians(result.getBestTarget().getPitch()));
-
-      // SmartDashboard.putNumber("Range", range);
-
       previousPoseEstimate = currentPoseEstimate;
       currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate).getFirst();
-      //SmartDashboard.putNumber("latency", getEstimatedGlobalPose(previousPoseEstimate).getSecond());
-
     }    
     
-
-    //SmartDashboard.putBoolean("hasTargets", hasTargets);
-    //SmartDashboard.putNumber("yaw", yaw);
-    //SmartDashboard.putNumber("pitch", pitch);
-    //SmartDashboard.putNumber("area", area);
-    //SmartDashboard.putNumber("skew", skew);
-    //SmartDashboard.putNumber("targetID", targetID);
     SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getX());
     SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getY());
     
     // Query the latest result from PhotonVision
-    var result2 = camera_microsoft.getLatestResult();
+    var result_microsoft = camera_microsoft.getLatestResult();
 
     // Check if the latest result has any targets.
-    hasTargets = result.hasTargets(); 
+    hasTargets = result_microsoft.hasTargets(); 
     
     if(hasTargets) {
       // Get a list of currently tracked targets.
-      targets = result.getTargets();
+      targets = result_microsoft.getTargets();
       // Get the current best target.
-      bestTarget = result.getBestTarget();
+      bestTarget = result_microsoft.getBestTarget();
 
       // Get information from target.
       SmartDashboard.putNumber("PV Yaw", bestTarget.getYaw());
