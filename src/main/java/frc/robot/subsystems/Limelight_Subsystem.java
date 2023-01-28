@@ -29,6 +29,7 @@ public class Limelight_Subsystem extends SubsystemBase {
 
   private NetworkTableEntry outputTx;
   private NetworkTableEntry outputTv;
+  private NetworkTableEntry pipeline;
 
   private NetworkTableEntry nt_botpose;
 
@@ -70,6 +71,7 @@ public class Limelight_Subsystem extends SubsystemBase {
     tv = table.getEntry("tv"); // target validity (1 or 0)
     leds = table.getEntry("ledMode");
     booleanLeds = table.getEntry("booleanLeds");
+    pipeline = table.getEntry("pipeline");
 
     nt_botpose = table.getEntry("botpose");
 
@@ -77,6 +79,8 @@ public class Limelight_Subsystem extends SubsystemBase {
 
     outputTv = outputTable.getEntry("Limelight Valid");
     outputTx = outputTable.getEntry("Limelight X error");
+
+    nt_botpose.setDoubleArray(new double[]{0,0,0,0,0,0});
     disableLED();
   }
 
@@ -98,9 +102,14 @@ public class Limelight_Subsystem extends SubsystemBase {
     botpose_ry = botpose[4];
     botpose_rz = botpose[5];
 
-    SmartDashboard.putNumber("botpose X", botpose_x);
-    SmartDashboard.putNumber("botpose Y", botpose_y);
-    SmartDashboard.putNumber("botpose Z", botpose_z);
+    //NOTE: LL gives position from the center of the field!  Need to transform to the standard of 0,0 at lower left
+
+    botpose_x += (651.5 * 0.0254)/2; //add 1/2 field X dimension in meters
+    botpose_y += (316.0 * 0.0254)/2; //add 1/2 field Y dimension in meters
+
+    SmartDashboard.putNumber("LL botpose X", botpose_x);
+    SmartDashboard.putNumber("LL botpose Y", botpose_y);
+    SmartDashboard.putNumber("LL botpose Z", botpose_z);
 
   }
 
@@ -163,6 +172,10 @@ public class Limelight_Subsystem extends SubsystemBase {
       enableLED();
     }
 
+  }
+
+  public void setPipeline(int pipe){
+    pipeline.setNumber(pipe);
   }
 
   public boolean valid() {

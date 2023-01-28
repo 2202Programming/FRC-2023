@@ -111,8 +111,8 @@ public class PhotonVision extends SubsystemBase {
     // SmartDashboard.putNumber("targetArea", m_targetPixelsArea);
     // SmartDashboard.putBoolean("hasTarget", m_hasTarget);
 
-    double CAMERA_HEIGHT_METERS = 0.5;
-    double TARGET_HEIGHT_METERS = 0.5;
+    double CAMERA_HEIGHT_METERS = 0.0;
+    double TARGET_HEIGHT_METERS = 0.0;
     double CAMERA_PITCH_RADIANS = 0.0;
 
     // Query the latest result from PhotonVision
@@ -163,8 +163,8 @@ public class PhotonVision extends SubsystemBase {
     SmartDashboard.putNumber("area", area);
     SmartDashboard.putNumber("skew", skew);
     SmartDashboard.putNumber("targetID", targetID);
-    SmartDashboard.putNumber("Estimated Pose X", currentPoseEstimate.getX());
-    SmartDashboard.putNumber("Estimated Pose Y", currentPoseEstimate.getY());
+    SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getX());
+    SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getY());
     
 
   }

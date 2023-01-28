@@ -54,6 +54,7 @@ public class RobotContainer {
   drivetrain = new SwerveDrivetrain();
   photonVision = new PhotonVision();
   limelight = new Limelight_Subsystem();
+  limelight.setPipeline(1);
   
   //if (m_driverController.getHID().isConnected()) {  //doesn't work for some reason to see if controller is connected
     drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
