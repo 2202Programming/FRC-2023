@@ -75,6 +75,7 @@ public class Claw extends SubsystemBase {
   NetworkTableEntry nt_currentAngle;
   NetworkTableEntry nt_desiredAngle;
   NetworkTableEntry nt_isOpen;
+  NetworkTableEntry nt_gamePieceHeld;                         
   NetworkTableEntry nt_kP;
   NetworkTableEntry nt_kD;
   NetworkTableEntry nt_kI;
@@ -85,6 +86,7 @@ public class Claw extends SubsystemBase {
     nt_currentAngle = table.getEntry("Current Angle");
     nt_desiredAngle = table.getEntry("Desired Anngle");
     nt_isOpen = table.getEntry("Is Claw Open");
+    nt_gamePieceHeld = table.getEntry("Game Piece Held");
     nt_kP = table.getEntry("kP");
     nt_kI = table.getEntry("kI");
     nt_kD = table.getEntry("kD");
@@ -98,6 +100,7 @@ public class Claw extends SubsystemBase {
     nt_currentAngle.setDouble(current_angle);
     nt_desiredAngle.setDouble(desired_angle);
     nt_isOpen.setBoolean(is_open);
+    nt_gamePieceHeld.setGamePieceHeld(piece_held);
     claw_controller.setP(nt_kP.getDouble(0.0));
     claw_controller.setI(nt_kI.getDouble(0.0));
     claw_controller.setD(nt_kD.getDouble(0.0));
