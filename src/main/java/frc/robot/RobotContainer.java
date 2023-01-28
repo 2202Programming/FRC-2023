@@ -83,6 +83,9 @@ public class RobotContainer {
 
     //Y button to reset current facing to zero
     m_driverController.getDriver().y().whileTrue(new InstantCommand(()->{drivetrain.resetAnglePose(new Rotation2d(0));}));
+
+    //X button to change LL pipeline
+    m_driverController.getDriver().x().onTrue(new InstantCommand(()->{limelight.togglePipeline();}));
   }
 
   /**

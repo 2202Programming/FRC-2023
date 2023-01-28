@@ -178,6 +178,14 @@ public class Limelight_Subsystem extends SubsystemBase {
     pipeline.setNumber(pipe);
   }
 
+  public void togglePipeline(){
+    long pipe = pipeline.getInteger(0);
+    if (pipe == 0){
+      setPipeline(1);
+    }
+    else setPipeline(0);
+  }
+
   public boolean valid() {
     return target;
   }
