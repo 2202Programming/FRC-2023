@@ -48,8 +48,7 @@ public class Limelight_Subsystem extends SubsystemBase {
   private double botpose_rx;
   private double botpose_ry;
   private double botpose_rz;
-
-
+  private double m_pipeline;
 
   private LinearFilter x_iir;
   private LinearFilter area_iir;
@@ -94,7 +93,10 @@ public class Limelight_Subsystem extends SubsystemBase {
     filteredX = x_iir.calculate(x);
     filteredArea = area_iir.calculate(area);
     ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
+    m_pipeline = pipeline.getDouble(0);
+
     botpose = nt_botpose.getDoubleArray(new double[]{0,0,0,0,0,0});
+    if (botpose.length > 0) {
     botpose_x = botpose[0];
     botpose_y = botpose[1];
     botpose_z = botpose[2];
@@ -104,12 +106,14 @@ public class Limelight_Subsystem extends SubsystemBase {
 
     //NOTE: LL gives position from the center of the field!  Need to transform to the standard of 0,0 at lower left
 
-    botpose_x += (651.5 * 0.0254)/2; //add 1/2 field X dimension in meters
-    botpose_y += (316.0 * 0.0254)/2; //add 1/2 field Y dimension in meters
+    botpose_x += 8.270458; //add 1/2 field X dimension in meters
+    botpose_y += 4.008216; //add 1/2 field Y dimension in meters
+    }
 
     SmartDashboard.putNumber("LL botpose X", botpose_x);
     SmartDashboard.putNumber("LL botpose Y", botpose_y);
     SmartDashboard.putNumber("LL botpose Z", botpose_z);
+    SmartDashboard.putNumber("LL X error", x);
 
   }
 
@@ -174,16 +178,23 @@ public class Limelight_Subsystem extends SubsystemBase {
 
   }
 
-  public void setPipeline(int pipe){
-    pipeline.setNumber(pipe);
+  public void setPipeline(double pipe){
+    pipeline.setDouble(pipe);
+    if(pipe == 1){
+      enableLED();
+    }
+    else disableLED();
   }
 
+  //switch between pipeline 0 and 1
   public void togglePipeline(){
-    long pipe = pipeline.getInteger(0);
+    double pipe = pipeline.getDouble(0.0);
     if (pipe == 0){
-      setPipeline(1);
+      setPipeline(1.0);
     }
-    else setPipeline(0);
+    else {
+      setPipeline(0.0);
+    }
   }
 
   public boolean valid() {

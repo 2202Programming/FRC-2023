@@ -48,6 +48,7 @@ public class PhotonVision extends SubsystemBase {
   // private boolean m_hasTarget;
 
   private PhotonCamera camera;
+  private PhotonCamera camera_microsoft;
   private boolean hasTargets;
   private List<PhotonTrackedTarget> targets;
   private PhotonTrackedTarget bestTarget;
@@ -87,7 +88,8 @@ public class PhotonVision extends SubsystemBase {
 
     // Assemble the list of cameras & mount locations
     camera = new PhotonCamera("Global_Shutter_Camera");
-    robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+    camera_microsoft = new PhotonCamera("Microsoft_LifeCam_HD-3000");
+    robotToCam = new Transform3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
     var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
     camList.add(new Pair<PhotonCamera, Transform3d>(camera, robotToCam));
     robotPoseEstimator = new RobotPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, camList);
@@ -152,21 +154,35 @@ public class PhotonVision extends SubsystemBase {
 
       previousPoseEstimate = currentPoseEstimate;
       currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate).getFirst();
-      SmartDashboard.putNumber("latency", getEstimatedGlobalPose(previousPoseEstimate).getSecond());
+      //SmartDashboard.putNumber("latency", getEstimatedGlobalPose(previousPoseEstimate).getSecond());
 
     }    
     
 
-    SmartDashboard.putBoolean("hasTargets", hasTargets);
-    SmartDashboard.putNumber("yaw", yaw);
-    SmartDashboard.putNumber("pitch", pitch);
-    SmartDashboard.putNumber("area", area);
-    SmartDashboard.putNumber("skew", skew);
-    SmartDashboard.putNumber("targetID", targetID);
+    //SmartDashboard.putBoolean("hasTargets", hasTargets);
+    //SmartDashboard.putNumber("yaw", yaw);
+    //SmartDashboard.putNumber("pitch", pitch);
+    //SmartDashboard.putNumber("area", area);
+    //SmartDashboard.putNumber("skew", skew);
+    //SmartDashboard.putNumber("targetID", targetID);
     SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getX());
     SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getY());
     
+    // Query the latest result from PhotonVision
+    var result2 = camera_microsoft.getLatestResult();
 
+    // Check if the latest result has any targets.
+    hasTargets = result.hasTargets(); 
+    
+    if(hasTargets) {
+      // Get a list of currently tracked targets.
+      targets = result.getTargets();
+      // Get the current best target.
+      bestTarget = result.getBestTarget();
+
+      // Get information from target.
+      SmartDashboard.putNumber("PV Yaw", bestTarget.getYaw());
+    }
   }
 
       /**

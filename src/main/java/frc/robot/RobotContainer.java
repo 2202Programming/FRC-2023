@@ -12,6 +12,7 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
+import frc.robot.util.RobotSpecs.RobotNames;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -50,15 +51,16 @@ public class RobotContainer {
     m_robotSpecs = new RobotSpecs(System.getenv("serialnum"));  //mechanism to pull different specs based on roborio serial
 
   // these can get created on any hardware setup
-  sensors = new Sensors_Subsystem();
-  drivetrain = new SwerveDrivetrain();
   photonVision = new PhotonVision();
   limelight = new Limelight_Subsystem();
-  limelight.setPipeline(1);
-  
-  //if (m_driverController.getHID().isConnected()) {  //doesn't work for some reason to see if controller is connected
+  limelight.setPipeline(0);
+
+  if (m_robotSpecs.myRobotName != RobotNames.BotOnBoard){
+    drivetrain = new SwerveDrivetrain();
     drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
-  //}
+    sensors = new Sensors_Subsystem();
+  }
+
     // Configure the trigger bindings
     configureBindings();
   }
@@ -81,11 +83,15 @@ public class RobotContainer {
     // cancelling on release.
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
-    //Y button to reset current facing to zero
-    m_driverController.getDriver().y().whileTrue(new InstantCommand(()->{drivetrain.resetAnglePose(new Rotation2d(0));}));
-
     //X button to change LL pipeline
     m_driverController.getDriver().x().onTrue(new InstantCommand(()->{limelight.togglePipeline();}));
+
+    if (m_robotSpecs.myRobotName != RobotNames.BotOnBoard){
+    //Y button to reset current facing to zero
+    m_driverController.getDriver().y().whileTrue(new InstantCommand(()->{drivetrain.resetAnglePose(new Rotation2d(0));}));
+    }
+
+
   }
 
   /**
