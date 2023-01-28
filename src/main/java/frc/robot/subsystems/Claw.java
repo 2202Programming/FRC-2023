@@ -16,12 +16,26 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
+
+/*
+ * Notes from Mr.L  1/27/2023
+ * 
+ * Some of your variables would make for a good API
+ * 
+ *      is_open the state can be read off the Pnumatics 
+ *      pieceheld -->  enum  HasPiece()  returns NONE, CUBE, CONE
+ *     
+ *      Is angle is wrist angle??, that may be a PWM Server (see vacuum bot)
+ *      it won't need a PID, but will need a pwm port. 
+ *      
+ */
 public class Claw extends SubsystemBase {
   private double current_angle;
   private double desired_angle;
   private boolean is_open;
   private PIDController claw_controller = new PIDController(0.0, 0.0, 0.0);
   private GamePieceHeld piece_held; 
+
   /** Creates a new Claw. */
   public Claw() {
     //TODO Find out motor then update
@@ -36,9 +50,15 @@ public class Claw extends SubsystemBase {
   }
   public void setDesiredAngle(double Desired_angle){
     this.desired_angle = Desired_angle;
+    //drive wrist server here
+
+    // if it is a servo, we don't have a measure of the angle
+    // unless we do something tricky in the servo.
+    // if it is a motor, we need the pid and a sensor for angle, likely a POT.
   }
   public boolean isOpen(){
     return is_open;
+    //TODO: use solenoid state
   }
 
   @Override
