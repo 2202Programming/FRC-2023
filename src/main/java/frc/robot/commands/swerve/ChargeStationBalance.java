@@ -60,8 +60,8 @@ public class ChargeStationBalance extends CommandBase {
 
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java
-    final double vmax = 0.4; // [m/s] fastest speed we allow
-    final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected
+    final double vmax = 0.9; // [m/s] fastest speed we allow
+    final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected  TODO: Try stiction fix to speed steady-state climb
     // also could be simple bang-bang...
     final double roll_offset = -0.8349609375; // [deg] simple sensor correction TODO:calibrate in sensor_SS
 
@@ -85,10 +85,10 @@ public class ChargeStationBalance extends CommandBase {
 
     // state vars, cleared on init()
     int levelCount;
-    PIDController csBalancePID = new PIDController(0.025, 0.0, 0.0); // kp [m/s per deg]
-    double kpRR = 0.0;   //[m/s/deg/s] vel compensation based on direct rollRate
+    PIDController csBalancePID = new PIDController(0.015, 0.0, 0.000); // kp [m/s per deg] kd .003 or less for TIM,  kp >.018 is unstable
+    double kpRR = -0.0055;   //[m/s/deg/s] vel compensation based on direct rollRate
 
-    LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.07, Constants.DT);
+    LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.3, Constants.DT);
     LinearFilter rollRateFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
 
     public ChargeStationBalance() {
@@ -114,18 +114,21 @@ public class ChargeStationBalance extends CommandBase {
         levelCount = 0;
         unfilteredRoll = sensors.getRoll() - roll_offset;
         rollRate = sensors.getRollRate();
-        csBalancePID.reset();
-        
+       
         //reset, use current measured roll & rollRate to initialize
         rollFilter.calculate(unfilteredRoll);
         rollFilter.calculate(unfilteredRoll);
+        filteredRoll = rollFilter.calculate(unfilteredRoll);
 
-        // Same for roll Rate
-        rollFilter.reset();
-        rollRateFilter.calculate(rollRate);
-        rollRateFilter.calculate(rollRate);
-
+        // Same for roll Rate, should be zero
         rollRateFilter.reset();
+        rollRateFilter.calculate(rollRate);
+        rollRateFilter.calculate(rollRate);
+
+        // set PID internal states
+        csBalancePID.reset();
+        csBalancePID.calculate(filteredRoll);
+        csBalancePID.calculate(filteredRoll);
         System.out.println("***Starting automatic charging station balancing***");
     }
 
@@ -149,13 +152,6 @@ public class ChargeStationBalance extends CommandBase {
      * @return SwerveModuleState[] swerve speeds to command
      */
     private SwerveModuleState[] calculate() {
-        // double tiltRate = sensors.getTotalTiltRate(); // TODO: hard to do a neg.
-        // feedback loop when this is always >0
-        // double tilt = sensors.getTotalTilt(); // dito no indication of direction, really want net tilt in direction of ramp-plane (a bit hard)
-        // double yaw = Math.toRadians(sensors.getYaw()); //sensor are in degrees, just keep that for intuition
-        
-        //TODO: filter magic number to constants
-        
         // try simple 1-D around roll
         unfilteredRoll = sensors.getRoll() - roll_offset;
         filteredRoll = rollFilter.calculate(unfilteredRoll); // simple best guess of our roll after physical alignment
