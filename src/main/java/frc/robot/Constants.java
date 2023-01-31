@@ -135,7 +135,10 @@ public final class Constants {
 
   // PWM assignments on the Rio
   public static final class PWM {
-    // dpl unused public static final int INTAKE = 0;
+    public static final int RIGHT_WRIST = 0;
+    public static final int LEFT_WRIST = 1;
+
+    //dpl unused public static final int INTAKE = 0;
   }
 
 
