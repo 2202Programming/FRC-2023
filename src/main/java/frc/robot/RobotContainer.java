@@ -53,7 +53,7 @@ public class RobotContainer {
   // these can get created on any hardware setup
   photonVision = new PhotonVision();
   limelight = new Limelight_Subsystem();
-  limelight.setPipeline(0);
+  limelight.setPipeline(1);
 
   if (m_robotSpecs.myRobotName != RobotNames.BotOnBoard){
     drivetrain = new SwerveDrivetrain();

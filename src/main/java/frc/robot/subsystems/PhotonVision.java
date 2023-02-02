@@ -115,7 +115,14 @@ public class PhotonVision extends SubsystemBase {
       bestTarget = result_microsoft.getBestTarget();
 
       // Get information from target.
-      SmartDashboard.putNumber("PV Yaw", bestTarget.getYaw());
+      SmartDashboard.putNumber("# of PV targets", targets.size());
+      SmartDashboard.putNumber("PV Yaw #1", targets.get(0).getYaw());
+      SmartDashboard.putNumber("PV Area #1", targets.get(0).getArea());
+      if (targets.size()>0){
+        SmartDashboard.putNumber("PV Yaw #2", targets.get(1).getYaw());
+        SmartDashboard.putNumber("PV Area #2", targets.get(1).getArea());
+      }
+
     }
   }
 
