@@ -31,7 +31,7 @@ import java.lang.Math;
 
 public class ArmSS extends SubsystemBase {
     // constants
-    double MaxVel = 20.0; // [cm/s] //todo Networktable?
+    double MaxVel = 20.0; // [cm/s] //TODO Networktable?
     double PosTol = .2; // [cm]
     double VelTol = .5; // [cm/s]
 
@@ -50,6 +50,9 @@ public class ArmSS extends SubsystemBase {
         PIDController positionPID = new PIDController(0.0, 0.0, 0.0); // outer position loop
         PIDFController hwPID = new PIDFController(0.0, 0.0, 0.0, 0.0); // holds values for hwpid vel
 
+        // TODO hook up MoveOut.java to this.
+        public double pointChange;
+
         // hardware
         final CANSparkMax ctrl;
         final SparkMaxPIDController pid;
@@ -63,7 +66,7 @@ public class ArmSS extends SubsystemBase {
             pid = ctrl.getPIDController();
             encoder = ctrl.getEncoder();
 
-            // todo: set scaling on endoder to use cm
+            // TODO: set scaling on endoder to use cm
             encoder.setPositionConversionFactor(TBD);
             encoder.setVelocityConversionFactor(TBD);
 
@@ -101,7 +104,7 @@ public class ArmSS extends SubsystemBase {
             // command hard 0.0 if POS is at tollerence
             velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
             // send our vel to the controller
-            pid.setReference(velCmd, ControlType.kSmartVelocity); // todo can we use position or SmartMotion modes?
+            pid.setReference(velCmd, ControlType.kSmartVelocity); // TODO can we use position or SmartMotion modes?
         }
     }
 
@@ -111,19 +114,6 @@ public class ArmSS extends SubsystemBase {
     
     // TODO use the Controllrt.calculate and Controller.setpoint
     // instance variables
-    // private PIDController left_arm_controller = new PIDController(0.0, 0.0, 0.0);
-    // private PIDController right_arm_controller = new PIDController(0.0, 0.0,
-    // 0.0);
-    // private PIDController arm_sync_controller = new PIDController(0.0, 0.0, 0.0);
-    private double currentPos; // current extension of arm in mm
-    private double desiredPos; // desired extension of arm in mm
-    private CANSparkMax leftMotor = new CANSparkMax(CAN.ARM_LEFT_Motor, MotorType.kBrushless); // TODO motor type
-    private CANSparkMax rightMotor = new CANSparkMax(CAN.ARM_RIGHT_Motor, MotorType.kBrushless);
-    private double motorSpeed;
-    private double current_vel; // current velocity of arm
-    private double desired_vel; // desired velocity of arm
-    private double tolerance; // tolerance
-
     // State vars
     final Arm leftArm;
     final Arm rightArm;
@@ -135,45 +125,13 @@ public class ArmSS extends SubsystemBase {
     }
 
     // Next think about what to do with the two arm objects
-
-    public double getCurrentVel() {
-        return current_vel;
-    }
-
-    public double getDesiredVel() {
-        return desired_vel;
-    }
-
-    public double getTolerance() {
-        return tolerance;
-    }
-
-    public void setDesiredVel(double Desired_vel) {
-        this.desired_vel = Desired_vel;
-    }
-
-    public double getCurrentPos() {
-        return currentPos;
-    }
-
-    public void setDesiredPos(double desiredPos) {
-        this.desiredPos = desiredPos;
-    }
-
-    public double getdesiredPos() {
-        return desiredPos;
+    public boolean armsAtPosition() {
+        return ((leftArm.atSetpoint()) && (rightArm.atSetpoint()));
     }
 
     /*
      * Looks at various pids and desired positions to see if we are there
      */
-    public boolean isAtPosition() {
-        return (Math.abs(currentPos - desiredPos) >= tolerance);
-    }
-
-    public boolean motorDirectionForwards() {
-        return (currentPos < desiredPos);
-    }
 
     @Override
     public void periodic() {
@@ -181,25 +139,12 @@ public class ArmSS extends SubsystemBase {
         rightArm.periodic();
 
         // TODO sync compenstation
-
-        boolean armCheck = isAtPosition();
-        if (armCheck = true) {
-            leftMotor.stopMotor();
-            rightMotor.stopMotor();
+        if (armsAtPosition(true)) {
+            //sync here??? Ask Mr.L, just an idea
         }
 
-        //feedback from MrL  - we have better controllers, 
-        if (armCheck = false) {
-            boolean forward = motorDirectionForwards();
-            if (forward = true) {
-                leftMotor.set(motorSpeed);
-                rightMotor.set(motorSpeed);
-            }
-            if (forward = false) {
-                leftMotor.set(0 - motorSpeed);
-                rightMotor.set(0 - motorSpeed);
-            }
-        }
+        leftArm.setSetpoint(pointChange);
+        rightArm.setSetpoint();
     }
 
     /******************
