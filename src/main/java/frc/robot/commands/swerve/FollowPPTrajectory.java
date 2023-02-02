@@ -78,9 +78,9 @@ public class FollowPPTrajectory extends CommandBase {
     PathPlannerState initialState = path.getInitialState();
     Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
     //TODO: take PID values from Constants or construction?
-    PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController thetaController = new PIDController(4, 0, 0, Constants.DT);     // [rad]
+    PIDController xController = new PIDController(1.0, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController yController = new PIDController(1.0, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController thetaController = new PIDController(0.08, 0, 0, Constants.DT);     // [rad]
       //Units are radians for thetaController; PPSwerveController is using radians internally.
       thetaController.enableContinuousInput(-Math.PI, Math.PI); //prevent piroutte paths over continuity
 
