@@ -130,6 +130,13 @@ public class PhotonVision extends SubsystemBase {
 
     }
   }
+public boolean hasAprilTarget(){
+  return hasAprilTargets;
+}
+
+public Pose2d getPoseEstimate(){
+  return currentPoseEstimate;
+}
 
 public boolean hasTapeTarget(){
   return hasTapeTargets;
