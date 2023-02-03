@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.PhotonCamera;
@@ -29,8 +30,10 @@ public class PhotonVision extends SubsystemBase {
 
   private PhotonCamera camera_global;
   private PhotonCamera camera_microsoft;
-  private boolean hasTargets;
-  private List<PhotonTrackedTarget> targets;
+  private boolean hasAprilTargets;
+  private boolean hasTapeTargets;
+  private List<PhotonTrackedTarget> AprilTargets;
+  private List<PhotonTrackedTarget> TapeTargets;
   private PhotonTrackedTarget bestTarget;
   private double yaw;
   private double pitch;
@@ -73,15 +76,15 @@ public class PhotonVision extends SubsystemBase {
   @Override
   public void periodic() {
 
-    // Query the latest result from PhotonVision
+    // Query the latest Apriltag result from PhotonVision
     var result_global = camera_global.getLatestResult();
 
     // Check if the latest result has any targets.
-    hasTargets = result_global.hasTargets(); 
+    hasAprilTargets = result_global.hasTargets(); 
     
-    if(hasTargets) {
+    if(hasAprilTargets) {
       // Get a list of currently tracked targets.
-      targets = result_global.getTargets();
+      AprilTargets = result_global.getTargets();
       // Get the current best target.
       bestTarget = result_global.getBestTarget();
 
@@ -102,29 +105,51 @@ public class PhotonVision extends SubsystemBase {
     SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getX());
     SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getY());
     
-    // Query the latest result from PhotonVision
+    // Query the latest Retroreflective result from PhotonVision
     var result_microsoft = camera_microsoft.getLatestResult();
 
     // Check if the latest result has any targets.
-    hasTargets = result_microsoft.hasTargets(); 
+    hasTapeTargets = result_microsoft.hasTargets(); 
     
-    if(hasTargets) {
+    if(hasTapeTargets) {
       // Get a list of currently tracked targets.
-      targets = result_microsoft.getTargets();
+      TapeTargets = result_microsoft.getTargets();
       // Get the current best target.
       bestTarget = result_microsoft.getBestTarget();
 
       // Get information from target.
-      SmartDashboard.putNumber("# of PV targets", targets.size());
-      SmartDashboard.putNumber("PV Yaw #1", targets.get(0).getYaw());
-      SmartDashboard.putNumber("PV Area #1", targets.get(0).getArea());
-      if (targets.size()>0){
-        SmartDashboard.putNumber("PV Yaw #2", targets.get(1).getYaw());
-        SmartDashboard.putNumber("PV Area #2", targets.get(1).getArea());
+      SmartDashboard.putNumber("# of PV targets", TapeTargets.size());
+      SmartDashboard.putNumber("PV Yaw #1", TapeTargets.get(0).getYaw());
+      SmartDashboard.putNumber("PV Area #1", TapeTargets.get(0).getArea());
+      if (getNumberOfTapeTargets()>0){
+        SmartDashboard.putNumber("PV Yaw #2", TapeTargets.get(1).getYaw());
+        SmartDashboard.putNumber("PV Area #2", TapeTargets.get(1).getArea());
+        SmartDashboard.putNumber("PV Largest Yaw", getLargestTapeTarget().getYaw());
+        SmartDashboard.putNumber("PV 2nd Largest Yaw", getSecondLargestTapeTarget().getYaw());
       }
 
     }
   }
+
+public boolean hasTapeTarget(){
+  return hasTapeTargets;
+}
+
+public int getNumberOfTapeTargets(){
+  return TapeTargets.size();
+}
+
+public PhotonTrackedTarget getLargestTapeTarget(){
+  TapeTargets.sort(new PhotonTrackedTargetComparator());
+  return TapeTargets.get(0);
+}
+
+public PhotonTrackedTarget getSecondLargestTapeTarget(){
+  TapeTargets.sort(new PhotonTrackedTargetComparator());
+  return TapeTargets.get(1);
+}
+
+
 
       /**
    * @param estimatedRobotPose The current best guess at robot pose
@@ -142,5 +167,16 @@ public class PhotonVision extends SubsystemBase {
     } else {
         return new Pair<Pose2d, Double>(null, 0.0);
     }
+  }
+}
+
+//make a comparator class to allow for list sorting
+class PhotonTrackedTargetComparator implements Comparator<PhotonTrackedTarget> {
+  @Override
+  public int compare(PhotonTrackedTarget a, PhotonTrackedTarget b) {
+    int temp = 0;
+    if (a.getArea() > b.getArea()) temp = 1;
+    if (a.getArea() < b.getArea()) temp = -1;
+    return temp;
   }
 }
