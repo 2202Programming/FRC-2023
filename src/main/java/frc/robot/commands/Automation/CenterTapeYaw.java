@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.SwerveDrivetrain;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 //rotates robot to center front reflective tape target
 
@@ -74,6 +75,9 @@ public class CenterTapeYaw extends CommandBase {
     currentAngle = drivetrain.getPose().getRotation();
     output_states = kinematics
         .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
+
+    SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
+    SmartDashboard.putNumber("targetYawError", targetYawError);       
   }
 
   // Called once the command ends or is interrupted.

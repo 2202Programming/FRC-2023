@@ -10,10 +10,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.SwerveDrivetrain;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 //translates robot to get both reflective tape targets aligned to same yaw
 
@@ -34,12 +36,12 @@ public class CenterTapeSkew extends CommandBase {
   double tapePidOutput = 0.0;
 
   Rotation2d currentAngle;
-  double min_rot_rate = 6.0;        //about 7.5 deg is min we measured
-  double r_min_rot_rate = min_rot_rate;
+  double min_velocity = 0.1;        //not yet measured
+  double degrees_to_meters_per_sec = 0.1;   //not yet measured
 
-  final double vel_tol = 10.0;
-  final double pos_tol = 2.0;
-  final double max_rot_rate = 60.0;  //[deg/s]
+  final double vel_tol = 10.0; //m/s
+  final double pos_tol = 1.0; //degrees error
+  final double max_velocity = 2.0; //m/s
 
   /** Creates a new CenterTapeYaw. */
   public CenterTapeSkew() {
@@ -69,12 +71,17 @@ public class CenterTapeSkew extends CommandBase {
       tapePid.setSetpoint(0.0); //target skew is both targets have same yaw
       tapePidOutput = tapePid.calculate(targetSkewError);
 
-      double min_rot = (Math.abs(targetSkewError) > pos_tol)  ? - Math.signum(targetSkewError) * min_rot_rate : 0.0;
-      xSpeed = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3;   //clamp in [deg/s] convert to [rad/s]
+      tapePidOutput *= degrees_to_meters_per_sec; //PID output is in degrees error between two targets, need to convert to m/s for drivetrain to translate.
+
+      double min_xspeed = (Math.abs(targetSkewError) > pos_tol)  ? - Math.signum(targetSkewError) * min_velocity : 0.0;
+      xSpeed = MathUtil.clamp(tapePidOutput + min_xspeed, -max_velocity, max_velocity);   //clamp in m/s
 
       currentAngle = drivetrain.getPose().getRotation();
       output_states = kinematics
           .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, 0, 0, currentAngle));
+
+      SmartDashboard.putNumber("Skew Pid Output", tapePidOutput);
+      SmartDashboard.putNumber("Target Skew", targetSkewError);    
     }
   } 
 
