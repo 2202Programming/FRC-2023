@@ -114,9 +114,10 @@ public final class Constants {
     public static final int CMB_RIGHT_Rotate = 37;
 
     // Arms
-    public static final int ARM_LEFT_Motor = -30; // TODO number
-    public static final int ARM_RIGHT_Motor = -30; // TODO number
+    public static final int ARM_LEFT_Motor = 12; //electrical needs to update their can id sheet, these may be wrong
+    public static final int ARM_RIGHT_Motor = 13;
     public static final int ELBOW = 39; //TODO fix this it is wrong 
+    public static final int CLAW = 234567890; //TODO fix number
 
     // IMU
     public static final int PIGEON_IMU_CAN = 60;
