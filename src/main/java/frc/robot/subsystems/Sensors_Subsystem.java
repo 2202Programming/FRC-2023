@@ -207,7 +207,7 @@ public class Sensors_Subsystem extends SubsystemBase {
       nt_canUtilization.setDouble(m_canStatus.percentBusUtilization);
       nt_canRxError.setNumber(m_canStatus.receiveErrorCount);
       nt_canTxError.setNumber(m_canStatus.transmitErrorCount);
-      
+
       nt_cancoder_bl.setDouble(m_rot.back_left);
       nt_cancoder_br.setDouble(m_rot.back_right);
       nt_cancoder_fl.setDouble(m_rot.front_left);
@@ -277,6 +277,13 @@ public class Sensors_Subsystem extends SubsystemBase {
     public double getYaw() {
       return m_yaw;
      }
+
+  public void setYaw(double yawDegrees) {
+    m_pigeon.setYaw(yawDegrees);
+  }
+  public void setYaw(Rotation2d rotation) {
+    setYaw(rotation.getDegrees());
+  }
 
 
 /**
@@ -356,10 +363,6 @@ public class Sensors_Subsystem extends SubsystemBase {
     return c;
   }
 
-  //if true, navx should not be used
-  public void disableNavx(boolean disabled){
-    navxManuallyDisabled = disabled;
-  }
 
   public void setAutoStartPose(Pose2d pose){
     autoStartPose = new Pose2d(pose.getTranslation(), pose.getRotation());
@@ -393,27 +396,6 @@ public class Sensors_Subsystem extends SubsystemBase {
 
   }
 
-  public static class Signals {
-    public enum Signal {
-      // WIP -
-      T(0), X(1), Y(2), Xd(3), Yd(4), Xdd(5), Ydd(6), Roll(7), Pitch(8), Yaw(9), Roll_d(10), Pitch_d(11), Yaw_d(12),
-      Roll_dd(13), Pitch_dd(14), Yaw_dd(15);
 
-      public final int id;
-
-      private Signal(int id) {
-        this.id = id;
-      }
-
-      public int id() {
-        return id;
-      }
-
-    }
-
-    double data[] = new double[Signal.values().length];
-  }
-
- 
 
 }
