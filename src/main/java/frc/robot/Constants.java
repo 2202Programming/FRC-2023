@@ -94,15 +94,6 @@ public final class Constants {
     public static final int DT_FR_CANCODER = 30;
     public static final int DT_FL_CANCODER = 7;
 
-    // Shooter CAN devices
-    public static final int SHOOTER_UPPER_TALON = 10;
-    public static final int SHOOTER_LOWER_TALON = 11;
-
-    // Magazine motors
-    public static final int MAG_R_SIDE_MTR = 12;
-    public static final int MAG_L_SIDE_MTR = 13;
-    public static final int MAG_TOP_WHEEL = 16;
-
     // Intake motor
     public static final int INTAKE_MTR = 14;
 
@@ -125,6 +116,7 @@ public final class Constants {
     // Arms
     public static final int ARM_LEFT_Motor = -30; // TODO number
     public static final int ARM_RIGHT_Motor = -30; // TODO number
+    public static final int ELBOW = 39; //TODO fix this it is wrong 
 
     // IMU
     public static final int PIGEON_IMU_CAN = 60;
