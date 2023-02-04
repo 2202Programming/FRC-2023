@@ -67,8 +67,8 @@ public class ArmSS extends SubsystemBase {
             encoder = ctrl.getEncoder();
 
             // TODO: set scaling on endoder to use cm
-            encoder.setPositionConversionFactor(TBD);
-            encoder.setVelocityConversionFactor(TBD);
+            encoder.setPositionConversionFactor(0.0);   //TODO fix me
+            encoder.setVelocityConversionFactor(0.0);   //TODO fix me
 
             // write the hwPID constants to the sparkmax
             hwPID.copyTo(pid, 0);
@@ -117,17 +117,30 @@ public class ArmSS extends SubsystemBase {
     // State vars
     final Arm leftArm;
     final Arm rightArm;
+    final Elbow elbow;
 
     public ArmSS() {
         leftArm = new Arm(CAN.ARM_LEFT_Motor);
         rightArm = new Arm(CAN.ARM_RIGHT_Motor);
+        elbow = new Elbow();
 
     }
 
-    // Next think about what to do with the two arm objects
+    // At Position flags for use in the commands
     public boolean armsAtPosition() {
         return ((leftArm.atSetpoint()) && (rightArm.atSetpoint()));
     }
+
+    public boolean everythingAtPosition() {
+        return armsAtPosition() && elbow.isAtPosition();
+    }
+
+    public boolean elbowAtPosition() {
+        return elbow.isAtPosition();
+    };
+
+    //accessor for elbow if needed.
+    public Elbow Elbow() {return this.elbow;}
 
     /*
      * Looks at various pids and desired positions to see if we are there
@@ -135,17 +148,19 @@ public class ArmSS extends SubsystemBase {
 
     @Override
     public void periodic() {
+        elbow.periodic();
         leftArm.periodic();
         rightArm.periodic();
-
-        // TODO sync compenstation
-        if (armsAtPosition(true)) {
-            //sync here??? Ask Mr.L, just an idea
-        }
-
-        leftArm.setSetpoint(pointChange);
-        rightArm.setSetpoint();
+        
+        ntUpdates();
     }
+
+    public void setPositions(double extension, double rotation){
+        leftArm.setSetpoint(extension);
+        rightArm.setSetpoint(extension);
+        elbow.setPosition(rotation);
+    }
+
 
     /******************
      * Network Table Stuff
@@ -195,12 +210,13 @@ public class ArmSS extends SubsystemBase {
 
     private void ntUpdates() {
         // info (set)
+        /*
         nt_desiredPos.setDouble(desiredPos);
         nt_currentPos.setDouble(currentPos);
         nt_desiredVel.setDouble(desired_vel);
         nt_currentVel.setDouble(current_vel);
         nt_tolerance.setDouble(tolerance);
-
+        */
         // PID setters
         /**
          * left_arm_controller.setP(nt_left_kP.getDouble(0.0));
