@@ -9,8 +9,11 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,9 +23,11 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.ChassisConfig;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.Constants.NTStrings;
 import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
@@ -52,16 +57,17 @@ public class SwerveDrivetrain extends SubsystemBase {
    * values represent moving toward the left of the robot All lengths in feet.
    * https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html#constructing-the-kinematics-object
    */
+  private ChassisConfig cfg = RobotContainer.RC().m_robotSpecs.getChassisConfig();
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-      new Translation2d(RobotContainer.RC().m_robotSpecs.getChassisConfig().XwheelOffset, RobotContainer.RC().m_robotSpecs.getChassisConfig().YwheelOffset), // Front Left
-      new Translation2d(RobotContainer.RC().m_robotSpecs.getChassisConfig().XwheelOffset, -RobotContainer.RC().m_robotSpecs.getChassisConfig().YwheelOffset), // Front Right
-      new Translation2d(-RobotContainer.RC().m_robotSpecs.getChassisConfig().XwheelOffset, RobotContainer.RC().m_robotSpecs.getChassisConfig().YwheelOffset), // Back Left
-      new Translation2d(-RobotContainer.RC().m_robotSpecs.getChassisConfig().XwheelOffset, -RobotContainer.RC().m_robotSpecs.getChassisConfig().YwheelOffset) // Back Right
+      new Translation2d(cfg.XwheelOffset, cfg.YwheelOffset), // Front Left
+      new Translation2d(cfg.XwheelOffset, -cfg.YwheelOffset), // Front Right
+      new Translation2d(-cfg.XwheelOffset, cfg.YwheelOffset), // Back Left
+      new Translation2d(-cfg.XwheelOffset, -cfg.YwheelOffset) // Back Right
   );
   private SwerveDriveOdometry m_odometry;
   private Pose2d m_pose;
   private Pose2d old_pose;
-  private SwerveModuleState[] cur_states;
+  
   private SwerveModuleState[] meas_states;   //measured wheel speed & angle
   private SwerveModulePosition[] meas_pos = new SwerveModulePosition[] {
     new SwerveModulePosition(),
@@ -69,6 +75,9 @@ public class SwerveDrivetrain extends SubsystemBase {
     new SwerveModulePosition(),
     new SwerveModulePosition()
   };
+
+
+
 
 
   // sensors and our mk3 modules
@@ -114,6 +123,8 @@ public class SwerveDrivetrain extends SubsystemBase {
   private LinearFilter bearingFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
   private LinearFilter velocityFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
 
+  public final SwerveDrivePoseEstimator m_poseEstimator;
+
   public final Field2d m_field = new Field2d();
 
   public SwerveDrivetrain() {
@@ -123,24 +134,48 @@ public class SwerveDrivetrain extends SubsystemBase {
     modules = new SwerveModuleMK3[] {
         // Front Left
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_FL_DRIVE, MT), new CANSparkMax(CAN.DT_FL_ANGLE, MT),
-            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FL_OFFSET, sensors.getCANCoder(EncoderID.FrontLeft), kAngleMotorInvert_Left,
+            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FL_OFFSET, 
+            sensors.getCANCoder(EncoderID.FrontLeft),
+            kAngleMotorInvert_Left,
             kAngleCmdInvert_Left, kDriveMotorInvert_Left, "FL"),
         // Front Right
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_FR_DRIVE, MT), new CANSparkMax(CAN.DT_FR_ANGLE, MT),
-            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FR_OFFSET, sensors.getCANCoder(EncoderID.FrontRight), kAngleMotorInvert_Right,
+            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FR_OFFSET, 
+            sensors.getCANCoder(EncoderID.FrontRight),
+            kAngleMotorInvert_Right,
             kAngleCmdInvert_Right, kDriveMotorInvert_Right, "FR"),
         // Back Left
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_BL_DRIVE, MT), new CANSparkMax(CAN.DT_BL_ANGLE, MT),
-            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BL_OFFSET, sensors.getCANCoder(EncoderID.BackLeft), kAngleMotorInvert_Left,
+            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BL_OFFSET, 
+            sensors.getCANCoder(EncoderID.BackLeft),
+            kAngleMotorInvert_Left,
             kAngleCmdInvert_Left, kDriveMotorInvert_Left, "BL"),
         // Back Right
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT), new CANSparkMax(CAN.DT_BR_ANGLE, MT),
-            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight), kAngleMotorInvert_Right,
+            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BR_OFFSET, 
+            sensors.getCANCoder(EncoderID.BackRight),
+            kAngleMotorInvert_Right,
             kAngleCmdInvert_Right, kDriveMotorInvert_Right, "BR") };
 
+    /*
+     * Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings.
+     * The numbers used below are robot specific, and should be tuned.
+     */
+     m_poseEstimator = new SwerveDrivePoseEstimator(
+        kinematics,
+        sensors.getRotation2d(),         
+        meas_pos,
+        new Pose2d(),               //initial pose ()
+        VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),   //std x,y, heading from odmetry
+        VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30)) );  // std x, y heading from vision
+
+
     m_odometry = new SwerveDriveOdometry(kinematics, sensors.getRotation2d(), meas_pos);
-    cur_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
+    //cur_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
     meas_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
+  
+    m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
+    old_pose = m_pose;
 
     // for updating CAN status in periodic
     table = NetworkTableInstance.getDefault().getTable(NT_Name);
@@ -173,9 +208,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Angle D", angle_kD);
     SmartDashboard.putNumber("Angle Feed Forward", angle_kFF);
     */
-    m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
-    old_pose = m_pose;
-
+    
     offsetDebug();
   }
 
@@ -202,7 +235,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   }
 
   public void drive(SwerveModuleState[] states) {
-    this.cur_states = states; //keep copy of commanded states so we can stop() withs 
+    // this.cur_states = states; //keep copy of commanded states so we can stop() withs 
 
     //if any one wheel is above max obtainable speed, reduce them all in the same ratio to maintain control
     //SwerveDriveKinematics.desaturateWheelSpeeds(states, DriveTrain.kMaxSpeed);
@@ -233,7 +266,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     // update pose
     old_pose = m_pose;
-    m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
+    m_pose = updateOdometry();
+   
 
     // from -PI to +PI
     double temp = Math.atan2(m_pose.getY() - old_pose.getY(), m_pose.getX() - old_pose.getX());
@@ -363,6 +397,27 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
     System.out.println("***BRAKES RELEASED***");
   }
+
+ /** Updates the field relative position of the robot. */
+ public Pose2d updateOdometry() {
+  Pose2d pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
+  m_poseEstimator.update( sensors.getRotation2d(), meas_pos);
+  
+  // Also apply vision measurements. We use 0.3 seconds in the past as an example -- on
+  // a real robot, this must be calculated based either on latency or timestamps.
+  m_poseEstimator.addVisionMeasurement(
+      ExampleGlobalMeasurementSensor.getEstimatedGlobalPose(
+          m_poseEstimator.getEstimatedPosition()),
+      Timer.getFPGATimestamp() - 0.3);
+
+  return pose;
+}
+
+
+
+
+
+
 
   //  TODO: Move to a TEST/Tuning command  - DPL 2/21/22
   // private void pidTuning() { //if drivetrain tuning

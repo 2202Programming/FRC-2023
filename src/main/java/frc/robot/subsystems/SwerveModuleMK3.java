@@ -13,6 +13,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -337,7 +338,7 @@ public class SwerveModuleMK3 {
    * This is the angle being controlled, so it should be thought of as the real
    * angle of the wheel.
    * 
-   * @return SmartMax/Neo internal angle (degrees)
+   * @return SmartMax/Neo internal angle in Rotation2d object [rad]
    */
   public Rotation2d getAngleRot2d() {
     return Rotation2d.fromDegrees(m_internalAngle);
@@ -378,7 +379,10 @@ public class SwerveModuleMK3 {
     return m_position;
   }
 
-
+  //Expose the position with wpi class, [m], [rad]
+  public SwerveModulePosition getSMPosition() {
+    return new SwerveModulePosition(m_position, getAngleRot2d());
+  }
   
   /**
    * Set the speed + rotation of the swerve module from a SwerveModuleState object

@@ -58,6 +58,12 @@ public class RobotSpecs {
                 mySubsystemConfig = Constants.swerveBotSubsystemConfig;
                 System.out.println("***ERROR, bot serial unknown. Using SwerveBot Config***");
                 break;
+            case BotOnBoard:
+                myWheelOffsets = Constants.DriveTrain.swerveBotOffsets;
+                myChassisConfig = Constants.DriveTrain.swerveBotChassisConfig;
+                mySubsystemConfig = Constants.swerveBotSubsystemConfig;
+                System.out.println("***ERROR,BotOnBoard don't expect too much***");
+                break;
         }
     }
 
