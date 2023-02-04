@@ -121,7 +121,7 @@ public class PhotonVision extends SubsystemBase {
       SmartDashboard.putNumber("# of PV targets", TapeTargets.size());
       SmartDashboard.putNumber("PV Yaw #1", TapeTargets.get(0).getYaw());
       SmartDashboard.putNumber("PV Area #1", TapeTargets.get(0).getArea());
-      if (getNumberOfTapeTargets()>0){
+      if (getNumberOfTapeTargets()>1){
         SmartDashboard.putNumber("PV Yaw #2", TapeTargets.get(1).getYaw());
         SmartDashboard.putNumber("PV Area #2", TapeTargets.get(1).getArea());
         SmartDashboard.putNumber("PV Largest Yaw", getLargestTapeTarget().getYaw());

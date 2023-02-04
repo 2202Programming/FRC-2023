@@ -5,6 +5,9 @@
 package frc.robot;
 
 import frc.robot.Constants.DriverControls.Id;
+import frc.robot.commands.Automation.CenterTapeSkew;
+import frc.robot.commands.Automation.CenterTapeYaw;
+import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
@@ -16,6 +19,7 @@ import frc.robot.util.RobotSpecs.RobotNames;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -56,9 +60,9 @@ public class RobotContainer {
   limelight.setPipeline(1);
 
   if (m_robotSpecs.myRobotName != RobotNames.BotOnBoard){
+    sensors = new Sensors_Subsystem();
     drivetrain = new SwerveDrivetrain();
     drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
-    sensors = new Sensors_Subsystem();
   }
 
     // Configure the trigger bindings
@@ -89,6 +93,9 @@ public class RobotContainer {
     if (m_robotSpecs.myRobotName != RobotNames.BotOnBoard){
     //Y button to reset current facing to zero
     m_driverController.getDriver().y().whileTrue(new InstantCommand(()->{drivetrain.resetAnglePose(new Rotation2d(0));}));
+    m_driverController.getDriver().a().whileTrue(new CenterTapeYaw());
+    m_driverController.getDriver().b().whileTrue(new CenterTapeSkew());
+    m_driverController.getDriver().x().whileTrue(new CenterTapeYawSkew());
     }
 
 
