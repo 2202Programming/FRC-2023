@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -34,6 +35,8 @@ public class RobotContainer {
   public final Sensors_Subsystem sensors;
   public final SwerveDrivetrain drivetrain;
   public final HID_Xbox_Subsystem dc;           //short for driver controls
+  public final ArmSS armSS;
+
   // Note: we may replace HID_Xbox with CommandPS4Controller or CommandJoystick if needed
  
   /**
@@ -50,6 +53,7 @@ public class RobotContainer {
     sensors = new Sensors_Subsystem();
     drivetrain = new SwerveDrivetrain();
     drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
+    armSS = new ArmSS();
     
     // Configure the trigger bindings
     configureBindings();

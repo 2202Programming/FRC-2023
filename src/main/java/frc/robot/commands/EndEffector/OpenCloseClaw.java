@@ -2,28 +2,28 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.EndAffector;
+package frc.robot.commands.EndEffector;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
-public class GamePieceAngle extends CommandBase {
+public class OpenCloseClaw extends CommandBase {
   final Claw claw;
-  final double angle;
   final String name;
-  /** Creates a new GamePieceAngle. */
-  public GamePieceAngle(Claw claw, String name, double angle) {
+  final double clawWidth;
+  public OpenCloseClaw(Claw claw, String name, double clawWidth) {
     this.claw = claw;
     this.name = name;
-    this.angle = angle;
-    
+    this.clawWidth = clawWidth;
+
     // Use addRequirements() here to declare subsystem dependencies.
   }
+  //Don't know if this can be done in the same class/file or if it needs separate class/files
+
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    claw.setAngle(angle);
-    System.out.println("Moving to" + angle);
+    claw.setClawPos(openClaw);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -32,15 +32,11 @@ public class GamePieceAngle extends CommandBase {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    //0.0 or whatever is default
-    claw.setAngle(0.0);
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    //when claw is at desired angle
-    return claw.correctAngle;
+    return false;
   }
 }

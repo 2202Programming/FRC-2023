@@ -2,11 +2,11 @@
 /**The goal is relatively simple, essentially establish whether the claw needs to be open or closed and do that
  * along with changing the claw to a certain angle if needed
 */
-package frc.robot.commands.EndAffector;
+package frc.robot.commands.EndEffector;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.EndAffector.GamePieceAngle;
+import frc.robot.commands.EndEffector.GamePieceAngle;
 
 
 public class PlaceGamePiece extends SequentialCommandGroup {
@@ -14,7 +14,7 @@ public class PlaceGamePiece extends SequentialCommandGroup {
 
   /** Creates a new PlaceGamePiece. */
   public PlaceGamePiece(Claw claw) {
-    super();
+ 
     //Don't know class name, claw for now, for the claw angle to place
     this.addCommands(
       //Angles obv. not accurate, just put in random numbers
