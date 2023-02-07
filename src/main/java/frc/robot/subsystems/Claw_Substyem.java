@@ -4,24 +4,16 @@
 
 package frc.robot.subsystems;
 
-
-import frc.robot.Constants.CAN;
-import frc.robot.Constants.Claw.GamePieceHeld;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PWM;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import frc.robot.util.CustomServo;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
-import frc.robot.Constants.Claw;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Claw.GamePieceHeld;
+import frc.robot.Constants.PCM1;
 
 /*
  * Notes from Mr.L  1/27/2023
@@ -35,72 +27,112 @@ import edu.wpi.first.networktables.NetworkTableInstance;
  *      it won't need a PID, but will need a pwm port. 
  *      
  */
-// 2 servos, 1 left/right each have a 0 position, have one mirror the other, (switch signs & mapping)
- // call 180 angle 0 and work from one way to the other - 0 wrist won't be 0 servo 
- //Eventually will need 2 solenoids 
+// 2 wrist servos, 1 left/right each have a 0 position, have one mirror the other, (switch signs & mapping)
+// call 180 angle 0 and work from one way to the other - 0 wrist won't be 0 servo 
+
+/*
+ * notes from Mr.L 2/7/23
+ * 
+ * Format imports, variable section and code in general 
+ *    (shift-alt-O) organizes imports
+ *    (shift-ctrl-P format document)
+ * 
+ *  custom servo commented out for now, so can compile
+ * 
+ * Is the wrist here or in the Arm??? 
+ * 
+ */
+
+//Eventually will need 2 solenoids 
 public class Claw_Substyem extends SubsystemBase {
-  private boolean is_open;
-  private GamePieceHeld piece_held; 
-  private double servo_position;
-  private DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Claw.SOLENOID_FORWARD_CHANNEL, Claw.SOLENOID_REVERSE_CHANNEL);
-  Servo rightServo = new Servo(0);
-  Servo leftServo = new Servo(1);
+
+  // constants/statics
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
-  public final double WristMinDegrees = -90.0; //TODO: Find actual value
-  public final double WristMaxDegrees = 90.0; //TODO: Find actual value
-  public final double kServoMinPWM = 0.1; //TODO: Find actual value
-  public final double kServoMaxPWM = 0.5; //TODO: Find actual value
-  protected CustomServo wristServo;
-  
+  static final double WristMinDegrees = -90.0; // TODO: Find actual value
+  static final double WristMaxDegrees = 90.0; // TODO: Find actual value
+  static final double kServoMinPWM = 0.1; // TODO: Find actual value
+  static final double kServoMaxPWM = 0.5; // TODO: Find actual value
 
-  
-  /** Creates a new Claw. */  
+  // Hardware
+  private DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PCM1.CLAW_FWD, PCM1.CLAW_REV);
+  private Servo rightServo = new Servo(frc.robot.Constants.PWM.RIGHT_WRIST);
+  private Servo leftServo = new Servo(frc.robot.Constants.PWM.LEFT_WRIST);
+  // protected CustomServo wristServo; //tbd if needed
+
+  // state vars
+  private boolean is_open;
+  private GamePieceHeld piece_held;
+  private double wrist_cmd;  //[deg]
+
+  /** Creates a new Claw. */
   public Claw_Substyem() {
-    //Creating the custom servo
-    wristServo = new CustomServo(Claw.CLAW_WRIST_SERVO_PWM, WristMinDegrees, WristMaxDegrees, kServoMinPWM, kServoMaxPWM);
-        //TODO Find out motor then update
+    // Creating the custom servo if needed
+    // TBD wristServo = new CustomServo(Claw.CLAW_WRIST_SERVO_PWM, WristMinDegrees,
+    // WristMaxDegrees, kServoMinPWM, kServoMaxPWM);
+
     piece_held = GamePieceHeld.Empty;
-    
+
   }
-  //getting the angles current position
-public double getAngle(){
-  double current_pos = wristServo.getPosition() * wristServo.getServoRange() + wristServo.getMinServoAngle();
-  return current_pos;
-}
-//Not sure if the part below is correct?
-public void setAngle(double desiredAngle){
-wristServo.setAngle(desiredAngle);
- //drive wrist server here
 
-    // if it is a servo, we don't have a measure of the angle
-    // unless we do something tricky in the servo.
-    // if it is a motor, we need the pid and a sensor for angle, likely a POT
-}
-public double getServoPos(){
-  return servo_position;
-}
-public void setServoPos(double Servo_position){
-  this.servo_position = Servo_position;
-}
+  // getting the angles current position
+  public double getAngle() {
 
+    // Just read the left and fixup the coordinates
+    // if left/right are not in sync, not much we can do.
+    // they will get there.
+    double current_pos = leftServo.get();  // todo:fix any offset so math is correct
+    //if customServo - wristServo.getPosition() * wristServo.getServoRange() + wristServo.getMinServoAngle();
+    return current_pos;
+  }
+
+  // Not sure if the part below is correct?
+  public void setAngle(double degrees) {
+
+    // do some math on the requested angle to get left/right settings
+    // assume left "unmirrored"
+    double left_cmd =  degrees;             // todo: may need to add left_offset
+    double right_cmd = 180.0 - left_cmd;    // mirror it, maybe rt_offset (example, needs geometry )
+
+    // Command the wrist servos to 
+    rightServo.set(right_cmd);
+    leftServo.set(left_cmd);
+
+    //save our commanded position
+    wrist_cmd = degrees; 
+  }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-  }
-  //setting solenoid
-  public void openClaw(){
-    solenoid.set(OPEN);
-  }
-  public void closeClaw(){
-    solenoid.set(CLOSE);
-  }
-  //getting status of solenoid (open/close)
-  public Value clawStatus(){
-    return solenoid.get();
+    clawStatus();  
+    // check any lightgates
+
+    // TODO: 2/7/23 how do we know what game piece?  Work with HW guys see what they are thinking
   }
 
+  // setting solenoid  NOTE:2/7 don't need OpenClaw... there will be a Claw Object so it will read  claw.open() or claw.close() 
+  public void open() {
+    solenoid.set(OPEN);
+    is_open = true;
+  }
+
+  public void close() {
+    solenoid.set(CLOSE);
+    is_open = false;
+  }
+
+  public boolean isOpen() {
+    return is_open;
+  }
+
+  // getting status of solenoid (open/close)
+  // and keep the is_open flag up to date
+  // commands can use isOpen()
+  private Value clawStatus() {
+    var value = solenoid.get();
+    is_open = (value == OPEN);
+    return value;
+  }
 
   /**
    ******** NETWORK TABLES ***********
@@ -110,19 +142,18 @@ public void setServoPos(double Servo_position){
   NetworkTableEntry nt_servoPos;
   NetworkTableEntry nt_angle;
   NetworkTableEntry nt_isOpen;
-  NetworkTableEntry nt_gamePieceHeld;                         
+  NetworkTableEntry nt_gamePieceHeld;
 
-
-
-  public void ntcreate(){
-    nt_servoPos = table.getEntry("Servo Pos");
+  public void ntcreate() {
+    nt_servoPos = table.getEntry("wrist_cmd");
     nt_angle = table.getEntry("Current Angle");
     nt_isOpen = table.getEntry("Is Claw Open");
     nt_gamePieceHeld = table.getEntry("Game Piece Held");
   }
-  public void ntupdates(){
-    //info
-    nt_servoPos.setDouble(servo_position);
+
+  public void ntupdates() {
+    // info
+    nt_servoPos.setDouble(wrist_cmd);
     nt_angle.setDouble(getAngle());
     nt_isOpen.setBoolean(is_open);
     nt_gamePieceHeld.setString(piece_held.toString());

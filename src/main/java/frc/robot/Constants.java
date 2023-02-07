@@ -153,6 +153,11 @@ public final class Constants {
     public static final int INTAKE_DOWN_SOLENOID_PCM = 3; // test value
     public static final int POSITIONER_UP_SOLENOID_PCM = 0; // test value
     public static final int POSITIONER_DOWN_SOLENOID_PCM = 1; // test value
+    
+    //claw double Solenoid
+    public static final int CLAW_FWD = 4;
+    public static final int CLAW_REV = 5;
+
   }
 
   // if we use a second PCM
@@ -371,10 +376,9 @@ public final class Constants {
       public enum GamePieceHeld{
         Cube,Cone,Empty
       }
-     public static final int SOLENOID_FORWARD_CHANNEL = 1;
-     public static final int SOLENOID_REVERSE_CHANNEL = 2;
+    
      public static final int SOLENOID_MODULE = 1;
-     public static final int CLAW_WRIST_SERVO_PWM = 0;
+     
 
     }
 }
