@@ -24,7 +24,7 @@ import frc.robot.Constants.CAN;
 import frc.robot.Constants.NTStrings;
 import frc.robot.util.ModMath;
 
-public class Sensors_Subsystem extends SubsystemBase { 
+public class Sensors_Subsystem extends SubsystemBase {
   public enum YawSensor {
     kNavX, kPigeon
   };
@@ -66,6 +66,8 @@ public class Sensors_Subsystem extends SubsystemBase {
   
   double[] m_xyz_dps = new double[3];     //rotation rates [deg/s]
 
+  double[] m_xyz_dps = new double[3]; // rotation rates [deg/s]
+
   public static class RotationPositions {
     public double back_left;
     public double back_right;
@@ -80,10 +82,13 @@ public class Sensors_Subsystem extends SubsystemBase {
   public enum GyroStatus {
     UsingNavx("Navx"),
     UsingPigeon("Pigeon");
+
     private String name;
+
     private GyroStatus(String name) {
       this.name = name;
     }
+
     public String toString() {
       return name;
     }
@@ -123,13 +128,13 @@ public class Sensors_Subsystem extends SubsystemBase {
     m_canStatus = new CANStatus();
 
     // create devices and interface access, use interface where possible
-    //m_gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
-    //m_gyro_ahrs = m_ahrs = new AHRS(SPI.Port.kMXP, update_hz);
-    //m_ahrs.enableLogging(true);
+    // m_gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
+    // m_gyro_ahrs = m_ahrs = new AHRS(SPI.Port.kMXP, update_hz);
+    // m_ahrs.enableLogging(true);
 
     m_pigeon = new Pigeon2(CAN.PIGEON_IMU_CAN);
 
-    //set all the CanCoders to 100ms refresh rate to save the can bus
+    // set all the CanCoders to 100ms refresh rate to save the can bus
     rot_encoder_bl.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100, 100);
     rot_encoder_br.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100, 100);
     rot_encoder_fl.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100, 100);
@@ -157,9 +162,10 @@ public class Sensors_Subsystem extends SubsystemBase {
     //allow Sensors to calibrate in it's own thread
     new Thread(()->{
       try {
-        Thread.sleep(1000); //wait a second so gyro is done booting before calibrating.
+        Thread.sleep(1000); // wait a second so gyro is done booting before calibrating.
         calibrate();
-      } catch (Exception e){}
+      } catch (Exception e) {
+      }
     }).start();
 
     log(20);
@@ -224,8 +230,8 @@ public class Sensors_Subsystem extends SubsystemBase {
   public void reset() {
 
     // if (m_ahrs.isConnected()) {
-    //   m_ahrs.reset();
-    //   m_ahrs.resetDisplacement();
+    // m_ahrs.reset();
+    // m_ahrs.resetDisplacement();
     // }
 
   }
@@ -237,13 +243,13 @@ public class Sensors_Subsystem extends SubsystemBase {
   public double getPitch() {
       return m_pitch;
   }
-  
+
   public double getPitchRate() {
     return m_xyz_dps[1];
   }
 
   public double getRollRate() {
-    return  m_xyz_dps[0];
+    return m_xyz_dps[0];
   }
 
   public double getYawRate() {
@@ -264,8 +270,7 @@ public class Sensors_Subsystem extends SubsystemBase {
     // m_gyro_ahrs.close();
   }
 
-
-    /**
+  /**
    * Return the heading of the robot in degrees.
    *
    * <p>
@@ -297,19 +302,25 @@ public class Sensors_Subsystem extends SubsystemBase {
 /**
    * Return the heading of the robot as a {@link edu.wpi.first.math.geometry.Rotation2d}.
    *
-   * <p>The angle is continuous, that is it will continue from 360 to 361 degrees. This allows
-   * algorithms that wouldn't want to see a discontinuity in the gyro output as it sweeps past from
+   * <p>
+   * The angle is continuous, that is it will continue from 360 to 361 degrees.
+   * This allows
+   * algorithms that wouldn't want to see a discontinuity in the gyro output as it
+   * sweeps past from
    * 360 to 0 on the second time around.
    *
-   * <p>The angle is expected to increase as the gyro turns counterclockwise when looked at from the
+   * <p>
+   * The angle is expected to increase as the gyro turns counterclockwise when
+   * looked at from the
    * top. It needs to follow the NWU axis convention.
    *
-   * <p>This heading is based on integration of the returned rate from the gyro.
+   * <p>
+   * This heading is based on integration of the returned rate from the gyro.
    *
    * @return the current heading of the robot as a {@link
-   *     edu.wpi.first.math.geometry.Rotation2d}.
+   *         edu.wpi.first.math.geometry.Rotation2d}.
    */
-  //@Override
+  // @Override
   public Rotation2d getRotation2d() {
     return Rotation2d.fromDegrees(-m_yaw);  //note sign
   }
@@ -326,7 +337,7 @@ public class Sensors_Subsystem extends SubsystemBase {
    *
    * @return the current rate in degrees per second
    */
-  //@Override
+  // @Override
   public double getRate() {
         return m_yaw_d;
   }
@@ -358,49 +369,55 @@ public class Sensors_Subsystem extends SubsystemBase {
 
   /**
    * init() - setup cancoder the way we need them.
-   * @param c 
-   * @return  CANCoder just initialized
+   * 
+   * @param c
+   * @return CANCoder just initialized
    */
-  
+
   CANCoder init(CANCoder c) {
-    c.configFactoryDefault();   // defaults to deg 
+    c.configFactoryDefault(); // defaults to deg
     c.setPositionToAbsolute();
-	  c.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    c.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     c.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
     c.clearStickyFaults();
     return c;
   }
 
 
-  public void setAutoStartPose(Pose2d pose){
+  public void setAutoStartPose(Pose2d pose) {
     autoStartPose = new Pose2d(pose.getTranslation(), pose.getRotation());
-    setYaw(pose.getRotation()); //set gyro to starting heading so it's in field coordinates.
-    System.out.println("***Auto Start Pose set: "+pose);
+    setYaw(pose.getRotation()); // set gyro to starting heading so it's in field coordinates.
+    System.out.println("***Auto Start Pose set: " + pose);
   }
 
-  public void setAutoEndPose(Pose2d pose){
+  public void setAutoEndPose(Pose2d pose) {
     autoEndPose = new Pose2d(pose.getTranslation(), pose.getRotation());
-    
-    //expected difference in heading from start of auto to end
+
+    // expected difference in heading from start of auto to end
     Rotation2d autoRot = autoStartPose.getRotation().minus(autoEndPose.getRotation());
 
-    //gyro should power on at zero heading which would be our auto start position's heading.  So any angle off zero is the difference from start to end per the gyro
-    //not sure if this should be added or subtracted
+    // gyro should power on at zero heading which would be our auto start position's
+    // heading. So any angle off zero is the difference from start to end per the
+    // gyro
+    // not sure if this should be added or subtracted
     Rotation2d rotError = autoRot.minus(Rotation2d.fromDegrees(getYaw()));
 
-    System.out.println("***Auto End Pose set: "+pose);
+    System.out.println("***Auto End Pose set: " + pose);
     System.out.println("***Rotation difference per Pose: " + autoRot.getDegrees());
     System.out.println("***Rotation difference per Gyro: " + getYaw());
     System.out.println("***Difference: " + rotError.getDegrees());
 
-    /*Idea below for correcting pose angle
-    Since before we run each path we set our pose to the starting position,
-    it's possible that our "true" heading (as determined by gryo) is not exactly the starting heading of the new path.
-    The end of the prior path should be the start of the new path, but presumably the rotation is not perfectly aligned (PID errors)
-    So with multiple paths this rotation error in pose may accumulate?
-    */
-    //RobotContainer.RC().drivetrain.resetAnglePose(pose.getRotation().minus(rotError));
-    System.out.println("***Corrected End Pose: "+pose);
+    /*
+     * Idea below for correcting pose angle
+     * Since before we run each path we set our pose to the starting position,
+     * it's possible that our "true" heading (as determined by gryo) is not exactly
+     * the starting heading of the new path.
+     * The end of the prior path should be the start of the new path, but presumably
+     * the rotation is not perfectly aligned (PID errors)
+     * So with multiple paths this rotation error in pose may accumulate?
+     */
+    // RobotContainer.RC().drivetrain.resetAnglePose(pose.getRotation().minus(rotError));
+    System.out.println("***Corrected End Pose: " + pose);
 
   }
 
