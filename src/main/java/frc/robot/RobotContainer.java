@@ -12,6 +12,7 @@ import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.subsystems.ArmSS;
 import frc.robot.commands.swerve.FollowPPTrajectory;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
@@ -48,6 +49,8 @@ public class RobotContainer {
   public final SwerveDrivetrain drivetrain;
   public final Intake intake;
   public final HID_Xbox_Subsystem dc;           //short for driver controls
+  public final ArmSS armSS;
+
   // Note: we may replace HID_Xbox with CommandPS4Controller or CommandJoystick if needed
  
   /**
@@ -78,8 +81,8 @@ public class RobotContainer {
     sensors = new Sensors_Subsystem();
     drivetrain = new SwerveDrivetrain();
     drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
-  }
-
+    armSS = new ArmSS();
+    
     // Configure the trigger bindings
     configureBindings();
   }
