@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.subsystems.hid.SwitchboardController.SBButton;
 
+
 /**
  * HID_Subsystem - Human Input Device
  * 
@@ -44,6 +45,9 @@ import frc.robot.subsystems.hid.SwitchboardController.SBButton;
  * 
  */
 public class HID_Xbox_Subsystem extends SubsystemBase {
+
+
+
   /**
    * Creates a new HID_Subsystem.
    */
@@ -124,10 +128,9 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
     return DriverStation.getStickButtons(id.value);
   }
 
-  // accesors for our specific controllers to bind triggers 
-  public CommandXboxController Driver() {return driver; }
-  public CommandXboxController Operator() {return operator;}
-  public CommandSwitchboardController SwitchBoard() {return switchBoard; }
+  public CommandXboxController getDriver(){
+    return driver;
+  }
 
   /**
    * constructor of the implementing class.

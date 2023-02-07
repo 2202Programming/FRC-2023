@@ -23,10 +23,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
-import frc.robot.Constants.ChassisConfig;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.Constants.NTStrings;
-import frc.robot.Constants.WheelOffsets;
 import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
 import frc.robot.util.ModMath;
 import frc.robot.util.PoseMath;
@@ -46,10 +44,6 @@ public class SwerveDrivetrain extends SubsystemBase {
   boolean kAngleMotorInvert_Left = false;
   boolean kAngleCmdInvert_Left = false;
 
-  // cc is the chassis config for all our pathing math
-  private final ChassisConfig cc = RobotContainer.RC().robotSpecs.getChassisConfig();  //chassis config 
-  private final WheelOffsets  wc = RobotContainer.RC().robotSpecs.getWheelOffset();    //wc = wheel config
-
   /**
    *
    * Modules are in the order of - Front Left Front Right Back Left Back Right
@@ -59,16 +53,15 @@ public class SwerveDrivetrain extends SubsystemBase {
    * https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html#constructing-the-kinematics-object
    */
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-      new Translation2d(cc.XwheelOffset, cc.YwheelOffset),  // Front Left
-      new Translation2d(cc.XwheelOffset, -cc.YwheelOffset), // Front Right
-      new Translation2d(-cc.XwheelOffset, cc.YwheelOffset), // Back Left
-      new Translation2d(-cc.XwheelOffset, -cc.YwheelOffset) // Back Right
+      new Translation2d(RobotContainer.RC().m_robotSpecs.getChassisConfig().XwheelOffset, RobotContainer.RC().m_robotSpecs.getChassisConfig().YwheelOffset), // Front Left
+      new Translation2d(RobotContainer.RC().m_robotSpecs.getChassisConfig().XwheelOffset, -RobotContainer.RC().m_robotSpecs.getChassisConfig().YwheelOffset), // Front Right
+      new Translation2d(-RobotContainer.RC().m_robotSpecs.getChassisConfig().XwheelOffset, RobotContainer.RC().m_robotSpecs.getChassisConfig().YwheelOffset), // Back Left
+      new Translation2d(-RobotContainer.RC().m_robotSpecs.getChassisConfig().XwheelOffset, -RobotContainer.RC().m_robotSpecs.getChassisConfig().YwheelOffset) // Back Right
   );
   private SwerveDriveOdometry m_odometry;
   private Pose2d m_pose;
   private Pose2d old_pose;
-  // private SwerveModuleState[] cur_states;   //dpl this really isn't used???
-
+  private SwerveModuleState[] cur_states;
   private SwerveModuleState[] meas_states;   //measured wheel speed & angle
   private SwerveModulePosition[] meas_pos = new SwerveModulePosition[] {
     new SwerveModulePosition(),
@@ -130,23 +123,23 @@ public class SwerveDrivetrain extends SubsystemBase {
     modules = new SwerveModuleMK3[] {
         // Front Left
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_FL_DRIVE, MT), new CANSparkMax(CAN.DT_FL_ANGLE, MT),
-            wc.CC_FL_OFFSET, sensors.getCANCoder(EncoderID.FrontLeft), kAngleMotorInvert_Left,
+            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FL_OFFSET, sensors.getCANCoder(EncoderID.FrontLeft), kAngleMotorInvert_Left,
             kAngleCmdInvert_Left, kDriveMotorInvert_Left, "FL"),
         // Front Right
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_FR_DRIVE, MT), new CANSparkMax(CAN.DT_FR_ANGLE, MT),
-            wc.CC_FR_OFFSET, sensors.getCANCoder(EncoderID.FrontRight), kAngleMotorInvert_Right,
+            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FR_OFFSET, sensors.getCANCoder(EncoderID.FrontRight), kAngleMotorInvert_Right,
             kAngleCmdInvert_Right, kDriveMotorInvert_Right, "FR"),
         // Back Left
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_BL_DRIVE, MT), new CANSparkMax(CAN.DT_BL_ANGLE, MT),
-            wc.CC_BL_OFFSET, sensors.getCANCoder(EncoderID.BackLeft), kAngleMotorInvert_Left,
+            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BL_OFFSET, sensors.getCANCoder(EncoderID.BackLeft), kAngleMotorInvert_Left,
             kAngleCmdInvert_Left, kDriveMotorInvert_Left, "BL"),
         // Back Right
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT), new CANSparkMax(CAN.DT_BR_ANGLE, MT),
-            wc.CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight), kAngleMotorInvert_Right,
+            RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight), kAngleMotorInvert_Right,
             kAngleCmdInvert_Right, kDriveMotorInvert_Right, "BR") };
 
     m_odometry = new SwerveDriveOdometry(kinematics, sensors.getRotation2d(), meas_pos);
-    //cur_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
+    cur_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
     meas_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
 
     // for updating CAN status in periodic
@@ -188,16 +181,16 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   private void offsetDebug() {
     periodic(); //run to initialize module values
-    double offsetFL = wc.CC_FL_OFFSET;
+    double offsetFL = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FL_OFFSET;
     double measuredFL = modules[0].m_internalAngle;
 
-    double offsetFR = wc.CC_FR_OFFSET;
+    double offsetFR = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_FR_OFFSET;
     double measuredFR = modules[1].m_internalAngle;
 
-    double offsetBL = wc.CC_BL_OFFSET;
+    double offsetBL = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BL_OFFSET;
     double measuredBL = modules[2].m_internalAngle;
 
-    double offsetBR = wc.CC_BR_OFFSET;
+    double offsetBR = RobotContainer.RC().m_robotSpecs.getWheelOffset().CC_BR_OFFSET;
     double measuredBR = modules[3].m_internalAngle;
 
     System.out.println("================Offsets==================");
@@ -209,7 +202,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   }
 
   public void drive(SwerveModuleState[] states) {
-    //this.cur_states = states; //keep copy of commanded states so we can stop() withs 
+    this.cur_states = states; //keep copy of commanded states so we can stop() withs 
 
     //if any one wheel is above max obtainable speed, reduce them all in the same ratio to maintain control
     //SwerveDriveKinematics.desaturateWheelSpeeds(states, DriveTrain.kMaxSpeed);
