@@ -371,5 +371,9 @@ public final class Constants {
       public enum GamePieceHeld{
         Cube,Cone,Empty
       }
+     public static final int SOLENOID_FORWARD_CHANNEL = 1;
+     public static final int SOLENOID_REVERSE_CHANNEL = 2;
+     public static final int SOLENOID_MODULE = 1;
+
     }
 }
