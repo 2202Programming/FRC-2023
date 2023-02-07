@@ -7,14 +7,14 @@ package frc.robot.commands.EndAffector;
 
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Claw;
+import frc.robot.subsystems.Claw_Substyem;
 
 public class GamePieceAngle extends CommandBase {
-  final Claw claw;
+  final Claw_Substyem claw;
   final double angle;
   final String name;
   /** Creates a new GamePieceAngle. */
-  public GamePieceAngle(Claw claw, String name, double angle) {
+  public GamePieceAngle(Claw_Substyem claw, String name, double angle) {
     this.claw = claw;
     this.name = name;
     this.angle = angle;

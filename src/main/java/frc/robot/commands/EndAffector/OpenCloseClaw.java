@@ -7,13 +7,13 @@ package frc.robot.commands.EndAffector;
 
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Claw;
+import frc.robot.subsystems.Claw_Substyem;
 
 public class OpenCloseClaw extends CommandBase {
-  final Claw claw;
+  final Claw_Substyem claw;
   final String name;
   final double clawWidth;
-  public OpenCloseClaw(Claw claw, String name, double clawWidth) {
+  public OpenCloseClaw(Claw_Substyem claw, String name, double clawWidth) {
     this.claw = claw;
     this.name = name;
     this.clawWidth = clawWidth;

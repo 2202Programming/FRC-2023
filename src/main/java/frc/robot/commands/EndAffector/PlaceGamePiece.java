@@ -9,7 +9,7 @@ package frc.robot.commands.EndAffector;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.EndAffector.GamePieceAngle;
-import frc.robot.subsystems.Claw;
+import frc.robot.subsystems.Claw_Substyem;
 
 
 
@@ -17,11 +17,11 @@ public class PlaceGamePiece extends SequentialCommandGroup {
  
 
 
-  private Claw claw;
+  private Claw_Substyem claw;
 
 
 /** Creates a new PlaceGamePiece. */
-  public PlaceGamePiece(Claw claw) {
+  public PlaceGamePiece(Claw_Substyem claw) {
     super();
     //Don't know class name, claw for now, for the claw angle to place
     this.addCommands(
