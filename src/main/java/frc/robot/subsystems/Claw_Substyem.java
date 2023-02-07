@@ -39,8 +39,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
  // call 180 angle 0 and work from one way to the other - 0 wrist won't be 0 servo 
  //Eventually will need 2 solenoids 
 public class Claw_Substyem extends SubsystemBase {
-  private double current_angle;
-  private double desired_angle;
   private boolean is_open;
   private GamePieceHeld piece_held; 
   private double servo_position;
@@ -59,18 +57,25 @@ public class Claw_Substyem extends SubsystemBase {
   
   /** Creates a new Claw. */  
   public Claw_Substyem() {
-    //TODO Find out motor then update
+    //Creating the custom servo
     wristServo = new CustomServo(Claw.CLAW_WRIST_SERVO_PWM, WristMinDegrees, WristMaxDegrees, kServoMinPWM, kServoMaxPWM);
+        //TODO Find out motor then update
     piece_held = GamePieceHeld.Empty;
     
   }
-  
+  //getting the angles current position
 public double getAngle(){
   double current_pos = wristServo.getPosition() * wristServo.getServoRange() + wristServo.getMinServoAngle();
   return current_pos;
 }
-public void setAngle(double Desired_angle){
-wristServo.setAngle(Desired_angle);
+//Not sure if the part below is correct?
+public void setAngle(double desiredAngle){
+wristServo.setAngle(desiredAngle);
+ //drive wrist server here
+
+    // if it is a servo, we don't have a measure of the angle
+    // unless we do something tricky in the servo.
+    // if it is a motor, we need the pid and a sensor for angle, likely a POT
 }
 public double getServoPos(){
   return servo_position;
@@ -79,31 +84,19 @@ public void setServoPos(double Servo_position){
   this.servo_position = Servo_position;
 }
 
-  public double getCurrentAngle(){
-    return current_angle;
-  }
-  public double getDesiredAngle(){
-    return desired_angle;
-  }
-  public void setDesiredAngle(double Desired_angle){
-    this.desired_angle = Desired_angle;
-    //drive wrist server here
-
-    // if it is a servo, we don't have a measure of the angle
-    // unless we do something tricky in the servo.
-    // if it is a motor, we need the pid and a sensor for angle, likely a POT.
-  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
+  //setting solenoid
   public void openClaw(){
     solenoid.set(OPEN);
   }
   public void closeClaw(){
     solenoid.set(CLOSE);
   }
+  //getting status of solenoid (open/close)
   public Value clawStatus(){
     return solenoid.get();
   }
@@ -114,23 +107,23 @@ public void setServoPos(double Servo_position){
    */
   NetworkTable table = NetworkTableInstance.getDefault().getTable("Claw");
 
-  NetworkTableEntry nt_currentAngle;
-  NetworkTableEntry nt_desiredAngle;
+  NetworkTableEntry nt_servoPos;
+  NetworkTableEntry nt_angle;
   NetworkTableEntry nt_isOpen;
   NetworkTableEntry nt_gamePieceHeld;                         
 
 
 
   public void ntcreate(){
-    nt_currentAngle = table.getEntry("Current Angle");
-    nt_desiredAngle = table.getEntry("Desired Anngle");
+    nt_servoPos = table.getEntry("Servo Pos");
+    nt_angle = table.getEntry("Current Angle");
     nt_isOpen = table.getEntry("Is Claw Open");
     nt_gamePieceHeld = table.getEntry("Game Piece Held");
   }
   public void ntupdates(){
     //info
-    nt_currentAngle.setDouble(current_angle);
-    nt_desiredAngle.setDouble(desired_angle);
+    nt_servoPos.setDouble(servo_position);
+    nt_angle.setDouble(getAngle());
     nt_isOpen.setBoolean(is_open);
     nt_gamePieceHeld.setString(piece_held.toString());
 
