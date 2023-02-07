@@ -128,7 +128,10 @@ public final class Constants {
 
   // PWM assignments on the Rio
   public static final class PWM {
-    // dpl unused public static final int INTAKE = 0;
+    public static final int RIGHT_WRIST = 0;
+    public static final int LEFT_WRIST = 1;
+
+    //dpl unused public static final int INTAKE = 0;
   }
 
 
@@ -151,6 +154,11 @@ public final class Constants {
     public static final int INTAKE_DOWN_SOLENOID_PCM = 3; // test value
     public static final int POSITIONER_UP_SOLENOID_PCM = 0; // test value
     public static final int POSITIONER_DOWN_SOLENOID_PCM = 1; // test value
+    
+    //claw double Solenoid
+    public static final int CLAW_FWD = 4;
+    public static final int CLAW_REV = 5;
+
   }
 
   // if we use a second PCM
@@ -451,4 +459,24 @@ public final class Constants {
       public static final double GEAR_RATIO = 1; //TODO: Find actual gear ratio value
       
       }
+  
+      public enum DriverMode {
+        Arcade(0), Tank(1), XYRot(2);
+  
+        public final int value;
+  
+        DriverMode(int value) {
+          this.value = value;
+        }
+      }
+    }
+    public static final class Claw {
+      public enum GamePieceHeld{
+        Cube,Cone,Empty
+      }
+    
+     public static final int SOLENOID_MODULE = 1;
+     
+
+    }
 }
