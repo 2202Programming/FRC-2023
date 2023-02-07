@@ -5,29 +5,27 @@
 package frc.robot;
 
 import com.pathplanner.lib.PathConstraints;
-import frc.robot.Constants.DriverControls.Id;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Constants.Intake;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.swerve.ChargeStationBalance;
-import frc.robot.Constants.Intake;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.FollowPPTrajectory;
 import frc.robot.subsystems.ArmSS;
+import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
-import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.util.RobotSpecs.RobotNames;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -39,91 +37,68 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  static RobotContainer rc;       
-  //singleton accessor for robot public sub-systems
-  public static RobotContainer RC() {  return rc;  }
+  static RobotContainer rc;
 
-  //Sub-systems 
-  public final RobotSpecs robotSpecs;
-  public final Sensors_Subsystem sensors;
-  public final SwerveDrivetrain drivetrain;
-  public final Intake intake;
-  public final HID_Xbox_Subsystem dc;           //short for driver controls
-  public final PhotonVision photonVision;
-  public final ArmSS armSS;
-
-  public RobotSpecs m_robotSpecs;
-  public Sensors_Subsystem sensors = null;
-  public SwerveDrivetrain drivetrain = null;
-  public PhotonVision photonVision;
-  public Limelight_Subsystem limelight;
-
-  public static RobotContainer RC() { //bad practice probably but super convenient.
+  // singleton accessor for robot public sub-systems
+  public static RobotContainer RC() {
     return rc;
   }
 
+  // Sub-systems
+  public final RobotSpecs robotSpecs;
+  public final Sensors_Subsystem sensors; 
+  public Limelight_Subsystem limelight;
+  public final SwerveDrivetrain drivetrain;
+  public final Intake intake;
+  public final HID_Xbox_Subsystem dc; // short for driver controls
+  public final PhotonVision photonVision;
+  public final ArmSS armSS;
+  public final Claw_Substyem claw;
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  public final HID_Xbox_Subsystem m_driverController =
-      new HID_Xbox_Subsystem(0.3,0.9,0.05);
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**Z
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
-    RobotContainer.rc = this;         //for singleton accesor
+    RobotContainer.rc = this; // for singleton accesor
 
-    //initialize all the sub-systems
-    robotSpecs = new RobotSpecs(System.getenv("serialnum")); // mechanism to pull different specs based on roborio                                                               
-    dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05);   //TODO: deal with driver prefs
+    // initialize all the sub-systems
+    robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio
+    dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05); // TODO: deal with driver prefs
 
     // these can get created on any hardware setup
     sensors = new Sensors_Subsystem();
     intake = new Intake();
     drivetrain = new SwerveDrivetrain();
     photonVision = new PhotonVision();
-    drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
     armSS = new ArmSS();
-    
+    claw = new Claw_Substyem();
+
+    // set default commands
+    drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
+
     // Configure the trigger bindings
     configureBindings();
   }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be
-   * created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-   * an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-   * {@link
-   * CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
+
+  //TODO: FIGURE OUT A WAY TO HANDLE DIFFERENT TEMPORARY BUTTON BINDINGS
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    // new Trigger(mySubsystem::exampleCondition).onTrue(new ExampleCommand(mySubsystem));
-    //
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is
-    // pressed, cancelling on release.
-    //    dc.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    // X button to change LL pipeline
+    dc.Driver().x().onTrue(new InstantCommand(() -> {
+      limelight.togglePipeline();
+    }));
 
-    //X button to change LL pipeline
-    m_driverController.getDriver().x().onTrue(new InstantCommand(()->{limelight.togglePipeline();}));
-
-    if (m_robotSpecs.myRobotName != RobotNames.BotOnBoard){
-    //Y button to reset current facing to zero
-    m_driverController.getDriver().y().whileTrue(new InstantCommand(()->{drivetrain.resetAnglePose(new Rotation2d(0));}));
-    m_driverController.getDriver().a().whileTrue(new CenterTapeYaw());
-    m_driverController.getDriver().b().whileTrue(new CenterTapeSkew());
-    m_driverController.getDriver().x().whileTrue(new CenterTapeYawSkew());
+    if (robotSpecs.myRobotName != RobotNames.BotOnBoard) {
+      // Y button to reset current facing to zero
+      dc.Driver().y().whileTrue(new InstantCommand(() -> {
+        drivetrain.resetAnglePose(new Rotation2d(0));
+      }));
+      dc.Driver().a().whileTrue(new CenterTapeYaw());
+      dc.Driver().b().whileTrue(new CenterTapeSkew());
+      dc.Driver().x().whileTrue(new CenterTapeYawSkew());
     }
-
 
     // Y button to reset current facing to zero
     dc.Driver().y().whileTrue(new InstantCommand(() -> {
@@ -140,12 +115,10 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return 
-    //null;
-    new FollowPPTrajectory(FollowPPTrajectory.pathFactoryTele(new PathConstraints(1, 1), 
-                                                              new Pose2d(drivetrain.getPose().getX() + 1, 
-                                                                          drivetrain.getPose().getY() + 1, 
-                                                                          new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))), 
-                                                                          true);
+    return new FollowPPTrajectory(FollowPPTrajectory.pathFactoryTele(new PathConstraints(1, 1),
+        new Pose2d(drivetrain.getPose().getX() + 1,
+            drivetrain.getPose().getY() + 1,
+            new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))),
+        true);
   }
 }

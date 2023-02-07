@@ -36,6 +36,11 @@ public class RobotSpecs {
     private ChassisConfig myChassisConfig;
     private SubsystemConfig mySubsystemConfig;
 
+
+    public RobotSpecs() {
+        this(System.getenv("serialnum"));
+    }
+    
     public RobotSpecs(String serialNo){
         myRobotName = getRobotName(serialNo);
 
@@ -57,6 +62,10 @@ public class RobotSpecs {
                 myChassisConfig = Constants.DriveTrain.swerveBotChassisConfig;
                 mySubsystemConfig = Constants.swerveBotSubsystemConfig;
                 System.out.println("***ERROR, bot serial unknown. Using SwerveBot Config***");
+                break;
+            case BotOnBoard:
+                break;
+            default:
                 break;
         }
     }

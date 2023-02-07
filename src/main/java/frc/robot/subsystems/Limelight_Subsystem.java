@@ -18,7 +18,6 @@ public class Limelight_Subsystem extends SubsystemBase {
 
   private NetworkTable table;
   private NetworkTable outputTable;
-  private NetworkTable shooterTable;
   private NetworkTableEntry tx;
   private NetworkTableEntry ty;
   private NetworkTableEntry ta;
@@ -29,7 +28,7 @@ public class Limelight_Subsystem extends SubsystemBase {
 
   private NetworkTableEntry outputTx;
   private NetworkTableEntry outputTv;
-  private NetworkTableEntry pipeline;
+  private NetworkTableEntry pipelineNTE;
 
   private NetworkTableEntry nt_botpose;
 
@@ -41,15 +40,25 @@ public class Limelight_Subsystem extends SubsystemBase {
   private boolean ledStatus; // true = ON
   private double filteredArea;
 
+  //botpose index keys
+  static final int X=0;
+  static final int Y=1;
+  static final int Z=2;
+  static final int RX=3;
+  static final int RY=4;
+  static final int RZ=5;
+
   private double[] botpose;
+  /* DPL -  see code below delete this if it works as expected
   private double botpose_x;
   private double botpose_y;
   private double botpose_z;
   private double botpose_rx;
   private double botpose_ry;
   private double botpose_rz;
-  private double m_pipeline;
-
+  */
+  private long pipeline;
+  
   private LinearFilter x_iir;
   private LinearFilter area_iir;
   public final String NT_Name = "DT"; // expose data under DriveTrain table
@@ -62,19 +71,16 @@ public class Limelight_Subsystem extends SubsystemBase {
     area_iir = LinearFilter.singlePoleIIR(filterTC, Constants.Tperiod);
     table = NetworkTableInstance.getDefault().getTable("limelight");
     outputTable = NetworkTableInstance.getDefault().getTable(NT_Name);
-    shooterTable = NetworkTableInstance.getDefault().getTable(NT_Shooter_Name);
-
+    
     tx = table.getEntry("tx"); // -27 degrees to 27 degrees
     ty = table.getEntry("ty"); // -20.5 to 20.5 degrees
     ta = table.getEntry("ta");
     tv = table.getEntry("tv"); // target validity (1 or 0)
     leds = table.getEntry("ledMode");
     booleanLeds = table.getEntry("booleanLeds");
-    pipeline = table.getEntry("pipeline");
+    pipelineNTE = table.getEntry("pipeline");
 
     nt_botpose = table.getEntry("botpose");
-
-    NT_hasTarget = shooterTable.getEntry("LL_Has_Target");
 
     outputTv = outputTable.getEntry("Limelight Valid");
     outputTx = outputTable.getEntry("Limelight X error");
@@ -93,26 +99,30 @@ public class Limelight_Subsystem extends SubsystemBase {
     filteredX = x_iir.calculate(x);
     filteredArea = area_iir.calculate(area);
     ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
-    m_pipeline = pipeline.getDouble(0);
+    pipeline = pipelineNTE.getInteger(0);  
 
     botpose = nt_botpose.getDoubleArray(new double[]{0,0,0,0,0,0});
-    if (botpose.length > 0) {
-    botpose_x = botpose[0];
-    botpose_y = botpose[1];
-    botpose_z = botpose[2];
-    botpose_rx = botpose[3];
-    botpose_ry = botpose[4];
-    botpose_rz = botpose[5];
 
+
+    if (botpose.length > 0) {
+    /* DPL - this should be the same without the copy
+    botpose_x = botpose[X];
+    botpose_y = botpose[Y];
+    botpose_z = botpose[Z];
+    botpose_rx = botpose[RX];
+    botpose_ry = botpose[RY];
+    botpose_rz = botpose[RZ];
+    */
     //NOTE: LL gives position from the center of the field!  Need to transform to the standard of 0,0 at lower left
 
-    botpose_x += 8.270458; //add 1/2 field X dimension in meters
-    botpose_y += 4.008216; //add 1/2 field Y dimension in meters
-    }
+    botpose[X] += 8.270458; //add 1/2 field X dimension in meters
+    botpose[Y] += 4.008216; //add 1/2 field Y dimension in meters
+    
 
-    SmartDashboard.putNumber("LL botpose X", botpose_x);
-    SmartDashboard.putNumber("LL botpose Y", botpose_y);
-    SmartDashboard.putNumber("LL botpose Z", botpose_z);
+    SmartDashboard.putNumber("LL botpose X", botpose[X]);
+    SmartDashboard.putNumber("LL botpose Y", botpose[Y]);
+    SmartDashboard.putNumber("LL botpose Z", botpose[Z]);
+    }
     SmartDashboard.putNumber("LL X error", x);
 
   }
@@ -178,8 +188,8 @@ public class Limelight_Subsystem extends SubsystemBase {
 
   }
 
-  public void setPipeline(double pipe){
-    pipeline.setDouble(pipe);
+  public void setPipeline(int pipe){
+    pipelineNTE.setInteger(pipe);   //dpl these looked like ints, not doubles
     if(pipe == 1){
       enableLED();
     }
@@ -188,15 +198,20 @@ public class Limelight_Subsystem extends SubsystemBase {
 
   //switch between pipeline 0 and 1
   public void togglePipeline(){
-    double pipe = pipeline.getDouble(0.0);
+    long pipe = pipelineNTE.getInteger(0);
     if (pipe == 0){
-      setPipeline(1.0);
+      setPipeline(1);
+      pipeline = 1;
     }
     else {
-      setPipeline(0.0);
+      setPipeline(0);
+      pipeline = 0;
     }
   }
 
+  public long getPipeline() {
+    return pipeline;
+  }
   public boolean valid() {
     return target;
   }

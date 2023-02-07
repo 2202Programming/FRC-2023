@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.Claw.GamePieceHeld;
 import frc.robot.Constants.PCM1;
 
 /*
@@ -46,7 +45,13 @@ import frc.robot.Constants.PCM1;
 //Eventually will need 2 solenoids 
 public class Claw_Substyem extends SubsystemBase {
 
+   public enum GamePieceHeld{  //TODO how do we know???
+        Cube,Cone,Empty
+      }
+    
+
   // constants/statics
+  static final double KSevoSpd = 5.0;    // [deg/s] time to wait for a move of the wrist
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
   static final double WristMinDegrees = -90.0; // TODO: Find actual value
@@ -100,7 +105,28 @@ public class Claw_Substyem extends SubsystemBase {
 
     //save our commanded position
     wrist_cmd = degrees; 
+
+    //TODO handle a timer to know if we are at position...
+
   }
+
+  public boolean atAngle() {
+    //TODO: 2/7/23 need to figure out tollerance for when at position
+
+    return false;
+  }
+
+  /*
+   * waitEstimate(degrees) -
+   * creates an estimate in seconds that it will take the wrist to move from
+   * where we are to where we want...  This might be needed if we can't actually
+   * measure the servo's position.   (PWM is really a one-way street) 
+   */
+  public double waitEstimate(double degrees) {
+    return Math.abs(degrees - wrist_cmd)*KSevoSpd;
+  }
+
+
 
   @Override
   public void periodic() {
