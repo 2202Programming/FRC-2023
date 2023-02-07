@@ -4,12 +4,15 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.PathConstraints;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
+import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.Constants.Intake;
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.commands.swerve.FollowPPTrajectory;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
@@ -17,6 +20,7 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
+import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.util.RobotSpecs.RobotNames;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -125,6 +129,8 @@ public class RobotContainer {
     dc.Driver().y().whileTrue(new InstantCommand(() -> {
       drivetrain.resetAnglePose(new Rotation2d(0));
     }));
+
+    dc.Driver().x().whileTrue(new ChargeStationBalance(false));
   }
 
   /**
@@ -134,6 +140,12 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return 
+    //null;
+    new FollowPPTrajectory(FollowPPTrajectory.pathFactoryTele(new PathConstraints(1, 1), 
+                                                              new Pose2d(drivetrain.getPose().getX() + 1, 
+                                                                          drivetrain.getPose().getY() + 1, 
+                                                                          new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))), 
+                                                                          true);
   }
 }
