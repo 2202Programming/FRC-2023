@@ -8,10 +8,11 @@ package frc.robot.subsystems;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.Claw.GamePieceHeld;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-
+import frc.robot.util.CustomServo;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -48,20 +49,28 @@ public class Claw_Substyem extends SubsystemBase {
   Servo leftServo = new Servo(1);
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
+  public final double WristMinDegrees = -90.0; //TODO: Find actual value
+  public final double WristMaxDegrees = 90.0; //TODO: Find actual value
+  public final double kServoMinPWM = 0.1; //TODO: Find actual value
+  public final double kServoMaxPWM = 0.5; //TODO: Find actual value
+  protected CustomServo wristServo;
   
 
   
-  /** Creates a new Claw. */
+  /** Creates a new Claw. */  
   public Claw_Substyem() {
     //TODO Find out motor then update
+    wristServo = new CustomServo(Claw.CLAW_WRIST_SERVO_PWM, WristMinDegrees, WristMaxDegrees, kServoMinPWM, kServoMaxPWM);
     piece_held = GamePieceHeld.Empty;
+    
   }
+  
 public double getAngle(){
-  solenoid.set(null);
-  return desired_angle;
+  double current_pos = wristServo.getPosition() * wristServo.getServoRange() + wristServo.getMinServoAngle();
+  return current_pos;
 }
 public void setAngle(double Desired_angle){
-  this.desired_angle = Desired_angle;
+wristServo.setAngle(Desired_angle);
 }
 public double getServoPos(){
   return servo_position;
@@ -89,13 +98,13 @@ public void setServoPos(double Servo_position){
   public void periodic() {
     // This method will be called once per scheduler run
   }
-  public void open(){
+  public void openClaw(){
     solenoid.set(OPEN);
   }
-  public void close(){
+  public void closeClaw(){
     solenoid.set(CLOSE);
   }
-  public Value isOpen(){
+  public Value clawStatus(){
     return solenoid.get();
   }
 
