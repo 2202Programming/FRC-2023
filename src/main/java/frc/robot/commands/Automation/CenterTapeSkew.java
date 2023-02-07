@@ -4,8 +4,6 @@
 
 package frc.robot.commands.Automation;
 
-import java.nio.file.DirectoryStream.Filter;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -18,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.SwerveDrivetrain;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 //translates robot to get both reflective tape targets aligned to same yaw
 

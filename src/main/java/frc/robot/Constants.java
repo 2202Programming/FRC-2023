@@ -137,10 +137,7 @@ public final class Constants {
 
   // Digital IO on the RIO
   public static final class DigitalIO {
-    public static final int INTAKE_GATE = 0;
-    public static final int MAGAZINE_GATE1 = 1;
-    public static final int MAGAZINE_GATE2 = 2;
-    public static final int MAGAZINE_GATE3 = 3;
+    
   }
 
   public static final class AnalogIn {
@@ -174,38 +171,6 @@ public final class Constants {
 
   public static final class ArmSettings {
 
-  }
-
-  public static final class ClimbSettings {
-    // Hardware Controller constants for velocity and position modes, each gets hw
-    // slot
-    public static PIDFController rotatePID_vel = new PIDFController(0.0006, 0.00001, 0.1, 0.00384); // [deg/s] - slot 0
-    public static PIDFController rotatePID_pos = new PIDFController(0.00, 0.00, 0.00, 0.00384); // [deg] - slot 1
-    public static PIDFController extendPID_vel = new PIDFController(0.015, 0.00019, 0.08, 0.08); // [in/s] - slot 0
-    public static PIDFController extendPID_pos = new PIDFController(0.05, 0.0, 0.0, 0.0); // [in] - slot 1
-
-    // ext pid ki was .00015
-
-    // Position/vel tolerance for outer position loops
-    public static final double TOLERANCE_EXT = .30; // [in]
-    public static final double TOLERANCE_EXT_VEL = 0.18; // [in/s]
-    public static final double TOLERANCE_ROT = 2.0; // [deg]
-    public static final double TOLERANCE_ROT_RATE = 3.0; // [deg/s]
-
-    // limit integrator windup (default =1.0)
-    public static final double ROT_INTEGRATOR_MIN = 0.0; // [deg/s]
-    public static final double ROT_INTEGRATOR_MAX = 5.0; // [deg/s]
-
-    // Software outer loop rate limits
-    public static final double MAX_VELOCITY_EXT = 10; // [in/s] 100% DutyCycle at 13.5
-    public static final double MAX_VELOCITY_ROT = 40; // [deg/s]
-
-    // SmartCurrent limit for brushless
-    public static final int MAX_EXT_AMPS = 25;
-    public static final int MAX_ROT_AMPS = 25;
-
-    // max angle delta before kill
-    public static final double KILL_COUNT = 30;
   }
 
   // Intake Constants
@@ -455,10 +420,7 @@ public final class Constants {
       return armLength;
     }
   }
-    public static final class Claw {
-      public static final double GEAR_RATIO = 1; //TODO: Find actual gear ratio value
-      
-      }
+    
   
       public enum DriverMode {
         Arcade(0), Tank(1), XYRot(2);
@@ -470,13 +432,7 @@ public final class Constants {
         }
       }
     }
-    public static final class Claw {
-      public enum GamePieceHeld{
-        Cube,Cone,Empty
-      }
-    
-     public static final int SOLENOID_MODULE = 1;
+   
      
-
-    }
-}
+   
+  

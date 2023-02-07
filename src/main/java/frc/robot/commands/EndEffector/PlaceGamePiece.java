@@ -4,54 +4,33 @@
 */
 package frc.robot.commands.EndEffector;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.EndEffector.GamePieceAngle;
+import frc.robot.subsystems.Claw_Substyem;
 
 
 public class PlaceGamePiece extends SequentialCommandGroup {
   
+  final Claw_Substyem claw;
 
   /** Creates a new PlaceGamePiece. */
-  public PlaceGamePiece(Claw claw) {
+  public PlaceGamePiece(Claw_Substyem claw) {
  
     //Don't know class name, claw for now, for the claw angle to place
     this.addCommands(
       //Angles obv. not accurate, just put in random numbers
-      new GamePieceAngle(claw, "nonbottomgrid", 50.0),
-      new GamePieceAngle(claw, "bottomgrid", 30.0),
-      new GamePieceAngle(claw, "grab", 25.0),
-      new OpenCloseClaw(claw, "closedclaw", 0.0),
-      new OpenCloseClaw(claw, "cubepick-up", 2.5),
-      new OpenCloseClaw(claw, "conepick-up", 2.0) 
+      new GamePieceAngle("nonbottomgrid", 50.0),
+      new GamePieceAngle("bottomgrid", 30.0),
+      new GamePieceAngle("grab", 25.0)
+      /*
+
+      Mr.L - these open/close will happen very fast, what is the intent?
+      new OpenCloseClaw("closedclaw", 0.0),
+      new OpenCloseClaw("cubepick-up", 2.5),
+      new OpenCloseClaw("conepick-up", 2.0) 
+      */
     );
     this.claw = claw;
 
   }
 
-  public void operateClaw(){
-    //Change angle of claw to what's needed
-    //TODO change currAngle/adjustAngle to actual variable names when known
-
-  }  
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {}
-
-  // Called every time the scheduler runs while the command is scheduled. 
-  @Override
-  public void execute() {}
-
-  //If interrupted, open the claw
-  @Override
-  public void end(boolean interrupted) {
-
-  }
-
-  //Assuming default is open, if claw doesn't need to be closed, close the claw
-  @Override
-  public boolean isFinished() {
- 
-    return super.isFinished();
-  }
 }

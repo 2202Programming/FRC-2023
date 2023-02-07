@@ -36,6 +36,11 @@ public class RobotSpecs {
     private ChassisConfig myChassisConfig;
     private SubsystemConfig mySubsystemConfig;
 
+
+    public RobotSpecs() {
+        this(System.getenv("serialnum"));
+    }
+    
     public RobotSpecs(String serialNo){
         myRobotName = getRobotName(serialNo);
 

@@ -5,14 +5,16 @@
 package frc.robot.commands.EndEffector;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.Claw_Substyem;
 
 public class GamePieceAngle extends CommandBase {
-  final Claw claw;
+  final Claw_Substyem claw;
   final double angle;
   final String name;
   /** Creates a new GamePieceAngle. */
-  public GamePieceAngle(Claw claw, String name, double angle) {
-    this.claw = claw;
+  public GamePieceAngle(String name, double angle) {
+    this.claw = RobotContainer.RC().claw;
     this.name = name;
     this.angle = angle;
     
@@ -23,7 +25,7 @@ public class GamePieceAngle extends CommandBase {
   @Override
   public void initialize() {
     claw.setAngle(angle);
-    System.out.println("Moving to" + angle);
+    //System.out.println("Moving to" + angle);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -34,13 +36,14 @@ public class GamePieceAngle extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     //0.0 or whatever is default
-    claw.setAngle(0.0);
+    //Mr.L don't chance position at end we jsut got here, next command may need something else
+    // claw.setAngle(0.0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     //when claw is at desired angle
-    return claw.correctAngle;
+    return claw.atAngle();
   }
 }
