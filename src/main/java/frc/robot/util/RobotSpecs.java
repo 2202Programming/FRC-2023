@@ -18,7 +18,8 @@ public class RobotSpecs {
     public enum RobotNames {
         SwerveBot("SwerveBot"), 
         CompetitionBot("CompetitionBot"),
-        UnknownBot("UnknownBot");
+        UnknownBot("UnknownBot"),
+        BotOnBoard("BotOnBoard");
         String name;
     
         private RobotNames(String name) {
@@ -30,7 +31,7 @@ public class RobotSpecs {
         }
       }
     
-    private RobotNames myRobotName;
+    public RobotNames myRobotName;
     private WheelOffsets myWheelOffsets;
     private ChassisConfig myChassisConfig;
     private SubsystemConfig mySubsystemConfig;
@@ -83,6 +84,8 @@ public class RobotSpecs {
         tempRobotName = RobotNames.SwerveBot;
     else if (serialNo.compareTo("03238151")==0)
         tempRobotName = RobotNames.CompetitionBot;
+    else if (serialNo.compareTo("0312db1a")==0)
+        tempRobotName = RobotNames.BotOnBoard;
     else tempRobotName = RobotNames.UnknownBot;
 
     System.out.println("***RoboRio SERIAL NUM: " + serialNo);

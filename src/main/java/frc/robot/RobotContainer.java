@@ -4,17 +4,24 @@
 
 package frc.robot;
 
+import frc.robot.Constants.DriverControls.Id;
+import frc.robot.commands.Automation.CenterTapeSkew;
+import frc.robot.commands.Automation.CenterTapeYaw;
+import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.Constants.Intake;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.ArmSS;
+import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
+import frc.robot.util.RobotSpecs.RobotNames;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -41,12 +48,22 @@ public class RobotContainer {
   public final PhotonVision photonVision;
   public final ArmSS armSS;
 
-  // Note: we may replace HID_Xbox with CommandPS4Controller or CommandJoystick if needed
- 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
- 
+  public RobotSpecs m_robotSpecs;
+  public Sensors_Subsystem sensors = null;
+  public SwerveDrivetrain drivetrain = null;
+  public PhotonVision photonVision;
+  public Limelight_Subsystem limelight;
+
+  public static RobotContainer RC() { //bad practice probably but super convenient.
+    return rc;
+  }
+
+
+  // Replace with CommandPS4Controller or CommandJoystick if needed
+  public final HID_Xbox_Subsystem m_driverController =
+      new HID_Xbox_Subsystem(0.3,0.9,0.05);
+
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     RobotContainer.rc = this;         //for singleton accesor
 
@@ -87,6 +104,22 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is
     // pressed, cancelling on release.
     //    dc.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+
+    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+
+    //X button to change LL pipeline
+    m_driverController.getDriver().x().onTrue(new InstantCommand(()->{limelight.togglePipeline();}));
+
+    if (m_robotSpecs.myRobotName != RobotNames.BotOnBoard){
+    //Y button to reset current facing to zero
+    m_driverController.getDriver().y().whileTrue(new InstantCommand(()->{drivetrain.resetAnglePose(new Rotation2d(0));}));
+    m_driverController.getDriver().a().whileTrue(new CenterTapeYaw());
+    m_driverController.getDriver().b().whileTrue(new CenterTapeSkew());
+    m_driverController.getDriver().x().whileTrue(new CenterTapeYawSkew());
+    }
+
 
     // Y button to reset current facing to zero
     dc.Driver().y().whileTrue(new InstantCommand(() -> {

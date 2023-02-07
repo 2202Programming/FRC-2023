@@ -6,48 +6,34 @@ package frc.robot.subsystems;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
 import org.photonvision.PhotonCamera;
 import org.photonvision.RobotPoseEstimator;
 import org.photonvision.RobotPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class PhotonVision extends SubsystemBase {
-  /** Creates a new PhotonVision. */
 
-  // private NetworkTable table;
-  // private NetworkTableEntry targetPixelsX;
-  // private NetworkTableEntry targetPixelsY;
-  // private NetworkTableEntry targetPixelsArea;
-  // private NetworkTableEntry hasTarget;
-  
-  // private double m_targetPixelsX;
-  // private double m_targetPixelsY;
-  // private double m_targetPixelsArea;
-  // private boolean m_hasTarget;
-
-  private PhotonCamera camera;
-  private boolean hasTargets;
-  private List<PhotonTrackedTarget> targets;
+  private PhotonCamera camera_global;
+  private PhotonCamera camera_microsoft;
+  private boolean hasAprilTargets;
+  private boolean hasTapeTargets;
+  private List<PhotonTrackedTarget> AprilTargets;
+  private List<PhotonTrackedTarget> TapeTargets;
   private PhotonTrackedTarget bestTarget;
   private double yaw;
   private double pitch;
@@ -66,11 +52,6 @@ public class PhotonVision extends SubsystemBase {
   private Pose2d previousPoseEstimate = new Pose2d();
 
   public PhotonVision() {
-    // table = NetworkTableInstance.getDefault().getTable("photonvision");
-    // targetPixelsX = table.getEntry("Global_Shutter_Camera/targetPixelsX");
-    // targetPixelsY = table.getEntry("Global_Shutter_Camera/targetPixelsY");
-    // targetPixelsArea = table.getEntry("Global_Shutter_Camera/targetArea");
-    // hasTarget = table.getEntry("Global_Shutter_Camera/hasTarget");
 
     //build path to apriltag json file in deploy directory
     File deploy = Filesystem.getDeployDirectory();
@@ -84,59 +65,28 @@ public class PhotonVision extends SubsystemBase {
     };
 
     // Assemble the list of cameras & mount locations
-    camera = new PhotonCamera("Global_Shutter_Camera");
-    robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+    camera_global = new PhotonCamera("Global_Shutter_Camera");
+    camera_microsoft = new PhotonCamera("Microsoft_LifeCam_HD-3000");
+    robotToCam = new Transform3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d(0,0,0)); //Cam mounted facing forward
     var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
-    camList.add(new Pair<PhotonCamera, Transform3d>(camera, robotToCam));
-    robotPoseEstimator = new RobotPoseEstimator(fieldLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, camList);
-    
-  
-    // Query the latest result from PhotonVision
-    var result = camera.getLatestResult();
-
+    camList.add(new Pair<PhotonCamera, Transform3d>(camera_global, robotToCam));
+    robotPoseEstimator = new RobotPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, camList);
   }
-
-      /**
-     * @param estimatedRobotPose The current best guess at robot pose
-     * @return A pair of the fused camera observations to a single Pose2d on the field, and the time
-     *     of the observation. Assumes a planar field and the robot is always firmly on the ground
-     */
-  public Pair<Pose2d, Double> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-    robotPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-
-    double currentTime = Timer.getFPGATimestamp();
-    Optional<Pair<Pose3d, Double>> result = robotPoseEstimator.update();
-    if (result.isPresent()) {
-        return new Pair<Pose2d, Double>(result.get().getFirst().toPose2d(), currentTime - result.get().getSecond());
-    } else {
-        return new Pair<Pose2d, Double>(null, 0.0);
-    }
-}
-
+  
   @Override
   public void periodic() {
-    // // This method will be called once per scheduler run
-    // m_targetPixelsX = targetPixelsX.getDouble(0);
-    // m_targetPixelsY = targetPixelsY.getDouble(0);
-    // m_targetPixelsArea = targetPixelsArea.getDouble(0);
-    // m_hasTarget = hasTarget.getBoolean(false);
 
-    // SmartDashboard.putNumber("targetX", m_targetPixelsX);
-    // SmartDashboard.putNumber("targetY", m_targetPixelsY);
-    // SmartDashboard.putNumber("targetArea", m_targetPixelsArea);
-    // SmartDashboard.putBoolean("hasTarget", m_hasTarget);
-
-    // Query the latest result from PhotonVision
-    var result = camera.getLatestResult();
+    // Query the latest Apriltag result from PhotonVision
+    var result_global = camera_global.getLatestResult();
 
     // Check if the latest result has any targets.
-    hasTargets = result.hasTargets(); 
+    hasAprilTargets = result_global.hasTargets(); 
     
-    if(hasTargets) {
+    if(hasAprilTargets) {
       // Get a list of currently tracked targets.
-      targets = result.getTargets();
+      AprilTargets = result_global.getTargets();
       // Get the current best target.
-      bestTarget = result.getBestTarget();
+      bestTarget = result_global.getBestTarget();
 
       // Get information from target.
       yaw = bestTarget.getYaw();
@@ -148,24 +98,92 @@ public class PhotonVision extends SubsystemBase {
 
       // Get information from target.
       targetID = bestTarget.getFiducialId();
-      double poseAmbiguity = bestTarget.getPoseAmbiguity();
-      Transform3d bestCameraToTarget = bestTarget.getBestCameraToTarget();
-      Transform3d alternateCameraToTarget = bestTarget.getAlternateCameraToTarget();
-
       previousPoseEstimate = currentPoseEstimate;
       currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate).getFirst();
-
     }    
     
+    SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getX());
+    SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getY());
+    
+    // Query the latest Retroreflective result from PhotonVision
+    var result_microsoft = camera_microsoft.getLatestResult();
 
-    SmartDashboard.putBoolean("hasTargets", hasTargets);
-    SmartDashboard.putNumber("yaw", yaw);
-    SmartDashboard.putNumber("pitch", pitch);
-    SmartDashboard.putNumber("area", area);
-    SmartDashboard.putNumber("skew", skew);
-    SmartDashboard.putNumber("targetID", targetID);
-    SmartDashboard.putNumber("Estimated Pose X", currentPoseEstimate.getX());
-    SmartDashboard.putNumber("Estimated Pose Y", currentPoseEstimate.getY());
+    // Check if the latest result has any targets.
+    hasTapeTargets = result_microsoft.hasTargets(); 
+    
+    if(hasTapeTargets) {
+      // Get a list of currently tracked targets.
+      TapeTargets = result_microsoft.getTargets();
+      // Get the current best target.
+      bestTarget = result_microsoft.getBestTarget();
 
+      // Get information from target.
+      SmartDashboard.putNumber("# of PV targets", TapeTargets.size());
+      SmartDashboard.putNumber("PV Yaw #1", TapeTargets.get(0).getYaw());
+      SmartDashboard.putNumber("PV Area #1", TapeTargets.get(0).getArea());
+      if (getNumberOfTapeTargets()>1){
+        SmartDashboard.putNumber("PV Yaw #2", TapeTargets.get(1).getYaw());
+        SmartDashboard.putNumber("PV Area #2", TapeTargets.get(1).getArea());
+        SmartDashboard.putNumber("PV Largest Yaw", getLargestTapeTarget().getYaw());
+        SmartDashboard.putNumber("PV 2nd Largest Yaw", getSecondLargestTapeTarget().getYaw());
+      }
+
+    }
+  }
+public boolean hasAprilTarget(){
+  return hasAprilTargets;
+}
+
+public Pose2d getPoseEstimate(){
+  return currentPoseEstimate;
+}
+
+public boolean hasTapeTarget(){
+  return hasTapeTargets;
+}
+
+public int getNumberOfTapeTargets(){
+  return TapeTargets.size();
+}
+
+public PhotonTrackedTarget getLargestTapeTarget(){
+  TapeTargets.sort(new PhotonTrackedTargetComparator());
+  return TapeTargets.get(0);
+}
+
+public PhotonTrackedTarget getSecondLargestTapeTarget(){
+  TapeTargets.sort(new PhotonTrackedTargetComparator());
+  return TapeTargets.get(1);
+}
+
+
+
+      /**
+   * @param estimatedRobotPose The current best guess at robot pose
+   * @return A pair of the fused camera observations to a single Pose2d on the field, and the time
+   *     of the observation. Assumes a planar field and the robot is always firmly on the ground
+   *  NOTE - APRIL TAG NEEDS TO BE IN 3D mode
+   */
+  public Pair<Pose2d, Double> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+    robotPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+
+    double currentTime = Timer.getFPGATimestamp();
+    Optional<Pair<Pose3d, Double>> result = robotPoseEstimator.update();
+    if (result.isPresent()) {
+        return new Pair<Pose2d, Double>(result.get().getFirst().toPose2d(), currentTime - result.get().getSecond());
+    } else {
+        return new Pair<Pose2d, Double>(null, 0.0);
+    }
+  }
+}
+
+//make a comparator class to allow for list sorting
+class PhotonTrackedTargetComparator implements Comparator<PhotonTrackedTarget> {
+  @Override
+  public int compare(PhotonTrackedTarget a, PhotonTrackedTarget b) {
+    int temp = 0;
+    if (a.getArea() > b.getArea()) temp = 1;
+    if (a.getArea() < b.getArea()) temp = -1;
+    return temp;
   }
 }
