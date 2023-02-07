@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.Constants.Intake;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
@@ -34,6 +35,7 @@ public class RobotContainer {
   public final RobotSpecs robotSpecs;
   public final Sensors_Subsystem sensors;
   public final SwerveDrivetrain drivetrain;
+  public final Intake intake;
   public final HID_Xbox_Subsystem dc;           //short for driver controls
   public final PhotonVision photonVision;
   // Note: we may replace HID_Xbox with CommandPS4Controller or CommandJoystick if needed
@@ -51,6 +53,7 @@ public class RobotContainer {
 
     // these can get created on any hardware setup
     sensors = new Sensors_Subsystem();
+    intake = new Intake();
     drivetrain = new SwerveDrivetrain();
     photonVision = new PhotonVision();
     drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
