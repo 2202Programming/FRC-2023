@@ -8,6 +8,7 @@ import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
+import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
@@ -99,6 +100,12 @@ public class RobotContainer {
     }
 
 
+    // Y button to reset current facing to zero
+    dc.Driver().y().whileTrue(new InstantCommand(() -> {
+      drivetrain.resetAnglePose(new Rotation2d(0));
+    }));
+
+    dc.Driver().x().whileTrue(new ChargeStationBalance(false));
   }
 
   /**
