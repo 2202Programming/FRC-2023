@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
-import org.photonvision.RobotPoseEstimator;
-import org.photonvision.RobotPoseEstimator.PoseStrategy;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -47,7 +49,7 @@ public class PhotonVision extends SubsystemBase {
   private Transform3d bestCameraToTarget;
   private Transform3d alternateCameraToTarget;
   private AprilTagFieldLayout fieldLayout;
-  private RobotPoseEstimator robotPoseEstimator;
+  private PhotonPoseEstimator robotPoseEstimator;
   private Pose2d currentPoseEstimate = new Pose2d();
   private Pose2d previousPoseEstimate = new Pose2d();
 
@@ -70,7 +72,7 @@ public class PhotonVision extends SubsystemBase {
     robotToCam = new Transform3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d(0,0,0)); //Cam mounted facing forward
     var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
     camList.add(new Pair<PhotonCamera, Transform3d>(camera_global, robotToCam));
-    robotPoseEstimator = new RobotPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, camList);
+    robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY,camera_global,robotToCam);
   }
   
   @Override
@@ -168,9 +170,9 @@ public PhotonTrackedTarget getSecondLargestTapeTarget(){
     robotPoseEstimator.setReferencePose(prevEstimatedRobotPose);
 
     double currentTime = Timer.getFPGATimestamp();
-    Optional<Pair<Pose3d, Double>> result = robotPoseEstimator.update();
+    Optional<EstimatedRobotPose> result = robotPoseEstimator.update();
     if (result.isPresent()) {
-        return new Pair<Pose2d, Double>(result.get().getFirst().toPose2d(), currentTime - result.get().getSecond());
+        return new Pair<Pose2d, Double>(result.get().estimatedPose.toPose2d(), currentTime - result.get().timestampSeconds);
     } else {
         return new Pair<Pose2d, Double>(null, 0.0);
     }
