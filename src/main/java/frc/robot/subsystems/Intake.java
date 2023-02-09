@@ -22,7 +22,8 @@ public class Intake extends SubsystemBase {
   static final Value RETRACT = Value.kForward;
 
   //Instantiations
-  final CANSparkMax intake_mtr = new CANSparkMax(CAN.INTAKE_MTR, CANSparkMax.MotorType.kBrushless);
+  final CANSparkMax l_intake_mtr = new CANSparkMax(CAN.INTAKE_LEFT_MTR, CANSparkMax.MotorType.kBrushless);
+  final CANSparkMax r_intake_mtr = new CANSparkMax(CAN.INTAKE_RIGHT_MTR, CANSparkMax.MotorType.kBrushless);
   final DoubleSolenoid intake_solenoid = new DoubleSolenoid(CAN.PCM1,
               PneumaticsModuleType.CTREPCM,
               PCM1.INTAKE_UP_SOLENOID_PCM,
@@ -32,9 +33,15 @@ public class Intake extends SubsystemBase {
   
   /** Creates a new Intake. */
   public Intake() {
-    intake_mtr.clearFaults();
-    intake_mtr.restoreFactoryDefaults();
-    intake_mtr.setInverted(false);
+    motor_config(l_intake_mtr, false);
+    motor_config(r_intake_mtr, true);    //TODO: Check if inversion is needed
+    
+  }
+
+  void motor_config(CANSparkMax mtr, boolean inverted) {
+     mtr.clearFaults();
+     mtr.restoreFactoryDefaults();
+     mtr.setInverted(inverted);
   }
 
   @Override
@@ -44,7 +51,8 @@ public class Intake extends SubsystemBase {
 
   //Turn Intake Motor On by sending a double value
   public void on(double intakeMotorStrength) {
-    intake_mtr.set(intakeMotorStrength);
+    l_intake_mtr.set(intakeMotorStrength);
+    r_intake_mtr.set(intakeMotorStrength);
   }
 
   public void on(){    //on() with no-args is default
@@ -52,7 +60,7 @@ public class Intake extends SubsystemBase {
   }   
 
   public void off() {
-    intake_mtr.set(0);
+    on(0);
   }
 
   //Deploy arm mechanism using a Double Solenoids
