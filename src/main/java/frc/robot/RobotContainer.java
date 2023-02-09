@@ -55,8 +55,8 @@ public class RobotContainer {
   public final Intake intake;
   public final HID_Xbox_Subsystem dc; // short for driver controls
   public final PhotonVision photonVision;
-  public final ArmSS armSS;
-  public final Claw_Substyem claw;
+  public ArmSS armSS = null;
+  public Claw_Substyem claw = null;
 
   // Note: we may replace HID_Xbox with CommandPS4Controller or CommandJoystick if needed
  
@@ -79,6 +79,11 @@ public class RobotContainer {
     sensors = new Sensors_Subsystem();
     intake = new Intake();
     drivetrain = new SwerveDrivetrain();
+    photonVision = new PhotonVision();
+    if (robotSpecs.myRobotName == RobotNames.CompetitionBot) {
+      armSS = new ArmSS();
+      claw = new Claw_Substyem();
+    }
   // these can get created on any hardware setup
   photonVision = new PhotonVision();
   limelight = new Limelight_Subsystem();
@@ -133,8 +138,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return new FollowPPTrajectory(FollowPPTrajectory.pathFactoryTele(new PathConstraints(1, 1),
-        new Pose2d(drivetrain.getPose().getX() + 1,
-            drivetrain.getPose().getY() + 1,
+        new Pose2d(drivetrain.getPose().getX(),
+            drivetrain.getPose().getY(),
             new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))),
         true);
   }
