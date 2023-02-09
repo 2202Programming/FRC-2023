@@ -123,7 +123,7 @@ public final class Constants {
     public static final int LEFT_ELBOW = 15;
 
     // IMU
-    public static final int PIGEON_IMU_CAN = 60;
+    public static final int PIGEON_IMU_CAN = 30;
 
     // Whether to burn flash or not
     public static final boolean BURN_FLASH = false; // swerve-mk3
