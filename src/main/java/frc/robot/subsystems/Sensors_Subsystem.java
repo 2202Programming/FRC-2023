@@ -63,8 +63,6 @@ public class Sensors_Subsystem extends SubsystemBase {
 
   // Sensors
   Pigeon2 m_pigeon;  
-  double[] m_xyz_dps = new double[3];     //rotation rates [deg/s]
-
   double[] m_xyz_dps = new double[3]; // rotation rates [deg/s]
 
   public static class RotationPositions {
