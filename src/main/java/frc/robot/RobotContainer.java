@@ -86,7 +86,7 @@ public class RobotContainer {
   private void configureBindings() {
 
     // X button to change LL pipeline
-    dc.Driver().x().onTrue(new InstantCommand(() -> {
+    dc.Driver().b().onTrue(new InstantCommand(() -> {
       limelight.togglePipeline();
     }));
 
