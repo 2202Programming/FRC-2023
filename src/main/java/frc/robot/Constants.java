@@ -84,11 +84,6 @@ public final class Constants {
    * 
    * Please keep in order ID order
    * 
-   * /**
-   * CAN bus IDs
-   * 
-   * Please keep in order ID order
-   * 
    */
   public static final class CAN {
     // CAN ID for non-motor devices
@@ -102,7 +97,8 @@ public final class Constants {
     public static final int DT_FL_CANCODER = 7;
 
     // Intake motor
-    public static final int INTAKE_MTR = 14;
+    public static final int INTAKE_RIGHT_MTR = 19;
+    public static final int INTAKE_LEFT_MTR = 18;
 
     // drive train drive / angle motors - sparkmax neo
     public static final int DT_FL_DRIVE = 20;
@@ -127,7 +123,7 @@ public final class Constants {
     public static final int CLAW = 234567890; // TODO fix number
 
     // IMU
-    public static final int PIGEON_IMU_CAN = 60;
+    public static final int PIGEON_IMU_CAN = 30;
 
     // Whether to burn flash or not
     public static final boolean BURN_FLASH = false; // swerve-mk3
