@@ -8,7 +8,9 @@ import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -52,6 +54,7 @@ public class FollowPPTrajectory extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    //Command runcommand = followTrajectoryCommand(path,true);
     Command runcommand = getPathCommand();
     runcommand.schedule();
   }
@@ -78,9 +81,11 @@ public class FollowPPTrajectory extends CommandBase {
     PathPlannerState initialState = path.getInitialState();
     Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
     //TODO: take PID values from Constants or construction?
-    PIDController xController = new PIDController(1.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController yController = new PIDController(1.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController thetaController = new PIDController(0.08, 0, 0, Constants.DT);     // [rad]
+    PIDController xController = new PIDController(0.0, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController yController = new PIDController(0.0, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController thetaController = new PIDController(0.0, 0, 0, Constants.DT);     // [rad]
+
+ 
       //Units are radians for thetaController; PPSwerveController is using radians internally.
       thetaController.enableContinuousInput(-Math.PI, Math.PI); //prevent piroutte paths over continuity
 
@@ -102,12 +107,14 @@ public class FollowPPTrajectory extends CommandBase {
     return new SequentialCommandGroup(
       new InstantCommand(()-> {
         if (!useOdo) // useOdo is false, starting pose is position/heading as defined in path. Otherwise go from where we are
-          sensors.setAutoStartPose(startingPose);
+          //sensors.setAutoStartPose(startingPose);
+          sdt.setPose(startingPose);
       }),
-      new PrintCommand("***Running Path"),
+      new PrintCommand("***Running Path.  Current Pose:"+sdt.getPose()),
       swerveControllerCommand,
       new InstantCommand(sdt::stop),
-      new PrintCommand("***Done Running Path")
+      new PrintCommand("***Done running Path."),
+      new InstantCommand(sdt::printPose)
       );
   }
 
@@ -128,4 +135,11 @@ public class FollowPPTrajectory extends CommandBase {
   public boolean isFinished() {
     return true;
   }
+
+  // Called once the command ends or is interrupted.
+  @Override
+  public void end(boolean interrupted) {
+    sdt.stop();
+  }
+
 }
