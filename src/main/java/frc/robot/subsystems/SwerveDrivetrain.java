@@ -4,17 +4,17 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
+import com.pathplanner.lib.PathPoint;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.revrobotics.CANSparkMax;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,17 +24,19 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ChassisConfig;
 import frc.robot.Constants.DriveTrain;
@@ -61,20 +63,20 @@ public class SwerveDrivetrain extends SubsystemBase {
   boolean kAngleCmdInvert_Left = false;
 
   // cc is the chassis config for all our pathing math
-  private final ChassisConfig cc = RobotContainer.RC().robotSpecs.getChassisConfig();  //chassis config 
-  private final WheelOffsets  wc = RobotContainer.RC().robotSpecs.getWheelOffset();    //wc = wheel config
+  private final ChassisConfig cc = RobotContainer.RC().robotSpecs.getChassisConfig(); // chassis config
+  private final WheelOffsets wc = RobotContainer.RC().robotSpecs.getWheelOffset(); // wc = wheel config
 
   /**
    *
-   * Modules are in the order of - Front Left Front Right Back Left Back Right
+   * Modules are in the order of - Front Left, Front Right, Back Left, Back Right
    * 
-   * Positive x values represent moving toward the front of the robot Positive y
-   * values represent moving toward the left of the robot All lengths in feet.
+   * Positive x --> represent moving toward the front of the robot
+   * Positive y --> represent moving toward the left of the robot
+   * [m]
    * https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html#constructing-the-kinematics-object
    */
-  private ChassisConfig cfg = RobotContainer.RC().m_robotSpecs.getChassisConfig();
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-      new Translation2d(cc.XwheelOffset, cc.YwheelOffset),  // Front Left
+      new Translation2d(cc.XwheelOffset, cc.YwheelOffset), // Front Left
       new Translation2d(cc.XwheelOffset, -cc.YwheelOffset), // Front Right
       new Translation2d(-cc.XwheelOffset, cc.YwheelOffset), // Back Left
       new Translation2d(-cc.XwheelOffset, -cc.YwheelOffset) // Back Right
@@ -82,18 +84,14 @@ public class SwerveDrivetrain extends SubsystemBase {
   private SwerveDriveOdometry m_odometry;
   private Pose2d m_pose;
   private Pose2d old_pose;
-  
-  private SwerveModuleState[] meas_states;   //measured wheel speed & angle
+
+  private SwerveModuleState[] meas_states; // measured wheel speed & angle
   private SwerveModulePosition[] meas_pos = new SwerveModulePosition[] {
-    new SwerveModulePosition(),
-    new SwerveModulePosition(),
-    new SwerveModulePosition(),
-    new SwerveModulePosition()
+      new SwerveModulePosition(),
+      new SwerveModulePosition(),
+      new SwerveModulePosition(),
+      new SwerveModulePosition()
   };
-
-
-
-
 
   // sensors and our mk3 modules
   private final Sensors_Subsystem sensors;
@@ -115,7 +113,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   private NetworkTableEntry posBL;
   private NetworkTableEntry posBR;
   private NetworkTableEntry robotVel;
-  
+
   double drive_kP = DriveTrain.drivePIDF.getP();
   double drive_kI = DriveTrain.drivePIDF.getI();
   double drive_kD = DriveTrain.drivePIDF.getD();
@@ -168,19 +166,18 @@ public class SwerveDrivetrain extends SubsystemBase {
      * Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings.
      * The numbers used below are robot specific, and should be tuned.
      */
-     m_poseEstimator = new SwerveDrivePoseEstimator(
+    m_poseEstimator = new SwerveDrivePoseEstimator(
         kinematics,
-        sensors.getRotation2d(),         
+        sensors.getRotation2d(),
         meas_pos,
-        new Pose2d(),               //initial pose ()
-        VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),   //std x,y, heading from odmetry
-        VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30)) );  // std x, y heading from vision
-
+        new Pose2d(), // initial pose ()
+        VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)), // std x,y, heading from odmetry
+        VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))); // std x, y heading from vision
 
     m_odometry = new SwerveDriveOdometry(kinematics, sensors.getRotation2d(), meas_pos);
-    //cur_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
+    // cur_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
     meas_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
-  
+
     m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
     old_pose = m_pose;
 
@@ -205,22 +202,22 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     // display PID coefficients on SmartDashboard if tuning drivetrain
     /*
-    SmartDashboard.putNumber("Drive P", drive_kP);
-    SmartDashboard.putNumber("Drive I", drive_kI);
-    SmartDashboard.putNumber("Drive D", drive_kD);
-    SmartDashboard.putNumber("Drive Feed Forward", drive_kFF);
+     * SmartDashboard.putNumber("Drive P", drive_kP);
+     * SmartDashboard.putNumber("Drive I", drive_kI);
+     * SmartDashboard.putNumber("Drive D", drive_kD);
+     * SmartDashboard.putNumber("Drive Feed Forward", drive_kFF);
+     * 
+     * SmartDashboard.putNumber("Angle P", angle_kP);
+     * SmartDashboard.putNumber("Angle I", angle_kI);
+     * SmartDashboard.putNumber("Angle D", angle_kD);
+     * SmartDashboard.putNumber("Angle Feed Forward", angle_kFF);
+     */
 
-    SmartDashboard.putNumber("Angle P", angle_kP);
-    SmartDashboard.putNumber("Angle I", angle_kI);
-    SmartDashboard.putNumber("Angle D", angle_kD);
-    SmartDashboard.putNumber("Angle Feed Forward", angle_kFF);
-    */
-    
     offsetDebug();
   }
 
   private void offsetDebug() {
-    periodic(); //run to initialize module values
+    periodic(); // run to initialize module values
     double offsetFL = wc.CC_FL_OFFSET;
     double measuredFL = modules[0].m_internalAngle;
 
@@ -234,18 +231,24 @@ public class SwerveDrivetrain extends SubsystemBase {
     double measuredBR = modules[3].m_internalAngle;
 
     System.out.println("================Offsets==================");
-    System.out.println("FL: offset " + offsetFL + ", measured " + measuredFL + ", should be " + ModMath.fmod360_2(offsetFL - measuredFL));
-    System.out.println("FR: offset " + offsetFR + ", measured " + measuredFR + ", should be " + ModMath.fmod360_2(offsetFR - measuredFR));
-    System.out.println("BL: offset " + offsetBL + ", measured " + measuredBL + ", should be " + ModMath.fmod360_2(offsetBL - measuredBL));
-    System.out.println("BR: offset " + offsetBR + ", measured " + measuredBR + ", should be " + ModMath.fmod360_2(offsetBR - measuredBR));
+    System.out.println("FL: offset " + offsetFL + ", measured " + measuredFL + ", should be "
+        + ModMath.fmod360_2(offsetFL - measuredFL));
+    System.out.println("FR: offset " + offsetFR + ", measured " + measuredFR + ", should be "
+        + ModMath.fmod360_2(offsetFR - measuredFR));
+    System.out.println("BL: offset " + offsetBL + ", measured " + measuredBL + ", should be "
+        + ModMath.fmod360_2(offsetBL - measuredBL));
+    System.out.println("BR: offset " + offsetBR + ", measured " + measuredBR + ", should be "
+        + ModMath.fmod360_2(offsetBR - measuredBR));
     System.out.println("============Offsets Done==============");
   }
 
   public void drive(SwerveModuleState[] states) {
-    //this.cur_states = states; //keep copy of commanded states so we can stop() withs 
+    // this.cur_states = states; //keep copy of commanded states so we can stop()
+    // withs
 
-    //if any one wheel is above max obtainable speed, reduce them all in the same ratio to maintain control
-    //SwerveDriveKinematics.desaturateWheelSpeeds(states, DriveTrain.kMaxSpeed);
+    // if any one wheel is above max obtainable speed, reduce them all in the same
+    // ratio to maintain control
+    // SwerveDriveKinematics.desaturateWheelSpeeds(states, DriveTrain.kMaxSpeed);
 
     // output the angle and velocity for each module
     for (int i = 0; i < states.length; i++) {
@@ -271,25 +274,22 @@ public class SwerveDrivetrain extends SubsystemBase {
       meas_pos[i].distanceMeters = modules[i].getPosition();
     }
 
-    // update pose
-    old_pose = m_pose;
-    m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
-//TODO: get the math out of here
-    m_pose = updateOdometry();
-   
+    updateOdometry();  //upates old_pose and m_pose
 
     // from -PI to +PI
     double temp = Math.atan2(m_pose.getY() - old_pose.getY(), m_pose.getX() - old_pose.getX());
-    if(temp != 0){ //remove singularity when moving too slow - otherwise lots of jitter
+    //TODO: is != really the right test?
+    if (temp != 0) { // remove singularity when moving too slow - otherwise lots of jitter
       currentBearing = temp;
       // convert this to degrees in the range -180 to 180
       currentBearing = Math.toDegrees(currentBearing);
     }
-    //run bearing through low pass filter
+    // run bearing through low pass filter
     filteredBearing = bearingFilter.calculate(currentBearing);
 
-    // velocity assuming period is 0.02 seconds - this is the standard FRC main loop period
-    filteredVelocity = velocityFilter.calculate(PoseMath.poseDistance(m_pose, old_pose)/0.02);
+    // velocity assuming period is 0.02 seconds - this is the standard FRC main loop
+    // period
+    filteredVelocity = velocityFilter.calculate(PoseMath.poseDistance(m_pose, old_pose) / 0.02);
 
     // updates CAN status data every 4 cycles
     timer++;
@@ -306,14 +306,14 @@ public class SwerveDrivetrain extends SubsystemBase {
       posFR.setDouble(modules[1].getPosition());
       posBL.setDouble(modules[2].getPosition());
       posBR.setDouble(modules[3].getPosition());
-      
+
       nt_currentBearing.setDouble(filteredBearing);
       robotVel.setDouble(filteredVelocity);
       timer = 0;
 
       m_field.setRobotPose(m_odometry.getPoseMeters());
-      //if Drivetrain tuning
-      //pidTuning();
+      // if Drivetrain tuning
+      // pidTuning();
     }
   }
 
@@ -336,32 +336,38 @@ public class SwerveDrivetrain extends SubsystemBase {
     m_pose = new_pose;
     m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);
   }
-//TODO: do we REALLY think this is where we need to go? field coords???
+
   // resets X,Y, and set current angle to be 0
   public void resetPose() {
-    m_pose = new Pose2d(0, 0, new Rotation2d(0));
+    resetPose(0, 0);
+  }
+
+  public void resetPose(double x, double y) {
+    m_pose = new Pose2d(x, y, new Rotation2d(0));
     m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);
   }
 
-  //reset angle to be zero, but retain X and Y; takes a Rotation2d object
-  public void resetAnglePose(Rotation2d rot){
+  // reset angle to be zero, but retain X and Y; takes a Rotation2d object
+  public void resetAnglePose(Rotation2d rot) {
     m_pose = new Pose2d(getPose().getX(), getPose().getY(), rot);
-    m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);  //updates gryo offset
+    m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose); // updates gryo offset
   }
 
   public Pose2d getPose() {
     return m_pose;
   }
 
-  public void printPose(){
-    System.out.println("***POSE X:" + m_pose.getX() + ", Y:" + m_pose.getY() + ", Rot:" + m_pose.getRotation().getDegrees());
+  public void printPose() {
+    System.out
+        .println("***POSE X:" + m_pose.getX() + ", Y:" + m_pose.getY() + ", Rot:" + m_pose.getRotation().getDegrees());
   }
-//TODO: bearing should be to or from *what*? split out?
-  public double getBearing(){
+
+  // TODO: bearing should be to or from *what*? split out?
+  public double getBearing() {
     return filteredBearing;
   }
 
-  public double getVelocity(){
+  public double getVelocity() {
     return filteredVelocity;
   }
 
@@ -369,23 +375,26 @@ public class SwerveDrivetrain extends SubsystemBase {
     return kinematics;
   }
 
-  public ChassisSpeeds  getChassisSpeeds() {
-      return  kinematics.toChassisSpeeds(meas_states);
+  public ChassisSpeeds getChassisSpeeds() {
+    return kinematics.toChassisSpeeds(meas_states);
   }
 
-  public ChassisSpeeds getFieldRelativeSpeeds(){    
+  public ChassisSpeeds getFieldRelativeSpeeds() {
     return new ChassisSpeeds(
-      getChassisSpeeds().vxMetersPerSecond * sensors.getRotation2d().getCos() - getChassisSpeeds().vyMetersPerSecond * sensors.getRotation2d().getSin(),
-      getChassisSpeeds().vyMetersPerSecond * sensors.getRotation2d().getCos() + getChassisSpeeds().vxMetersPerSecond * sensors.getRotation2d().getSin(),
-      getChassisSpeeds().omegaRadiansPerSecond);
+        getChassisSpeeds().vxMetersPerSecond * sensors.getRotation2d().getCos()
+            - getChassisSpeeds().vyMetersPerSecond * sensors.getRotation2d().getSin(),
+        getChassisSpeeds().vyMetersPerSecond * sensors.getRotation2d().getCos()
+            + getChassisSpeeds().vxMetersPerSecond * sensors.getRotation2d().getSin(),
+        getChassisSpeeds().omegaRadiansPerSecond);
   }
 
   /**
-   * stop() - zero the current state's velocity component and leave angles as they are
+   * stop() - zero the current state's velocity component and leave angles as they
+   * are
    */
   public void stop() {
     SwerveModuleState state = new SwerveModuleState();
-    state.speedMetersPerSecond =0.0;
+    state.speedMetersPerSecond = 0.0;
     // output the angle and velocity for each module
     for (int i = 0; i < modules.length; i++) {
       state.angle = Rotation2d.fromDegrees(modules[i].getAngle());
@@ -393,129 +402,140 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
   }
 
-  public void setBrakeMode(){
+  public void setBrakeMode() {
     for (int i = 0; i < modules.length; i++) {
       modules[i].setBrakeMode();
     }
     System.out.println("***BRAKES ENGAGED***");
   }
 
-  public void setCoastMode(){
+  public void setCoastMode() {
     for (int i = 0; i < modules.length; i++) {
       modules[i].setCoastMode();
     }
     System.out.println("***BRAKES RELEASED***");
   }
 
-
-  public static Command pathFactoryAuto(SwerveDrivetrain dt, Sensors_Subsystem sensors, double maxVel, double maxAcc, String pathname, int pathNum){
+  public static Command pathFactoryAuto(SwerveDrivetrain dt, Sensors_Subsystem sensors, double maxVel, double maxAcc,
+      String pathname, int pathNum) {
     SwerveDrivetrain m_robotDrive = dt;
     Sensors_Subsystem m_sensors = sensors;
 
-    var path = PathPlanner.loadPath(pathname, maxVel, maxAcc); //last two parameters are max velocity and max accelleration
+    var path = PathPlanner.loadPath(pathname, maxVel, maxAcc);
 
     if (path == null) {
-      return new InstantCommand();  // no path selected
+      return new InstantCommand(); // no path selected
     }
-    
+
     dt.m_field.getObject("Path" + pathNum).setTrajectory(path);
 
     // get initial state from the trajectory
     PathPlannerState initialState = path.getInitialState();
     Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
 
-    PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController thetaController = new PIDController(4, 0, 0, Constants.DT);     // [rad]
-      //Units are radians for thetaController; PPSwerveController is using radians internally.
-      thetaController.enableContinuousInput(-Math.PI, Math.PI); //prevent piroutte paths over continuity
+    PIDController xController = new PIDController(4.0, 0.0, 0.0, Constants.DT); // [m]
+    PIDController yController = new PIDController(4.0, 0.0, 0.0, Constants.DT); // [m]
+    PIDController thetaController = new PIDController(4, 0, 0, Constants.DT); // [rad]
+    // Units are radians for thetaController; PPSwerveController is using radians
+    // internally.
+    thetaController.enableContinuousInput(-Math.PI, Math.PI); // prevent piroutte paths over continuity
 
-      PPSwerveControllerCommand swerveControllerCommand =
-      new PPSwerveControllerCommand(
-          path,
-          m_robotDrive::getPose, // Functional interface to feed supplier
-          m_robotDrive.getKinematics(),
-          // Position controllers 
-          xController,
-          yController,
-          thetaController,
-          m_robotDrive::drive,
-          m_robotDrive
-      );
-
+    PPSwerveControllerCommand swerveControllerCommand = new PPSwerveControllerCommand(
+        path,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        m_robotDrive.getKinematics(),
+        // Position controllers
+        xController,
+        yController,
+        thetaController,
+        m_robotDrive::drive,
+        m_robotDrive);
 
     // Run path following command, then stop at the end.
     return new SequentialCommandGroup(
-      new InstantCommand(()-> {
-        m_robotDrive.setPose(startingPose);
-        if (pathNum == 1) m_sensors.setAutoStartPose(startingPose);
-      }),
-      new PrintCommand("***Factory: Running Path " + pathname),
-      swerveControllerCommand,
-      new InstantCommand(m_robotDrive::stop),
-      new PrintCommand("***Done Running Path " + pathname)
-      );
+        new InstantCommand(() -> {
+          m_robotDrive.setPose(startingPose);
+          if (pathNum == 1)
+            m_sensors.setAutoStartPose(startingPose);
+        }),
+        new PrintCommand("***Factory: Running Path " + pathname),
+        swerveControllerCommand,
+        new InstantCommand(m_robotDrive::stop),
+        new PrintCommand("***Done Running Path " + pathname));
   }
 
   public PathPlannerTrajectory pathFactoryTele(Pose2d finalPoint) {
-    return PathPlanner.generatePath(new PathConstraints(1, 1), new PathPoint(m_pose.getTranslation(), finalPoint.getRotation(), m_pose.getRotation()), new PathPoint(finalPoint.getTranslation(), finalPoint.getRotation(), finalPoint.getRotation()));
+    return PathPlanner.generatePath(new PathConstraints(1, 1),
+        new PathPoint(m_pose.getTranslation(), finalPoint.getRotation(), m_pose.getRotation()),
+        new PathPoint(finalPoint.getTranslation(), finalPoint.getRotation(), finalPoint.getRotation()));
   }
 
- /** Updates the field relative position of the robot. */
- public Pose2d updateOdometry() {
-  Pose2d pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
-  m_poseEstimator.update( sensors.getRotation2d(), meas_pos);
-  
-  // Also apply vision measurements. We use 0.3 seconds in the past as an example -- on
-  // a real robot, this must be calculated based either on latency or timestamps.
-  m_poseEstimator.addVisionMeasurement(
-      ExampleGlobalMeasurementSensor.getEstimatedGlobalPose(
-          m_poseEstimator.getEstimatedPosition()),
-      Timer.getFPGATimestamp() - 0.3);
+  /** Updates the field relative position of the robot. */
+  public void updateOdometry() {
+    //update states
+    old_pose = m_pose;
+    m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
 
-  return pose;
-}
+    // WIP use other poseEstimator
+    m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
+    double now = Timer.getFPGATimestamp();
+    // Also apply vision measurements. We use 0.3 seconds in the past as an example
+    // on real robot, this must be calculated based either on latency or timestamps.
+    /*
+     * WORK IN PROGRESS
+     * m_poseEstimator.addVisionMeasurement(
+     * ExampleGlobalMeasurementSensor.getEstimatedGlobalPose(
+     * m_poseEstimator.getEstimatedPosition()), now - 0.3);
+     * 
+     */
+  }
 
-
-
-
-
-
-
-  //  TODO: Move to a TEST/Tuning command  - DPL 2/21/22
+  // TODO: Move to a TEST/Tuning command - DPL 2/21/22
   // private void pidTuning() { //if drivetrain tuning
 
-  //   // read PID coefficients from SmartDashboard if tuning drivetrain
-  //   double drive_p = SmartDashboard.getNumber("Drive P Gain", DriveTrain.drivePIDF.getP());
-  //   double drive_i = SmartDashboard.getNumber("Drive I Gain", DriveTrain.drivePIDF.getI());
-  //   double drive_d = SmartDashboard.getNumber("Drive D Gain", DriveTrain.drivePIDF.getD());
-  //   double drive_ff = SmartDashboard.getNumber("Drive Feed Forward", DriveTrain.drivePIDF.getF());
-  //   double angle_p = SmartDashboard.getNumber("Angle P Gain", DriveTrain.anglePIDF.getP());
-  //   double angle_i = SmartDashboard.getNumber("Angle I Gain", DriveTrain.anglePIDF.getI());
-  //   double angle_d = SmartDashboard.getNumber("Angle D Gain", DriveTrain.anglePIDF.getD());
-  //   double angle_ff = SmartDashboard.getNumber("Angle Feed Forward", DriveTrain.anglePIDF.getF());
+  // // read PID coefficients from SmartDashboard if tuning drivetrain
+  // double drive_p = SmartDashboard.getNumber("Drive P Gain",
+  // DriveTrain.drivePIDF.getP());
+  // double drive_i = SmartDashboard.getNumber("Drive I Gain",
+  // DriveTrain.drivePIDF.getI());
+  // double drive_d = SmartDashboard.getNumber("Drive D Gain",
+  // DriveTrain.drivePIDF.getD());
+  // double drive_ff = SmartDashboard.getNumber("Drive Feed Forward",
+  // DriveTrain.drivePIDF.getF());
+  // double angle_p = SmartDashboard.getNumber("Angle P Gain",
+  // DriveTrain.anglePIDF.getP());
+  // double angle_i = SmartDashboard.getNumber("Angle I Gain",
+  // DriveTrain.anglePIDF.getI());
+  // double angle_d = SmartDashboard.getNumber("Angle D Gain",
+  // DriveTrain.anglePIDF.getD());
+  // double angle_ff = SmartDashboard.getNumber("Angle Feed Forward",
+  // DriveTrain.anglePIDF.getF());
 
-  //   // if anything changes in drive PID, update all the modules with a new drive PID
-  //   if ((drive_p != drive_kP) || (drive_i != drive_kI) || (drive_d != drive_kD) || (drive_ff != drive_kFF)) {
-  //     drive_kP = drive_p;
-  //     drive_kI = drive_i;
-  //     drive_kD = drive_d;
-  //     drive_kFF = drive_ff;
-  //     for (SwerveModuleMK3 i : modules) {
-  //       i.setDrivePID(new PIDFController(drive_kP, drive_kI, drive_kD, drive_kFF));
-  //     }
-  //   }
+  // // if anything changes in drive PID, update all the modules with a new drive
+  // PID
+  // if ((drive_p != drive_kP) || (drive_i != drive_kI) || (drive_d != drive_kD)
+  // || (drive_ff != drive_kFF)) {
+  // drive_kP = drive_p;
+  // drive_kI = drive_i;
+  // drive_kD = drive_d;
+  // drive_kFF = drive_ff;
+  // for (SwerveModuleMK3 i : modules) {
+  // i.setDrivePID(new PIDFController(drive_kP, drive_kI, drive_kD, drive_kFF));
+  // }
+  // }
 
-  //   // if anything changes in angle PID, update all the modules with a new angle PID
-  //   if ((angle_p != angle_kP) || (angle_i != angle_kI) || (angle_d != angle_kD) || (angle_ff != angle_kFF)) {
-  //     angle_kP = angle_p;
-  //     angle_kI = angle_i;
-  //     angle_kD = angle_d;
-  //     angle_kFF = angle_ff;
-  //     for (SwerveModuleMK3 i : modules) {
-  //       i.setAnglePID(new PIDFController(angle_kP, angle_kI, angle_kD, angle_kFF));
-  //     }
-  //   }
+  // // if anything changes in angle PID, update all the modules with a new angle
+  // PID
+  // if ((angle_p != angle_kP) || (angle_i != angle_kI) || (angle_d != angle_kD)
+  // || (angle_ff != angle_kFF)) {
+  // angle_kP = angle_p;
+  // angle_kI = angle_i;
+  // angle_kD = angle_d;
+  // angle_kFF = angle_ff;
+  // for (SwerveModuleMK3 i : modules) {
+  // i.setAnglePID(new PIDFController(angle_kP, angle_kI, angle_kD, angle_kFF));
+  // }
+  // }
   // }
 
 }

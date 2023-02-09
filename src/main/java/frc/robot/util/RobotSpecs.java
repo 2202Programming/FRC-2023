@@ -4,6 +4,7 @@
 
 package frc.robot.util;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ChassisConfig;
 import frc.robot.Constants.SubsystemConfig;
@@ -38,11 +39,16 @@ public class RobotSpecs {
 
 
     public RobotSpecs() {
-        this(System.getenv("serialnum"));
+        this(System.getenv("serialnum"));        
     }
     
     public RobotSpecs(String serialNo){
         myRobotName = getRobotName(serialNo);
+
+        //if we are simulated, use the competionBot so we have everything
+        if (RobotBase.isSimulation()) {
+            myRobotName = RobotNames.CompetitionBot;
+        }
 
         switch(myRobotName){
             case SwerveBot:

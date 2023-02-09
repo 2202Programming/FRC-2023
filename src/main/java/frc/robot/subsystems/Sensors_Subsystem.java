@@ -60,13 +60,10 @@ public class Sensors_Subsystem extends SubsystemBase {
   private NetworkTableEntry nt_pitch;
   private NetworkTableEntry nt_rotation;
 
-  static final byte update_hz = 100;
-  // Sensors
-  Pigeon2 m_pigeon;
-  
-  double[] m_xyz_dps = new double[3];     //rotation rates [deg/s]
 
-  double[] m_xyz_dps = new double[3]; // rotation rates [deg/s]
+  // Sensors
+  Pigeon2 m_pigeon;  
+  double[] m_xyz_dps = new double[3];     //rotation rates [deg/s]
 
   public static class RotationPositions {
     public double back_left;
@@ -126,12 +123,6 @@ public class Sensors_Subsystem extends SubsystemBase {
 
     // alocate sensors
     m_canStatus = new CANStatus();
-
-    // create devices and interface access, use interface where possible
-    // m_gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
-    // m_gyro_ahrs = m_ahrs = new AHRS(SPI.Port.kMXP, update_hz);
-    // m_ahrs.enableLogging(true);
-
     m_pigeon = new Pigeon2(CAN.PIGEON_IMU_CAN);
 
     // set all the CanCoders to 100ms refresh rate to save the can bus
@@ -174,7 +165,6 @@ public class Sensors_Subsystem extends SubsystemBase {
 
   //@Override
   public void calibrate() {
-
     //TODO: measure angles, average and remove offsets.
 
     reset();
@@ -229,12 +219,9 @@ public class Sensors_Subsystem extends SubsystemBase {
 
   public void reset() {
 
-    // if (m_ahrs.isConnected()) {
-    // m_ahrs.reset();
-    // m_ahrs.resetDisplacement();
-    // }
-
   }
+
+  // All accessors return values measured in the periodic()
 
   public double getRoll() {   
       return m_roll;
