@@ -159,11 +159,13 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
+
     return new FollowPPTrajectory(FollowPPTrajectory.pathFactoryTele(new PathConstraints(1, 1),
         new Pose2d(drivetrain.getPose().getX(),
-            drivetrain.getPose().getY(),
+            drivetrain.getPose().getY()+1,
             new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))),
         true);
+    //return new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate"),
+    //false);
   }
 }
