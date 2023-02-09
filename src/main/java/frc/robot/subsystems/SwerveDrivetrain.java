@@ -336,7 +336,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     m_pose = new_pose;
     m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);
   }
-
+//TODO: do we REALLY think this is where we need to go? field coords???
   // resets X,Y, and set current angle to be 0
   public void resetPose() {
     resetPose(0, 0);
