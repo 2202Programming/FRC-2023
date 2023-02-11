@@ -18,7 +18,7 @@ public class RobotSpecs {
 
     public enum RobotNames {
         SwerveBot("SwerveBot"), 
-        CompetitionBot("CompetitionBot"),
+        CompetitionBot2023("CompetitionBot2023"),
         ChadBot("ChadBot"),
         UnknownBot("UnknownBot"),
         BotOnBoard("BotOnBoard");
@@ -48,35 +48,38 @@ public class RobotSpecs {
 
         //if we are simulated, use the competionBot so we have everything
         if (RobotBase.isSimulation()) {
-            myRobotName = RobotNames.CompetitionBot;
+            myRobotName = RobotNames.CompetitionBot2023;
         }
-
+        //setup to handle any swerve both we have
         switch(myRobotName){
             case SwerveBot:
                 myWheelOffsets = Constants.DriveTrain.swerveBotOffsets;
                 myChassisConfig = Constants.DriveTrain.swerveBotChassisConfig;
-                mySubsystemConfig = Constants.swerveBotSubsystemConfig;
-                System.out.println("***I'm a Swervebot***");
+                mySubsystemConfig = Constants.swerveBotSubsystemConfig;               
                 break;
-            case CompetitionBot:
+
+            case CompetitionBot2023:
+                myWheelOffsets = Constants.DriveTrain.compBotOffsets;
+                myChassisConfig = Constants.DriveTrain.compBotChassisConfig;
+                mySubsystemConfig = Constants.compBotSubsystemConfig;            
+                break;
+            
+            case ChadBot:
                 myWheelOffsets = Constants.DriveTrain.chadBotOffsets;
                 myChassisConfig = Constants.DriveTrain.chadBotChassisConfig;
-                mySubsystemConfig = Constants.chadBotSubsystemConfig;
-                System.out.println("***I'm a ChadBot***");
+                mySubsystemConfig = Constants.chadBotSubsystemConfig;              
                 break;
-            case UnknownBot:
-                myWheelOffsets = Constants.DriveTrain.swerveBotOffsets;
-                myChassisConfig = Constants.DriveTrain.swerveBotChassisConfig;
-                mySubsystemConfig = Constants.swerveBotSubsystemConfig;
-                System.out.println("***ERROR, bot serial unknown. Using SwerveBot Config***");
-                break;
+
+            default:
+            case UnknownBot: 
             case BotOnBoard:
                 myWheelOffsets = Constants.DriveTrain.swerveBotOffsets;
                 myChassisConfig = Constants.DriveTrain.swerveBotChassisConfig;
-                mySubsystemConfig = Constants.swerveBotSubsystemConfig;
-                System.out.println("***ERROR,BotOnBoard don't expect too much***");
+                mySubsystemConfig = Constants.swerveBotSubsystemConfig;                
+                System.out.println("***Non-driving robot,don't expect too much***");
                 break;
         }
+        System.out.println("***I am " + myRobotName+" ***");
     }
 
   public WheelOffsets getWheelOffset(){
@@ -105,7 +108,7 @@ public class RobotSpecs {
     else if (serialNo.compareTo("0312db1a")==0)
         tempRobotName = RobotNames.BotOnBoard;
     else if (serialNo.compareTo("293e833")==0) //TODO: Fix serial number
-        tempRobotName = RobotNames.CompetitionBot;
+        tempRobotName = RobotNames.CompetitionBot2023;
     else tempRobotName = RobotNames.UnknownBot;
 
     System.out.println("***RoboRio SERIAL NUM: " + serialNo);

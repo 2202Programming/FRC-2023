@@ -79,7 +79,7 @@ public class RobotContainer {
     limelight.setPipeline(1);
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
-      case CompetitionBot:
+      case CompetitionBot2023:
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
