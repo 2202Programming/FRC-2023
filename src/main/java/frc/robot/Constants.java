@@ -90,8 +90,12 @@ public final class Constants {
     public static final int DT_FL_CANCODER = 7;
 
     // Intake motor
+<<<<<<< Updated upstream
     public static final int INTAKE_RIGHT_MTR = 19;
     public static final int INTAKE_LEFT_MTR = 18;
+=======
+  
+>>>>>>> Stashed changes
 
     // drive train drive / angle motors - sparkmax neo
     public static final int DT_FL_DRIVE = 20;
@@ -110,10 +114,10 @@ public final class Constants {
     public static final int CMB_RIGHT_Rotate = 37;
 
     // Arms
-    public static final int ARM_LEFT_Motor = 12; //electrical needs to update their can id sheet, these may be wrong
-    public static final int ARM_RIGHT_Motor = 13;
-    public static final int ELBOW = 39; //TODO fix this it is wrong 
-    public static final int CLAW = 234567890; //TODO fix number
+    public static final int ARM_LEFT_Motor = 13;
+    public static final int ARM_RIGHT_Motor = 12;
+    public static final int RIGHT_ELBOW = 14;
+    public static final int LEFT_ELBOW = 15;
 
     // IMU
     public static final int PIGEON_IMU_CAN = 60;
