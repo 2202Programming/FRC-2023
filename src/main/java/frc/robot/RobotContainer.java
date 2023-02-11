@@ -18,6 +18,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.Intake;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
@@ -174,8 +176,14 @@ public class RobotContainer {
     //         new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))),
     //     true);
 
-    return new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate"),
-    false);
+    return new SequentialCommandGroup(
+        new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate"),
+    false), 
+        new PrintCommand("End of Path 1 Construction"),
+        new WaitCommand(1),
+        new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate2"),
+    true),
+        new PrintCommand("End of Path 2 Construction"));
 
 
 // ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("rotate", new PathConstraints(4, 3));
