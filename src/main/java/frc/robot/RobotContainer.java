@@ -186,7 +186,7 @@ public class RobotContainer {
     //     new PrintCommand("End of Path 2 Construction"));
 
 
-ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("autopath1", new PathConstraints(1, 1));  //5,3 tested and ok
+ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("AT Test", new PathConstraints(2, 3));  //5,3 tested and ok
 
 // This is just an example event map. It would be better to have a constant, global event map
 // in your code that will be used by all path following commands.
@@ -194,7 +194,7 @@ HashMap<String, Command> eventMap = new HashMap<>();
 eventMap.put("start", new SequentialCommandGroup(new PrintCommand("***Path Start"), new InstantCommand(drivetrain::printPose)));
 eventMap.put("middle", new SequentialCommandGroup(new PrintCommand("***Path Middle"), new InstantCommand(drivetrain::printPose)));
 eventMap.put("end", new SequentialCommandGroup(new PrintCommand("***Path End"), new InstantCommand(drivetrain::printPose), new ChargeStationBalance(true)));
-eventMap.put("score", new SequentialCommandGroup(new PrintCommand("***Path score"), new InstantCommand(drivetrain::printPose), new WaitCommand(1)));
+eventMap.put("score", new SequentialCommandGroup(new PrintCommand("***Path score"), new InstantCommand(drivetrain::printPose), new WaitCommand(2)));
 
 
 // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
