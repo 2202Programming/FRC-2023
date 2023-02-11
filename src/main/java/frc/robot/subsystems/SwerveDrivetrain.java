@@ -12,6 +12,7 @@ import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.revrobotics.CANSparkMax;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -28,7 +29,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -97,6 +97,11 @@ public class SwerveDrivetrain extends SubsystemBase {
   private final Sensors_Subsystem sensors;
   private final SwerveModuleMK3[] modules;
 
+  // used to update postion esimates
+  double kTimeoffset = .1;  //[s] measurement delay from photonvis TODO:measure this???
+  private final PhotonVision photonVision;
+
+//Network tables
   private NetworkTable table;
   private NetworkTable postionTable;
   private NetworkTableEntry currentX;
@@ -133,8 +138,8 @@ public class SwerveDrivetrain extends SubsystemBase {
   // Creates a new Single-Pole IIR filter
   // Time constant is 0.1 seconds
   // Period is 0.02 seconds - this is the standard FRC main loop period
-  private LinearFilter bearingFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
-  private LinearFilter velocityFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
+  private LinearFilter bearingFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
+  private LinearFilter velocityFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
 
   public final SwerveDrivePoseEstimator m_poseEstimator;
 
@@ -142,6 +147,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   public SwerveDrivetrain() {
     sensors = RobotContainer.RC().sensors;
+    photonVision = RobotContainer.RC().photonVision;
 
     var MT = CANSparkMax.MotorType.kBrushless;
     modules = new SwerveModuleMK3[] {
@@ -336,7 +342,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     m_pose = new_pose;
     m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);
   }
-//TODO: do we REALLY think this is where we need to go? field coords???
+  //TODO: do we REALLY think this is where we need to go? field coords???
   // resets X,Y, and set current angle to be 0
   public void resetPose() {
     resetPose(0, 0);
@@ -478,7 +484,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     // WIP use other poseEstimator
     m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
-    double now = Timer.getFPGATimestamp();
+    
     // Also apply vision measurements. We use 0.3 seconds in the past as an example
     // on real robot, this must be calculated based either on latency or timestamps.
     /*
@@ -488,6 +494,15 @@ public class SwerveDrivetrain extends SubsystemBase {
      * m_poseEstimator.getEstimatedPosition()), now - 0.3);
      * 
      */
+    //PhotonVision from here down
+    if (photonVision == null) return;
+    if (photonVision.hasAprilTarget()) {
+      //only if we have a tag in view
+      Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
+      m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
+    }
+  }
+    
   }
 
   // TODO: Move to a TEST/Tuning command - DPL 2/21/22
@@ -538,4 +553,3 @@ public class SwerveDrivetrain extends SubsystemBase {
   // }
   // }
 
-}
