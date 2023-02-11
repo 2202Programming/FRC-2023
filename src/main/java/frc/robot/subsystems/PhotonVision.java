@@ -36,7 +36,7 @@ public class PhotonVision extends SubsystemBase {
   private boolean hasTapeTargets;
   private List<PhotonTrackedTarget> AprilTargets;
   private List<PhotonTrackedTarget> TapeTargets;
-  private PhotonTrackedTarget bestTarget;
+  private PhotonTrackedTarget bestTarget = new PhotonTrackedTarget();
   private double yaw;
   private double pitch;
   private double area;
