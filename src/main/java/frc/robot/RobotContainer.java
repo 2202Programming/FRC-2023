@@ -148,22 +148,8 @@ public class RobotContainer {
 
       case Competition:
       default:
-      //everything subject to change
-      dc.Driver().x().whileTrue(new ChargeStationBalance(false));
-      dc.Driver().y().whileTrue(new CalibrateFieldCentric());
-      dc.Driver().leftStick().whileTrue(new );
-      dc.Driver().rightStick().whileTrue(new );
-      dc.Driver().leftTrigger().whileTrue(new RobotOrFieldCentric());
-      dc.Driver().rightTrigger().whileTrue(new ActivatePlacer());
-      dc.Operator().leftTrigger().whileTrue(new leftColumn());
-      dc.Operator().rightTrigger().whileTrue(new rightColumn());
-      dc.Operator().leftBumper().whileTrue(new toggleIntake());
-      dc.Operator().rightBumper().whileTrue(new operatorPlaceConfirm());
-      dc.Operator().a().whileTrue(new activateIntake());
-      dc.Operator().b().whileTrue(new intakeOrOrientatorRunBack());
-      dc.Operator().x().whileTrue(new bottomRow());
-      dc.Operator().y().whileTrue(new topRow());
-        break;
+        //TODO: Put Competition bindings here
+        break;      
     }
   }
 
@@ -180,73 +166,4 @@ public class RobotContainer {
             new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))),
         true);
   }
-  /**
-   * Driver xbox controller button bindings
-   * <ul>
-   * <li>B - *nothing bound*</li>
-   * <li>A - Invert Controls</li>
-   * <li>Y - Autoshift Toggle</li>
-   * <li>X - Robot balance toggle</li>
-   * </ul>
-   */
-  // void setDriverButtons() {
-  //   // B - Toggle drive mode
-  //   if (m_robotSpecs.getSubsystemConfig().HAS_DRIVETRAIN && m_robotSpecs.getSubsystemConfig().IS_COMPETITION_BOT) {
-  //     //driverControls.bind(Id.Driver, XboxButton.B).whenPressed(m_driveController::cycleDriveMode);
-  //     driverControls.bind(Id.Driver, XboxButton.Y).whenPressed(new InstantCommand(() -> { drivetrain.resetAnglePose(Rotation2d.fromDegrees(-180)); })); //-180 reset if intake faces drivers
-  //     driverControls.bind(Id.Driver, XboxAxis.TRIGGER_LEFT).whenPressed(m_driveController::setRobotCentric);
-  //     driverControls.bind(Id.Driver, XboxAxis.TRIGGER_LEFT).whenReleased(m_driveController::setFieldCentric);   
-  //     driverControls.bind(Id.Driver, XboxAxis.TRIGGER_RIGHT).whenPressed(m_driveController::turnOnShootingMode);
-  //     driverControls.bind(Id.Driver, XboxAxis.TRIGGER_RIGHT).whenReleased(m_driveController::turnOffShootingMode);
-  //   }
-  //   if (m_robotSpecs.getSubsystemConfig().HAS_DRIVETRAIN && !m_robotSpecs.getSubsystemConfig().IS_COMPETITION_BOT) {
-  //     driverControls.bind(Id.Driver, XboxButton.B).whenPressed(m_driveControllerDrivetrain::cycleDriveMode);
-  //     driverControls.bind(Id.Driver, XboxButton.Y).whenPressed(new InstantCommand(() -> { drivetrain.resetAnglePose(Rotation2d.fromDegrees(-180)); })); //-180 reset if intake faces drivers
-  //     driverControls.bind(Id.Driver, XboxAxis.TRIGGER_LEFT).whenPressed(m_driveControllerDrivetrain::setRobotCentric);
-  //     driverControls.bind(Id.Driver, XboxAxis.TRIGGER_LEFT).whenReleased(m_driveControllerDrivetrain::setFieldCentric);   
-  //     driverControls.bind(Id.Driver, XboxAxis.TRIGGER_RIGHT).whenPressed(m_driveControllerDrivetrain::turnOnShootingMode);
-  //     driverControls.bind(Id.Driver, XboxAxis.TRIGGER_RIGHT).whenReleased(m_driveControllerDrivetrain::turnOffShootingMode);
-  //   }
-
-
-  //   // RB limelight toggle
-  //   if (m_robotSpecs.getSubsystemConfig().HAS_LIMELIGHT)
-  //     driverControls.bind(Id.Driver, XboxButton.X).whenPressed(new InstantCommand(limelight::toggleLED));
-
-  //   //temporary for navx/pigeon testing
-  //   driverControls.bind(Id.Driver, XboxPOV.POV_UP).whenPressed(new InstantCommand(()->{ sensors.disableNavx(true); }));
-  //   driverControls.bind(Id.Driver, XboxPOV.POV_DOWN).whenPressed(new InstantCommand(()->{ sensors.disableNavx(false); }));
-
-  // }
-  // void setAssistantButtons() {
-  //   // LB - Intake up/down toggle
-  //   // B - Intake run back
-  //   // A - bottom row
-  //   // RT - right column
-  //   if (driverControls.isConnected(Id.SwitchBoard)) {
-  //     driverControls.bind(Id.SwitchBoard, SBButton.Sw13).whenActive(new ResetPosition(Autonomous.startPose3));
-  //   }
-    
-  //   if (m_robotSpecs.getSubsystemConfig().HAS_INTAKE) {
-  //     driverControls.bind(Id.Assistant, XboxButton.LB).whenPressed(new MoveIntake(DeployMode.Toggle));
-  //     //vertical intake controls - manual control of intake and side rollers,not the magazine
-  //     driverControls.bind(Id.Assistant, XboxButton.A).whileHeld(new IntakeCommand((() -> 0.6), () -> 0.5, IntakeMode.LoadCargo));
-  //     driverControls.bind(Id.Assistant, XboxButton.B).whileHeld(new IntakeCommand((() -> 0.35), () -> 0.5, IntakeMode.ExpellCargo));
-  //   }
-
-  //   if (m_robotSpecs.getSubsystemConfig().HAS_MAGAZINE && m_robotSpecs.getSubsystemConfig().HAS_SHOOTER) {
-  //     // Positioner binds :)
-  //     driverControls.bind(Id.Assistant, XboxButton.RB).whenPressed(new MovePositioner(PositionerMode.Toggle));
-
-  //     // Magazine Commands with intake sides, and intake roller
-  //     driverControls.bind(Id.Assistant, XboxButton.X).whileHeld(mag_default_cmd.getFeedCmd());
-  //     driverControls.bind(Id.Assistant, XboxButton.Y).whileHeld(mag_default_cmd.getEjectCmd());
-
-  //     driverControls.bind(Id.Assistant, XboxAxis.TRIGGER_RIGHT).whileHeld(new VelShootGatedCommand(Shooter.DefaultSettings,     mag_default_cmd));
-  //     driverControls.bind(Id.Assistant, XboxPOV.POV_LEFT)      .whileHeld(new VelShootGatedCommand(Shooter.shortVelocity,       mag_default_cmd));
-  //     driverControls.bind(Id.Assistant, XboxPOV.POV_UP)        .whileHeld(new VelShootGatedCommand(Shooter.shortMediumVelocity, mag_default_cmd));
-  //     driverControls.bind(Id.Assistant, XboxPOV.POV_DOWN)      .whileHeld(new VelShootGatedCommand(Shooter.mediumVelocity,      mag_default_cmd));
-  //     driverControls.bind(Id.Assistant, XboxPOV.POV_RIGHT)     .whileHeld(new VelShootGatedCommand(Shooter.longVelocity,        mag_default_cmd));
-  //   }
-  // }
 }
