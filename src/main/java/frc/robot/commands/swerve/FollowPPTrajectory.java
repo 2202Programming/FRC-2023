@@ -8,9 +8,7 @@ import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -34,6 +32,7 @@ public class FollowPPTrajectory extends CommandBase {
   public FollowPPTrajectory(PathPlannerTrajectory path, boolean useOdo) {
     sdt = RobotContainer.RC().drivetrain;
     sensors = RobotContainer.RC().sensors;
+    this.useOdo = useOdo;
     this.path = path;
         // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(sdt, sensors);
@@ -74,16 +73,16 @@ public class FollowPPTrajectory extends CommandBase {
       return new InstantCommand();  // no path selected
     }
     
-    //TODO: wtf does htis do
+
     //sdt.m_field.getObject(pathname).setTrajectory(path);
 
     // get initial state from the trajectory
     PathPlannerState initialState = path.getInitialState();
     Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
     //TODO: take PID values from Constants or construction?
-    PIDController xController = new PIDController(0.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController yController = new PIDController(0.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController thetaController = new PIDController(0.0, 0, 0, Constants.DT);     // [rad]
+    PIDController xController = new PIDController(4, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController yController = new PIDController(4, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController thetaController = new PIDController(0.1, 0, 0, Constants.DT);     // [rad]
 
  
       //Units are radians for thetaController; PPSwerveController is using radians internally.
@@ -110,7 +109,8 @@ public class FollowPPTrajectory extends CommandBase {
           //sensors.setAutoStartPose(startingPose);
           sdt.setPose(startingPose);
       }),
-      new PrintCommand("***Running Path.  Current Pose:"+sdt.getPose()),
+      new PrintCommand("***Running Path.  Current Pose:"),
+      new InstantCommand(sdt::printPose),
       swerveControllerCommand,
       new InstantCommand(sdt::stop),
       new PrintCommand("***Done running Path."),
