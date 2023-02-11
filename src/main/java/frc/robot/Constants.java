@@ -51,7 +51,7 @@ public final class Constants {
 
   public static final SubsystemConfig swerveBotSubsystemConfig = new SubsystemConfig(false, false, false, false, false,
       false, true, true);
-  public static final SubsystemConfig compBotSubsystemConfig = new SubsystemConfig(true, true, true, true, true, true,
+  public static final SubsystemConfig chadBotSubsystemConfig = new SubsystemConfig(true, true, true, true, true, true,
       true, true);
 
   public static final double FTperM = 3.28084;
@@ -261,8 +261,8 @@ public final class Constants {
         99.5 / 1000.0, 12.8, 8.14);
 
     // FOR Competion Bot - degrees
-    public static final WheelOffsets compBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
-    public static final ChassisConfig compBotChassisConfig = new ChassisConfig(MperFT * (21.516 / 12) / 2,
+    public static final WheelOffsets chadBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
+    public static final ChassisConfig chadBotChassisConfig = new ChassisConfig(MperFT * (21.516 / 12) / 2,
         MperFT * (24.87 / 12) / 2, 0.995, 99.5 / 1000.0, 12.8, 8.14);
 
   }
