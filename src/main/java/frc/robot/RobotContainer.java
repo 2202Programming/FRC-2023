@@ -86,10 +86,10 @@ public class RobotContainer {
     robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio SN
     dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05); // TODO: deal with driver prefs
 
-    limelight.setPipeline(1);
+    limelight.setPipeline(0);
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
-      case CompetitionBot:
+      case CompetitionBot2023:
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
@@ -187,7 +187,7 @@ public class RobotContainer {
     //     new PrintCommand("End of Path 2 Construction"));
 
 
-ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("autopath1", new PathConstraints(1, 1));
+ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("autopath2", new PathConstraints(2, 2));
 
 // This is just an example event map. It would be better to have a constant, global event map
 // in your code that will be used by all path following commands.

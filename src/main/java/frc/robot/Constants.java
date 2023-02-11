@@ -7,10 +7,9 @@
 
 package frc.robot;
 
-import frc.robot.util.PIDFController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import java.lang.Math;
+import frc.robot.util.PIDFController;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -49,11 +48,19 @@ public final class Constants {
     }
   }
 
-  public static final SubsystemConfig swerveBotSubsystemConfig = new SubsystemConfig(false, false, false, false, false,
-      false, true, true);
-  public static final SubsystemConfig compBotSubsystemConfig = new SubsystemConfig(true, true, true, true, true, true,
-      true, true);
+  public static final SubsystemConfig swerveBotSubsystemConfig = new SubsystemConfig(false,false, false, false, false,      false, true, true);
+  public static final SubsystemConfig chadBotSubsystemConfig = new SubsystemConfig(true, true, false, true, true, true, true, true);
+  //2023 competitionbot
+  public static final SubsystemConfig compBotSubsystemConfig = new SubsystemConfig(true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true);
 
+  // Handy feet to meters
   public static final double FTperM = 3.28084;
   public static final double MperFT = 1.0 / FTperM;
 
@@ -131,13 +138,12 @@ public final class Constants {
     public static final int RIGHT_WRIST = 0;
     public static final int LEFT_WRIST = 1;
 
-    //dpl unused public static final int INTAKE = 0;
+    // dpl unused public static final int INTAKE = 0;
   }
-
 
   // Digital IO on the RIO
   public static final class DigitalIO {
-    
+
   }
 
   public static final class AnalogIn {
@@ -151,8 +157,8 @@ public final class Constants {
     public static final int INTAKE_DOWN_SOLENOID_PCM = 3; // test value
     public static final int POSITIONER_UP_SOLENOID_PCM = 0; // test value
     public static final int POSITIONER_DOWN_SOLENOID_PCM = 1; // test value
-    
-    //claw double Solenoid
+
+    // claw double Solenoid
     public static final int CLAW_FWD = 4;
     public static final int CLAW_REV = 5;
 
@@ -255,15 +261,25 @@ public final class Constants {
     public static final PIDFController anglePIDF = new PIDFController(0.01, 0.0, 0.0, 0.0); // maybe 1.0,0.0,0.1 from
                                                                                             // SDS sample code?
 
-    // FOR SWERVEBOT
+    // FOR SWERVEBOT, aka Tim 2.0
     public static final WheelOffsets swerveBotOffsets = new WheelOffsets(-98.942, 91.33, -177.035, -28.215);
     public static final ChassisConfig swerveBotChassisConfig = new ChassisConfig(10.5 / 12, 10.5 / 12, 0.995,
         99.5 / 1000.0, 12.8, 8.14);
 
-    // FOR Competion Bot - degrees
-    public static final WheelOffsets compBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
-    public static final ChassisConfig compBotChassisConfig = new ChassisConfig(MperFT * (21.516 / 12) / 2,
+    // FOR 2022 Chad Bot - degrees
+    public static final WheelOffsets chadBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
+    public static final ChassisConfig chadBotChassisConfig = new ChassisConfig(MperFT * (21.516 / 12) / 2,
         MperFT * (24.87 / 12) / 2, 0.995, 99.5 / 1000.0, 12.8, 8.14);
+
+    // For 2023 CompetitionBot TODO FIX ME
+    public static final WheelOffsets compBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
+    public static final ChassisConfig compBotChassisConfig = new ChassisConfig(
+        MperFT * (21.516 / 12) / 2,
+        MperFT * (24.87 / 12) / 2,
+        0.999, // scale [] <= 1.0
+        (99.5 / 1000.0), // wheel diameter[m]
+        12.8,
+        8.14);
 
   }
 
@@ -416,23 +432,19 @@ public final class Constants {
     public double getLengthY() {
       return lengthY;
     }
+
     public double getLengthZ() {
       return armLength;
     }
   }
-    
-  
-      public enum DriverMode {
-        Arcade(0), Tank(1), XYRot(2);
-  
-        public final int value;
-  
-        DriverMode(int value) {
-          this.value = value;
-        }
-      }
+
+  public enum DriverMode {
+    Arcade(0), Tank(1), XYRot(2);
+
+    public final int value;
+
+    DriverMode(int value) {
+      this.value = value;
     }
-   
-     
-   
-  
+  }
+}
