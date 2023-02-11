@@ -76,6 +76,7 @@ public class PhotonVision extends SubsystemBase {
     //setup PhotonVision's pose estimator
     robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, camera_global, robotToCam);
     previousPoseEstimate = new Pair<>(new Pose2d(), 0.0);
+    currentPoseEstimate =  new Pair<>(new Pose2d(), 0.0);
   }
 
   @Override
@@ -103,10 +104,10 @@ public class PhotonVision extends SubsystemBase {
       targetID = bestTarget.getFiducialId();
       previousPoseEstimate = currentPoseEstimate;
       currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate.getFirst());// .getFirst();
-    }
 
-    SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
-    SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
+      SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
+      SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
+    }
 
     // Query the latest Retroreflective result from PhotonVision
     var result_microsoft = camera_microsoft.getLatestResult();
