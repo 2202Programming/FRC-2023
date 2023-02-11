@@ -82,7 +82,7 @@ public class FollowPPTrajectory extends CommandBase {
     //TODO: take PID values from Constants or construction?
     PIDController xController = new PIDController(4, 0.0, 0.0, Constants.DT);   // [m]
     PIDController yController = new PIDController(4, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController thetaController = new PIDController(0.1, 0, 0, Constants.DT);     // [rad]
+    PIDController thetaController = new PIDController(2.0, 0, 0, Constants.DT);     // [rad]
 
  
       //Units are radians for thetaController; PPSwerveController is using radians internally.
@@ -98,6 +98,7 @@ public class FollowPPTrajectory extends CommandBase {
           yController,
           thetaController,
           sdt::drive,
+          true, // be very careful make sure alliance color in ds is set to blue for testing
           sdt
       );
 
@@ -139,6 +140,7 @@ public class FollowPPTrajectory extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    new PrintCommand("Done running path at end").schedule();
     sdt.stop();
   }
 
