@@ -98,10 +98,10 @@ public class SwerveDrivetrain extends SubsystemBase {
   private final SwerveModuleMK3[] modules;
 
   // used to update postion esimates
-  double kTimeoffset = .1;  //[s] measurement delay from photonvis TODO:measure this???
+  double kTimeoffset = .1; // [s] measurement delay from photonvis TODO:measure this???
   private final PhotonVision photonVision;
 
-//Network tables
+  // Network tables
   private NetworkTable table;
   private NetworkTable postionTable;
   private NetworkTableEntry currentX;
@@ -280,11 +280,11 @@ public class SwerveDrivetrain extends SubsystemBase {
       meas_pos[i].distanceMeters = modules[i].getPosition();
     }
 
-    updateOdometry();  //upates old_pose and m_pose
+    updateOdometry(); // upates old_pose and m_pose
 
     // from -PI to +PI
     double temp = Math.atan2(m_pose.getY() - old_pose.getY(), m_pose.getX() - old_pose.getX());
-    //TODO: is != really the right test?
+    // TODO: is != really the right test?
     if (temp != 0) { // remove singularity when moving too slow - otherwise lots of jitter
       currentBearing = temp;
       // convert this to degrees in the range -180 to 180
@@ -342,7 +342,8 @@ public class SwerveDrivetrain extends SubsystemBase {
     m_pose = new_pose;
     m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);
   }
-  //TODO: do we REALLY think this is where we need to go? field coords???
+
+  // TODO: do we REALLY think this is where we need to go? field coords???
   // resets X,Y, and set current angle to be 0
   public void resetPose() {
     resetPose(0, 0);
@@ -477,79 +478,71 @@ public class SwerveDrivetrain extends SubsystemBase {
   }
 
   /** Updates the field relative position of the robot. */
-  public void updateOdometry() {
-    //update states
+  void updateOdometry() {
+    // update states
     old_pose = m_pose;
     m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
 
     // WIP use other poseEstimator
     m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
-    
-    // Also apply vision measurements. We use 0.3 seconds in the past as an example
-    // on real robot, this must be calculated based either on latency or timestamps.
-    /*
-     * WORK IN PROGRESS
-     * m_poseEstimator.addVisionMeasurement(
-     * ExampleGlobalMeasurementSensor.getEstimatedGlobalPose(
-     * m_poseEstimator.getEstimatedPosition()), now - 0.3);
-     * 
-     */
-    //PhotonVision from here down
-    if (photonVision == null) return;
+
+    // PhotonVision from here down
+    if (photonVision == null)
+      return;
+
     if (photonVision.hasAprilTarget()) {
-      //only if we have a tag in view
+      // only if we have a tag in view
       Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
       m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
     }
   }
-    
-  }
 
-  // TODO: Move to a TEST/Tuning command - DPL 2/21/22
-  // private void pidTuning() { //if drivetrain tuning
+}
 
-  // // read PID coefficients from SmartDashboard if tuning drivetrain
-  // double drive_p = SmartDashboard.getNumber("Drive P Gain",
-  // DriveTrain.drivePIDF.getP());
-  // double drive_i = SmartDashboard.getNumber("Drive I Gain",
-  // DriveTrain.drivePIDF.getI());
-  // double drive_d = SmartDashboard.getNumber("Drive D Gain",
-  // DriveTrain.drivePIDF.getD());
-  // double drive_ff = SmartDashboard.getNumber("Drive Feed Forward",
-  // DriveTrain.drivePIDF.getF());
-  // double angle_p = SmartDashboard.getNumber("Angle P Gain",
-  // DriveTrain.anglePIDF.getP());
-  // double angle_i = SmartDashboard.getNumber("Angle I Gain",
-  // DriveTrain.anglePIDF.getI());
-  // double angle_d = SmartDashboard.getNumber("Angle D Gain",
-  // DriveTrain.anglePIDF.getD());
-  // double angle_ff = SmartDashboard.getNumber("Angle Feed Forward",
-  // DriveTrain.anglePIDF.getF());
+// TODO: Move to a TEST/Tuning command - DPL 2/21/22
+// private void pidTuning() { //if drivetrain tuning
 
-  // // if anything changes in drive PID, update all the modules with a new drive
-  // PID
-  // if ((drive_p != drive_kP) || (drive_i != drive_kI) || (drive_d != drive_kD)
-  // || (drive_ff != drive_kFF)) {
-  // drive_kP = drive_p;
-  // drive_kI = drive_i;
-  // drive_kD = drive_d;
-  // drive_kFF = drive_ff;
-  // for (SwerveModuleMK3 i : modules) {
-  // i.setDrivePID(new PIDFController(drive_kP, drive_kI, drive_kD, drive_kFF));
-  // }
-  // }
+// // read PID coefficients from SmartDashboard if tuning drivetrain
+// double drive_p = SmartDashboard.getNumber("Drive P Gain",
+// DriveTrain.drivePIDF.getP());
+// double drive_i = SmartDashboard.getNumber("Drive I Gain",
+// DriveTrain.drivePIDF.getI());
+// double drive_d = SmartDashboard.getNumber("Drive D Gain",
+// DriveTrain.drivePIDF.getD());
+// double drive_ff = SmartDashboard.getNumber("Drive Feed Forward",
+// DriveTrain.drivePIDF.getF());
+// double angle_p = SmartDashboard.getNumber("Angle P Gain",
+// DriveTrain.anglePIDF.getP());
+// double angle_i = SmartDashboard.getNumber("Angle I Gain",
+// DriveTrain.anglePIDF.getI());
+// double angle_d = SmartDashboard.getNumber("Angle D Gain",
+// DriveTrain.anglePIDF.getD());
+// double angle_ff = SmartDashboard.getNumber("Angle Feed Forward",
+// DriveTrain.anglePIDF.getF());
 
-  // // if anything changes in angle PID, update all the modules with a new angle
-  // PID
-  // if ((angle_p != angle_kP) || (angle_i != angle_kI) || (angle_d != angle_kD)
-  // || (angle_ff != angle_kFF)) {
-  // angle_kP = angle_p;
-  // angle_kI = angle_i;
-  // angle_kD = angle_d;
-  // angle_kFF = angle_ff;
-  // for (SwerveModuleMK3 i : modules) {
-  // i.setAnglePID(new PIDFController(angle_kP, angle_kI, angle_kD, angle_kFF));
-  // }
-  // }
-  // }
+// // if anything changes in drive PID, update all the modules with a new drive
+// PID
+// if ((drive_p != drive_kP) || (drive_i != drive_kI) || (drive_d != drive_kD)
+// || (drive_ff != drive_kFF)) {
+// drive_kP = drive_p;
+// drive_kI = drive_i;
+// drive_kD = drive_d;
+// drive_kFF = drive_ff;
+// for (SwerveModuleMK3 i : modules) {
+// i.setDrivePID(new PIDFController(drive_kP, drive_kI, drive_kD, drive_kFF));
+// }
+// }
 
+// // if anything changes in angle PID, update all the modules with a new angle
+// PID
+// if ((angle_p != angle_kP) || (angle_i != angle_kI) || (angle_d != angle_kD)
+// || (angle_ff != angle_kFF)) {
+// angle_kP = angle_p;
+// angle_kI = angle_i;
+// angle_kD = angle_d;
+// angle_kFF = angle_ff;
+// for (SwerveModuleMK3 i : modules) {
+// i.setAnglePID(new PIDFController(angle_kP, angle_kI, angle_kD, angle_kFF));
+// }
+// }
+// }
