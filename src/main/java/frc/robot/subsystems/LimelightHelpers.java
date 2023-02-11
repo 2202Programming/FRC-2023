@@ -1,6 +1,6 @@
 //LimelightHelpers v1.1.2 (Feb 8, 2023)
 
-package frc.robot;
+package frc.robot.subsystems;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -638,6 +638,14 @@ public class LimelightHelpers {
      * The LEDs will be controlled by Limelight pipeline settings, and not by robot
      * code.
      */
+
+
+    public static double getLEDMode(String limelightName){
+        //getLEDMode method was not in v1.2 helpers
+        //implemented by Team2202
+        return getLimelightNTDouble(limelightName, "ledMode");
+    }
+
     public static void setLEDMode_PipelineControl(String limelightName) {
         setLimelightNTDouble(limelightName, "ledMode", 0);
     }
