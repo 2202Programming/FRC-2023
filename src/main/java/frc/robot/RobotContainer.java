@@ -164,7 +164,6 @@ public class RobotContainer {
       dc.Operator().x().whileTrue(new bottomRow());
       dc.Operator().y().whileTrue(new topRow());
         break;
-        break;      
     }
   }
 
