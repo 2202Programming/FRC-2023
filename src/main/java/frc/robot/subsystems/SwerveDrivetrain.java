@@ -515,7 +515,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     if (photonVision.hasAprilTarget()) {
       // only if we have a tag in view
       Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
-      m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
+      //m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
     }
     m_pose_integ = m_poseEstimator.getEstimatedPosition();
   }
