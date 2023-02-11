@@ -176,36 +176,40 @@ public class RobotContainer {
     //         new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))),
     //     true);
 
-    return new SequentialCommandGroup(
-        new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate"),
-    false), 
-        new PrintCommand("End of Path 1 Construction"),
-        new WaitCommand(1),
-        new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate2"),
-    true),
-        new PrintCommand("End of Path 2 Construction"));
+    // return new SequentialCommandGroup(
+    //     new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate"),
+    // false), 
+    //     new PrintCommand("End of Path 1 Construction"),
+    //     new WaitCommand(1),
+    //     new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate2"),
+    // true),
+    //     new PrintCommand("End of Path 2 Construction"));
 
 
-// ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("rotate", new PathConstraints(4, 3));
+ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("autopath1", new PathConstraints(1, 1));
 
-// // This is just an example event map. It would be better to have a constant, global event map
-// // in your code that will be used by all path following commands.
-// HashMap<String, Command> eventMap = new HashMap<>();
+// This is just an example event map. It would be better to have a constant, global event map
+// in your code that will be used by all path following commands.
+HashMap<String, Command> eventMap = new HashMap<>();
+eventMap.put("start", new SequentialCommandGroup(new PrintCommand("***Path Start"), new InstantCommand(drivetrain::printPose)));
+eventMap.put("middle", new SequentialCommandGroup(new PrintCommand("***Path Middle"), new InstantCommand(drivetrain::printPose)));
+eventMap.put("end", new SequentialCommandGroup(new PrintCommand("***Path End"), new InstantCommand(drivetrain::printPose), new ChargeStationBalance(true)));
 
-// // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
-// SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
-//     drivetrain::getPose, // Pose2d supplier
-//     drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
-//     drivetrain.getKinematics(), // SwerveDriveKinematics
-//     new PIDConstants(5.0, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-//     new PIDConstants(0.5, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
-//     drivetrain::drive, // Module states consumer used to output to the drive subsystem
-//     eventMap,
-//     false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-//     drivetrain // The drive subsystem. Used to properly set the requirements of path following commands
-// );
 
-// Command fullAuto = autoBuilder.fullAuto(pathGroup);
-// return fullAuto;
+// Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
+SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
+    drivetrain::getPose, // Pose2d supplier
+    drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
+    drivetrain.getKinematics(), // SwerveDriveKinematics
+    new PIDConstants(4.0, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+    new PIDConstants(2.0, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
+    drivetrain::drive, // Module states consumer used to output to the drive subsystem
+    eventMap,
+    false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+    drivetrain // The drive subsystem. Used to properly set the requirements of path following commands
+);
+
+Command fullAuto = autoBuilder.fullAuto(pathGroup);
+return fullAuto;
  }
 }
