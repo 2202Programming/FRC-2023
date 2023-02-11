@@ -97,12 +97,8 @@ public final class Constants {
     public static final int DT_FL_CANCODER = 7;
 
     // Intake motor
-<<<<<<< Updated upstream
     public static final int INTAKE_RIGHT_MTR = 19;
     public static final int INTAKE_LEFT_MTR = 18;
-=======
-  
->>>>>>> Stashed changes
 
     // drive train drive / angle motors - sparkmax neo
     public static final int DT_FL_DRIVE = 20;

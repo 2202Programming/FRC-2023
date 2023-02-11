@@ -37,7 +37,7 @@ public class Elbow extends SubsystemBase {
   double currentVel;
 
   public Elbow() {
-    ctrl = new CANSparkMax(CAN.ELBOW, MotorType.kBrushless);
+    ctrl = new CANSparkMax(CAN.LEFT_ELBOW, MotorType.kBrushless);
     ctrl.restoreFactoryDefaults();
     ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
     pid = ctrl.getPIDController();

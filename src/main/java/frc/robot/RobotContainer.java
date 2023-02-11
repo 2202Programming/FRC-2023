@@ -170,7 +170,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
 
-<<<<<<< Updated upstream
     // return new FollowPPTrajectory(FollowPPTrajectory.pathFactoryTele(new PathConstraints(1, 1),
     //     new Pose2d(drivetrain.getPose().getX(),
     //         drivetrain.getPose().getY()+1,
@@ -214,14 +213,4 @@ SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
 Command fullAuto = autoBuilder.fullAuto(pathGroup);
 return fullAuto;
  }
-=======
-    return new FollowPPTrajectory(FollowPPTrajectory.pathFactoryTele(new PathConstraints(1, 1),
-        new Pose2d(drivetrain.getPose().getX(),
-            drivetrain.getPose().getY(),
-            new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))),
-        true);
-    //return new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate"),
-    //false);
-  }
->>>>>>> Stashed changes
 }
