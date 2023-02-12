@@ -148,22 +148,8 @@ public class RobotContainer {
 
       case Competition:
       default:
-      //everything subject to change
-      dc.Driver().x().whileTrue(new ChargeStationBalance());
-      dc.Driver().y().whileTrue(new CalibrateFieldCentric());
-      dc.Driver().leftStick().whileTrue(new move());
-      dc.Driver().rightStick().whileTrue(new move());
-      dc.Driver().leftTrigger().whileTrue(new RobotOrFieldCentric());
-      dc.Driver().rightTrigger().whileTrue(new ActivatePlacer());
-      dc.Operator().leftTrigger().whileTrue(new leftColumn());
-      dc.Operator().rightTrigger().whileTrue(new rightColumn());
-      dc.Operator().leftBumper().whileTrue(new toggleIntake());
-      dc.Operator().rightBumper().whileTrue(new operatorPlaceConfirm());
-      dc.Operator().a().whileTrue(new activateIntake());
-      dc.Operator().b().whileTrue(new intakeOrOrientatorRunBack());
-      dc.Operator().x().whileTrue(new bottomRow());
-      dc.Operator().y().whileTrue(new topRow());
-        break;
+        //TODO: Put Competition bindings here
+        break;      
     }
   }
 
