@@ -1,76 +1,83 @@
 package frc.robot.subsystems;
 
-import javax.lang.model.util.ElementScanner14;
-
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.LimelightHelpers.LimelightResults;
 
 
 public class Limelight_Helpers_util extends SubsystemBase{
-    LimelightResults llresults; 
-    private double x;
-    private double y;
-    private double area;
-    /*3 total LED Status 
-        0: pipeline control
-        1: off
-        2: blink
-        3: on
-    */
-    private double ledStatus; 
+    LimelightResults llresults;
+    DriverStation.Alliance color;
+    private double[] megaPose;
+    private double[] teamPose;
+    private boolean isBlue;
     final private String LL_NAME = "";//"limelight" for if left blank
 
-    public Limelight_Helpers_util(){
-        //
-        llresults = LimelightHelpers.getLatestResults(LL_NAME);
+    public Limelight_Helpers_util(){       
+        
+        //getting team Color
+        color = DriverStation.getAlliance();
+        if(color == DriverStation.Alliance.Blue){
+            isBlue = true;
+        }
+
     }
 
     public void peridic() {
-        x = LimelightHelpers.getTX(LL_NAME);
-        y = LimelightHelpers.getTY(LL_NAME);
-        area = LimelightHelpers.getTA(LL_NAME);
-        ledStatus = LimelightHelpers.getLEDMode(LL_NAME);
+        // in meters and degrees
+        megaPose = LimelightHelpers.getBotPose(LL_NAME);
+
+        //TeamPose
+        if(isBlue){
+            teamPose = LimelightHelpers.getBotpose_wpiBlue(LL_NAME);
+        }
+        else{
+            teamPose = LimelightHelpers.getBotPose_wpiRed(LL_NAME);
+        }
+
     }
 
 
 /*Get mehods below*/
+
     public double getX(){
-        return x;
+        return megaPose[0];
     }
     public double getY(){
-        return y;
+        return  megaPose[1];
     }
-    public double getArea(){
-        return area;
+    public double getZ(){
+        return  megaPose[2];
     }
-    public double getLEDStatus(){
-        return ledStatus;
+    public double getRoll(){
+        return megaPose[3];
+    }
+    public double getPitch(){
+        return megaPose[4];
+    }
+    public double getYaw(){
+        return megaPose[5];
     }
 
 
-/*Set methods below*/
-    /**
-     * @param id :
-     *       0: pipeline control
-     *       1: off
-     *       2: blink
-     *       3: on 
-     * Change the state of limeLight
-     */
-    public void setLEDMode(double id){
-        if(id == 0.0){
-            LimelightHelpers.setLEDMode_PipelineControl(LL_NAME);
-        }
-        else if(id == 1.0){
-            LimelightHelpers.setLEDMode_ForceOff(LL_NAME);
-        }
-        else if(id == 2.0){
-            LimelightHelpers.setLEDMode_ForceBlink(LL_NAME);
-        }
-        else if(id == 3.0){
-            LimelightHelpers.setLEDMode_ForceOn(LL_NAME);
-        }
-        else{
-        }
+
+    public double get_teamX(){
+        return teamPose[0];
     }
+    public double get_teamY(){
+        return  teamPose[1];
+    }
+    public double get_teamZ(){
+        return  teamPose[2];
+    }
+    public double get_teamRoll(){
+        return teamPose[3];
+    }
+    public double get_teamPitch(){
+        return teamPose[4];
+    }
+    public double get_teamYaw(){
+        return teamPose[5];
+    }
+
 }
