@@ -4,16 +4,7 @@
 
 package frc.robot;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.auto.PIDConstants;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -24,9 +15,9 @@ import frc.robot.Constants.Intake;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
+import frc.robot.commands.Automation.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
-import frc.robot.commands.swerve.FollowPPTrajectory;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Limelight_Subsystem;
@@ -77,6 +68,7 @@ public class RobotContainer {
   // vision systems, create on every bot
   public final PhotonVision photonVision = new PhotonVision();
   public final Limelight_Subsystem limelight = new Limelight_Subsystem();;
+  public HashMap<String, Command> eventMap;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -85,7 +77,7 @@ public class RobotContainer {
     RobotContainer.rc = this; // for singleton accesor
     robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio SN
     dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05); // TODO: deal with driver prefs
-
+    initEvents();  //setup event hashmap
     limelight.setPipeline(0);
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
@@ -169,48 +161,14 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    return new autoCommand();
+  }
 
-    // return new FollowPPTrajectory(FollowPPTrajectory.pathFactoryTele(new PathConstraints(1, 1),
-    //     new Pose2d(drivetrain.getPose().getX(),
-    //         drivetrain.getPose().getY()+1,
-    //         new Rotation2d(drivetrain.getPose().getRotation().getRadians() + Math.PI))),
-    //     true);
-
-    // return new SequentialCommandGroup(
-    //     new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate"),
-    // false), 
-    //     new PrintCommand("End of Path 1 Construction"),
-    //     new WaitCommand(1),
-    //     new FollowPPTrajectory(FollowPPTrajectory.pathFactoryAuto(new PathConstraints(1, 1),"rotate2"),
-    // true),
-    //     new PrintCommand("End of Path 2 Construction"));
-
-
-ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("AT Test", new PathConstraints(2, 3));  //5,3 tested and ok
-
-// This is just an example event map. It would be better to have a constant, global event map
-// in your code that will be used by all path following commands.
-HashMap<String, Command> eventMap = new HashMap<>();
-eventMap.put("start", new SequentialCommandGroup(new PrintCommand("***Path Start"), new InstantCommand(drivetrain::printPose)));
-eventMap.put("middle", new SequentialCommandGroup(new PrintCommand("***Path Middle"), new InstantCommand(drivetrain::printPose)));
-eventMap.put("end", new SequentialCommandGroup(new PrintCommand("***Path End"), new InstantCommand(drivetrain::printPose), new ChargeStationBalance(true)));
-eventMap.put("score", new SequentialCommandGroup(new PrintCommand("***Path score"), new InstantCommand(drivetrain::printPose), new WaitCommand(2)));
-
-
-// Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
-SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
-    drivetrain::getPose, // Pose2d supplier
-    drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
-    drivetrain.getKinematics(), // SwerveDriveKinematics
-    new PIDConstants(4.0, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-    new PIDConstants(2.0, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
-    drivetrain::drive, // Module states consumer used to output to the drive subsystem
-    eventMap,
-    true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-    drivetrain // The drive subsystem. Used to properly set the requirements of path following commands
-);
-
-Command fullAuto = autoBuilder.fullAuto(pathGroup);
-return fullAuto;
- }
+ public void initEvents(){
+    eventMap = new HashMap<>();
+    eventMap.put("start", new SequentialCommandGroup(new PrintCommand("***Path Start"), new InstantCommand(drivetrain::printPose)));
+    eventMap.put("middle", new SequentialCommandGroup(new PrintCommand("***Path Middle"), new InstantCommand(drivetrain::printPose)));
+    eventMap.put("end", new SequentialCommandGroup(new PrintCommand("***Path End"), new InstantCommand(drivetrain::printPose), new ChargeStationBalance(true)));
+    eventMap.put("score", new SequentialCommandGroup(new PrintCommand("***Path score"), new InstantCommand(drivetrain::printPose), new WaitCommand(2)));
+  }
 }
