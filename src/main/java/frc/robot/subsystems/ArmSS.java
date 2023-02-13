@@ -1,5 +1,9 @@
 package frc.robot.subsystems;
 
+import frc.robot.Constants.ArmSettings;
+import frc.robot.Constants.CAN;
+import frc.robot.util.PIDFController;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -35,7 +39,7 @@ public class ArmSS extends SubsystemBase {
      */
     class Arm {
         // commands
-        double velCmd; // [cm/s] computed
+        double velCmd;          // [cm/s] computed
 
         // measured values
         double currentPos;
@@ -93,8 +97,7 @@ public class ArmSS extends SubsystemBase {
 
 
         // we can change the max vel if we need to.
-        // TODO: update with proper value in constants, use the constants value, remove
-        // setter here
+        // TODO: update with proper value in constants, use the constants value, remove setter here
         void setMaxVel(double v) {
             maxVel = Math.abs(v);
         }
@@ -111,21 +114,21 @@ public class ArmSS extends SubsystemBase {
             velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
             // send our vel to the controller
             pid.setReference(velCmd, ControlType.kSmartVelocity); // TODO can we use position or SmartMotion modes?
-
+            
         }
-        
+
         /**
          * NTs
          */
 
-    } //End of Arm Class
-
+         
+    }
     // instance variables
     // State vars
     final Arm leftArm;
     final Arm rightArm;
 
-    // constants
+    // constants TODO actually move to constants also if we're using the SparkMax pid for outer control posTol and velTol are useless?
     double maxVel = 20.0; // [cm/s]
     double posTol = .2; // [cm]
     double velTol = .5; // [cm/s]
@@ -135,7 +138,7 @@ public class ArmSS extends SubsystemBase {
     double syncCompensation; // amount of compensation [m/s]
 
     // controllers
-    PIDController syncPID = new PIDController(0.25, 0.0, 0.0); // arm synchronization pid. syncs left --> right
+    PIDController syncPID = new PIDController(0.0, 0.0, 0.0); // arm synchronization pid. syncs left --> right
 
     public ArmSS() {
         leftArm = new Arm(CAN.ARM_LEFT_Motor);
@@ -156,11 +159,12 @@ public class ArmSS extends SubsystemBase {
     @Override
     public void periodic() {
         // Synchronization
-        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) / 2.0 : 0;
+        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) : 0;
 
+        elbow.periodic();
         leftArm.periodic(syncCompensation);
         rightArm.periodic(-syncCompensation);
-
+        
         ntUpdates();
     }
 
@@ -170,9 +174,9 @@ public class ArmSS extends SubsystemBase {
     }
 
     /******************
-     * Network Table Stuff.
+     * Network Table Stuff. 
      * 
-     * Should most of this be in the arm class? Probably.
+     * Should most of this be in the arm class? Probably. 
      * Is it easier to look at and fix if it's in the ArmSS class? Probably.
      *************/
     NetworkTable table = NetworkTableInstance.getDefault().getTable("arm");
@@ -209,7 +213,7 @@ public class ArmSS extends SubsystemBase {
     NetworkTableEntry nt_syncCompensation;
 
     public void ntcreate() {
-        // PIDs
+        //PIDs
         nt_left_kP = table.getEntry("Left kP");
         nt_left_kI = table.getEntry("Left kI");
         nt_left_kD = table.getEntry("Left kD");
@@ -240,15 +244,14 @@ public class ArmSS extends SubsystemBase {
         nt_posTol = table.getEntry("Position Tolerance (cm)");
         nt_velTol = table.getEntry("Velocity Tolerance (cm/s)");
 
-        // set doubles for values that we will update based on what is in NT, so they
-        // appear
-        nt_left_kP.setDouble(leftArm.positionPID.getP());
-        nt_left_kI.setDouble(leftArm.positionPID.getI());
-        nt_left_kD.setDouble(leftArm.positionPID.getD());
+        // set doubles for values that we will update based on what is in NT, so they appear
+        nt_left_kP.setDouble(leftArm.pid.getP());
+        nt_left_kI.setDouble(leftArm.pid.getI());
+        nt_left_kD.setDouble(leftArm.pid.getD());
 
-        nt_right_kP.setDouble(rightArm.positionPID.getP());
-        nt_right_kI.setDouble(rightArm.positionPID.getI());
-        nt_right_kD.setDouble(rightArm.positionPID.getD());
+        nt_right_kP.setDouble(rightArm.pid.getP());
+        nt_right_kI.setDouble(rightArm.pid.getI());
+        nt_right_kD.setDouble(rightArm.pid.getD());
 
         nt_sync_kP.setDouble(syncPID.getP());
         nt_sync_kI.setDouble(syncPID.getI());
@@ -261,33 +264,30 @@ public class ArmSS extends SubsystemBase {
 
     private void ntUpdates() {
         // info (get)
-        nt_left_desiredPos.setDouble(leftArm.getSetpoint());
+        // nt_left_desiredPos.setDouble(leftArm.desiredPos); TODO does not exust
         nt_left_currentPos.setDouble(leftArm.currentPos);
         nt_left_desiredVel.setDouble(leftArm.velCmd);
         nt_left_currentVel.setDouble(leftArm.encoder.getVelocity());
 
-        nt_right_desiredPos.setDouble(rightArm.getSetpoint());
+        // nt_right_desiredPos.setDouble(rightArm.desiredPos); TODO does not exust
         nt_right_currentPos.setDouble(rightArm.currentPos);
         nt_right_desiredVel.setDouble(rightArm.velCmd);
         nt_right_currentVel.setDouble(rightArm.encoder.getVelocity());
 
         nt_syncCompensation.setDouble(syncCompensation);
-
+        
         // PID setters
-        leftArm.positionPID.setP(nt_left_kP.getDouble(0.0));
-        leftArm.positionPID.setI(nt_left_kI.getDouble(0.0));
-        leftArm.positionPID.setD(nt_left_kD.getDouble(0.0));
+        leftArm.pid.setP(nt_left_kP.getDouble(0.0));
+        leftArm.pid.setI(nt_left_kI.getDouble(0.0));
+        leftArm.pid.setD(nt_left_kD.getDouble(0.0));
 
-        rightArm.positionPID.setP(nt_right_kP.getDouble(0.0));
-        rightArm.positionPID.setI(nt_right_kI.getDouble(0.0));
-        rightArm.positionPID.setD(nt_right_kD.getDouble(0.0));
+        rightArm.pid.setP(nt_right_kP.getDouble(0.0));
+        rightArm.pid.setI(nt_right_kI.getDouble(0.0));
+        rightArm.pid.setD(nt_right_kD.getDouble(0.0));
 
         syncPID.setP(nt_sync_kP.getDouble(0.0));
         syncPID.setI(nt_sync_kI.getDouble(0.0));
         syncPID.setD(nt_sync_kD.getDouble(0.0));
-
-        leftArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
-        rightArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
     }
 
 }
