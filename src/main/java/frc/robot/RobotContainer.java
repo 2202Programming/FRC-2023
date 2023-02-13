@@ -5,6 +5,10 @@
 package frc.robot;
 
 import java.util.HashMap;
+
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -69,7 +73,7 @@ public class RobotContainer {
   public final PhotonVision photonVision = new PhotonVision();
   public final Limelight_Subsystem limelight = new Limelight_Subsystem();;
   public HashMap<String, Command> eventMap;
-
+  public SwerveAutoBuilder autoBuilder;
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -115,6 +119,19 @@ public class RobotContainer {
 
     // Edit the binding confiuration for testing
     configureBindings(Bindings.Competition);
+
+    autoBuilder = new SwerveAutoBuilder(
+      drivetrain::getPose, // Pose2d supplier
+      drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
+      drivetrain.getKinematics(), // SwerveDriveKinematics
+      new PIDConstants(4.0, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      new PIDConstants(2.0, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
+      drivetrain::drive, // Module states consumer used to output to the drive subsystem
+      RobotContainer.RC().eventMap,
+      true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+      drivetrain // The drive subsystem. Used to properly set the requirements of path following commands
+    );
+
   }
 
 

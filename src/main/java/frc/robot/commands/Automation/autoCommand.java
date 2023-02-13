@@ -25,20 +25,9 @@ public class autoCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
-      drivetrain::getPose, // Pose2d supplier
-      drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
-      drivetrain.getKinematics(), // SwerveDriveKinematics
-      new PIDConstants(4.0, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-      new PIDConstants(2.0, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
-      drivetrain::drive, // Module states consumer used to output to the drive subsystem
-      RobotContainer.RC().eventMap,
-      true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-      drivetrain // The drive subsystem. Used to properly set the requirements of path following commands
-    );
-    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("AT Test", new PathConstraints(2, 3));  //5,3 tested and ok
 
-    autoBuilder.fullAuto(pathGroup).schedule();
+    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("AT Test", new PathConstraints(2, 3));  //5,3 tested and ok
+    RobotContainer.RC().autoBuilder.fullAuto(pathGroup).schedule();
 
   }
 
