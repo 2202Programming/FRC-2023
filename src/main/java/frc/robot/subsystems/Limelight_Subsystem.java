@@ -73,6 +73,7 @@ public class Limelight_Subsystem extends SubsystemBase {
   private LimelightHelpers.LimelightResults llresults;
   private Pose2d megaPose;
   private Pose2d teamPose;
+  private Pose2d bluePose;
   final private String LL_NAME = "";//"limelight" for if left blank
 
   
@@ -143,7 +144,10 @@ public class Limelight_Subsystem extends SubsystemBase {
     else{
         teamTempPose = LimelightHelpers.getBotPose_wpiRed(LL_NAME);
     }
+    double[] tempBluePose = LimelightHelpers.getBotpose_wpiBlue(LL_NAME);
+
     teamPose = new Pose2d(teamTempPose[X], teamTempPose[Y], Rotation2d.fromDegrees(teamTempPose[RZ]));
+    bluePose = new Pose2d(tempBluePose[X], tempBluePose[Y], Rotation2d.fromDegrees(tempBluePose[RZ]));
 
     SmartDashboard.putNumber("LL botpose X", megaPose.getX());
     SmartDashboard.putNumber("LL botpose Y", megaPose.getY());
@@ -152,6 +156,10 @@ public class Limelight_Subsystem extends SubsystemBase {
     SmartDashboard.putNumber("LL teampose X", teamPose.getX());
     SmartDashboard.putNumber("LL teampose Y", teamPose.getY());
     SmartDashboard.putNumber("LL teampose Yaw", teamPose.getRotation().getDegrees());
+
+    SmartDashboard.putNumber("LL bluePose X", bluePose.getX());
+    SmartDashboard.putNumber("LL bluePose Y", bluePose.getY());
+    SmartDashboard.putNumber("LL bluePose Yaw", bluePose.getRotation().getDegrees());
 
   }
 
