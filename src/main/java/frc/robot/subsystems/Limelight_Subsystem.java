@@ -5,12 +5,16 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.Shooter;
 
 public class Limelight_Subsystem extends SubsystemBase {
@@ -66,6 +70,13 @@ public class Limelight_Subsystem extends SubsystemBase {
   private double filterTC = 0.08;     // seconds, 2Hz cutoff T = 1/(2pi*f)  was .2hz T=.8
   private int log_counter = 0;
 
+  private LimelightHelpers.LimelightResults llresults;
+  private Pose2d megaPose;
+  private Pose2d teamPose;
+  private Pose2d bluePose;
+  final private String LL_NAME = "";//"limelight" for if left blank
+
+  
   public Limelight_Subsystem() {
     x_iir = LinearFilter.singlePoleIIR(filterTC, Constants.Tperiod);
     area_iir = LinearFilter.singlePoleIIR(filterTC, Constants.Tperiod);
@@ -87,6 +98,7 @@ public class Limelight_Subsystem extends SubsystemBase {
 
     nt_botpose.setDoubleArray(new double[]{0,0,0,0,0,0});
     disableLED();
+
   }
 
   @Override
@@ -102,9 +114,9 @@ public class Limelight_Subsystem extends SubsystemBase {
     pipeline = pipelineNTE.getInteger(0);  
 
     botpose = nt_botpose.getDoubleArray(new double[]{0,0,0,0,0,0});
+    llresults = LimelightHelpers.getLatestResults("");
 
-
-    if (botpose.length > 0) {
+    // if (botpose.length > 0) {
     /* DPL - this should be the same without the copy
     botpose_x = botpose[X];
     botpose_y = botpose[Y];
@@ -115,15 +127,39 @@ public class Limelight_Subsystem extends SubsystemBase {
     */
     //NOTE: LL gives position from the center of the field!  Need to transform to the standard of 0,0 at lower left
 
-    botpose[X] += 8.270458; //add 1/2 field X dimension in meters
-    botpose[Y] += 4.008216; //add 1/2 field Y dimension in meters
-    
+    // botpose[X] += 8.270458; //add 1/2 field X dimension in meters
+    // botpose[Y] += 4.008216; //add 1/2 field Y dimension in meters
+    //}
 
-    SmartDashboard.putNumber("LL botpose X", botpose[X]);
-    SmartDashboard.putNumber("LL botpose Y", botpose[Y]);
-    SmartDashboard.putNumber("LL botpose Z", botpose[Z]);
+    //new way of grabbing LL results
+    double[] tempPose = LimelightHelpers.getBotPose(LL_NAME);
+    megaPose = new Pose2d(tempPose[X], tempPose[Y], Rotation2d.fromDegrees(tempPose[RZ]));
+
+    //TeamPose
+    
+    double[] teamTempPose;
+    if(RobotContainer.RC().robotSpecs.isBlue()){
+        teamTempPose = LimelightHelpers.getBotpose_wpiBlue(LL_NAME);
     }
-    SmartDashboard.putNumber("LL X error", x);
+    else{
+        teamTempPose = LimelightHelpers.getBotPose_wpiRed(LL_NAME);
+    }
+    double[] tempBluePose = LimelightHelpers.getBotpose_wpiBlue(LL_NAME);
+
+    teamPose = new Pose2d(teamTempPose[X], teamTempPose[Y], Rotation2d.fromDegrees(teamTempPose[RZ]));
+    bluePose = new Pose2d(tempBluePose[X], tempBluePose[Y], Rotation2d.fromDegrees(tempBluePose[RZ]));
+
+    SmartDashboard.putNumber("LL botpose X", megaPose.getX());
+    SmartDashboard.putNumber("LL botpose Y", megaPose.getY());
+    SmartDashboard.putNumber("LL botpose Yaw", megaPose.getRotation().getDegrees());
+
+    SmartDashboard.putNumber("LL teampose X", teamPose.getX());
+    SmartDashboard.putNumber("LL teampose Y", teamPose.getY());
+    SmartDashboard.putNumber("LL teampose Yaw", teamPose.getRotation().getDegrees());
+
+    SmartDashboard.putNumber("LL bluePose X", bluePose.getX());
+    SmartDashboard.putNumber("LL bluePose Y", bluePose.getY());
+    SmartDashboard.putNumber("LL bluePose Yaw", bluePose.getRotation().getDegrees());
 
   }
 

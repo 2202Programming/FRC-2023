@@ -4,6 +4,7 @@
 
 package frc.robot.util;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ChassisConfig;
@@ -33,12 +34,15 @@ public class RobotSpecs {
         }
       }
     
+    
     public RobotNames myRobotName;
     private WheelOffsets myWheelOffsets;
     private ChassisConfig myChassisConfig;
     private SubsystemConfig mySubsystemConfig;
 
-
+    DriverStation.Alliance color;
+    private boolean isBlue;
+    
     public RobotSpecs() {
         this(System.getenv("serialnum"));        
     }
@@ -80,7 +84,23 @@ public class RobotSpecs {
                 break;
         }
         System.out.println("***I am " + myRobotName+" ***");
+
+        //getting team Color
+        color = DriverStation.getAlliance();
+        if(color == DriverStation.Alliance.Blue){
+            isBlue = true;
+            System.out.println("***We are on blue alliance***");
+        }
+        else {
+        isBlue = false;
+        System.out.println("***We are on red alliance***");
     }
+
+    }
+
+  public boolean isBlue(){
+    return isBlue;
+  }
 
   public WheelOffsets getWheelOffset(){
       return myWheelOffsets;

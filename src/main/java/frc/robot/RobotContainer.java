@@ -206,7 +206,7 @@ SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
     new PIDConstants(2.0, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
     drivetrain::drive, // Module states consumer used to output to the drive subsystem
     eventMap,
-    false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+    true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
     drivetrain // The drive subsystem. Used to properly set the requirements of path following commands
 );
 
