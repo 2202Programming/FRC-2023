@@ -128,7 +128,7 @@ public class ArmSS extends SubsystemBase {
     final Arm leftArm;
     final Arm rightArm;
 
-    // constants TODO actually move to constants also if we're using the SparkMax pid for outer control posTol and velTol are useless?
+    // constants
     double maxVel = 20.0; // [cm/s]
     double posTol = .2; // [cm]
     double velTol = .5; // [cm/s]
@@ -288,6 +288,9 @@ public class ArmSS extends SubsystemBase {
         syncPID.setP(nt_sync_kP.getDouble(0.0));
         syncPID.setI(nt_sync_kI.getDouble(0.0));
         syncPID.setD(nt_sync_kD.getDouble(0.0));
+
+        leftArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
+        rightArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
     }
 
 }
