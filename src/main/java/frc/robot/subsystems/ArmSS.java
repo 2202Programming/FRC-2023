@@ -264,12 +264,12 @@ public class ArmSS extends SubsystemBase {
 
     private void ntUpdates() {
         // info (get)
-        // nt_left_desiredPos.setDouble(leftArm.desiredPos); TODO does not exust
+        nt_left_desiredPos.setDouble(leftArm.getSetpoint());
         nt_left_currentPos.setDouble(leftArm.currentPos);
         nt_left_desiredVel.setDouble(leftArm.velCmd);
         nt_left_currentVel.setDouble(leftArm.encoder.getVelocity());
 
-        // nt_right_desiredPos.setDouble(rightArm.desiredPos); TODO does not exust
+        nt_right_desiredPos.setDouble(rightArm.getSetpoint());
         nt_right_currentPos.setDouble(rightArm.currentPos);
         nt_right_desiredVel.setDouble(rightArm.velCmd);
         nt_right_currentVel.setDouble(rightArm.encoder.getVelocity());
