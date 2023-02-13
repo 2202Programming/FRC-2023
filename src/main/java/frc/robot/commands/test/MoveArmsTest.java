@@ -16,7 +16,7 @@ public class MoveArmsTest extends CommandBase {
 
     @Override
     public void initialize() {
-        arm.setPositions(0);
+        arm.setPositions(0, 0);
         setpointAtZero = true;
     }
 
@@ -25,7 +25,7 @@ public class MoveArmsTest extends CommandBase {
         if (count <= 5) { count++; return; }
 
         if (arm.armsAtPosition()) {
-            arm.setPositions(setpointAtZero ? 10.0 : 0.0); // TODO: is 10.0 reasonable?
+            arm.setPositions(setpointAtZero ? 10.0 : 0.0, 0.0); // TODO: is 10.0 reasonable?
             setpointAtZero ^= true;
         }
 

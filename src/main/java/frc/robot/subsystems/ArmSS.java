@@ -245,13 +245,13 @@ public class ArmSS extends SubsystemBase {
         nt_velTol = table.getEntry("Velocity Tolerance (cm/s)");
 
         // set doubles for values that we will update based on what is in NT, so they appear
-        nt_left_kP.setDouble(leftArm.pid.getP());
-        nt_left_kI.setDouble(leftArm.pid.getI());
-        nt_left_kD.setDouble(leftArm.pid.getD());
+        nt_left_kP.setDouble(leftArm.positionPID.getP());
+        nt_left_kI.setDouble(leftArm.positionPID.getI());
+        nt_left_kD.setDouble(leftArm.positionPID.getD());
 
-        nt_right_kP.setDouble(rightArm.pid.getP());
-        nt_right_kI.setDouble(rightArm.pid.getI());
-        nt_right_kD.setDouble(rightArm.pid.getD());
+        nt_right_kP.setDouble(rightArm.positionPID.getP());
+        nt_right_kI.setDouble(rightArm.positionPID.getI());
+        nt_right_kD.setDouble(rightArm.positionPID.getD());
 
         nt_sync_kP.setDouble(syncPID.getP());
         nt_sync_kI.setDouble(syncPID.getI());
