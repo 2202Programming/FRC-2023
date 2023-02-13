@@ -277,13 +277,13 @@ public class ArmSS extends SubsystemBase {
         nt_syncCompensation.setDouble(syncCompensation);
         
         // PID setters
-        leftArm.pid.setP(nt_left_kP.getDouble(0.0));
-        leftArm.pid.setI(nt_left_kI.getDouble(0.0));
-        leftArm.pid.setD(nt_left_kD.getDouble(0.0));
+        leftArm.positionPID.setP(nt_left_kP.getDouble(0.0));
+        leftArm.positionPID.setI(nt_left_kI.getDouble(0.0));
+        leftArm.positionPID.setD(nt_left_kD.getDouble(0.0));
 
-        rightArm.pid.setP(nt_right_kP.getDouble(0.0));
-        rightArm.pid.setI(nt_right_kI.getDouble(0.0));
-        rightArm.pid.setD(nt_right_kD.getDouble(0.0));
+        rightArm.positionPID.setP(nt_right_kP.getDouble(0.0));
+        rightArm.positionPID.setI(nt_right_kI.getDouble(0.0));
+        rightArm.positionPID.setD(nt_right_kD.getDouble(0.0));
 
         syncPID.setP(nt_sync_kP.getDouble(0.0));
         syncPID.setI(nt_sync_kI.getDouble(0.0));
