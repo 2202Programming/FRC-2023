@@ -126,7 +126,7 @@ public class RobotContainer {
         sensors = null;
         drivetrain = null;
         intake = null;
-        armSS = null;
+        armSS = new ArmSS();
         elbow = null;
         claw = null;
         break;
