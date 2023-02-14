@@ -19,6 +19,11 @@ import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
+<<<<<<< integration
+=======
+import frc.robot.commands.swerve.FollowPPTrajectory;
+import frc.robot.commands.test.MoveArmsTest;
+>>>>>>> Updates
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Elbow;
@@ -101,6 +106,7 @@ public class RobotContainer {
         intake = null;
         armSS = null;
         elbow = null;
+<<<<<<< integration
         claw = null;
         break;
 
@@ -109,6 +115,8 @@ public class RobotContainer {
         drivetrain = new SwerveDrivetrain();
         intake = null;
         armSS = null;
+=======
+>>>>>>> Updates
         claw = null;
         break;
 
@@ -131,6 +139,7 @@ public class RobotContainer {
 
     initEvents(); // setup event hashmap
     // Edit the binding confiuration for testing
+<<<<<<< integration
     configureBindings(Bindings.Competition);
     initEvents();  //setup event hashmap
     autoBuilder = new SwerveAutoBuilder(
@@ -148,6 +157,10 @@ public class RobotContainer {
         drivetrain // The drive subsystem. Used to properly set the requirements of path following
                    // commands
     );
+=======
+    configureBindings(Bindings.arm_test);
+  }
+>>>>>>> Updates
 
   }
 

@@ -1,9 +1,5 @@
 package frc.robot.subsystems;
 
-import frc.robot.Constants.ArmSettings;
-import frc.robot.Constants.CAN;
-import frc.robot.util.PIDFController;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -39,7 +35,7 @@ public class ArmSS extends SubsystemBase {
      */
     class Arm {
         // commands
-        double velCmd;          // [cm/s] computed
+        double velCmd; // [cm/s] computed
 
         // measured values
         double currentPos;
@@ -97,7 +93,8 @@ public class ArmSS extends SubsystemBase {
 
 
         // we can change the max vel if we need to.
-        // TODO: update with proper value in constants, use the constants value, remove setter here
+        // TODO: update with proper value in constants, use the constants value, remove
+        // setter here
         void setMaxVel(double v) {
             maxVel = Math.abs(v);
         }
@@ -114,15 +111,15 @@ public class ArmSS extends SubsystemBase {
             velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
             // send our vel to the controller
             pid.setReference(velCmd, ControlType.kSmartVelocity); // TODO can we use position or SmartMotion modes?
-            
-        }
 
+        }
+        
         /**
          * NTs
          */
 
-         
-    }
+    } //End of Arm Class
+
     // instance variables
     // State vars
     final Arm leftArm;
@@ -138,7 +135,7 @@ public class ArmSS extends SubsystemBase {
     double syncCompensation; // amount of compensation [m/s]
 
     // controllers
-    PIDController syncPID = new PIDController(0.0, 0.0, 0.0); // arm synchronization pid. syncs left --> right
+    PIDController syncPID = new PIDController(0.25, 0.0, 0.0); // arm synchronization pid. syncs left --> right
 
     public ArmSS() {
         leftArm = new Arm(CAN.ARM_LEFT_Motor);
@@ -159,12 +156,11 @@ public class ArmSS extends SubsystemBase {
     @Override
     public void periodic() {
         // Synchronization
-        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) : 0;
+        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) / 2.0 : 0;
 
-        elbow.periodic();
         leftArm.periodic(syncCompensation);
         rightArm.periodic(-syncCompensation);
-        
+
         ntUpdates();
     }
 
@@ -174,9 +170,9 @@ public class ArmSS extends SubsystemBase {
     }
 
     /******************
-     * Network Table Stuff. 
+     * Network Table Stuff.
      * 
-     * Should most of this be in the arm class? Probably. 
+     * Should most of this be in the arm class? Probably.
      * Is it easier to look at and fix if it's in the ArmSS class? Probably.
      *************/
     NetworkTable table = NetworkTableInstance.getDefault().getTable("arm");
@@ -213,7 +209,7 @@ public class ArmSS extends SubsystemBase {
     NetworkTableEntry nt_syncCompensation;
 
     public void ntcreate() {
-        //PIDs
+        // PIDs
         nt_left_kP = table.getEntry("Left kP");
         nt_left_kI = table.getEntry("Left kI");
         nt_left_kD = table.getEntry("Left kD");
@@ -244,7 +240,8 @@ public class ArmSS extends SubsystemBase {
         nt_posTol = table.getEntry("Position Tolerance (cm)");
         nt_velTol = table.getEntry("Velocity Tolerance (cm/s)");
 
-        // set doubles for values that we will update based on what is in NT, so they appear
+        // set doubles for values that we will update based on what is in NT, so they
+        // appear
         nt_left_kP.setDouble(leftArm.positionPID.getP());
         nt_left_kI.setDouble(leftArm.positionPID.getI());
         nt_left_kD.setDouble(leftArm.positionPID.getD());
@@ -275,7 +272,7 @@ public class ArmSS extends SubsystemBase {
         nt_right_currentVel.setDouble(rightArm.encoder.getVelocity());
 
         nt_syncCompensation.setDouble(syncCompensation);
-        
+
         // PID setters
         leftArm.positionPID.setP(nt_left_kP.getDouble(0.0));
         leftArm.positionPID.setI(nt_left_kI.getDouble(0.0));
