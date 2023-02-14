@@ -27,6 +27,7 @@
     "open": true
   },
   "NetworkTables Settings": {
+<<<<<<< integration
     "mode": "Server"
   },
   "Server": {
@@ -37,5 +38,8 @@
       "open": true
     },
     "open": true
+=======
+    "mode": "Client (NT4)"
+>>>>>>> Version4 UI
   }
 }
