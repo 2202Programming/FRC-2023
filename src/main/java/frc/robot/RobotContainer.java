@@ -106,11 +106,7 @@ public class RobotContainer {
         sensors = null;
         drivetrain = null;
         intake = null;
-<<<<<<< HEAD
         armSS = new ArmSS();
-=======
-        armSS = null;
->>>>>>> ArmSS
         elbow = null;
         claw = null;
         break;
@@ -138,7 +134,7 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings){
       case arm_test:
-      dc.Driver().a().whileTrue(new MoveArmsTest());
+      dc.Driver().a().whileTrue(new MoveArmsTest(10.0));
         break;
       case balance_test:
         dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
