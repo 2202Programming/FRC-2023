@@ -21,6 +21,7 @@ import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
+import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
@@ -64,6 +65,7 @@ public class RobotContainer {
   public final HID_Xbox_Subsystem dc; // short for driver controls
   public final Intake intake;
   public final ArmSS armSS;
+  public final Elbow elbow;
   public final Claw_Substyem claw;
 
   // vision systems, create on every bot
@@ -89,6 +91,7 @@ public class RobotContainer {
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
         armSS = new ArmSS();
+        elbow = new Elbow();
         claw = new Claw_Substyem();
         break;
 
@@ -97,6 +100,7 @@ public class RobotContainer {
         drivetrain = new SwerveDrivetrain();
         intake = null;
         armSS = null;
+        elbow = null;
         claw = null;
         break;
 
@@ -115,6 +119,7 @@ public class RobotContainer {
         drivetrain = null;
         intake = null;
         armSS = null;
+        elbow = null;
         claw = null;
         break;
     }
@@ -159,6 +164,7 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings) {
       case arm_test:
+      dc.Driver().a().whileTrue(new MoveArmsTest());
         break;
       case balance_test:
         dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
