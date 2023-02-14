@@ -1,21 +1,19 @@
 package frc.robot.subsystems;
 
-import frc.robot.Constants.ArmSettings;
-import frc.robot.Constants.CAN;
-import frc.robot.util.PIDFController;
-
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import java.lang.Math;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.CAN;
+import frc.robot.util.PIDFController;
 
 /*
  * 1/27/23 notes from MrL
@@ -37,14 +35,15 @@ public class ArmSS extends SubsystemBase {
      */
     class Arm {
         // commands
-        double velCmd;          // [cm/s] computed
+        double velCmd; // [cm/s] computed
 
         // measured values
         double currentPos;
 
         // state vars
         PIDController positionPID = new PIDController(0.0, 0.0, 0.0); // outer position loop
-        PIDFController hwPID = new PIDFController(0.0, 0.0, 0.0, 0.0); // holds values for hwpid vel
+        PIDFController hwVelPID = new PIDFController(0.0, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
+        final int hwVelSlot = 0;
 
         // TODO hook up MoveOut.java to this.
         public double pointChange;
@@ -56,18 +55,20 @@ public class ArmSS extends SubsystemBase {
 
         Arm(int canID) {
             // use canID to get controller and supporting objects
+            //TODO: Set current limit
             ctrl = new CANSparkMax(canID, MotorType.kBrushless);
             ctrl.restoreFactoryDefaults();
             ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
             pid = ctrl.getPIDController();
             encoder = ctrl.getEncoder();
+            positionPID.setTolerance(posTol, velTol);
 
-            // TODO: set scaling on endoder to use cm
-            encoder.setPositionConversionFactor(0.0);   //TODO fix me
-            encoder.setVelocityConversionFactor(0.0);   //TODO fix me
+            // TODO: set scaling on encoder to use cm
+            encoder.setPositionConversionFactor(0.0); // TODO fix me
+            encoder.setVelocityConversionFactor(0.0); // TODO fix me
 
-            // write the hwPID constants to the sparkmax
-            hwPID.copyTo(pid, 0);
+            // write the hwVelPID constants to the sparkmax
+            hwVelPID.copyTo(pid, hwVelSlot);
 
         }
 
@@ -84,11 +85,21 @@ public class ArmSS extends SubsystemBase {
         boolean atSetpoint() {
             return positionPID.atSetpoint();
         }
+        void setPosition(double x){
+            encoder.setPosition(x); //Sets the position of the physical position (Doesn't move anything)
+            positionPID.reset();
+            setSetpoint(x);
+        }
+
 
         // we can change the max vel if we need to.
-        // TODO: update with proper value in constants, use the constants value, remove setter here
+        // TODO: update with proper value in constants, use the constants value, remove
+        // setter here
         void setMaxVel(double v) {
             maxVel = Math.abs(v);
+        }
+        double getPosition(){
+            return currentPos;
         }
 
         void periodic(double compAdjustment) {
@@ -100,20 +111,19 @@ public class ArmSS extends SubsystemBase {
             velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
             // send our vel to the controller
             pid.setReference(velCmd, ControlType.kSmartVelocity); // TODO can we use position or SmartMotion modes?
-            
-        }
 
+        }
+        
         /**
          * NTs
          */
 
-         
-    }
+    } //End of Arm Class
+
     // instance variables
     // State vars
     final Arm leftArm;
     final Arm rightArm;
-    final Elbow elbow;
 
     // constants
     double maxVel = 20.0; // [cm/s]
@@ -125,30 +135,19 @@ public class ArmSS extends SubsystemBase {
     double syncCompensation; // amount of compensation [m/s]
 
     // controllers
-    PIDController syncPID = new PIDController(0.0, 0.0, 0.0); // arm synchronization pid. syncs left --> right
+    PIDController syncPID = new PIDController(0.25, 0.0, 0.0); // arm synchronization pid. syncs left --> right
 
     public ArmSS() {
         leftArm = new Arm(CAN.ARM_LEFT_Motor);
         rightArm = new Arm(CAN.ARM_RIGHT_Motor);
-        elbow = new Elbow();
-
+        leftArm.setPosition(0.0); //Change if we end up starting somewhere else
+        rightArm.setPosition(0.0); //Change if we end up starting somewhere else
     }
-
     // At Position flags for use in the commands
     public boolean armsAtPosition() {
         return ((leftArm.atSetpoint()) && (rightArm.atSetpoint()));
     }
 
-    public boolean everythingAtPosition() {
-        return armsAtPosition() && elbow.isAtPosition();
-    }
-
-    public boolean elbowAtPosition() {
-        return elbow.isAtPosition();
-    };
-
-    //accessor for elbow if needed.
-    public Elbow Elbow() {return this.elbow;}
 
     /*
      * Looks at various pids and desired positions to see if we are there
@@ -157,26 +156,23 @@ public class ArmSS extends SubsystemBase {
     @Override
     public void periodic() {
         // Synchronization
-        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) : 0;
+        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) / 2.0 : 0;
 
-        elbow.periodic();
         leftArm.periodic(syncCompensation);
         rightArm.periodic(-syncCompensation);
-        
+
         ntUpdates();
     }
 
-    public void setPositions(double extension, double rotation){
+    public void setPositions(double extension) {
         leftArm.setSetpoint(extension);
         rightArm.setSetpoint(extension);
-        elbow.setPosition(rotation);
     }
 
-
     /******************
-     * Network Table Stuff. 
+     * Network Table Stuff.
      * 
-     * Should most of this be in the arm class? Probably. 
+     * Should most of this be in the arm class? Probably.
      * Is it easier to look at and fix if it's in the ArmSS class? Probably.
      *************/
     NetworkTable table = NetworkTableInstance.getDefault().getTable("arm");
@@ -213,7 +209,7 @@ public class ArmSS extends SubsystemBase {
     NetworkTableEntry nt_syncCompensation;
 
     public void ntcreate() {
-        //PIDs
+        // PIDs
         nt_left_kP = table.getEntry("Left kP");
         nt_left_kI = table.getEntry("Left kI");
         nt_left_kD = table.getEntry("Left kD");
@@ -244,7 +240,8 @@ public class ArmSS extends SubsystemBase {
         nt_posTol = table.getEntry("Position Tolerance (cm)");
         nt_velTol = table.getEntry("Velocity Tolerance (cm/s)");
 
-        // set doubles for values that we will update based on what is in NT, so they appear
+        // set doubles for values that we will update based on what is in NT, so they
+        // appear
         nt_left_kP.setDouble(leftArm.positionPID.getP());
         nt_left_kI.setDouble(leftArm.positionPID.getI());
         nt_left_kD.setDouble(leftArm.positionPID.getD());
@@ -275,7 +272,7 @@ public class ArmSS extends SubsystemBase {
         nt_right_currentVel.setDouble(rightArm.encoder.getVelocity());
 
         nt_syncCompensation.setDouble(syncCompensation);
-        
+
         // PID setters
         leftArm.positionPID.setP(nt_left_kP.getDouble(0.0));
         leftArm.positionPID.setI(nt_left_kI.getDouble(0.0));
