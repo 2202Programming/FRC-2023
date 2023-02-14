@@ -104,17 +104,19 @@ public class Limelight_Subsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    x = tx.getDouble(0.0);
-    y = ty.getDouble(0.0);
-    area = ta.getDouble(0.0);
+
+    llresults = LimelightHelpers.getLatestResults("");
+    int numAprilTags = llresults.targetingResults.targets_Fiducials.length;
+    
+    x = LimelightHelpers.getTX(LL_NAME);
+    y = LimelightHelpers.getTY(LL_NAME);
+    area = LimelightHelpers.getTA(LL_NAME);
     target = (tv.getDouble(0) == 0) ? (false) : (true); // tv is only 0.0 or 1.0 per LL docs
     filteredX = x_iir.calculate(x);
     filteredArea = area_iir.calculate(area);
     ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
     pipeline = pipelineNTE.getInteger(0);
-
-    botpose = nt_botpose.getDoubleArray(new double[] { 0, 0, 0, 0, 0, 0 });
-    
+  
 
     // if (botpose.length > 0) {
     /*
@@ -132,8 +134,8 @@ public class Limelight_Subsystem extends SubsystemBase {
     // botpose[X] += 8.270458; //add 1/2 field X dimension in meters
     // botpose[Y] += 4.008216; //add 1/2 field Y dimension in meters
     // }
-    if (target) {
-      llresults = LimelightHelpers.getLatestResults("");
+    if (numAprilTags>0) {
+      
       // new way of grabbing LL results
       double[] tempPose = LimelightHelpers.getBotPose(LL_NAME);
       megaPose = new Pose2d(tempPose[X], tempPose[Y], Rotation2d.fromDegrees(tempPose[RZ]));
