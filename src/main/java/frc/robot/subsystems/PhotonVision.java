@@ -103,11 +103,11 @@ public class PhotonVision extends SubsystemBase {
       targetID = bestTarget.getFiducialId();
       previousPoseEstimate = currentPoseEstimate;
       currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate.getFirst());// .getFirst();
-    }
+    
 
     SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
     SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
-
+    }
     // Query the latest Retroreflective result from PhotonVision
     var result_microsoft = camera_microsoft.getLatestResult();
 
