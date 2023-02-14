@@ -71,7 +71,7 @@ public class RobotContainer {
 
   // vision systems, create on every bot
   public final PhotonVision photonVision = new PhotonVision();
-  // public final Limelight_Subsystem limelight = new Limelight_Subsystem();;
+  public final Limelight_Subsystem limelight = new Limelight_Subsystem();;
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
 
@@ -82,7 +82,7 @@ public class RobotContainer {
     RobotContainer.rc = this; // for singleton accesor
     robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio SN
     dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05); // TODO: deal with driver prefs
-    //limelight.setPipeline(0);
+    limelight.setPipeline(0);
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
@@ -170,9 +170,9 @@ public class RobotContainer {
 
       case vision_test:
         // X button to change LL pipeline
-        // dc.Driver().leftBumper().onTrue(new InstantCommand(() -> {
-        //   limelight.togglePipeline();
-        // }));
+        dc.Driver().leftBumper().onTrue(new InstantCommand(() -> {
+          limelight.togglePipeline();
+        }));
         dc.Driver().a().whileTrue(new CenterTapeYaw());
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().whileTrue(new CenterTapeYawSkew());
