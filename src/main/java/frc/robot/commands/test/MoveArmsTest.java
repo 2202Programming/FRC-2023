@@ -5,52 +5,59 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.ArmSS;
 
 public class MoveArmsTest extends CommandBase {
-    
+
     ArmSS arm = RobotContainer.RC().armSS;
     boolean setpointAtZero;
     double count = 0;
 
-    public MoveArmsTest() {
-        // do nothing
+    // Test constraints
+    final double distance_cm;
+    final double velocity_limit;
+
+    // save vel limit so we can restore after test
+    double old_velocity_limit;
+
+    /*
+     * Assumes arm is at 0.0 and will move
+     */
+
+    public MoveArmsTest(double distance_cm) {
+        this(distance_cm, 5.0);
+    }
+
+    public MoveArmsTest(double distance_cm, double velocity_limit) {
+        this.distance_cm = distance_cm;
+        this.velocity_limit = velocity_limit;
     }
 
     @Override
     public void initialize() {
+        old_velocity_limit = arm.getVelocityLimit();
+        arm.setVelocityLimit(velocity_limit);
         arm.setPositions(0);
         setpointAtZero = true;
-<<<<<<< HEAD
         count = 0;
-=======
->>>>>>> ArmSS
     }
 
     @Override
     public void execute() {
-<<<<<<< HEAD
-        if (count <= 50) { count++; return; }
-
-        if (arm.armsAtPosition()) {
-            arm.setPositions(setpointAtZero ? 10.0 : 0.0); // TODO: is 10.0 reasonable?
-            setpointAtZero = !setpointAtZero;
-            count = 0;
-=======
-        if (count <= 5) { count++; return; }
-
-        if (arm.armsAtPosition()) {
-            arm.setPositions(setpointAtZero ? 10.0 : 0.0); // TODO: is 10.0 reasonable?
-            setpointAtZero ^= true;
->>>>>>> ArmSS
+        if (count <= 50) {
+            count++;
+            return;
         }
 
+        if (arm.armsAtPosition()) {
+            arm.setPositions(setpointAtZero ? distance_cm : 0.0);
+            setpointAtZero = !setpointAtZero;
+            count = 0;
+        }
     }
 
     @Override
     public void end(boolean interrupted) {
         // do nothing
-<<<<<<< HEAD
-        arm.off();
-=======
->>>>>>> ArmSS
+        arm.off(); // safety off. note: this uses different control mode than normal
+        arm.setVelocityLimit(old_velocity_limit);
     }
 
     @Override
