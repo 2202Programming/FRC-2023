@@ -36,15 +36,28 @@ public class ArmSS extends SubsystemBase {
     class Arm {
         // commands
         double velCmd; // [cm/s] computed
+<<<<<<< HEAD
         final double gearRadius = 2.63398 * 2 * Math.PI; //[cm]
         final double gearRatio = (1/5) * 3.35; //3.35 fudge factor
+=======
+
+>>>>>>> ArmSS
         // measured values
         double currentPos;
 
         // state vars
+<<<<<<< HEAD
         PIDController positionPID = new PIDController(5.0, 0.0, 0.0); // outer position loop
         PIDFController hwVelPID = new PIDFController(0.001, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
         final int hwVelSlot = 0;
+=======
+        PIDController positionPID = new PIDController(0.0, 0.0, 0.0); // outer position loop
+        PIDFController hwVelPID = new PIDFController(0.0, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
+        final int hwVelSlot = 0;
+
+        // TODO hook up MoveOut.java to this.
+        public double pointChange;
+>>>>>>> ArmSS
 
         // hardware
         final CANSparkMax ctrl;
@@ -61,8 +74,14 @@ public class ArmSS extends SubsystemBase {
             encoder = ctrl.getEncoder();
             positionPID.setTolerance(posTol, velTol);
 
+<<<<<<< HEAD
             encoder.setPositionConversionFactor(gearRatio * gearRadius); 
             encoder.setVelocityConversionFactor(gearRatio * gearRadius / 60); //rpm to rps 
+=======
+            // TODO: set scaling on encoder to use cm
+            encoder.setPositionConversionFactor(0.0); // TODO fix me
+            encoder.setVelocityConversionFactor(0.0); // TODO fix me
+>>>>>>> ArmSS
 
             // write the hwVelPID constants to the sparkmax
             hwVelPID.copyTo(pid, hwVelSlot);
@@ -98,10 +117,13 @@ public class ArmSS extends SubsystemBase {
         double getPosition(){
             return currentPos;
         }
+<<<<<<< HEAD
         void off() {
             ctrl.set(0);
            
         }
+=======
+>>>>>>> ArmSS
 
         void periodic(double compAdjustment) {
             // read encoder for current position
@@ -111,7 +133,11 @@ public class ArmSS extends SubsystemBase {
             // command hard 0.0 if POS is at tollerence
             velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
             // send our vel to the controller
+<<<<<<< HEAD
             pid.setReference(velCmd, ControlType.kVelocity); // TODO can we use position or SmartMotion modes?
+=======
+            pid.setReference(velCmd, ControlType.kSmartVelocity); // TODO can we use position or SmartMotion modes?
+>>>>>>> ArmSS
 
         }
         
@@ -127,9 +153,15 @@ public class ArmSS extends SubsystemBase {
     final Arm rightArm;
 
     // constants
+<<<<<<< HEAD
     double maxVel = 1.0; // [cm/s]
     double posTol = .2; // [cm]
     double velTol = .05; // [cm/s]
+=======
+    double maxVel = 20.0; // [cm/s]
+    double posTol = .2; // [cm]
+    double velTol = .5; // [cm/s]
+>>>>>>> ArmSS
 
     // sync instance vars
     boolean sync = true; // should usually be true, option to change to false for testing purposes
@@ -143,17 +175,24 @@ public class ArmSS extends SubsystemBase {
         rightArm = new Arm(CAN.ARM_RIGHT_Motor);
         leftArm.setPosition(0.0); //Change if we end up starting somewhere else
         rightArm.setPosition(0.0); //Change if we end up starting somewhere else
+<<<<<<< HEAD
         ntcreate();
+=======
+>>>>>>> ArmSS
     }
     // At Position flags for use in the commands
     public boolean armsAtPosition() {
         return ((leftArm.atSetpoint()) && (rightArm.atSetpoint()));
     }
 
+<<<<<<< HEAD
     public void off() {
         leftArm.off();
         rightArm.off();
     }
+=======
+
+>>>>>>> ArmSS
     /*
      * Looks at various pids and desired positions to see if we are there
      */
@@ -162,7 +201,11 @@ public class ArmSS extends SubsystemBase {
     public void periodic() {
         // Synchronization
         syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) / 2.0 : 0;
+<<<<<<< HEAD
         syncCompensation = 0.0;
+=======
+
+>>>>>>> ArmSS
         leftArm.periodic(syncCompensation);
         rightArm.periodic(-syncCompensation);
 
