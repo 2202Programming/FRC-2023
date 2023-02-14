@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -137,21 +136,16 @@ public class Limelight_Subsystem extends SubsystemBase {
     if (numAprilTags>0) {
       
       // new way of grabbing LL results
-      double[] tempPose = LimelightHelpers.getBotPose(LL_NAME);
-      megaPose = new Pose2d(tempPose[X], tempPose[Y], Rotation2d.fromDegrees(tempPose[RZ]));
+      megaPose = llresults.targetingResults.getBotPose2d();
 
       // TeamPose
-
-      double[] teamTempPose;
       if (RobotContainer.RC().robotSpecs.isBlue()) {
-        teamTempPose = LimelightHelpers.getBotPose_wpiBlue(LL_NAME);
+        teamPose = llresults.targetingResults.getBotPose2d_wpiBlue();
       } else {
-        teamTempPose = LimelightHelpers.getBotPose_wpiRed(LL_NAME);
+        teamPose = llresults.targetingResults.getBotPose2d_wpiRed();
       }
-      double[] tempBluePose = LimelightHelpers.getBotPose_wpiBlue(LL_NAME);
 
-      teamPose = new Pose2d(teamTempPose[X], teamTempPose[Y], Rotation2d.fromDegrees(teamTempPose[RZ]));
-      bluePose = new Pose2d(tempBluePose[X], tempBluePose[Y], Rotation2d.fromDegrees(tempBluePose[RZ]));
+      bluePose = llresults.targetingResults.getBotPose2d_wpiBlue();
 
       SmartDashboard.putNumber("LL botpose X", megaPose.getX());
       SmartDashboard.putNumber("LL botpose Y", megaPose.getY());
@@ -229,7 +223,7 @@ public class Limelight_Subsystem extends SubsystemBase {
   }
 
   public void setPipeline(int pipe) {
-    pipelineNTE.setInteger(pipe); // dpl these looked like ints, not doubles
+    LimelightHelpers.setPipelineIndex(LL_NAME, pipe);
     if (pipe == 1) {
       enableLED();
     } else
