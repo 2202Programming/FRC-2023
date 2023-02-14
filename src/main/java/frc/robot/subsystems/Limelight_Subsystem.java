@@ -114,7 +114,7 @@ public class Limelight_Subsystem extends SubsystemBase {
     pipeline = pipelineNTE.getInteger(0);
 
     botpose = nt_botpose.getDoubleArray(new double[] { 0, 0, 0, 0, 0, 0 });
-    llresults = LimelightHelpers.getLatestResults("");
+    
 
     // if (botpose.length > 0) {
     /*
@@ -132,7 +132,8 @@ public class Limelight_Subsystem extends SubsystemBase {
     // botpose[X] += 8.270458; //add 1/2 field X dimension in meters
     // botpose[Y] += 4.008216; //add 1/2 field Y dimension in meters
     // }
-    if (NT_hasTarget.equals(true)) {
+    if (target) {
+      llresults = LimelightHelpers.getLatestResults("");
       // new way of grabbing LL results
       double[] tempPose = LimelightHelpers.getBotPose(LL_NAME);
       megaPose = new Pose2d(tempPose[X], tempPose[Y], Rotation2d.fromDegrees(tempPose[RZ]));
