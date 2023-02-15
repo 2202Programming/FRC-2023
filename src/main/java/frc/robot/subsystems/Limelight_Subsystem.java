@@ -6,14 +6,14 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.Shooter;
 
 public class Limelight_Subsystem extends SubsystemBase {
@@ -139,7 +139,7 @@ public class Limelight_Subsystem extends SubsystemBase {
       megaPose = llresults.targetingResults.getBotPose2d();
 
       // TeamPose
-      if (RobotContainer.RC().robotSpecs.isBlue()) {
+      if (DriverStation.getAlliance() == Alliance.Blue) {
         teamPose = llresults.targetingResults.getBotPose2d_wpiBlue();
       } else {
         teamPose = llresults.targetingResults.getBotPose2d_wpiRed();

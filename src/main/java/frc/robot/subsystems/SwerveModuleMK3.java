@@ -341,6 +341,12 @@ public class SwerveModuleMK3 {
     }
   }
 
+  public void simulationPeriodic()
+  {
+
+  }
+
+
   /**
    * This is the angle being controlled, so it should be thought of as the real
    * angle of the wheel.
