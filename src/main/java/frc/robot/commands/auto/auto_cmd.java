@@ -4,11 +4,33 @@
 
 package frc.robot.commands.auto;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.commands.swerve.ChargeStationBalance;
+import frc.robot.subsystems.hid.SwitchboardController;
+import frc.robot.subsystems.hid.SwitchboardController.SBButton;
 
 public class auto_cmd extends CommandBase {
+  
+  SwitchboardController sbButton = new SwitchboardController(0);
+  ArrayList Button = new ArrayList<>();
+  ChargeStationBalance balance = new ChargeStationBalance();
+  //TODO: If in diff branch get things correct Fetch item = new Fetch();
+  
   /** Creates a new auto_cmd. */
   public auto_cmd() {
+    if(sbButton.getSw11()){
+      Button.add(balance);
+    }
+    else if(sbButton.getSw12()){
+    // TODO: Fetch  Button.add(item);
+    }
+    else if(sbButton.getSw13()){
+    // TODO: start_position Button.add();
+    }
+    
+
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
