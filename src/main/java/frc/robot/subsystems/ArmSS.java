@@ -36,14 +36,14 @@ public class ArmSS extends SubsystemBase {
     class Arm {
         // commands
         double velCmd; // [cm/s] computed
-        final double gearRadius = 2.63398 * 2 * Math.PI; //[cm]
+        final double gearRadius = 2.63398 * 2 * Math.PI; //[cm] .22  and .0037
         final double gearRatio = (1/75) * 1; //3.35 fudge factor orig.
-    
+        
         // measured values
         double currentPos;
 
         // state vars
-        PIDController positionPID = new PIDController(1., 0.0, 0.0); // outer position loop
+        PIDController positionPID = new PIDController(.1, 0.0, 0.0); // outer position loop
         PIDFController hwVelPID = new PIDFController(.00511, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
         final int hwVelSlot = 0;
 
@@ -70,6 +70,7 @@ public class ArmSS extends SubsystemBase {
             hwVelPID.copyTo(pid, hwVelSlot, 50, 5);
 
         }
+
 
         // control the arm's postion [cm]
         void setSetpoint(double x) {
@@ -183,9 +184,15 @@ public class ArmSS extends SubsystemBase {
         ntUpdates();
     }
 
-    public void setPositions(double extension) {
+    public void setSetpoints(double extension) {
         leftArm.setSetpoint(extension);
         rightArm.setSetpoint(extension);
+    }
+
+    //initializes position, doesn't move anything.  Defines zero or whereever you.
+    public void setPositions(double extension) {
+        leftArm.setPosition(extension); 
+        rightArm.setPosition(extension);
     }
 
     /******************

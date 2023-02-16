@@ -41,13 +41,9 @@ public class MoveArmsTest extends CommandBase {
 
     @Override
     public void execute() {
-        if (count <= 50) {
-            count++;
-            return;
-        }
-
-        if (arm.armsAtPosition()) {
-            arm.setPositions(setpointAtZero ? distance_cm : 0.0);
+    
+        if (arm.armsAtPosition() && ++count > 50) {
+            arm.setSetpoints(setpointAtZero ? distance_cm : 0.0);
             setpointAtZero = !setpointAtZero;
             count = 0;
         }
