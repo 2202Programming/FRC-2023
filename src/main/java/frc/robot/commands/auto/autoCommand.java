@@ -4,14 +4,11 @@
 
 package frc.robot.commands.auto;
 
-import java.util.ArrayList;
-import java.util.List;
 
+import java.util.List;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.auto.PIDConstants;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
@@ -22,6 +19,8 @@ public class autoCommand extends CommandBase {
 
   SwerveDrivetrain drivetrain;
   HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
+  double maxVelocity = 3.0;
+  double maxAcceleration = 3.0;
 
   public autoCommand() {
     this.drivetrain = RobotContainer.RC().drivetrain;
@@ -32,46 +31,26 @@ public class autoCommand extends CommandBase {
   public void initialize() {
     List<PathPlannerTrajectory> pathGroup; 
 
-    // Starting pos 1
-    if (dc.initialSideboard(SBButton.Sw21)) pathGroup = PathPlanner.loadPathGroup("pos1", new PathConstraints(1, 3));  //5,3 tested and ok
-    // Starting pos 2
-    else if (dc.initialSideboard(SBButton.Sw22)) pathGroup = PathPlanner.loadPathGroup("pos2", new PathConstraints(1, 3));  //5,3 tested and ok
-    // Starting pos 3
-    else if (dc.initialSideboard(SBButton.Sw23)) pathGroup = PathPlanner.loadPathGroup("pos3", new PathConstraints(1, 3));  //5,3 tested and ok
-    // Starting pos 4
-    else if (dc.initialSideboard(SBButton.Sw24)) pathGroup = PathPlanner.loadPathGroup("pos4", new PathConstraints(1, 3));  //5,3 tested and ok
-    // No auto
+    // Starting pos 1 SW21
+    if (dc.initialSideboard(SBButton.Sw21)) {
+      System.out.println("***Running autopath1");
+      pathGroup = PathPlanner.loadPathGroup("autopath1", new PathConstraints(maxVelocity, maxAcceleration));  //5,3 tested and ok
+    }
+    // Starting pos 2 SW22
+    else if (dc.initialSideboard(SBButton.Sw22)){
+      System.out.println("***Running autopath2");
+      pathGroup = PathPlanner.loadPathGroup("autopath2", new PathConstraints(maxVelocity, maxAcceleration));  //5,3 tested and ok
+    }
     else return;
 
-    List<PathPlannerTrajectory> filteredGroup = new ArrayList<PathPlannerTrajectory>();
+    //run first part of path (exit community zone, come back to scoring position)
+    RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(0)).schedule();
 
-    // index 0: initial pathing to get out of community zone, place object currently held
-
-    // this assumes that the getting / placing / getting out of community zone all end at the same place so everything can be neatly linked
-
-    // SW12: Get out of community zone
-    if (dc.initialSideboard(SBButton.Sw12)) filteredGroup.add(pathGroup.get(1));
-
-    // SW13: Get / place 1st position object
-    if (dc.initialSideboard(SBButton.Sw13)) filteredGroup.add(pathGroup.get(2));
-
-    // SW14: Get / place 2nd position object
-    if (dc.initialSideboard(SBButton.Sw14)) filteredGroup.add(pathGroup.get(3));
-
-    // SW15: Get / place 3rd position object
-    if (dc.initialSideboard(SBButton.Sw15)) filteredGroup.add(pathGroup.get(4));
-
-    // SW 16: Get / place 4th position object
-    if (dc.initialSideboard(SBButton.Sw16)) filteredGroup.add(pathGroup.get(5));
-
-    // SW 26: Move from position to the other side of the field (we'll undoubtedely be stopped in the midst of it but whatever)
-    if (dc.initialSideboard(SBButton.Sw26)) filteredGroup.add(pathGroup.get(6));
-
-    // SW11: Charge station balance
-    if (dc.initialSideboard(SBButton.Sw11)) filteredGroup.add(pathGroup.get(6));
-    
-    // Schedule full group
-    RobotContainer.RC().autoBuilder.fullAuto(filteredGroup).schedule();
+    //if SW12 on, continue on to balance
+    if (dc.initialSideboard(SBButton.Sw12)) {
+      System.out.println("***Running second part of path to balance");
+      RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(1)).schedule();
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.

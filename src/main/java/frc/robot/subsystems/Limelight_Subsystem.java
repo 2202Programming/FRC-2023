@@ -9,13 +9,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
-import frc.robot.Constants.Shooter;
 
 public class Limelight_Subsystem extends SubsystemBase {
   /** Creates a new Limelight_Subsystem. */
@@ -52,16 +48,6 @@ public class Limelight_Subsystem extends SubsystemBase {
   static final int RY = 4;
   static final int RZ = 5;
 
-  private double[] botpose;
-  /*
-   * DPL - see code below delete this if it works as expected
-   * private double botpose_x;
-   * private double botpose_y;
-   * private double botpose_z;
-   * private double botpose_rx;
-   * private double botpose_ry;
-   * private double botpose_rz;
-   */
   private long pipeline;
 
   private LinearFilter x_iir;
@@ -115,9 +101,7 @@ public class Limelight_Subsystem extends SubsystemBase {
     filteredArea = area_iir.calculate(area);
     ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
     pipeline = pipelineNTE.getInteger(0);
-  
 
-    botpose = nt_botpose.getDoubleArray(new double[]{0,0,0,0,0,0}); //old and busted way
 
     megaPose = LimelightHelpers.getBotPose2d(LL_NAME); //new hotness
     bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);

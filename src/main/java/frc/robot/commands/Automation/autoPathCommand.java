@@ -14,19 +14,30 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
 
-public class autoCommand extends CommandBase {
+public class autoPathCommand extends CommandBase {
 
   SwerveDrivetrain drivetrain;
+  String pathname;
+  double maxVelocity;
+  double maxAcceleration;
 
-  public autoCommand() {
+  //builds an executes an autopath when given the path name
+  public autoPathCommand(String pathname, double maxVelocity, double maxAcceleration) {
     this.drivetrain = RobotContainer.RC().drivetrain;
+    this.pathname = pathname;
+    this.maxAcceleration = maxAcceleration;
+    this.maxVelocity = maxVelocity;
+  }
+
+  public autoPathCommand(String pathname) {
+    this(pathname, 2, 3);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
 
-    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("autopath1", new PathConstraints(2, 3));  //5,3 tested and ok
+    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup(pathname, new PathConstraints(maxVelocity, maxAcceleration));  //5,3 tested and ok
     RobotContainer.RC().autoBuilder.fullAuto(pathGroup).schedule();
 
   }
