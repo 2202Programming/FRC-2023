@@ -44,7 +44,7 @@ public class ArmSS extends SubsystemBase {
 
         // state vars
         PIDController positionPID = new PIDController(.1, 0.0, 0.0); // outer position loop
-        PIDFController hwVelPID = new PIDFController(.00511, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
+        PIDFController hwVelPID = new PIDFController(.00011, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
         final int hwVelSlot = 0;
 
         // hardware
