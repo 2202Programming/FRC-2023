@@ -1,5 +1,41 @@
 {
+  "Clients": {
+    "open": true
+  },
+  "Connections": {
+    "open": true
+  },
+  "FRC Web Components_11040564": {
+    "Publishers": {
+      "open": true
+    },
+    "Subscribers": {
+      "open": true
+    },
+    "open": true
+  },
+  "FRC Web Components_39570095": {
+    "open": true
+  },
+  "FRC Web Components_55495605": {
+    "Publishers": {
+      "open": true
+    },
+    "Subscribers": {
+      "open": true
+    },
+    "open": true
+  },
   "NetworkTables Settings": {
-    "mode": "Client (NT4)"
+    "mode": "Server"
+  },
+  "Server": {
+    "Publishers": {
+      "open": true
+    },
+    "Subscribers": {
+      "open": true
+    },
+    "open": true
   }
 }
