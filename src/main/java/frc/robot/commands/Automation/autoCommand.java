@@ -11,6 +11,7 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
 
@@ -26,7 +27,7 @@ public class autoCommand extends CommandBase {
   @Override
   public void initialize() {
 
-    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("AT Test", new PathConstraints(1, 3));  //5,3 tested and ok
+    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("autopath2", new PathConstraints(1.5, 3));  //5,3 tested and ok
     RobotContainer.RC().autoBuilder.fullAuto(pathGroup).schedule();
 
   }

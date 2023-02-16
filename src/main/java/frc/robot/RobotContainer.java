@@ -19,8 +19,9 @@ import frc.robot.Constants.Intake;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
-import frc.robot.commands.auto.autoCommand;
+import frc.robot.commands.Automation.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
+import frc.robot.commands.swerve.ChargeStationBalanceChad;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
@@ -127,7 +128,7 @@ public class RobotContainer {
 
     initEvents(); // setup event hashmap
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.balance_test);
 
     autoBuilder = new SwerveAutoBuilder(
         drivetrain::getPose, // Pose2d supplier
@@ -162,7 +163,7 @@ public class RobotContainer {
       case arm_test:
         break;
       case balance_test:
-        dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
+        dc.Driver().rightBumper().whileTrue(new ChargeStationBalanceChad(false));
         break;
 
       case claw_test:
@@ -191,7 +192,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new autoCommand();
+    return new autoCommand().andThen(new ChargeStationBalanceChad());
   }
 
   public void initEvents() {
