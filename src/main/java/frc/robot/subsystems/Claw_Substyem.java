@@ -134,6 +134,7 @@ public class Claw_Substyem extends SubsystemBase {
     // check any lightgates
 
     // TODO: 2/7/23 how do we know what game piece?  Work with HW guys see what they are thinking
+    //2/15/23 HW people thinking that there will be three color sensors/lightgate in the intake
   }
 
   // setting solenoid  NOTE:2/7 don't need OpenClaw... there will be a Claw Object so it will read  claw.open() or claw.close() 
