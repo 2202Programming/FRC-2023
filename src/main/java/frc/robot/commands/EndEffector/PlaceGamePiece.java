@@ -5,20 +5,16 @@
 package frc.robot.commands.EndEffector;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.Claw_Substyem;
 
 
 public class PlaceGamePiece extends SequentialCommandGroup {
+  
   final Claw_Substyem claw;
-  final double angle;
-  final String name;
 
   /** Creates a new PlaceGamePiece. */
-  public PlaceGamePiece(Claw_Substyem claw, String name, double angle) {
-    this.claw = RobotContainer.RC().claw;
-    this.name = name;
-    this.angle = angle;
+  public PlaceGamePiece(Claw_Substyem claw) {
+ 
     //Don't know class name, claw for now, for the claw angle to place
     this.addCommands(
       //Angles obv. not accurate, just put in random numbers
@@ -33,16 +29,8 @@ public class PlaceGamePiece extends SequentialCommandGroup {
       new OpenCloseClaw("conepick-up", 2.0) 
       */
     );
+    this.claw = claw;
 
   }
-  public void setAngle() {
-    claw.setAngle(angle);
-    //System.out.println("Moving to" + angle);
-  }
-  public boolean done() {
-    //when claw is at desired angle
-    return claw.atAngle();
-  }
-
 
 }
