@@ -5,6 +5,7 @@
 package frc.robot.commands.auto;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
@@ -31,7 +32,7 @@ public class autoCommand extends CommandBase {
   @Override
   public void initialize() {
     List<PathPlannerTrajectory> pathGroup; 
-    CommandSwitchboardController sb = new CommandSwitchboardController(2);
+    List<PathPlannerTrajectory> finalPathGroup = new ArrayList<PathPlannerTrajectory>();
 
     // Starting pos 1 SW21
     if (dc.readSideboard(SBButton.Sw21)) {
@@ -43,18 +44,23 @@ public class autoCommand extends CommandBase {
       System.out.println("***Running autopath2");
       pathGroup = PathPlanner.loadPathGroup("autopath2", new PathConstraints(maxVelocity, maxAcceleration));  //5,3 tested and ok
     }
+
     else  {
       System.out.println("***Running no path"); return;
     }
 
     //run first part of path (exit community zone, come back to scoring position)
-    RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(0)).schedule();
+    //RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(0)).schedule();
+    finalPathGroup.add(pathGroup.get(0));
 
     //if SW12 on, continue on to balance
     if (dc.readSideboard(SBButton.Sw12)) {
       System.out.println("***Running second part of path to balance");
-      RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(1)).schedule();
+      //RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(1)).schedule();
+      finalPathGroup.add(pathGroup.get(1));
     }
+
+    RobotContainer.RC().autoBuilder.fullAuto(finalPathGroup).schedule();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
