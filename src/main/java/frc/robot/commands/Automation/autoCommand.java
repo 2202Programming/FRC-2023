@@ -5,11 +5,11 @@
 package frc.robot.commands.Automation;
 
 import java.util.ArrayList;
+
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.auto.PIDConstants;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
@@ -26,7 +26,7 @@ public class autoCommand extends CommandBase {
   @Override
   public void initialize() {
 
-    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("AT Test", new PathConstraints(2, 3));  //5,3 tested and ok
+    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("AT Test", new PathConstraints(1, 3));  //5,3 tested and ok
     RobotContainer.RC().autoBuilder.fullAuto(pathGroup).schedule();
 
   }

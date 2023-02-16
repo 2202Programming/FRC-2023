@@ -345,12 +345,15 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
   }
 
+  public void simulationInit(){
+    //WIP placeholder
+    //motor/inertia models
+    
+  }
+
   @Override
   public void simulationPeriodic() {
-    // any sim work for each module
-    for (int i = 0; i < modules.length; i++) {
-      // modules[i].periodic();
-    }
+    //WIP
   }
 
   public SwerveModuleMK3 getMK3(int modID) {
@@ -514,8 +517,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     if (photonVision.hasAprilTarget()) {
       // only if we have a tag in view
-      Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
-      //m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
+      ////Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
+      ///  STILL A PROBLEM  m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
     }
     m_pose_integ = m_poseEstimator.getEstimatedPosition();
   }
