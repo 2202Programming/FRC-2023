@@ -68,7 +68,7 @@ public class PhotonVision extends SubsystemBase {
     // Assemble the list of cameras & mount locations
     camera_global = new PhotonCamera("Global_Shutter_Camera");
     camera_microsoft = new PhotonCamera("Microsoft_LifeCam_HD-3000");
-    robotToCam = new Transform3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d(0, 0, 0)); // Cam mounted facing
+    robotToCam = new Transform3d(new Translation3d(0.0, 0.0, 0.75), new Rotation3d(0, 0, 0)); // Cam mounted facing
                                                                                              // forward
     var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
     camList.add(new Pair<PhotonCamera, Transform3d>(camera_global, robotToCam));

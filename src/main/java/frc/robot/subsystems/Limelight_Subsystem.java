@@ -70,7 +70,6 @@ public class Limelight_Subsystem extends SubsystemBase {
   private double filterTC = 0.08;     // seconds, 2Hz cutoff T = 1/(2pi*f)  was .2hz T=.8
   private int log_counter = 0;
 
-  private LimelightHelpers.LimelightResults llresults;
   private Pose2d megaPose;
   private Pose2d teamPose;
   private Pose2d bluePose;
@@ -114,40 +113,17 @@ public class Limelight_Subsystem extends SubsystemBase {
     pipeline = pipelineNTE.getInteger(0);  
 
     botpose = nt_botpose.getDoubleArray(new double[]{0,0,0,0,0,0});
-    llresults = LimelightHelpers.getLatestResults("");
-
-    // if (botpose.length > 0) {
-    /* DPL - this should be the same without the copy
-    botpose_x = botpose[X];
-    botpose_y = botpose[Y];
-    botpose_z = botpose[Z];
-    botpose_rx = botpose[RX];
-    botpose_ry = botpose[RY];
-    botpose_rz = botpose[RZ];
-    */
-    //NOTE: LL gives position from the center of the field!  Need to transform to the standard of 0,0 at lower left
-
-    // botpose[X] += 8.270458; //add 1/2 field X dimension in meters
-    // botpose[Y] += 4.008216; //add 1/2 field Y dimension in meters
-    //}
-
-    //new way of grabbing LL results
-    double[] tempPose = LimelightHelpers.getBotPose(LL_NAME);
-    megaPose = new Pose2d(tempPose[X], tempPose[Y], Rotation2d.fromDegrees(tempPose[RZ]));
-
-    //TeamPose
     
-    double[] teamTempPose;
+    LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
+    megaPose = LimelightHelpers.getBotPose2d(LL_NAME);
+    bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
+    //TeamPose
     if(RobotContainer.RC().robotSpecs.isBlue()){
-        teamTempPose = LimelightHelpers.getBotpose_wpiBlue(LL_NAME);
+        teamPose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
     }
     else{
-        teamTempPose = LimelightHelpers.getBotPose_wpiRed(LL_NAME);
-    }
-    double[] tempBluePose = LimelightHelpers.getBotpose_wpiBlue(LL_NAME);
-
-    teamPose = new Pose2d(teamTempPose[X], teamTempPose[Y], Rotation2d.fromDegrees(teamTempPose[RZ]));
-    bluePose = new Pose2d(tempBluePose[X], tempBluePose[Y], Rotation2d.fromDegrees(tempBluePose[RZ]));
+      teamPose = LimelightHelpers.getBotPose2d_wpiRed(LL_NAME);
+    }    
 
     SmartDashboard.putNumber("LL botpose X", megaPose.getX());
     SmartDashboard.putNumber("LL botpose Y", megaPose.getY());

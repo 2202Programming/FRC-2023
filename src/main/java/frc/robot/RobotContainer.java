@@ -81,7 +81,7 @@ public class RobotContainer {
     RobotContainer.rc = this; // for singleton accesor
     robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio SN
     dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05); // TODO: deal with driver prefs
-    initEvents();  //setup event hashmap
+    
     limelight.setPipeline(0);
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
@@ -119,7 +119,7 @@ public class RobotContainer {
 
     // Edit the binding confiuration for testing
     configureBindings(Bindings.Competition);
-
+    initEvents();  //setup event hashmap
     autoBuilder = new SwerveAutoBuilder(
       drivetrain::getPose, // Pose2d supplier
       drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
