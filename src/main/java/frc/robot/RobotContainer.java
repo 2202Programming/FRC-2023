@@ -19,7 +19,7 @@ import frc.robot.Constants.Intake;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
-import frc.robot.commands.auto.autoCommand;
+import frc.robot.commands.Automation.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.subsystems.ArmSS;

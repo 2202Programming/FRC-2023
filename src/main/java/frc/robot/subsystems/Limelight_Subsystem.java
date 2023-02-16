@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.Shooter;
 
 public class Limelight_Subsystem extends SubsystemBase {
@@ -103,7 +104,7 @@ public class Limelight_Subsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    llresults = LimelightHelpers.getLatestResults("");
+    LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
     int numAprilTags = llresults.targetingResults.targets_Fiducials.length;
     
     x = LimelightHelpers.getTX(LL_NAME);
@@ -116,39 +117,25 @@ public class Limelight_Subsystem extends SubsystemBase {
     pipeline = pipelineNTE.getInteger(0);
   
 
-    botpose = nt_botpose.getDoubleArray(new double[]{0,0,0,0,0,0});
-    
-    LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
-    megaPose = LimelightHelpers.getBotPose2d(LL_NAME);
+    botpose = nt_botpose.getDoubleArray(new double[]{0,0,0,0,0,0}); //old and busted way
+
+    megaPose = LimelightHelpers.getBotPose2d(LL_NAME); //new hotness
     bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
     //TeamPose
-    if(RobotContainer.RC().robotSpecs.isBlue()){
-        teamPose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
-    }
-    else{
-      teamPose = LimelightHelpers.getBotPose2d_wpiRed(LL_NAME);
-    }    
+    // if(RobotContainer.RC().robotSpecs.isBlue()){
+    //     teamPose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
+    // }
+    // else{
+    //   teamPose = LimelightHelpers.getBotPose2d_wpiRed(LL_NAME);
+    // }    
 
     SmartDashboard.putNumber("LL botpose X", megaPose.getX());
     SmartDashboard.putNumber("LL botpose Y", megaPose.getY());
     SmartDashboard.putNumber("LL botpose Yaw", megaPose.getRotation().getDegrees());
 
-      SmartDashboard.putNumber("LL bluePose X", bluePose.getX());
-      SmartDashboard.putNumber("LL bluePose Y", bluePose.getY());
-      SmartDashboard.putNumber("LL bluePose Yaw", bluePose.getRotation().getDegrees());
-    }
-  }
-
-  public double estimateDistance() {
-    double targetOffsetAngle_Vertical = ty.getDouble(0.0);
-    // how many degrees back is your limelight rotated from perfectly vertical?
-
-    // both because why not (and that's what the copy-pasta had)
-    double angleToGoalDegrees = Shooter.LL_MOUNT_ANGLE_DEG + targetOffsetAngle_Vertical;
-    double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
-    // calculate distance
-    return (((Shooter.GOAL_HEIGHT_TO_FLOOR_INCHES - Shooter.LL_LENS_HEIGHT_INCHES) / Math.tan(angleToGoalRadians)
-        + Shooter.EDGE_TO_CENTER_INCHES) / Shooter.METERS_TO_INCHES);
+    SmartDashboard.putNumber("LL bluePose X", bluePose.getX());
+    SmartDashboard.putNumber("LL bluePose Y", bluePose.getY());
+    SmartDashboard.putNumber("LL bluePose Yaw", bluePose.getRotation().getDegrees());
   }
 
   public double getX() {

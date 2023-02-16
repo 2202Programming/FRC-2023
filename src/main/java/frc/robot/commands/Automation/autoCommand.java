@@ -26,7 +26,7 @@ public class autoCommand extends CommandBase {
   @Override
   public void initialize() {
 
-    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("AT Test", new PathConstraints(1, 3));  //5,3 tested and ok
+    ArrayList<PathPlannerTrajectory> pathGroup = (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("autopath1", new PathConstraints(2, 3));  //5,3 tested and ok
     RobotContainer.RC().autoBuilder.fullAuto(pathGroup).schedule();
 
   }
