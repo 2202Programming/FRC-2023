@@ -5,16 +5,27 @@
 package frc.robot.commands.Intake.Washer;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.Intake;
 
 public class toggleIntake extends CommandBase {
   /** Creates a new toggleIntake. */
+  final Intake intake;
+  boolean intakePos;
+  
   public toggleIntake() {
+    intakePos = Intake.isDeployed();
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    if (intakePos = true) {
+      intake.deploy();
+    } if (intakePos = false) {
+      intake.retract();
+    }
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -27,6 +38,6 @@ public class toggleIntake extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return intakePos =! Intake.isDeployed();
   }
 }

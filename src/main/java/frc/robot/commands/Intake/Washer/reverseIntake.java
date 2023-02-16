@@ -9,20 +9,22 @@ import frc.robot.subsystems.Carwash;
 import frc.robot.subsystems.Intake;
 
 
-public class activateIntake extends CommandBase {
+public class reverseIntake extends CommandBase {
   /** Creates a new activateIntake. */
   final Intake intake;
   final Carwash washer;
+  public double speed;
 
-  public activateIntake() {
+  public reverseIntake() {
+    speed = -washer.CarwashMotorStrength;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.on();
-    washer.on();
+    intake.on(speed);
+    washer.on(speed);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
