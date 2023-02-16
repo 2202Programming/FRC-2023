@@ -194,10 +194,12 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
     }
   }
 
-public boolean initialSideboard(SBButton buttonId) {
-  int switches = getInitialButtons(Id.SwitchBoard);
-  int mask = 1 << (buttonId.value -1);
-  return (switches & mask) !=0 ? true : false ;
+public boolean readSideboard(SBButton buttonId) {
+  return this.switchBoard.getHID().getRawButton(buttonId.value);
+  // The below isn't working. The above works. We don't have time to debug the below. --nren 02-15-2023 9:50pm
+  // int switches = getInitialButtons(Id.SwitchBoard);
+  // int mask = 1 << (buttonId.value -1);
+  // return (switches & mask) !=0 ? true : false ;
 }
 
 
