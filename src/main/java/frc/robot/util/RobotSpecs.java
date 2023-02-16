@@ -10,10 +10,6 @@ import frc.robot.Constants.ChassisConfig;
 import frc.robot.Constants.SubsystemConfig;
 import frc.robot.Constants.WheelOffsets;
 
-/** Add your docs here. */
-
-
-
 public class RobotSpecs {
 
     public enum RobotNames {
@@ -33,12 +29,16 @@ public class RobotSpecs {
         }
       }
     
+    
     public RobotNames myRobotName;
     private WheelOffsets myWheelOffsets;
     private ChassisConfig myChassisConfig;
     private SubsystemConfig mySubsystemConfig;
 
-
+    //CANT DO THIS YET
+    //DriverStation.Alliance color;
+    //private boolean isBlue;
+    
     public RobotSpecs() {
         this(System.getenv("serialnum"));        
     }
@@ -80,6 +80,18 @@ public class RobotSpecs {
                 break;
         }
         System.out.println("***I am " + myRobotName+" ***");
+
+       /* Can't check Team Alliance yet, STILL CONSTRUCTING ROBOT
+        //getting team Color
+        color = DriverStation.getAlliance();
+        if(color == DriverStation.Alliance.Blue){
+            isBlue = true;
+            System.out.println("***We are on blue alliance***");
+        }
+        else {
+        isBlue = false;
+        System.out.println("***We are on red alliance***");
+        */
     }
 
   public WheelOffsets getWheelOffset(){

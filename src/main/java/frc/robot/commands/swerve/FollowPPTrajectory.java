@@ -32,6 +32,7 @@ public class FollowPPTrajectory extends CommandBase {
   public FollowPPTrajectory(PathPlannerTrajectory path, boolean useOdo) {
     sdt = RobotContainer.RC().drivetrain;
     sensors = RobotContainer.RC().sensors;
+    this.useOdo = useOdo;
     this.path = path;
         // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(sdt, sensors);
@@ -52,6 +53,7 @@ public class FollowPPTrajectory extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    //Command runcommand = followTrajectoryCommand(path,true);
     Command runcommand = getPathCommand();
     runcommand.schedule();
   }
@@ -71,17 +73,18 @@ public class FollowPPTrajectory extends CommandBase {
       return new InstantCommand();  // no path selected
     }
     
-    //TODO: wtf does htis do
+
     //sdt.m_field.getObject(pathname).setTrajectory(path);
 
     // get initial state from the trajectory
     PathPlannerState initialState = path.getInitialState();
     Pose2d startingPose = new Pose2d(initialState.poseMeters.getTranslation(), initialState.holonomicRotation);
     //TODO: take PID values from Constants or construction?
-    PIDController xController = new PIDController(1.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController yController = new PIDController(1.0, 0.0, 0.0, Constants.DT);   // [m]
-    PIDController thetaController = new PIDController(0.08, 0, 0, Constants.DT);     // [rad]
-      //Units are radians for thetaController; PPSwerveController is using radians internally.
+    PIDController xController = new PIDController(4, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController yController = new PIDController(4, 0.0, 0.0, Constants.DT);   // [m]
+    PIDController thetaController = new PIDController(2.0, 0, 0, Constants.DT);     // [rad]
+
+    //Units are radians for thetaController; PPSwerveController is using radians internally.
       thetaController.enableContinuousInput(-Math.PI, Math.PI); //prevent piroutte paths over continuity
 
       PPSwerveControllerCommand swerveControllerCommand =
@@ -94,6 +97,7 @@ public class FollowPPTrajectory extends CommandBase {
           yController,
           thetaController,
           sdt::drive,
+          true, // be very careful make sure alliance color in ds is set to blue for testing
           sdt
       );
 
@@ -102,12 +106,15 @@ public class FollowPPTrajectory extends CommandBase {
     return new SequentialCommandGroup(
       new InstantCommand(()-> {
         if (!useOdo) // useOdo is false, starting pose is position/heading as defined in path. Otherwise go from where we are
-          sensors.setAutoStartPose(startingPose);
+          //sensors.setAutoStartPose(startingPose);
+          sdt.setPose(startingPose);
       }),
-      new PrintCommand("***Running Path"),
+      new PrintCommand("***Running Path.  Current Pose:"),
+      new InstantCommand(sdt::printPose),
       swerveControllerCommand,
       new InstantCommand(sdt::stop),
-      new PrintCommand("***Done Running Path")
+      new PrintCommand("***Done running Path."),
+      new InstantCommand(sdt::printPose)
       );
   }
 
@@ -128,4 +135,12 @@ public class FollowPPTrajectory extends CommandBase {
   public boolean isFinished() {
     return true;
   }
+
+  // Called once the command ends or is interrupted.
+  @Override
+  public void end(boolean interrupted) {
+    new PrintCommand("Done running path at end").schedule();
+    sdt.stop();
+  }
+
 }

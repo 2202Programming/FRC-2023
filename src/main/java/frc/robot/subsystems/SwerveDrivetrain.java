@@ -84,6 +84,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   private SwerveDriveOdometry m_odometry;
   private Pose2d m_pose;
   private Pose2d old_pose;
+  private Pose2d m_pose_integ;  //incorporates vision
 
   private SwerveModuleState[] meas_states; // measured wheel speed & angle
   private SwerveModulePosition[] meas_pos = new SwerveModulePosition[] {
@@ -118,6 +119,12 @@ public class SwerveDrivetrain extends SubsystemBase {
   private NetworkTableEntry posBL;
   private NetworkTableEntry posBR;
   private NetworkTableEntry robotVel;
+  private NetworkTableEntry est_pose_od_x;
+  private NetworkTableEntry est_pose_od_y;
+  private NetworkTableEntry est_pose_od_h;
+  private NetworkTableEntry est_pose_integ_x;
+  private NetworkTableEntry est_pose_integ_y;
+  private NetworkTableEntry est_pose_integ_h;
 
   double drive_kP = DriveTrain.drivePIDF.getP();
   double drive_kI = DriveTrain.drivePIDF.getI();
@@ -203,7 +210,14 @@ public class SwerveDrivetrain extends SubsystemBase {
     posBL = table.getEntry("/POS BL");
     posBR = table.getEntry("/POS BR");
     robotVel = postionTable.getEntry("/RobotVel");
-
+    
+    est_pose_od_x = table.getEntry("est_od_x");
+    est_pose_od_y = table.getEntry("est_od_y");
+    est_pose_od_h = table.getEntry("est_od_h");
+    est_pose_integ_x = table.getEntry("est_int_x");
+    est_pose_integ_y = table.getEntry("est_int_y");
+    est_pose_integ_h = table.getEntry("est_int_h");
+    
     SmartDashboard.putData("Field", m_field);
 
     // display PID coefficients on SmartDashboard if tuning drivetrain
@@ -317,18 +331,29 @@ public class SwerveDrivetrain extends SubsystemBase {
       robotVel.setDouble(filteredVelocity);
       timer = 0;
 
+      est_pose_od_x.setDouble(m_pose.getX());
+      est_pose_od_y.setDouble(m_pose.getY());
+      est_pose_od_h.setDouble(m_pose.getRotation().getDegrees());
+
+      est_pose_integ_x.setDouble(m_pose_integ.getX());
+      est_pose_integ_y.setDouble(m_pose_integ.getY());
+      est_pose_integ_h.setDouble(m_pose_integ.getRotation().getDegrees());
+      
       m_field.setRobotPose(m_odometry.getPoseMeters());
       // if Drivetrain tuning
       // pidTuning();
     }
   }
 
+  public void simulationInit(){
+    //WIP placeholder
+    //motor/inertia models
+    
+  }
+
   @Override
   public void simulationPeriodic() {
-    // any sim work for each module
-    for (int i = 0; i < modules.length; i++) {
-      // modules[i].periodic();
-    }
+    //WIP
   }
 
   public SwerveModuleMK3 getMK3(int modID) {
@@ -346,11 +371,11 @@ public class SwerveDrivetrain extends SubsystemBase {
   // TODO: do we REALLY think this is where we need to go? field coords???
   // resets X,Y, and set current angle to be 0
   public void resetPose() {
-    resetPose(0, 0);
+    resetPose(new Pose2d(new Translation2d(0,0), new Rotation2d(0)));
   }
 
-  public void resetPose(double x, double y) {
-    m_pose = new Pose2d(x, y, new Rotation2d(0));
+  public void resetPose(Pose2d pose) {
+    m_pose = pose;
     m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);
   }
 
@@ -492,9 +517,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     if (photonVision.hasAprilTarget()) {
       // only if we have a tag in view
-      Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
-      m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
+      ////Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
+      ///  STILL A PROBLEM  m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
     }
+    m_pose_integ = m_poseEstimator.getEstimatedPosition();
   }
 
 }
