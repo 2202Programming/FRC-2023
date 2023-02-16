@@ -37,13 +37,14 @@ public class ArmSS extends SubsystemBase {
         // commands
         double velCmd; // [cm/s] computed
         final double gearRadius = 2.63398 * 2 * Math.PI; //[cm]
-        final double gearRatio = (1/5) * 3.35; //3.35 fudge factor
+        final double gearRatio = (1/75) * 1; //3.35 fudge factor orig.
+    
         // measured values
         double currentPos;
 
         // state vars
-        PIDController positionPID = new PIDController(5.0, 0.0, 0.0); // outer position loop
-        PIDFController hwVelPID = new PIDFController(0.001, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
+        PIDController positionPID = new PIDController(1., 0.0, 0.0); // outer position loop
+        PIDFController hwVelPID = new PIDFController(.00511, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
         final int hwVelSlot = 0;
 
         // hardware
@@ -61,11 +62,12 @@ public class ArmSS extends SubsystemBase {
             encoder = ctrl.getEncoder();
             positionPID.setTolerance(posTol, velTol);
 
+            ctrl.setSmartCurrentLimit(30, 15);
             encoder.setPositionConversionFactor(gearRatio * gearRadius); 
             encoder.setVelocityConversionFactor(gearRatio * gearRadius / 60); //rpm to rps 
 
             // write the hwVelPID constants to the sparkmax
-            hwVelPID.copyTo(pid, hwVelSlot);
+            hwVelPID.copyTo(pid, hwVelSlot, 50, 5);
 
         }
 
