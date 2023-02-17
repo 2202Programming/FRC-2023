@@ -76,7 +76,6 @@ public class RobotContainer {
   public final Elbow elbow;
   public final Claw_Substyem claw;
 
- 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
 
@@ -137,29 +136,28 @@ public class RobotContainer {
         break;
     }
 
-
-    if (limelight !=null) {
-       // apriltag is pipeline 0
+    if (limelight != null) {
+      // apriltag is pipeline 0
       limelight.setPipeline(0);
-    }
-
-    // set default commands, if sub-system exists
-    if (drivetrain != null) {
-      drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
     }
 
     initEvents(); // setup event hashmap
 
-    autoBuilder = new SwerveAutoBuilder(
-        drivetrain::getPose, // Pose2d supplier, gyro for our facing
-        drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
-        drivetrain.getKinematics(), // SwerveDriveKinematics
-        new PIDConstants(4.0, 0.0, 0.0), // PID for create the X and Y                                         
-        new PIDConstants(2.0, 0.0, 0.0), // PID correct for rotation error 
-        drivetrain::drive, // Swerve Module states consumer, used to drive the drivetrain
-        RobotContainer.RC().eventMap,  // events that may be in the path
-        true, // correct path for mirrored depending on alliance color.
-        drivetrain);
+    // set default commands, if sub-system exists
+    if (drivetrain != null) {
+      drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
+
+      autoBuilder = new SwerveAutoBuilder(
+          drivetrain::getPose, // Pose2d supplier, gyro for our facing
+          drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
+          drivetrain.getKinematics(), // SwerveDriveKinematics
+          new PIDConstants(4.0, 0.0, 0.0), // PID for create the X and Y
+          new PIDConstants(2.0, 0.0, 0.0), // PID correct for rotation error
+          drivetrain::drive, // Swerve Module states consumer, used to drive the drivetrain
+          RobotContainer.RC().eventMap, // events that may be in the path
+          true, // correct path for mirrored depending on alliance color.
+          drivetrain);
+    }
 
     // Edit the binding confiuration for testing
     configureBindings(Bindings.Competition);
@@ -175,6 +173,7 @@ public class RobotContainer {
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0));
         break;
       case balance_test:
+        if (drivetrain == null) break;
         dc.Driver().rightBumper().whileTrue(new ChargeStationBalanceChad(false));
         break;
 
@@ -193,6 +192,7 @@ public class RobotContainer {
 
       case Competition:
       default:
+        if (drivetrain==null) break;
         // everything subject to change
         dc.Driver().x().whileTrue(new ChargeStationBalance());
         dc.Driver().y().whileTrue(new InstantCommand(() -> {
@@ -232,6 +232,9 @@ public class RobotContainer {
    */
   public void initEvents() {
     eventMap = new HashMap<>();
+    if (drivetrain == null)
+      return; // guard for bot-on-board
+
     eventMap.put("start",
         new SequentialCommandGroup(new PrintCommand("***Path Start"), new InstantCommand(drivetrain::printPose)));
     eventMap.put("middle",
