@@ -11,6 +11,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.util.PIDFController;
@@ -37,7 +38,7 @@ public class ArmSS extends SubsystemBase {
         // commands
         double velCmd; // [cm/s] computed
         final double gearRadius = 2.63398 * 2 * Math.PI; //[cm] .22  and .0037
-        final double gearRatio = (1/75) * 1; //3.35 fudge factor orig.
+        final double gearRatio = (1.0/75.0); //3.35 fudge factor orig.
         
         // measured values
         double currentPos;
@@ -46,6 +47,11 @@ public class ArmSS extends SubsystemBase {
         PIDController positionPID = new PIDController(.1, 0.0, 0.0); // outer position loop
         PIDFController hwVelPID = new PIDFController(.00011, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
         final int hwVelSlot = 0;
+
+        //Testing Mode
+        boolean velocity_mode = false;
+        double external_vel_cmd = 0.0;
+
 
         // hardware
         final CANSparkMax ctrl;
@@ -68,13 +74,17 @@ public class ArmSS extends SubsystemBase {
 
             // write the hwVelPID constants to the sparkmax
             hwVelPID.copyTo(pid, hwVelSlot, 50, 5);
-
+            
+            ctrl.burnFlash();
+            Timer.delay(.2);  //this holds up the current thread
         }
 
 
         // control the arm's postion [cm]
-        void setSetpoint(double x) {
-            positionPID.setSetpoint(x);
+        void setSetpoint(double x_cm) {
+            positionPID.setSetpoint(x_cm);
+            velocity_mode = false;
+            external_vel_cmd = 0.0;
         }
 
         // where we want to be is tracked by positionPID setpoint
@@ -85,10 +95,16 @@ public class ArmSS extends SubsystemBase {
         boolean atSetpoint() {
             return positionPID.atSetpoint();
         }
-        void setPosition(double x){
-            encoder.setPosition(x); //Sets the position of the physical position (Doesn't move anything)
+
+        //Sets the position of the physical position (Doesn't move anything)
+        void setPosition(double x_cm){
+            encoder.setPosition(x_cm); 
             positionPID.reset();
-            setSetpoint(x);
+            setSetpoint(x_cm);
+        }
+
+        double getPosition(){
+            return currentPos;
         }
 
         void setMaxVel(double v) {
@@ -99,12 +115,17 @@ public class ArmSS extends SubsystemBase {
             return maxVel;
         }
 
-        double getPosition(){
-            return currentPos;
+        void setVelocityCmd(double v_cm) {
+            velocity_mode = true;
+            external_vel_cmd = v_cm;
         }
-        void off() {
-            ctrl.set(0);
-           
+
+        void hold() {
+            pid.setReference(0.0, ControlType.kVelocity);            
+            currentPos = encoder.getPosition();
+            setSetpoint(currentPos);
+            positionPID.reset();
+            positionPID.calculate(currentPos);
         }
 
         void periodic(double compAdjustment) {
@@ -114,15 +135,13 @@ public class ArmSS extends SubsystemBase {
             velCmd = MathUtil.clamp(positionPID.calculate(currentPos) + compAdjustment, -maxVel, maxVel);
             // command hard 0.0 if POS is at tollerence
             velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
+
+            //if velocity mode, use the maxVel to control it, otherwise use positionPID 
+            velCmd = velocity_mode ? external_vel_cmd : velCmd;
+
             // send our vel to the controller
-            pid.setReference(velCmd, ControlType.kVelocity); // TODO can we use position or SmartMotion modes?
-
+            pid.setReference(velCmd, ControlType.kVelocity); 
         }
-        
-        /**
-         * NTs
-         */
-
     } //End of Arm Class
 
     // instance variables
@@ -131,9 +150,9 @@ public class ArmSS extends SubsystemBase {
     final Arm rightArm;
 
     // constants
-    double maxVel = 1.0; // [cm/s]
-    double posTol = .2; // [cm]
-    double velTol = .05; // [cm/s]
+    double maxVel = 2.0;  // [cm/s]
+    double posTol = 0.2;  // [cm]
+    double velTol = 0.05; // [cm/s]
 
     // sync instance vars
     boolean sync = true; // should usually be true, option to change to false for testing purposes
@@ -145,8 +164,7 @@ public class ArmSS extends SubsystemBase {
     public ArmSS() {
         leftArm = new Arm(CAN.ARM_LEFT_Motor);
         rightArm = new Arm(CAN.ARM_RIGHT_Motor);
-        leftArm.setPosition(0.0); //Change if we end up starting somewhere else
-        rightArm.setPosition(0.0); //Change if we end up starting somewhere else
+        setPositions(0.0);
         ntcreate();
     }
     // At Position flags for use in the commands
@@ -164,11 +182,11 @@ public class ArmSS extends SubsystemBase {
        return leftArm.getMaxVel();
     }
 
-
-    public void off() {
-        leftArm.off();
-        rightArm.off();
+    public void hold() {
+        leftArm.hold();
+        rightArm.hold();
     }
+
     /*
      * Looks at various pids and desired positions to see if we are there
      */
@@ -194,6 +212,14 @@ public class ArmSS extends SubsystemBase {
         leftArm.setPosition(extension); 
         rightArm.setPosition(extension);
     }
+
+    //Testing mode, use with care since there are no limit switches
+    public void setVelocityCmd(double vel_cm) {
+        double v = MathUtil.clamp(vel_cm, -maxVel, maxVel);
+        leftArm.setVelocityCmd(v);
+        rightArm.setVelocityCmd(v);
+    }
+
 
     /******************
      * Network Table Stuff.

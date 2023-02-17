@@ -11,12 +11,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.Intake;
+import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.FollowPPTrajectory;
+import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.MoveArmsTest;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
@@ -134,7 +136,10 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings){
       case arm_test:
-      dc.Driver().a().whileTrue(new MoveArmsTest(10.0, 2.0));
+        dc.Driver().a().whileTrue(new MoveArmsTest(10.0, 2.0));
+        dc.Driver().b().whileTrue(new ArmVelocityTest(2.0, 3.0, 1.0));
+        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(2.0));
+        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-3.0));
         break;
       case balance_test:
         dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
