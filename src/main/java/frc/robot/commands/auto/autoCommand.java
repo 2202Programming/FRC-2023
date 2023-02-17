@@ -4,16 +4,16 @@
 
 package frc.robot.commands.auto;
 
-
 import java.util.ArrayList;
 import java.util.List;
+
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.hid.CommandSwitchboardController;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.subsystems.hid.SwitchboardController.SBButton;
 
@@ -31,32 +31,37 @@ public class autoCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    List<PathPlannerTrajectory> pathGroup; 
+    List<PathPlannerTrajectory> pathGroup;
     List<PathPlannerTrajectory> finalPathGroup = new ArrayList<PathPlannerTrajectory>();
 
     // Starting pos 1 SW21
     if (dc.readSideboard(SBButton.Sw21)) {
       System.out.println("***Running autopath1");
-      pathGroup = PathPlanner.loadPathGroup("autopath1", new PathConstraints(maxVelocity, maxAcceleration));  //5,3 tested and ok
+      pathGroup = PathPlanner.loadPathGroup("autopath1", new PathConstraints(maxVelocity, maxAcceleration)); // 5,3
+                                                                                                             // tested
+                                                                                                             // and ok
     }
     // Starting pos 2 SW22
-    else if (dc.readSideboard(SBButton.Sw22)){
+    else if (dc.readSideboard(SBButton.Sw22)) {
       System.out.println("***Running autopath2");
-      pathGroup = PathPlanner.loadPathGroup("autopath2", new PathConstraints(maxVelocity, maxAcceleration));  //5,3 tested and ok
+      pathGroup = PathPlanner.loadPathGroup("autopath2", new PathConstraints(maxVelocity, maxAcceleration)); // 5,3
+                                                                                                             // tested
+                                                                                                             // and ok
     }
 
-    else  {
-      System.out.println("***Running no path"); return;
+    else {
+      System.out.println("?????????? Running no path, POTATO AUTO ???????????");
+      return;
     }
 
-    //run first part of path (exit community zone, come back to scoring position)
-    //RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(0)).schedule();
+    // run first part of path (exit community zone, come back to scoring position)
+    // RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(0)).schedule();
     finalPathGroup.add(pathGroup.get(0));
 
-    //if SW12 on, continue on to balance
+    // if SW12 on, continue on to balance
     if (dc.readSideboard(SBButton.Sw12)) {
       System.out.println("***Running second part of path to balance");
-      //RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(1)).schedule();
+      // RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(1)).schedule();
       finalPathGroup.add(pathGroup.get(1));
     }
 

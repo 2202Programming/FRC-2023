@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -58,8 +57,8 @@ public class Limelight_Subsystem extends SubsystemBase {
   private int log_counter = 0;
 
   private Pose2d megaPose;
-  private Pose2d teamPose;
-  private Pose2d bluePose;
+  //private Pose2d teamPose;
+  //private Pose2d bluePose;
   final private String LL_NAME = "";// "limelight" for if left blank
 
   public Limelight_Subsystem() {
@@ -90,9 +89,9 @@ public class Limelight_Subsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
-    int numAprilTags = llresults.targetingResults.targets_Fiducials.length;
-    
+    ///LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
+    ///int numAprilTags = llresults.targetingResults.targets_Fiducials.length;
+
     x = LimelightHelpers.getTX(LL_NAME);
     y = LimelightHelpers.getTY(LL_NAME);
     area = LimelightHelpers.getTA(LL_NAME);
@@ -102,24 +101,24 @@ public class Limelight_Subsystem extends SubsystemBase {
     ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
     pipeline = pipelineNTE.getInteger(0);
 
-
-    megaPose = LimelightHelpers.getBotPose2d(LL_NAME); //new hotness
-    bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
-    //TeamPose
-    // if(RobotContainer.RC().robotSpecs.isBlue()){
-    //     teamPose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
-    // }
-    // else{
-    //   teamPose = LimelightHelpers.getBotPose2d_wpiRed(LL_NAME);
-    // }    
-
-    SmartDashboard.putNumber("LL botpose X", megaPose.getX());
-    SmartDashboard.putNumber("LL botpose Y", megaPose.getY());
-    SmartDashboard.putNumber("LL botpose Yaw", megaPose.getRotation().getDegrees());
-
-    SmartDashboard.putNumber("LL bluePose X", bluePose.getX());
-    SmartDashboard.putNumber("LL bluePose Y", bluePose.getY());
-    SmartDashboard.putNumber("LL bluePose Yaw", bluePose.getRotation().getDegrees());
+    megaPose = LimelightHelpers.getBotPose2d(LL_NAME); // new hotness
+    //bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
+    
+    tx.setDouble(megaPose.getX());
+    ty.setDouble(megaPose.getY());
+    ta.setDouble(megaPose.getRotation().getDegrees());
+    /*
+     * avoid SmartDashboard - use NT directly
+     * SmartDashboard.putNumber("LL botpose X", megaPose.getX());
+     * SmartDashboard.putNumber("LL botpose Y", megaPose.getY());
+     * SmartDashboard.putNumber("LL botpose Yaw",
+     * megaPose.getRotation().getDegrees());
+     * 
+     * SmartDashboard.putNumber("LL bluePose X", bluePose.getX());
+     * SmartDashboard.putNumber("LL bluePose Y", bluePose.getY());
+     * SmartDashboard.putNumber("LL bluePose Yaw",
+     * bluePose.getRotation().getDegrees());
+     */
   }
 
   public double getX() {

@@ -10,31 +10,19 @@ public class Limelight_Helpers_util extends SubsystemBase{
     DriverStation.Alliance color;
     private double[] megaPose;
     private double[] teamPose;
-    private boolean isBlue;
-    final private String LL_NAME = "";//"limelight" for if left blank
+    
+    final private String LL_NAME;//"limelight" for if left blank
 
-    public Limelight_Helpers_util(){       
-        
-        //getting team Color
-        color = DriverStation.getAlliance();
-        if(color == DriverStation.Alliance.Blue){
-            isBlue = true;
-        }
-
+    public Limelight_Helpers_util(){
+        this("limelight");
+    }
+    public Limelight_Helpers_util(String name){       
+        LL_NAME = name;
     }
 
     public void peridic() {
         // in meters and degrees
         megaPose = LimelightHelpers.getBotPose(LL_NAME);
-
-        //TeamPose
-        if(isBlue){
-            teamPose = LimelightHelpers.getBotpose_wpiBlue(LL_NAME);
-        }
-        else{
-            teamPose = LimelightHelpers.getBotPose_wpiRed(LL_NAME);
-        }
-
     }
 
 
