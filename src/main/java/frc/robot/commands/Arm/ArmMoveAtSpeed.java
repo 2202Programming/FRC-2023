@@ -13,6 +13,7 @@ public class ArmMoveAtSpeed extends CommandBase {
   ArmSS arm;
   boolean zero_position = false;
   double speed; //[cm/s]
+  double old_max_speed;
 
   /** Creates a new ArmMoveAtSpeed. */
   public ArmMoveAtSpeed(double speed) {
@@ -29,6 +30,8 @@ public class ArmMoveAtSpeed extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    old_max_speed = arm.getVelocityLimit();
+    arm.setVelocityLimit(speed);
     arm.setVelocityCmd(speed);
   }
 
@@ -41,6 +44,7 @@ public class ArmMoveAtSpeed extends CommandBase {
   public void end(boolean interrupted) {
     if (zero_position) arm.setPositions(0.0);
     arm.hold();
+    arm.setVelocityLimit(old_max_speed);
   }
 
   // Returns true when the command should end.

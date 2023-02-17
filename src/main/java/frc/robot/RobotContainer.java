@@ -136,10 +136,10 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings){
       case arm_test:
-        dc.Driver().a().whileTrue(new MoveArmsTest(10.0, 2.0));
+        dc.Driver().a().whileTrue(new MoveArmsTest(20.0, 25.0));
         dc.Driver().b().whileTrue(new ArmVelocityTest(2.0, 3.0, 1.0));
-        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(2.0));
-        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-3.0));
+        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0));
+        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0));
         break;
       case balance_test:
         dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
