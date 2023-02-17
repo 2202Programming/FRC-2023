@@ -52,7 +52,7 @@ public class MoveArmsTest extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         // do nothing
-        arm.off(); // safety off. note: this uses different control mode than normal
+        arm.hold(); // safety off. note: this uses different control mode than normal
         arm.setVelocityLimit(old_velocity_limit);
     }
 
