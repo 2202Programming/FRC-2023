@@ -19,8 +19,9 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
-import frc.robot.commands.auto.autoCommand;
+import frc.robot.commands.Automation.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
+import frc.robot.commands.swerve.ChargeStationBalanceChad;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.MoveArmsTest;
@@ -175,7 +176,7 @@ public class RobotContainer {
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0));
         break;
       case balance_test:
-        dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
+        dc.Driver().rightBumper().whileTrue(new ChargeStationBalanceChad(false));
         break;
 
       case claw_test:
@@ -204,7 +205,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new autoCommand();
+    return new autoCommand().andThen(new ChargeStationBalanceChad());
   }
 
   public void initEvents() {
