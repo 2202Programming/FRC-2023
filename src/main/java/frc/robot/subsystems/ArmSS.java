@@ -44,14 +44,13 @@ public class ArmSS extends SubsystemBase {
         double currentPos;
 
         // state vars
-        PIDController positionPID = new PIDController(.1, 0.0, 0.0); // outer position loop
-        PIDFController hwVelPID = new PIDFController(.00011, 0.0, 0.0, 0.0); // holds values for hwVelpid vel
+        PIDController positionPID = new PIDController(7.0, 0.150, 0.0); // outer position loop
+        PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); // holds values for hwVelpid vel
         final int hwVelSlot = 0;
 
         //Testing Mode
         boolean velocity_mode = false;
         double external_vel_cmd = 0.0;
-
 
         // hardware
         final CANSparkMax ctrl;
@@ -151,8 +150,8 @@ public class ArmSS extends SubsystemBase {
 
     // constants
     double maxVel = 2.0;  // [cm/s]
-    double posTol = 0.2;  // [cm]
-    double velTol = 0.05; // [cm/s]
+    double posTol = 0.30;  // [cm]
+    double velTol = 0.25; // [cm/s]
 
     // sync instance vars
     boolean sync = true; // should usually be true, option to change to false for testing purposes
@@ -164,12 +163,17 @@ public class ArmSS extends SubsystemBase {
     public ArmSS() {
         leftArm = new Arm(CAN.ARM_LEFT_Motor);
         rightArm = new Arm(CAN.ARM_RIGHT_Motor);
+        //zero our encoders at power up
         setPositions(0.0);
         ntcreate();
     }
     // At Position flags for use in the commands
     public boolean armsAtPosition() {
-        return ((leftArm.atSetpoint()) && (rightArm.atSetpoint()));
+        //TODO fix me
+        //TODO  I really mean it fix this
+        //TODO I am missing an arm, fix me
+        return (rightArm.atSetpoint()   //TODO fixme when I get an arm       leftArm.atSetpoint())
+             && rightArm.atSetpoint());
     }
 
     public void setVelocityLimit(double vel_limit){
