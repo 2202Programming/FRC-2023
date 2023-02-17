@@ -19,7 +19,7 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
-import frc.robot.commands.Automation.autoCommand;
+import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.ChargeStationBalanceChad;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -66,6 +66,8 @@ public class RobotContainer {
   public final RobotSpecs robotSpecs;
 
   // Sub-systems
+  public final PhotonVision photonVision;
+  public final Limelight_Subsystem limelight;
   public final Sensors_Subsystem sensors;
   public final SwerveDrivetrain drivetrain;
   public final HID_Xbox_Subsystem dc; // short for driver controls
@@ -74,9 +76,7 @@ public class RobotContainer {
   public final Elbow elbow;
   public final Claw_Substyem claw;
 
-  // vision systems, create on every bot
-  public final PhotonVision photonVision = new PhotonVision();
-  public final Limelight_Subsystem limelight = new Limelight_Subsystem();;
+ 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
 
@@ -86,13 +86,13 @@ public class RobotContainer {
   public RobotContainer() {
     RobotContainer.rc = this; // for singleton accesor
     robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio SN
-    dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05); // TODO: deal with driver prefs
-    
-    limelight.setPipeline(0); //apriltag is pipeline 0
-    
+    dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05);
+
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
+        photonVision = new PhotonVision();
+        limelight = new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
@@ -102,6 +102,8 @@ public class RobotContainer {
         break;
 
       case SwerveBot:
+        photonVision = new PhotonVision();
+        limelight = new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = null;
@@ -111,6 +113,8 @@ public class RobotContainer {
         break;
 
       case ChadBot:
+        photonVision = new PhotonVision();
+        limelight = new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = null;
@@ -122,6 +126,8 @@ public class RobotContainer {
       case BotOnBoard: // fall through
       case UnknownBot: // fall through
       default:
+        photonVision = null;
+        limelight = null;
         sensors = null;
         drivetrain = null;
         intake = null;
@@ -129,6 +135,12 @@ public class RobotContainer {
         elbow = null;
         claw = null;
         break;
+    }
+
+
+    if (limelight !=null) {
+       // apriltag is pipeline 0
+      limelight.setPipeline(0);
     }
 
     // set default commands, if sub-system exists
@@ -139,34 +151,21 @@ public class RobotContainer {
     initEvents(); // setup event hashmap
 
     autoBuilder = new SwerveAutoBuilder(
-        drivetrain::getPose, // Pose2d supplier
+        drivetrain::getPose, // Pose2d supplier, gyro for our facing
         drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
         drivetrain.getKinematics(), // SwerveDriveKinematics
-        new PIDConstants(4.0, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y
-                                         // PID controllers)
-        new PIDConstants(2.0, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation
-                                         // controller)
-        drivetrain::drive, // Module states consumer used to output to the drive subsystem
-        RobotContainer.RC().eventMap,
-        true, // Should the path be automatically mirrored depending on alliance color.
-              // Optional, defaults to true
-        drivetrain // The drive subsystem. Used to properly set the requirements of path following
-                   // commands
-    );
-    
+        new PIDConstants(4.0, 0.0, 0.0), // PID for create the X and Y                                         
+        new PIDConstants(2.0, 0.0, 0.0), // PID correct for rotation error 
+        drivetrain::drive, // Swerve Module states consumer, used to drive the drivetrain
+        RobotContainer.RC().eventMap,  // events that may be in the path
+        true, // correct path for mirrored depending on alliance color.
+        drivetrain);
+
     // Edit the binding confiuration for testing
     configureBindings(Bindings.Competition);
   }
 
   private void configureBindings(Bindings bindings) {
-    // bindings useful for everyone
-    // Y button to reset current facing to zero
-    if (drivetrain != null) {
-      dc.Driver().y().whileTrue(new InstantCommand(() -> {
-        drivetrain.resetAnglePose(new Rotation2d(0));
-      }));
-    }
-
     // add bindings based on current user mode
     switch (bindings) {
       case arm_test:
@@ -194,8 +193,28 @@ public class RobotContainer {
 
       case Competition:
       default:
-        //TODO: Put Competition bindings here
-        break;      
+        // everything subject to change
+        dc.Driver().x().whileTrue(new ChargeStationBalance());
+        dc.Driver().y().whileTrue(new InstantCommand(() -> {
+          // calibrate robot gryo to to field 0 degrees
+          drivetrain.resetAnglePose(new Rotation2d(0));
+        }));
+
+        /******************************************************
+         * WIP - Commands are needed, names will change, confirm with Drive team
+         * dc.Driver().leftTrigger().whileTrue(new RobotOrFieldCentric());
+         * dc.Driver().rightTrigger().whileTrue(new ActivatePlacer());
+         * 
+         * dc.Operator().leftTrigger().whileTrue(new leftColumn());
+         * dc.Operator().rightTrigger().whileTrue(new rightColumn());
+         * dc.Operator().leftBumper().whileTrue(new toggleIntake());
+         * dc.Operator().rightBumper().whileTrue(new operatorPlaceConfirm());
+         * dc.Operator().a().whileTrue(new activateIntake());
+         * dc.Operator().b().whileTrue(new intakeOrOrientatorRunBack());
+         * dc.Operator().x().whileTrue(new bottomRow());
+         * dc.Operator().y().whileTrue(new topRow());
+         ********************************************************/
+        break;
     }
   }
 
@@ -208,6 +227,9 @@ public class RobotContainer {
     return new autoCommand().andThen(new ChargeStationBalanceChad());
   }
 
+  /**
+   * Add Event terms to the hashmap so they may be used in the pathing sequence
+   */
   public void initEvents() {
     eventMap = new HashMap<>();
     eventMap.put("start",
