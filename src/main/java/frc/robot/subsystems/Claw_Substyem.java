@@ -51,7 +51,7 @@ public class Claw_Substyem extends SubsystemBase {
     
 
   // constants/statics
-  static final double KSevoSpd = 5.0;    // [deg/s] time to wait for a move of the wrist
+  static final double KServoSpd = 5.0;    // [deg/s] time to wait for a move of the wrist
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
   static final double WristMinDegrees = -90.0; // TODO: Find actual value
@@ -111,7 +111,7 @@ public class Claw_Substyem extends SubsystemBase {
   }
 
   public boolean atAngle() {
-    //TODO: 2/7/23 need to figure out tollerance for when at position
+    //TODO: 2/7/23 need to figure out tolerance for when at position
 
     return false;
   }
@@ -123,7 +123,7 @@ public class Claw_Substyem extends SubsystemBase {
    * measure the servo's position.   (PWM is really a one-way street) 
    */
   public double waitEstimate(double degrees) {
-    return Math.abs(degrees - wrist_cmd)*KSevoSpd;
+    return Math.abs(degrees - wrist_cmd)*KServoSpd;
   }
 
 
@@ -134,6 +134,7 @@ public class Claw_Substyem extends SubsystemBase {
     // check any lightgates
 
     // TODO: 2/7/23 how do we know what game piece?  Work with HW guys see what they are thinking
+    //2/15/23 HW people thinking that there will be three color sensors/lightgate in the intake
   }
 
   // setting solenoid  NOTE:2/7 don't need OpenClaw... there will be a Claw Object so it will read  claw.open() or claw.close() 
