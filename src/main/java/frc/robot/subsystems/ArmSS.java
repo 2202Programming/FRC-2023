@@ -1,20 +1,20 @@
 package frc.robot.subsystems;
 
-import frc.robot.Constants.CAN;
-import frc.robot.util.PIDFController;
-
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import java.lang.Math;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.CAN;
+import frc.robot.util.PIDFController;
 
 /*
  * 1/27/23 notes from MrL
@@ -30,28 +30,27 @@ import java.lang.Math;
  */
 
 public class ArmSS extends SubsystemBase {
-    // constants
-    double MaxVel = 20.0; // [cm/s] //TODO Networktable?
-    double PosTol = .2; // [cm]
-    double VelTol = .5; // [cm/s]
 
     /**
      * Arm - does one arm
      */
     class Arm {
         // commands
-        double maxVel = MaxVel; // [cm/s] extension rate limit
-        double velCmd;          // [cm/s] computed
-
+        double velCmd; // [cm/s] computed
+        final double gearRadius = 2.63398 * 2 * Math.PI; //[cm] .22  and .0037
+        final double gearRatio = (1.0/75.0); //3.35 fudge factor orig.
+        
         // measured values
         double currentPos;
 
         // state vars
-        PIDController positionPID = new PIDController(0.0, 0.0, 0.0); // outer position loop
-        PIDFController hwPID = new PIDFController(0.0, 0.0, 0.0, 0.0); // holds values for hwpid vel
+        PIDController positionPID = new PIDController(7.0, 0.150, 0.0); // outer position loop
+        PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); // holds values for hwVelpid vel
+        final int hwVelSlot = 0;
 
-        // TODO hook up MoveOut.java to this.
-        public double pointChange;
+        //Testing Mode
+        boolean velocity_mode = false;
+        double external_vel_cmd = 0.0;
 
         // hardware
         final CANSparkMax ctrl;
@@ -60,26 +59,31 @@ public class ArmSS extends SubsystemBase {
 
         Arm(int canID) {
             // use canID to get controller and supporting objects
+            //TODO: Set current limit
             ctrl = new CANSparkMax(canID, MotorType.kBrushless);
             ctrl.restoreFactoryDefaults();
             ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
             pid = ctrl.getPIDController();
             encoder = ctrl.getEncoder();
+            positionPID.setTolerance(posTol, velTol);
 
-            // TODO: set scaling on endoder to use cm
-            encoder.setPositionConversionFactor(0.0);   //TODO fix me
-            encoder.setVelocityConversionFactor(0.0);   //TODO fix me
+            ctrl.setSmartCurrentLimit(30, 15);
+            encoder.setPositionConversionFactor(gearRatio * gearRadius); 
+            encoder.setVelocityConversionFactor(gearRatio * gearRadius / 60); //rpm to rps 
 
-            // write the hwPID constants to the sparkmax
-            hwPID.copyTo(pid, 0);
-
-            // finish the position pid for outer loop
-            positionPID.setTolerance(PosTol, VelTol);
+            // write the hwVelPID constants to the sparkmax
+            hwVelPID.copyTo(pid, hwVelSlot, 50, 5);
+            
+            ctrl.burnFlash();
+            Timer.delay(.2);  //this holds up the current thread
         }
 
+
         // control the arm's postion [cm]
-        void setSetpoint(double x) {
-            positionPID.setSetpoint(x);
+        void setSetpoint(double x_cm) {
+            positionPID.setSetpoint(x_cm);
+            velocity_mode = false;
+            external_vel_cmd = 0.0;
         }
 
         // where we want to be is tracked by positionPID setpoint
@@ -91,56 +95,101 @@ public class ArmSS extends SubsystemBase {
             return positionPID.atSetpoint();
         }
 
-        // we can change the max vel if we need to.
+        //Sets the position of the physical position (Doesn't move anything)
+        void setPosition(double x_cm){
+            encoder.setPosition(x_cm); 
+            positionPID.reset();
+            setSetpoint(x_cm);
+        }
+
+        double getPosition(){
+            return currentPos;
+        }
+
         void setMaxVel(double v) {
             maxVel = Math.abs(v);
         }
 
-        void periodic() {
+        double getMaxVel() {
+            return maxVel;
+        }
+
+        void setVelocityCmd(double v_cm) {
+            velocity_mode = true;
+            external_vel_cmd = v_cm;
+        }
+
+        void hold() {
+            pid.setReference(0.0, ControlType.kVelocity);            
+            currentPos = encoder.getPosition();
+            setSetpoint(currentPos);
+            positionPID.reset();
+            positionPID.calculate(currentPos);
+        }
+
+        void periodic(double compAdjustment) {
             // read encoder for current position
             currentPos = encoder.getPosition();
             // run position pid to get velocity
-            velCmd = MathUtil.clamp(positionPID.calculate(currentPos), -maxVel, maxVel);
+            velCmd = MathUtil.clamp(positionPID.calculate(currentPos) + compAdjustment, -maxVel, maxVel);
             // command hard 0.0 if POS is at tollerence
             velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
+
+            //if velocity mode, use the maxVel to control it, otherwise use positionPID 
+            velCmd = velocity_mode ? external_vel_cmd : velCmd;
+
             // send our vel to the controller
-            pid.setReference(velCmd, ControlType.kSmartVelocity); // TODO can we use position or SmartMotion modes?
+            pid.setReference(velCmd, ControlType.kVelocity); 
         }
-    }
+    } //End of Arm Class
 
-
-    //FEEDBACK from Mr.L  - rework this, most of it in now in Arm.
-    // think about how to control the two arms?
-    
-    // TODO use the Controllrt.calculate and Controller.setpoint
     // instance variables
     // State vars
     final Arm leftArm;
     final Arm rightArm;
-    final Elbow elbow;
+
+    // constants
+    double maxVel = 2.0;  // [cm/s]
+    double posTol = 0.30;  // [cm]
+    double velTol = 0.25; // [cm/s]
+
+    // sync instance vars
+    boolean sync = true; // should usually be true, option to change to false for testing purposes
+    double syncCompensation; // amount of compensation [m/s]
+
+    // controllers
+    PIDController syncPID = new PIDController(0.25, 0.0, 0.0); // arm synchronization pid. syncs left --> right
 
     public ArmSS() {
         leftArm = new Arm(CAN.ARM_LEFT_Motor);
         rightArm = new Arm(CAN.ARM_RIGHT_Motor);
-        elbow = new Elbow();
-
+        //zero our encoders at power up
+        setPositions(0.0);
+        ntcreate();
     }
-
     // At Position flags for use in the commands
     public boolean armsAtPosition() {
-        return ((leftArm.atSetpoint()) && (rightArm.atSetpoint()));
+        //TODO fix me
+        //TODO  I really mean it fix this
+        //TODO I am missing an arm, fix me
+        return (rightArm.atSetpoint()   //TODO fixme when I get an arm       leftArm.atSetpoint())
+             && rightArm.atSetpoint());
     }
 
-    public boolean everythingAtPosition() {
-        return armsAtPosition() && elbow.isAtPosition();
+    public void setVelocityLimit(double vel_limit){
+        leftArm.setMaxVel(vel_limit);
+        rightArm.setMaxVel(vel_limit);
     }
 
-    public boolean elbowAtPosition() {
-        return elbow.isAtPosition();
-    };
+    public double getVelocityLimit(){
+       //arms should have same vel_limit
+       return leftArm.getMaxVel();
+    }
 
-    //accessor for elbow if needed.
-    public Elbow Elbow() {return this.elbow;}
+    public void hold() {
+        leftArm.hold();
+        rightArm.hold();
+    }
 
     /*
      * Looks at various pids and desired positions to see if we are there
@@ -148,88 +197,153 @@ public class ArmSS extends SubsystemBase {
 
     @Override
     public void periodic() {
-        elbow.periodic();
-        leftArm.periodic();
-        rightArm.periodic();
-        
+        // Synchronization
+        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) / 2.0 : 0;
+        syncCompensation = 0.0;   // force off since we are testing one arm at the moment TODO: remove.
+        leftArm.periodic(syncCompensation);
+        rightArm.periodic(-syncCompensation);
+
         ntUpdates();
     }
 
-    public void setPositions(double extension, double rotation){
+    public void setSetpoints(double extension) {
         leftArm.setSetpoint(extension);
         rightArm.setSetpoint(extension);
-        elbow.setPosition(rotation);
+    }
+
+    //initializes position, doesn't move anything.  Defines zero or whereever you.
+    public void setPositions(double extension) {
+        leftArm.setPosition(extension); 
+        rightArm.setPosition(extension);
+    }
+
+    //Testing mode, use with care since there are no limit switches
+    public void setVelocityCmd(double vel_cm) {
+        double v = MathUtil.clamp(vel_cm, -maxVel, maxVel);
+        leftArm.setVelocityCmd(v);
+        rightArm.setVelocityCmd(v);
     }
 
 
     /******************
-     * Network Table Stuff
+     * Network Table Stuff.
+     * 
+     * Should most of this be in the arm class? Probably.
+     * Is it easier to look at and fix if it's in the ArmSS class? Probably.
      *************/
     NetworkTable table = NetworkTableInstance.getDefault().getTable("arm");
 
+    // PID controllers
     NetworkTableEntry nt_left_kP;
     NetworkTableEntry nt_left_kI;
     NetworkTableEntry nt_left_kD;
+
     NetworkTableEntry nt_right_kP;
     NetworkTableEntry nt_right_kI;
     NetworkTableEntry nt_right_kD;
+
     NetworkTableEntry nt_sync_kP;
     NetworkTableEntry nt_sync_kI;
     NetworkTableEntry nt_sync_kD;
-    NetworkTableEntry nt_desiredPos;
-    NetworkTableEntry nt_currentPos;
-    NetworkTableEntry nt_desiredVel;
-    NetworkTableEntry nt_currentVel;
-    NetworkTableEntry nt_tolerance;
+
+    // positions/vels
+    NetworkTableEntry nt_left_desiredPos;
+    NetworkTableEntry nt_left_currentPos;
+    NetworkTableEntry nt_left_desiredVel;
+    NetworkTableEntry nt_left_currentVel;
+
+    NetworkTableEntry nt_right_desiredPos;
+    NetworkTableEntry nt_right_currentPos;
+    NetworkTableEntry nt_right_desiredVel;
+    NetworkTableEntry nt_right_currentVel;
+
+    // maxs, mins, tols
+    NetworkTableEntry nt_maxVel;
+    NetworkTableEntry nt_posTol;
+    NetworkTableEntry nt_velTol;
+
+    NetworkTableEntry nt_syncCompensation;
 
     public void ntcreate() {
+        // PIDs
         nt_left_kP = table.getEntry("Left kP");
         nt_left_kI = table.getEntry("Left kI");
         nt_left_kD = table.getEntry("Left kD");
+
         nt_right_kP = table.getEntry("Right kP");
         nt_right_kI = table.getEntry("Right kI");
         nt_right_kD = table.getEntry("Right kD");
+
         nt_sync_kP = table.getEntry("Sync kP");
         nt_sync_kI = table.getEntry("Sync kI");
         nt_sync_kD = table.getEntry("Sync kD");
-        nt_desiredPos = table.getEntry("Desired Position");
-        nt_currentPos = table.getEntry("Current Position");
-        nt_desiredVel = table.getEntry("Desired Velocity");
-        nt_currentVel = table.getEntry("Current Velocity");
-        nt_tolerance = table.getEntry("Tolerance");
-        nt_left_kP.setDouble(0.0);
-        nt_left_kI.setDouble(0.0);
-        nt_left_kD.setDouble(0.0);
-        nt_right_kP.setDouble(0.0);
-        nt_right_kI.setDouble(0.0);
-        nt_right_kD.setDouble(0.0);
-        nt_sync_kP.setDouble(0.0);
-        nt_sync_kI.setDouble(0.0);
-        nt_sync_kD.setDouble(0.0);
+
+        // des/cur pos/vel
+        nt_left_desiredPos = table.getEntry("Left Desired Position");
+        nt_left_currentPos = table.getEntry("Left Current Position");
+        nt_left_desiredVel = table.getEntry("Left Desired Velocity");
+        nt_left_currentVel = table.getEntry("Left Current Velocity");
+
+        nt_right_desiredPos = table.getEntry("right Desired Position");
+        nt_right_currentPos = table.getEntry("right Current Position");
+        nt_right_desiredVel = table.getEntry("right Desired Velocity");
+        nt_right_currentVel = table.getEntry("right Current Velocity");
+
+        nt_syncCompensation = table.getEntry("Sync Compensation");
+
+        // maxs, mins, tols
+        nt_maxVel = table.getEntry("Max Velocity (cm/s)");
+        nt_posTol = table.getEntry("Position Tolerance (cm)");
+        nt_velTol = table.getEntry("Velocity Tolerance (cm/s)");
+
+        // set doubles for values that we will update based on what is in NT, so they
+        // appear
+        nt_left_kP.setDouble(leftArm.positionPID.getP());
+        nt_left_kI.setDouble(leftArm.positionPID.getI());
+        nt_left_kD.setDouble(leftArm.positionPID.getD());
+
+        nt_right_kP.setDouble(rightArm.positionPID.getP());
+        nt_right_kI.setDouble(rightArm.positionPID.getI());
+        nt_right_kD.setDouble(rightArm.positionPID.getD());
+
+        nt_sync_kP.setDouble(syncPID.getP());
+        nt_sync_kI.setDouble(syncPID.getI());
+        nt_sync_kD.setDouble(syncPID.getD());
+
+        nt_maxVel.setDouble(maxVel);
+        nt_posTol.setDouble(posTol);
+        nt_velTol.setDouble(velTol);
     }
 
     private void ntUpdates() {
-        // info (set)
-        /*
-        nt_desiredPos.setDouble(desiredPos);
-        nt_currentPos.setDouble(currentPos);
-        nt_desiredVel.setDouble(desired_vel);
-        nt_currentVel.setDouble(current_vel);
-        nt_tolerance.setDouble(tolerance);
-        */
-        // PID setters
-        /**
-         * left_arm_controller.setP(nt_left_kP.getDouble(0.0));
-         * left_arm_controller.setI(nt_left_kI.getDouble(0.0));
-         * left_arm_controller.setD(nt_left_kD.getDouble(0.0));
-         * right_arm_controller.setP(nt_right_kP.getDouble(0.0));
-         * right_arm_controller.setI(nt_right_kI.getDouble(0.0));
-         * right_arm_controller.setD(nt_right_kD.getDouble(0.0));
-         * sync_arms_controller.setP(nt_sync_kP.getDouble(0.0));
-         * sync_arms_controller.setI(nt_sync_kI.getDouble(0.0));
-         * sync_arms_controller.setD(nt_sync_kD.getDouble(0.0));
-         */
+        // info (get)
+        nt_left_desiredPos.setDouble(leftArm.getSetpoint());
+        nt_left_currentPos.setDouble(leftArm.currentPos);
+        nt_left_desiredVel.setDouble(leftArm.velCmd);
+        nt_left_currentVel.setDouble(leftArm.encoder.getVelocity());
 
+        nt_right_desiredPos.setDouble(rightArm.getSetpoint());
+        nt_right_currentPos.setDouble(rightArm.currentPos);
+        nt_right_desiredVel.setDouble(rightArm.velCmd);
+        nt_right_currentVel.setDouble(rightArm.encoder.getVelocity());
+
+        nt_syncCompensation.setDouble(syncCompensation);
+
+        // PID setters
+        leftArm.positionPID.setP(nt_left_kP.getDouble(0.0));
+        leftArm.positionPID.setI(nt_left_kI.getDouble(0.0));
+        leftArm.positionPID.setD(nt_left_kD.getDouble(0.0));
+
+        rightArm.positionPID.setP(nt_right_kP.getDouble(0.0));
+        rightArm.positionPID.setI(nt_right_kI.getDouble(0.0));
+        rightArm.positionPID.setD(nt_right_kD.getDouble(0.0));
+
+        syncPID.setP(nt_sync_kP.getDouble(0.0));
+        syncPID.setI(nt_sync_kI.getDouble(0.0));
+        syncPID.setD(nt_sync_kD.getDouble(0.0));
+
+        leftArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
+        rightArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
     }
 
 }

@@ -5,22 +5,29 @@
 package frc.robot;
 
 import java.util.HashMap;
+
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.Intake;
+import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.commands.swerve.FollowPPTrajectory;
+import frc.robot.commands.test.ArmVelocityTest;
+import frc.robot.commands.test.MoveArmsTest;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
+import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
@@ -64,6 +71,7 @@ public class RobotContainer {
   public final HID_Xbox_Subsystem dc; // short for driver controls
   public final Intake intake;
   public final ArmSS armSS;
+  public final Elbow elbow;
   public final Claw_Substyem claw;
 
   // vision systems, create on every bot
@@ -89,6 +97,7 @@ public class RobotContainer {
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
         armSS = new ArmSS();
+        elbow = new Elbow();
         claw = new Claw_Substyem();
         break;
 
@@ -97,6 +106,7 @@ public class RobotContainer {
         drivetrain = new SwerveDrivetrain();
         intake = null;
         armSS = null;
+        elbow = null;
         claw = null;
         break;
 
@@ -105,6 +115,7 @@ public class RobotContainer {
         drivetrain = new SwerveDrivetrain();
         intake = null;
         armSS = null;
+        elbow = null;
         claw = null;
         break;
 
@@ -114,7 +125,8 @@ public class RobotContainer {
         sensors = null;
         drivetrain = null;
         intake = null;
-        armSS = null;
+        armSS = new ArmSS();
+        elbow = null;
         claw = null;
         break;
     }
@@ -125,9 +137,7 @@ public class RobotContainer {
     }
 
     initEvents(); // setup event hashmap
-    // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
-    initEvents();  //setup event hashmap
+
     autoBuilder = new SwerveAutoBuilder(
         drivetrain::getPose, // Pose2d supplier
         drivetrain::resetPose, // Pose2d consumer, used to reset odometry at the beginning of auto
@@ -143,12 +153,13 @@ public class RobotContainer {
         drivetrain // The drive subsystem. Used to properly set the requirements of path following
                    // commands
     );
-
+    
+    // Edit the binding confiuration for testing
+    configureBindings(Bindings.arm_test);
   }
 
   private void configureBindings(Bindings bindings) {
     // bindings useful for everyone
-
     // Y button to reset current facing to zero
     if (drivetrain != null) {
       dc.Driver().y().whileTrue(new InstantCommand(() -> {
@@ -159,6 +170,10 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings) {
       case arm_test:
+        dc.Driver().a().whileTrue(new MoveArmsTest(20.0, 25.0));
+        dc.Driver().b().whileTrue(new ArmVelocityTest(2.0, 3.0, 1.0));
+        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0));
+        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0));
         break;
       case balance_test:
         dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
@@ -179,8 +194,8 @@ public class RobotContainer {
 
       case Competition:
       default:
-        // TODO: Put Competition bindings here
-        break;
+        //TODO: Put Competition bindings here
+        break;      
     }
   }
 

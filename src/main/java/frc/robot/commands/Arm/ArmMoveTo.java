@@ -5,6 +5,7 @@ package frc.robot.commands.Arm;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ArmSS;
+import frc.robot.subsystems.Elbow;
 
 /*
  * comments form Mr.L
@@ -38,19 +39,23 @@ public class ArmMoveTo extends CommandBase {
   final ArmSS armSS;
   final double length;
   final double angle;
+  final Elbow elbow;
 
   
   public ArmMoveTo(double arm_length_cm, double elbow_angle_deg) {
-    armSS = RobotContainer.RC().armSS;
+    armSS = RobotContainer.RC().armSS; 
+    elbow = RobotContainer.RC().elbow;
     length = arm_length_cm;
     angle = elbow_angle_deg;
     addRequirements(armSS);
+
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    armSS.setPositions(length, angle);
+    armSS.setPositions(length);
+    elbow.setPosition(angle);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -71,6 +76,6 @@ public class ArmMoveTo extends CommandBase {
   @Override
   public boolean isFinished() {
     // everything is arm extension and elbo angle
-    return armSS.everythingAtPosition();
+    return armSS.armsAtPosition() && elbow.isAtPosition();
   }
 }
