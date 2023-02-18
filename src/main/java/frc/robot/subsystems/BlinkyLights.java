@@ -5,56 +5,70 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.led.CANdle;
-import com.ctre.phoenix.led.CANdleConfiguration;
-import com.ctre.phoenix.led.CANdle.LEDStripType;
-import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class BlinkyLights extends SubsystemBase {
   // State vars
   CANdle candle;
-  CANdleConfiguration config;
-  Color orange = new Color(265, 165, 0); 
-  Color blue = new Color(0, 0, 255);
-  Color black = new Color(0, 0, 0);
+  double brightness;
+  Color8Bit currentColor;
+  
    
-// consider passing through a single Color parameter here --nren
-public void setColor(int r, int g, int b){
-    candle.setLEDs(r, g, b);
+public void setColor(Color8Bit color){
+    candle.setLEDs(color.red, color.blue, color.green);
+    currentColor = color;
 }
 
-// each of these should call the setColor(r/g/b) command --nren
-  public void setOrange(){
-    candle.setLEDs(265, 165, 0);
-  }
-  public void setBlue(){
-    candle.setLEDs(0, 0, 255);
-  }
-  public void setBlack(){
-    candle.setLEDs(0, 0, 0);
-  }
 
   
   /** Creates a new BlinkyLights. */
   public BlinkyLights() {
-    // do something with the config --nren
    candle = new CANdle(0);
+   candle.configAllSettings(Constants.BlinkyLights.config);
+   ntcreate();
   }
 /*
 * Brightness on a scale from 0-1, with 1 being max brightness
 */
 
   public void setBrightness(double brightness) {
-    // directl set the candle's brightness, not the config's brightness --nren
-    config.brightnessScalar = brightness;
+    candle.configBrightnessScalar(brightness);
   }
 
   
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
+ntUpdates();
   }
 
-  // give me some NTs --nren
+  /** 
+   * NETWORK TABLES AHH
+   */
+
+  NetworkTable table = NetworkTableInstance.getDefault().getTable("Blinky Lights");
+
+  NetworkTableEntry nt_brightness;
+  NetworkTableEntry nt_color_r;
+  NetworkTableEntry nt_color_g;
+  NetworkTableEntry nt_color_b;
+  public void ntcreate(){
+    nt_brightness = table.getEntry("Brightness");
+    nt_color_r = table.getEntry("Color-R");
+    nt_color_g = table.getEntry("Color-G");
+    nt_color_b = table.getEntry("Color-B");
+  }
+
+  public void ntUpdates(){
+    nt_brightness.setDouble(brightness);
+    nt_color_r.setInteger(currentColor.red);
+    nt_color_g.setInteger(currentColor.green);
+    nt_color_b.setInteger(currentColor.blue);
+
+  }
 }

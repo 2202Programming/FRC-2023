@@ -10,7 +10,6 @@ import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -26,7 +25,6 @@ import frc.robot.commands.swerve.ChargeStationBalanceChad;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.MoveArmsTest;
-import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Elbow;
@@ -245,11 +243,5 @@ public class RobotContainer {
         new InstantCommand(drivetrain::printPose), new ChargeStationBalance(true)));
     eventMap.put("score", new SequentialCommandGroup(new PrintCommand("***Path score"),
         new InstantCommand(drivetrain::printPose)));
-  }
-  public void blinkyLights(int r, int g, int b){
-    
-    new InstantCommand(() -> {
-      Color.fromHSV(r, g, b);
-    });
   }
 }

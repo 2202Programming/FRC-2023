@@ -7,11 +7,11 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.util.PIDFController;
 
 /**
@@ -450,5 +450,8 @@ public final class Constants {
   }
   public static final class BlinkyLights{
     public static final CANdleConfiguration config = new CANdleConfiguration();
+    public static final Color8Bit orange = new Color8Bit(265, 165, 0); 
+    public static final Color8Bit blue = new Color8Bit(0, 0, 255);
+    public static final Color8Bit black = new Color8Bit(0, 0, 0);
   }
 }
