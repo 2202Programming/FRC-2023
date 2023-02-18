@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
   final CANSparkMax l_intake_mtr = new CANSparkMax(CAN.INTAKE_LEFT_MTR, CANSparkMax.MotorType.kBrushless);
   final CANSparkMax r_intake_mtr = new CANSparkMax(CAN.INTAKE_RIGHT_MTR, CANSparkMax.MotorType.kBrushless);
   final DoubleSolenoid intake_solenoid = new DoubleSolenoid(CAN.PCM1,
-              PneumaticsModuleType.CTREPCM,
+              PneumaticsModuleType.REVPH,
               PCM1.INTAKE_UP_SOLENOID_PCM,
               PCM1.INTAKE_DOWN_SOLENOID_PCM);
   final CANSparkMax l_carwash_mtr = new CANSparkMax(CAN.CARWASH_LEFT_MTR, CANSparkMax.MotorType.kBrushless);

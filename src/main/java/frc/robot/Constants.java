@@ -87,8 +87,10 @@ public final class Constants {
    */
   public static final class CAN {
     // CAN ID for non-motor devices
-    public static final int PDP = 0; // this must be 0
-    public static final int PCM1 = 1; // default ID for PCM
+
+    //DL PROBLEM TO WORK WITH OTHER BOTS
+    public static final int PDP = 1; //for rev
+    public static final int PCM1 = 2; //for rev
 
     // drive train CANCoders
     public static final int DT_BL_CANCODER = 28;
@@ -152,14 +154,12 @@ public final class Constants {
   // PWM assignments on the Rio
   public static final class PCM1 {
     // Double Solenoid
-    public static final int INTAKE_UP_SOLENOID_PCM = 2; // test value
-    public static final int INTAKE_DOWN_SOLENOID_PCM = 3; // test value
-    public static final int POSITIONER_UP_SOLENOID_PCM = 0; // test value
-    public static final int POSITIONER_DOWN_SOLENOID_PCM = 1; // test value
+    public static final int INTAKE_UP_SOLENOID_PCM = 1; // test value
+    public static final int INTAKE_DOWN_SOLENOID_PCM = 0; // test value
 
     // claw double Solenoid
-    public static final int CLAW_FWD = 4;
-    public static final int CLAW_REV = 5;
+    public static final int CLAW_FWD = 2;
+    public static final int CLAW_REV = 3;
 
   }
 
@@ -273,7 +273,7 @@ public final class Constants {
         MperFT * (24.87 / 12) / 2, 0.995, 99.5 / 1000.0, 12.8, 8.14);
 
     // For 2023 CompetitionBot TODO FIX ME
-    public static final WheelOffsets compBotOffsets = new WheelOffsets(130.083, -83.584, -56.51, 139.91);
+    public static final WheelOffsets compBotOffsets = new WheelOffsets(129.03, -83.94, -57.83, 139.38);
     public static final ChassisConfig compBotChassisConfig = new ChassisConfig(
         MperFT * (23.5 / 12.0) / 2.0, //based on CAD in reference_links
         MperFT * (19.5 / 12.0) / 2.0, //based on CAD in reference_links
