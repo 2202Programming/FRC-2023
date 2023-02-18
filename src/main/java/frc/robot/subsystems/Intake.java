@@ -49,9 +49,9 @@ public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
   public Intake() {
     motor_config(l_intake_mtr, false);
-    motor_config(r_intake_mtr, true);    //TODO: Check if inversion is needed
-    motor_config(l_carwash_mtr, false);
-    motor_config(r_carwash_mtr, false); // TODO: check if inversion is needed
+    motor_config(r_intake_mtr, false);
+    motor_config(l_carwash_mtr, true);
+    motor_config(r_carwash_mtr, false);
 
     ntconfig();
   }
