@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.led.CANdle;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.util.PIDFController;
@@ -444,5 +446,8 @@ public final class Constants {
     DriverMode(int value) {
       this.value = value;
     }
+  }
+  public static final class BlinkyLights{
+    public static final CANdle candle = new CANdle(0);
   }
 }
