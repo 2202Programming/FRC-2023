@@ -7,7 +7,7 @@ package frc.robot.commands.Intake.Washer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Carwash;
 import frc.robot.subsystems.Intake;
-
+import frc.robot.RobotContainer;
 
 public class activateIntake extends CommandBase {
   /** Creates a new activateIntake. */
@@ -15,6 +15,8 @@ public class activateIntake extends CommandBase {
   final Carwash washer;
 
   public activateIntake() {
+    intake = RobotContainer.RC().intake;
+    washer = RobotContainer.RC().washer; 
     // Use addRequirements() here to declare subsystem dependencies.
   }
 

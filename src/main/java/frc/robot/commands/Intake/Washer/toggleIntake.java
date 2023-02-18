@@ -6,6 +6,7 @@ package frc.robot.commands.Intake.Washer;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Intake;
+import frc.robot.RobotContainer;
 
 public class toggleIntake extends CommandBase {
   /** Creates a new toggleIntake. */
@@ -13,6 +14,7 @@ public class toggleIntake extends CommandBase {
   boolean intakePos;
   
   public toggleIntake() {
+    intake =  RobotContainer.RC().intake;
     intakePos = Intake.isDeployed();
     // Use addRequirements() here to declare subsystem dependencies.
   }

@@ -7,6 +7,7 @@ package frc.robot.commands.Intake.Washer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Carwash;
 import frc.robot.subsystems.Intake;
+import frc.robot.RobotContainer;
 
 
 public class reverseIntake extends CommandBase {
@@ -17,6 +18,9 @@ public class reverseIntake extends CommandBase {
   public double speed2;
 
   public reverseIntake() {
+    washer =  RobotContainer.RC().washer;
+    intake =  RobotContainer.RC().intake;
+
     speed1 = washer.CarwashMotorStrength;
     speed2 = intake.IntakeMotorStrength;
 
