@@ -14,20 +14,19 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.Constants.Intake;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
-import frc.robot.commands.swerve.ChargeStationBalanceChad;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.MoveArmsTest;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Elbow;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
@@ -90,17 +89,18 @@ public class RobotContainer {
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
-        photonVision = null; //new PhotonVision();
-        limelight = null; //new Limelight_Subsystem();
+        photonVision = null; // new PhotonVision();
+        limelight = null; // new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
-        intake = new Intake();
-        //armSS = new ArmSS();
-        //elbow = new Elbow();
-        //claw = new Claw_Substyem();
+        // intake = new Intake();
+        // armSS = new ArmSS();
+        // elbow = new Elbow();
+        // claw = new Claw_Substyem();
         armSS = null;
         elbow = null;
         claw = null;
+        intake = new Intake();
         break;
 
       case SwerveBot:
@@ -133,7 +133,7 @@ public class RobotContainer {
         sensors = null;
         drivetrain = null;
         intake = null;
-        //armSS = new ArmSS();
+        // armSS = new ArmSS();
         armSS = null;
         elbow = null;
         claw = null;
@@ -177,8 +177,9 @@ public class RobotContainer {
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0));
         break;
       case balance_test:
-        if (drivetrain == null) break;
-        dc.Driver().rightBumper().whileTrue(new ChargeStationBalanceChad(false));
+        if (drivetrain == null)
+          break;
+        dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
         break;
 
       case claw_test:
@@ -196,12 +197,22 @@ public class RobotContainer {
 
       case Competition:
       default:
-        if (drivetrain==null) break;
+        if (drivetrain == null)
+          break;
         // everything subject to change
         dc.Driver().x().whileTrue(new ChargeStationBalance());
         dc.Driver().y().whileTrue(new InstantCommand(() -> {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
+        }));
+        dc.Operator().a().whileTrue(new InstantCommand(() -> {
+          intake.intakeOn();
+        }));
+        dc.Operator().b().whileTrue(new InstantCommand(() -> {
+          intake.intakeReverse();
+        }));
+        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
+          intake.deploy();
         }));
 
         /******************************************************
@@ -219,6 +230,7 @@ public class RobotContainer {
          * dc.Operator().y().whileTrue(new topRow());
          ********************************************************/
         break;
+
     }
   }
 
@@ -228,7 +240,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new autoCommand().andThen(new ChargeStationBalanceChad());
+    return new autoCommand().andThen(new ChargeStationBalance());
   }
 
   /**

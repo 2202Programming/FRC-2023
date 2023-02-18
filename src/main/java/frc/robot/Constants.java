@@ -99,6 +99,8 @@ public final class Constants {
     // Intake motor
     public static final int INTAKE_RIGHT_MTR = 19;
     public static final int INTAKE_LEFT_MTR = 18;
+    public static final int CARWASH_RIGHT_MTR = 11;
+    public static final int CARWASH_LEFT_MTR = 10;
 
     // drive train drive / angle motors - sparkmax neo
     public static final int DT_FL_DRIVE = 20;
@@ -126,7 +128,8 @@ public final class Constants {
     public static final int PIGEON_IMU_CAN = 60;
 
     // Whether to burn flash or not
-    public static final boolean BURN_FLASH = false; // swerve-mk3, do once
+    public static final boolean BURN_FLASH = false; // swerve-mk3
+    public static final int INTAKE_TOP_MOTOR = 0;
   }
 
   // PWM assignments on the Rio
@@ -178,7 +181,7 @@ public final class Constants {
   }
 
   // Intake Constants
-  public static final class Intake {
+  public static final class Intake_Constants {
     // PID values to get copied to the hardware
     public static PIDFController r_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
     public static PIDFController l_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);

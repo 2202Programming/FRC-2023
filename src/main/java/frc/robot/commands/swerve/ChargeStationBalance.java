@@ -63,11 +63,11 @@ public class ChargeStationBalance extends CommandBase {
     final double vmax = 0.9; // [m/s] fastest speed we allow
     final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected  TODO: Try stiction fix to speed steady-state climb
     // also could be simple bang-bang...
-    final double roll_offset = -0.8349609375; // [deg] simple sensor correction TODO:calibrate in sensor_SS
+    final double pitch_offset = -0.8349609375; // [deg] simple sensor correction TODO:calibrate in sensor_SS
 
     // tolerance limits
-    final double rollPosTol = 1.5; // [deg] level more or less
-    final double rollRateTol = 3.0; // [deg/s] little motion TODO: tell it to stop being annoying
+    final double pitchPosTol = 1.5; // [deg] level more or less
+    final double pitchRateTol = 3.0; // [deg/s] little motion TODO: tell it to stop being annoying
     final int levelN = 5; // [frame-counts] stable roll for n frames, maybe use FIR?                          
 
     // Subsystems
@@ -75,21 +75,21 @@ public class ChargeStationBalance extends CommandBase {
     Sensors_Subsystem sensors; // read-only, not require
 
     //measured & output values
-    double rollRate;                    //[deg/s]
-    double xSpeed_r;                    //[m/s]  controller on roll
-    double xSpeed_rr;                   //[m/s]  controller on rollRate
+    double pitchRate;                    //[deg/s]
+    double xSpeed_p;                    //[m/s]  controller on roll
+    double xSpeed_pr;                   //[m/s]  controller on rollRate
     double xSpeed;                      //[m/s]  output vel
-    double unfilteredRoll;              //[deg/s]
-    double filteredRoll;                //[deg/s]
-    double prev_filteredRoll;           //[deg/s]
+    double unfilteredPitch;              //[deg/s]
+    double filteredPitch;                //[deg/s]
+    double prev_filteredPitch;           //[deg/s]
 
     // state vars, cleared on init()
     int levelCount;
     PIDController csBalancePID = new PIDController(0.015, 0.0, 0.000); // kp [m/s per deg] kd .003 or less for TIM,  kp >.018 is unstable
-    double kpRR = -0.0055;   //[m/s/deg/s] vel compensation based on direct rollRate
+    double kpPR = -0.0055;   //[m/s/deg/s] vel compensation based on direct rollRate
 
-    LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.3, Constants.DT);
-    LinearFilter rollRateFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
+    LinearFilter pitchFilter = LinearFilter.singlePoleIIR(0.3, Constants.DT);
+    LinearFilter pitchRateFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
 
     public ChargeStationBalance() {
         this(true);
@@ -103,7 +103,7 @@ public class ChargeStationBalance extends CommandBase {
 
         // pid setpoint is always 0.0, aka level, include tolerances
         csBalancePID.setSetpoint(0.0);
-        csBalancePID.setTolerance(rollPosTol, rollRateTol);
+        csBalancePID.setTolerance(pitchPosTol, pitchRateTol);
 
         // NT creation
         ntcreate();
@@ -112,23 +112,23 @@ public class ChargeStationBalance extends CommandBase {
     @Override
     public void initialize() {
         levelCount = 0;
-        unfilteredRoll = sensors.getPitch() - roll_offset - 2.0;
-        rollRate = sensors.getPitchRate();
+        unfilteredPitch = sensors.getPitch() - pitch_offset - 2.0;
+        pitchRate = sensors.getPitchRate();
        
         //reset, use current measured roll & rollRate to initialize
-        rollFilter.calculate(unfilteredRoll);
-        rollFilter.calculate(unfilteredRoll);
-        filteredRoll = rollFilter.calculate(unfilteredRoll);
+        pitchFilter.calculate(unfilteredPitch);
+        pitchFilter.calculate(unfilteredPitch);
+        filteredPitch = pitchFilter.calculate(unfilteredPitch);
 
         // Same for roll Rate, should be zero
-        rollRateFilter.reset();
-        rollRateFilter.calculate(rollRate);
-        rollRateFilter.calculate(rollRate);
+        pitchRateFilter.reset();
+        pitchRateFilter.calculate(pitchRate);
+        pitchRateFilter.calculate(pitchRate);
 
         // set PID internal states
         csBalancePID.reset();
-        csBalancePID.calculate(filteredRoll);
-        csBalancePID.calculate(filteredRoll);
+        csBalancePID.calculate(filteredPitch);
+        csBalancePID.calculate(filteredPitch);
         System.out.println("***Starting automatic charging station balancing***");
     }
 
@@ -153,14 +153,14 @@ public class ChargeStationBalance extends CommandBase {
      */
     private SwerveModuleState[] calculate() {
         // try simple 1-D around roll
-        unfilteredRoll = sensors.getPitch() - roll_offset - 2.0;
-        filteredRoll = rollFilter.calculate(unfilteredRoll); // simple best guess of our roll after physical alignment
-        rollRate = rollRateFilter.calculate(sensors.getPitchRate());
+        unfilteredPitch = sensors.getPitch() - pitch_offset - 2.0;
+        filteredPitch = pitchFilter.calculate(unfilteredPitch); // simple best guess of our roll after physical alignment
+        pitchRate = pitchRateFilter.calculate(sensors.getPitchRate());
 
         // pid speed + min speed in proper direction, then clamp to our max
-        xSpeed_r = csBalancePID.calculate(filteredRoll);
-        xSpeed_rr = kpRR*rollRate;
-        xSpeed = MathUtil.clamp(xSpeed_r + xSpeed_rr, -vmax, vmax);
+        xSpeed_p = csBalancePID.calculate(filteredPitch);
+        xSpeed_pr = kpPR*pitchRate;
+        xSpeed = MathUtil.clamp(xSpeed_p + xSpeed_pr, -vmax, vmax);
 
         /**
          * if we use an unaligned start, decouple the desired speed into components
@@ -233,19 +233,19 @@ public class ChargeStationBalance extends CommandBase {
         nt_kP.setDouble(csBalancePID.getP());
         nt_kI.setDouble(csBalancePID.getI());
         nt_kD.setDouble(csBalancePID.getD());
-        nt_KPRR.setDouble(kpRR);
+        nt_KPRR.setDouble(kpPR);
     }
 
     private void ntupdates() {
         // info
         nt_framesStable.setDouble(levelCount);
         nt_atSetpoint.setBoolean(csBalancePID.atSetpoint());
-        nt_filteredGyro.setDouble(filteredRoll);
-        nt_unfilteredGyro.setDouble(unfilteredRoll);
-        nt_rollRate.setDouble(rollRate);
+        nt_filteredGyro.setDouble(filteredPitch);
+        nt_unfilteredGyro.setDouble(unfilteredPitch);
+        nt_rollRate.setDouble(pitchRate);
         nt_xSpeed.setDouble(xSpeed);
-        nt_xSpeedR.setDouble(xSpeed_r);
-        nt_xSpeedRR.setDouble(xSpeed_rr);
+        nt_xSpeedR.setDouble(xSpeed_p);
+        nt_xSpeedRR.setDouble(xSpeed_pr);
 
         // setters
         csBalancePID.setP(nt_kP.getDouble(0.02));
@@ -253,7 +253,7 @@ public class ChargeStationBalance extends CommandBase {
         csBalancePID.setD(nt_kD.getDouble(0.0));
         
         //rollrate kp
-        kpRR = nt_KPRR.getDouble(0.0);
+        kpPR = nt_KPRR.getDouble(0.0);
 
     }
 }

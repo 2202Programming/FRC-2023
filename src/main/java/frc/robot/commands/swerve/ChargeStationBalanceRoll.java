@@ -56,7 +56,7 @@ import frc.robot.subsystems.SwerveDrivetrain;
  * 
  */
 
-public class ChargeStationBalanceChad extends CommandBase {
+public class ChargeStationBalanceRoll extends CommandBase {
 
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java
@@ -91,11 +91,11 @@ public class ChargeStationBalanceChad extends CommandBase {
     LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.3, Constants.DT);
     LinearFilter rollRateFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
 
-    public ChargeStationBalanceChad() {
+    public ChargeStationBalanceRoll() {
         this(true);
     }
 
-    public ChargeStationBalanceChad(boolean exitOnLevel) {
+    public ChargeStationBalanceRoll(boolean exitOnLevel) {
         this.exitOnLevel = exitOnLevel;
         sdt = RobotContainer.RC().drivetrain;
         sensors = RobotContainer.RC().sensors;
