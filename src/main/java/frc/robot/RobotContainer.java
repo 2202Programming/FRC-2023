@@ -223,6 +223,14 @@ public class RobotContainer {
         //OPERATOR
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
         dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
+
+        // testing deploying / retracting intake on bumpers
+        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
+          intake.deploy();
+        }));
+        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
+          intake.retract();
+        }));
         // testing on pov
         dc.Operator().povLeft().whileTrue(new IntakeForward());
         dc.Operator().povRight().whileTrue(new IntakeReverse());

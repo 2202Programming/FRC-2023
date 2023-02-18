@@ -20,7 +20,7 @@ public class outtakeCompetitionToggle extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.deploy();
+    intake.retract();
     intake.intakeOnReverse();
     intake.carwashOnReverse();
   }
@@ -34,7 +34,6 @@ public class outtakeCompetitionToggle extends CommandBase {
   public void end(boolean interrupted) {
     intake.intakeOff();
     intake.carwashOff();
-    intake.retract();
   }
 
   // Returns true when the command should end.
