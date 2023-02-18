@@ -8,6 +8,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.led.CANdle;
+import com.ctre.phoenix.led.CANdleConfiguration;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -448,6 +449,6 @@ public final class Constants {
     }
   }
   public static final class BlinkyLights{
-    public static final CANdle candle = new CANdle(0);
+    public static final CANdleConfiguration config = new CANdleConfiguration();
   }
 }

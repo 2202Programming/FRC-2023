@@ -8,13 +8,16 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
+
+import frc.robot.Constants;
 import frc.robot.subsystems.BlinkyLights;
 
 public class BlinkyLight extends CommandBase {
+  CANdle candle;
   /** Creates a new BlinkyLight. */
   public BlinkyLight() {
     candle = new CANdle(0);
-    config = new CANdleConfiguration();
+    config = Constants.BlinkyLights.CONFIG;
     config.stripType = LEDStripType.RGB; // set the strip type to RGB
     config.brightnessScalar = 1.0; // Full Bright (Blind)
     candle.configAllSettings(config);
