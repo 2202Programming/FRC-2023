@@ -181,7 +181,7 @@ public final class Constants {
   }
 
   // Intake Constants
-  public static final class Intake {
+  public static final class Intake_Constants {
     // PID values to get copied to the hardware
     public static PIDFController r_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
     public static PIDFController l_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
