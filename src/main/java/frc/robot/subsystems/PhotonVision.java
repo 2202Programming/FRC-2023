@@ -80,7 +80,7 @@ public class PhotonVision extends SubsystemBase {
     camList.add(new Pair<PhotonCamera, Transform3d>(camera_global, robotToCam));
 
     // setup PhotonVision's pose estimator,
-    robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, camera_global, robotToCam);
+    robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camera_global, robotToCam);
     previousPoseEstimate = new Pair<>(new Pose2d(), 0.0);
     currentPoseEstimate = new Pair<>(new Pose2d(), 0.0);
   }
