@@ -27,7 +27,7 @@
     "open": true
   },
   "NetworkTables Settings": {
-    "mode": "Server"
+    "mode": "Client (NT4)"
   },
   "Server": {
     "Publishers": {
