@@ -10,10 +10,9 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
 
@@ -131,13 +130,13 @@ public class Intake extends SubsystemBase {
   NetworkTableEntry nt_carwashSpeed = nt.getEntry("Carwash Speed");
 
   public void ntconfig() {
-    nt_intakeSpeed.setDouble(0.0);
-    nt_carwashSpeed.setDouble(0.0);
+    // nt_intakeSpeed.setDouble(0.0);
+    // nt_carwashSpeed.setDouble(0.0);
   }
 
   public void ntupdates() {
-    if (nt_intakeSpeed.getDouble(0.0) != IntakeMotorStrength) setIntakeSpeed(nt_intakeSpeed.getDouble(0.0));
-    if (nt_carwashSpeed.getDouble(0.0) != CarwashMotorStrength) setIntakeSpeed(nt_carwashSpeed.getDouble(0.0));
+    // if (nt_intakeSpeed.getDouble(0.0) != IntakeMotorStrength) setIntakeSpeed(nt_intakeSpeed.getDouble(0.0));
+    // if (nt_carwashSpeed.getDouble(0.0) != CarwashMotorStrength) setIntakeSpeed(nt_carwashSpeed.getDouble(0.0));
   }
 
 }

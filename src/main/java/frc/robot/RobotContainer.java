@@ -15,13 +15,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
-import frc.robot.Constants.Intake_Constants;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
-import frc.robot.commands.swerve.ChargeStationBalanceRoll; // default is pitch
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.MoveArmsTest;
@@ -91,14 +89,14 @@ public class RobotContainer {
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
-        photonVision = null; //new PhotonVision();
-        limelight = null; //new Limelight_Subsystem();
+        photonVision = null; // new PhotonVision();
+        limelight = null; // new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
-        //intake = new Intake();
-        //armSS = new ArmSS();
-        //elbow = new Elbow();
-        //claw = new Claw_Substyem();
+        // intake = new Intake();
+        // armSS = new ArmSS();
+        // elbow = new Elbow();
+        // claw = new Claw_Substyem();
         armSS = null;
         elbow = null;
         claw = null;
@@ -135,7 +133,7 @@ public class RobotContainer {
         sensors = null;
         drivetrain = null;
         intake = null;
-        //armSS = new ArmSS();
+        // armSS = new ArmSS();
         armSS = null;
         elbow = null;
         claw = null;
@@ -179,7 +177,8 @@ public class RobotContainer {
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0));
         break;
       case balance_test:
-        if (drivetrain == null) break;
+        if (drivetrain == null)
+          break;
         dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
         break;
 
@@ -197,16 +196,24 @@ public class RobotContainer {
         break;
 
       case Competition:
-      if (drivetrain==null) break;
+      default:
+        if (drivetrain == null)
+          break;
         // everything subject to change
         dc.Driver().x().whileTrue(new ChargeStationBalance());
         dc.Driver().y().whileTrue(new InstantCommand(() -> {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
         }));
-        dc.Operator().a().whileTrue(new InstantCommand (()-> {intake.intakeOn();}));
-        dc.Operator().b().whileTrue(new InstantCommand (()-> {intake.intakeReverse();}));
-        dc.Operator().leftBumper().onTrue(new InstantCommand(()-> {intake.deploy();}));  
+        dc.Operator().a().whileTrue(new InstantCommand(() -> {
+          intake.intakeOn();
+        }));
+        dc.Operator().b().whileTrue(new InstantCommand(() -> {
+          intake.intakeReverse();
+        }));
+        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
+          intake.deploy();
+        }));
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
@@ -223,8 +230,7 @@ public class RobotContainer {
          * dc.Operator().y().whileTrue(new topRow());
          ********************************************************/
         break;
-      default:
-        
+
     }
   }
 
