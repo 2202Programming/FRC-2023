@@ -15,7 +15,7 @@ public class toggleIntake extends CommandBase {
   
   public toggleIntake() {
     intake =  RobotContainer.RC().intake;
-    intakePos = Intake.isDeployed();
+    intakePos = intake.isDeployed();
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -40,6 +40,6 @@ public class toggleIntake extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return intakePos =! Intake.isDeployed();
+    return intakePos =! intake.isDeployed();
   }
 }
