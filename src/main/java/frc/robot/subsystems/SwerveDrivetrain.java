@@ -333,12 +333,14 @@ public class SwerveDrivetrain extends SubsystemBase {
       est_pose_od_x.setDouble(m_pose.getX());
       est_pose_od_y.setDouble(m_pose.getY());
       est_pose_od_h.setDouble(m_pose.getRotation().getDegrees());
+      m_field.setRobotPose(m_odometry.getPoseMeters());
 
+      if (m_pose_integ == null) return;
       est_pose_integ_x.setDouble(m_pose_integ.getX());
       est_pose_integ_y.setDouble(m_pose_integ.getY());
       est_pose_integ_h.setDouble(m_pose_integ.getRotation().getDegrees());
       
-      m_field.setRobotPose(m_odometry.getPoseMeters());
+      
       // if Drivetrain tuning
       // pidTuning();
     }
@@ -507,13 +509,14 @@ public class SwerveDrivetrain extends SubsystemBase {
     old_pose = m_pose;
     m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
 
-    // WIP use other poseEstimator
-    m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
 
     // PhotonVision from here down
     if (photonVision == null)
       return;
 
+      // WIP use other poseEstimator
+    m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
+    
     if (photonVision.hasAprilTarget()) {
       // only if we have a tag in view
       ////Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
