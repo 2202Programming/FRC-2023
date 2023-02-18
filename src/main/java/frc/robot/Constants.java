@@ -126,7 +126,7 @@ public final class Constants {
     public static final int PIGEON_IMU_CAN = 60;
 
     // Whether to burn flash or not
-    public static final boolean BURN_FLASH = false; // swerve-mk3
+    public static final boolean BURN_FLASH = false; // swerve-mk3, do once
   }
 
   // PWM assignments on the Rio
@@ -266,16 +266,16 @@ public final class Constants {
 
     // FOR 2022 Chad Bot - degrees
     public static final WheelOffsets chadBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
-    public static final ChassisConfig chadBotChassisConfig = new ChassisConfig(MperFT * (21.516 / 12) / 2,
+    public static final ChassisConfig chadBotChassisConfig = new ChassisConfig(MperFT * (21.516 / 12.0) / 2.0,
         MperFT * (24.87 / 12) / 2, 0.995, 99.5 / 1000.0, 12.8, 8.14);
 
     // For 2023 CompetitionBot TODO FIX ME
-    public static final WheelOffsets compBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
+    public static final WheelOffsets compBotOffsets = new WheelOffsets(130.083, -83.584, -56.51, 139.91);
     public static final ChassisConfig compBotChassisConfig = new ChassisConfig(
-        MperFT * (23.5 / 12) / 2, //based on CAD in reference_links
-        MperFT * (19.5 / 12) / 2, //based on CAD in reference_links
+        MperFT * (23.5 / 12.0) / 2.0, //based on CAD in reference_links
+        MperFT * (19.5 / 12.0) / 2.0, //based on CAD in reference_links
         0.999, // scale [] <= 1.0
-        MperFT * (4/12), // wheel diameter[m] Comp bot is 4" wheels
+        MperFT * (4.0/12.0), // wheel diameter[m] Comp bot is 4" wheels
         12.8, //confirmed with vince
         8.14); //confirmed with vince
 
