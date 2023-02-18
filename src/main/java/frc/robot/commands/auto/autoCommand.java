@@ -21,8 +21,8 @@ public class autoCommand extends CommandBase {
 
   SwerveDrivetrain drivetrain;
   HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
-  double maxVelocity = 3.0;
-  double maxAcceleration = 3.0;
+  double maxVelocity = 1.0;
+  double maxAcceleration = 1.0;
 
   public autoCommand() {
     this.drivetrain = RobotContainer.RC().drivetrain;

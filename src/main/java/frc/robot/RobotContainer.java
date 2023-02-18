@@ -96,10 +96,10 @@ public class RobotContainer {
         limelight = null; // new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
-        // intake = new Intake();
-        // armSS = new ArmSS();
-        // elbow = new Elbow();
-        // claw = new Claw_Substyem();
+        intake = new Intake();
+        //armSS = new ArmSS();
+        //elbow = new Elbow();
+        //claw = new Claw_Substyem();
         armSS = null;
         elbow = null;
         claw = null;

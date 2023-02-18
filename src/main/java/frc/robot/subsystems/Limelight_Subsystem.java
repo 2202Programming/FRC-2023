@@ -124,9 +124,11 @@ public class Limelight_Subsystem extends SubsystemBase {
         
         nt_bluepose_x.setDouble(bluePose.getX());
         nt_bluepose_y.setDouble(bluePose.getY());
-        RobotContainer.RC().drivetrain.setPose(
-          new Pose2d(bluePose.getTranslation(), //heavy handed way to update robot pose, DL will not like
-          RobotContainer.RC().drivetrain.getPose().getRotation())); //do not update facing, only X,Y
+
+        //this if for when we are ready to have LL update pose
+        // RobotContainer.RC().drivetrain.setPose(
+        //   new Pose2d(bluePose.getTranslation(), //heavy handed way to update robot pose, DL will not like
+        //   RobotContainer.RC().drivetrain.getPose().getRotation())); //do not update facing, only X,Y
 
       }
 
