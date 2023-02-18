@@ -77,7 +77,7 @@ public class Limelight_Subsystem extends SubsystemBase {
     tv = table.getEntry("tv"); // target validity (1 or 0)
     nt_bluepose_x = table.getEntry("Blue Pose X");
     nt_bluepose_y = table.getEntry("Blue Pose Y");
-    nt_numApriltags = table.getEntry("LL Num Apriltag");
+    nt_numApriltags = table.getEntry("LL_Num_Apriltag");
     leds = table.getEntry("ledMode");
     booleanLeds = table.getEntry("booleanLeds");
     pipelineNTE = table.getEntry("pipeline");
