@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -24,11 +26,12 @@ public class Limelight_Subsystem extends SubsystemBase {
   private NetworkTableEntry leds;
   private NetworkTableEntry booleanLeds;
   private NetworkTableEntry NT_hasTarget;
-
+  private NetworkTableEntry nt_bluepose_x;
+  private NetworkTableEntry nt_bluepose_y;
   private NetworkTableEntry outputTx;
   private NetworkTableEntry outputTv;
   private NetworkTableEntry pipelineNTE;
-
+  private NetworkTableEntry nt_numApriltags;
   private NetworkTableEntry nt_botpose;
 
   private double x;
@@ -57,9 +60,10 @@ public class Limelight_Subsystem extends SubsystemBase {
   private int log_counter = 0;
 
   private Pose2d megaPose;
-  //private Pose2d teamPose;
-  //private Pose2d bluePose;
+  private Pose2d teamPose;
+  private Pose2d bluePose;
   final private String LL_NAME = "";// "limelight" for if left blank
+  private int numAprilTags;
 
   public Limelight_Subsystem() {
     x_iir = LinearFilter.singlePoleIIR(filterTC, Constants.Tperiod);
@@ -71,16 +75,14 @@ public class Limelight_Subsystem extends SubsystemBase {
     ty = table.getEntry("ty"); // -20.5 to 20.5 degrees
     ta = table.getEntry("ta");
     tv = table.getEntry("tv"); // target validity (1 or 0)
+    nt_bluepose_x = table.getEntry("Blue Pose X");
+    nt_bluepose_y = table.getEntry("Blue Pose Y");
+    nt_numApriltags = table.getEntry("LL Num Apriltag");
     leds = table.getEntry("ledMode");
     booleanLeds = table.getEntry("booleanLeds");
     pipelineNTE = table.getEntry("pipeline");
-
-    nt_botpose = table.getEntry("botpose");
-
     outputTv = outputTable.getEntry("Limelight Valid");
     outputTx = outputTable.getEntry("Limelight X error");
-
-    nt_botpose.setDoubleArray(new double[] { 0, 0, 0, 0, 0, 0 });
     disableLED();
 
   }
@@ -89,36 +91,51 @@ public class Limelight_Subsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    ///LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
-    ///int numAprilTags = llresults.targetingResults.targets_Fiducials.length;
+    pipeline = pipelineNTE.getInteger(0); 
 
-    x = LimelightHelpers.getTX(LL_NAME);
-    y = LimelightHelpers.getTY(LL_NAME);
-    area = LimelightHelpers.getTA(LL_NAME);
-    target = (tv.getDouble(0) == 0) ? (false) : (true); // tv is only 0.0 or 1.0 per LL docs
-    filteredX = x_iir.calculate(x);
-    filteredArea = area_iir.calculate(area);
-    ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
-    pipeline = pipelineNTE.getInteger(0);
+    if (pipeline == 1) {
+      //LL reflective tape stuff
+      x = LimelightHelpers.getTX(LL_NAME);
+      y = LimelightHelpers.getTY(LL_NAME);
+      area = LimelightHelpers.getTA(LL_NAME);
+      target = (tv.getDouble(0) == 0) ? (false) : (true); // tv is only 0.0 or 1.0 per LL docs
+      filteredX = x_iir.calculate(x);
+      filteredArea = area_iir.calculate(area);
+      ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
+      
+      tx.setDouble(x);
+      ty.setDouble(y);
+      ta.setDouble(area);
+    }
+    else if (pipeline == 0) {
+        
+      //LL apriltags stuff
+      LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
+      numAprilTags = llresults.targetingResults.targets_Fiducials.length;
 
-    megaPose = LimelightHelpers.getBotPose2d(LL_NAME); // new hotness
-    //bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
-    
-    tx.setDouble(megaPose.getX());
-    ty.setDouble(megaPose.getY());
-    ta.setDouble(megaPose.getRotation().getDegrees());
-    /*
-     * avoid SmartDashboard - use NT directly
-     * SmartDashboard.putNumber("LL botpose X", megaPose.getX());
-     * SmartDashboard.putNumber("LL botpose Y", megaPose.getY());
-     * SmartDashboard.putNumber("LL botpose Yaw",
-     * megaPose.getRotation().getDegrees());
-     * 
-     * SmartDashboard.putNumber("LL bluePose X", bluePose.getX());
-     * SmartDashboard.putNumber("LL bluePose Y", bluePose.getY());
-     * SmartDashboard.putNumber("LL bluePose Yaw",
-     * bluePose.getRotation().getDegrees());
-     */
+      megaPose = LimelightHelpers.getBotPose2d(LL_NAME);
+      bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
+      if(DriverStation.getAlliance() == Alliance.Blue)
+        teamPose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
+      else
+        teamPose = LimelightHelpers.getBotPose2d_wpiRed(LL_NAME);
+      
+      nt_bluepose_x.setDouble(bluePose.getX());
+      nt_bluepose_y.setDouble(bluePose.getY());
+      nt_numApriltags.setInteger(numAprilTags);
+    }
+  }
+
+  public Pose2d getBluePose(){
+    return bluePose;
+  }
+
+  public Pose2d getTeamPose(){
+    return teamPose;
+  }
+
+  public int getNumApriltags(){
+    return numAprilTags;
   }
 
   public double getX() {
