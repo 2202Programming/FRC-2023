@@ -213,6 +213,9 @@ public class RobotContainer {
         dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
           intake.deploy();
         }));
+        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
+          intake.retract();
+        }));
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
