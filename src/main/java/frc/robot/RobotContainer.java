@@ -93,8 +93,8 @@ public class RobotContainer {
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
-        photonVision = new PhotonVision();
-        limelight = new Limelight_Subsystem();
+        photonVision = null; //new PhotonVision();
+        limelight = null; //new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         //intake = new Intake();
