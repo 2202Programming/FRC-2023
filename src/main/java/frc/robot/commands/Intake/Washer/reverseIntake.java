@@ -13,18 +13,23 @@ public class reverseIntake extends CommandBase {
   /** Creates a new activateIntake. */
   final Intake intake;
   final Carwash washer;
-  public double speed;
+  public double speed1;
+  public double speed2;
 
   public reverseIntake() {
-    speed = -washer.CarwashMotorStrength;
+    speed1 = washer.CarwashMotorStrength;
+    speed2 = intake.IntakeMotorStrength;
+
+    this.speed1 = -speed1;
+    this.speed2 = -speed2;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.on(speed);
-    washer.on(speed);
+    intake.on(speed2);
+    washer.on(speed1);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
