@@ -19,18 +19,17 @@ public class BlinkyLights extends SubsystemBase {
   Color black = new Color(0, 0, 0);
    
 public void setColor(int r, int g, int b){
-    Color color = new Color(r, g, b);
-    candle.setLEDs(color);
+    candle.setLEDs(r, g, b);
 }
 
   public void setOrange(){
-    candle.setLEDs(orange);
+    candle.setLEDs(265, 165, 0);
   }
   public void setBlue(){
-    candle.setLEDs(blue);
+    candle.setLEDs(0, 0, 255);
   }
   public void setBlack(){
-    candle.setLEDs(black);
+    candle.setLEDs(0, 0, 0);
   }
 
   
