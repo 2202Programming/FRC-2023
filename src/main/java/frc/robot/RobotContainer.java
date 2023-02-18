@@ -27,6 +27,7 @@ import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.MoveArmsTest;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
+import frc.robot.subsystems.Carwash;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Limelight_Subsystem;
@@ -76,6 +77,7 @@ public class RobotContainer {
   public final ArmSS armSS;
   public final Elbow elbow;
   public final Claw_Substyem claw;
+  public final Carwash washer;
 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
@@ -99,10 +101,10 @@ public class RobotContainer {
         //armSS = new ArmSS();
         //elbow = new Elbow();
         //claw = new Claw_Substyem();
-        intake = null;
         armSS = null;
         elbow = null;
         claw = null;
+        intake = new Intake();
         break;
 
       case SwerveBot:
@@ -114,6 +116,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        washer = null;
         break;
 
       case ChadBot:
@@ -139,6 +142,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        washer = null;
         break;
     }
 
