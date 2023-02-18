@@ -15,7 +15,7 @@ import frc.robot.Constants.PCM1;
 
 public class Carwash extends SubsystemBase {
 
-  final double CarwashMotorStrength = 0; //used for default ON
+  public final double CarwashMotorStrength = 0; //used for default ON
 
 
   //Instantiations
@@ -44,8 +44,8 @@ public class Carwash extends SubsystemBase {
 
   //Turn Intake Motor On by sending a double value
   public void on(double intakeMotorStrength) {
-    l_intake_mtr.set(intakeMotorStrength);
-    r_intake_mtr.set(intakeMotorStrength);
+    l_carwash_mtr.set(intakeMotorStrength);
+    r_carwash_mtr.set(intakeMotorStrength);
   }
 
   public void on(){    //on() with no-args is default
