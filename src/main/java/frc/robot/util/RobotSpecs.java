@@ -119,7 +119,7 @@ public class RobotSpecs {
         tempRobotName = RobotNames.ChadBot;
     else if (serialNo.compareTo("0312db1a")==0)
         tempRobotName = RobotNames.BotOnBoard;
-    else if (serialNo.compareTo("293e833")==0) //TODO: Fix serial number
+    else if (serialNo.compareTo("032381BF")==0)
         tempRobotName = RobotNames.CompetitionBot2023;
     else tempRobotName = RobotNames.UnknownBot;
 
