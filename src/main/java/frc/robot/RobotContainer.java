@@ -125,6 +125,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        washer = null;
         break;
 
       case BotOnBoard: // fall through
@@ -205,6 +206,9 @@ public class RobotContainer {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
         }));
+        dc.Operator().a().whileTrue(new InstantCommand (()-> {intake.intakeOn();}));
+        dc.Operator().b().onTrue(new InstantCommand (()-> {intake.intakeReverse();}));
+        dc.Operator().leftBumper().onTrue(new InstantCommand(()-> {intake.deploy();}));  
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
