@@ -5,37 +5,36 @@
 package frc.robot.commands.Intake.Washer;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Carwash;
 import frc.robot.subsystems.Intake;
 import frc.robot.RobotContainer;
 
 public class activateIntake extends CommandBase {
   /** Creates a new activateIntake. */
   final Intake intake;
-  final Carwash washer;
 
   public activateIntake() {
     intake = RobotContainer.RC().intake;
-    washer = RobotContainer.RC().washer; 
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.on();
-    washer.on();
+    intake.intakeOn();
+    intake.carwashOn();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    // nothing needs to happen here
+  }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.off();
-    washer.off();
+    intake.intakeOff();
+    intake.carwashOff();
   }
 
   // Returns true when the command should end.
@@ -43,6 +42,6 @@ public class activateIntake extends CommandBase {
   public boolean isFinished() {
     //Idea: when the button is released edit a variable to return false
     //We may also want to end it when 2/3 color sensors are triggered
-    return false;
+    return true;
   }
 }

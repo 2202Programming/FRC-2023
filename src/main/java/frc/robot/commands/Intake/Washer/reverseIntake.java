@@ -5,7 +5,6 @@
 package frc.robot.commands.Intake.Washer;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Carwash;
 import frc.robot.subsystems.Intake;
 import frc.robot.RobotContainer;
 
@@ -13,27 +12,17 @@ import frc.robot.RobotContainer;
 public class reverseIntake extends CommandBase {
   /** Creates a new activateIntake. */
   final Intake intake;
-  final Carwash washer;
-  public double speed1;
-  public double speed2;
 
   public reverseIntake() {
-    washer =  RobotContainer.RC().washer;
     intake =  RobotContainer.RC().intake;
-
-    speed1 = washer.CarwashMotorStrength;
-    speed2 = intake.IntakeMotorStrength;
-
-    this.speed1 = -speed1;
-    this.speed2 = -speed2;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.on(speed2);
-    washer.on(speed1);
+    intake.intakeReverse();
+    intake.carwashReverse();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -43,8 +32,8 @@ public class reverseIntake extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.off();
-    washer.off();
+    intake.intakeOff();
+    intake.carwashOff();
   }
 
   // Returns true when the command should end.
@@ -52,6 +41,6 @@ public class reverseIntake extends CommandBase {
   public boolean isFinished() {
     //Idea: when the button is released edit a variable to return false
     //We may also want to end it when 2/3 color sensors are triggered
-    return false;
+    return true;
   }
 }

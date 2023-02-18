@@ -28,6 +28,9 @@ public class Intake extends SubsystemBase {
   double IntakeMotorStrength = 0.6; //used for default ON
   double CarwashMotorStrength = 0.5; // used for default ON TODO move to constatns (same with above)
 
+  private double currentIntakeSpeed;
+  private double currentCarwashSpeed;
+
   //Localized Constants - what valve value does what action
   static final Value DEPLOY  = Value.kReverse;
   static final Value RETRACT = Value.kForward;
@@ -69,6 +72,7 @@ public class Intake extends SubsystemBase {
   public void setIntakeSpeed(double intakeMotorStrength) {
     l_intake_mtr.set(intakeMotorStrength);
     r_intake_mtr.set(intakeMotorStrength);
+    currentIntakeSpeed = intakeMotorStrength;
   }
 
   public void intakeOn(){    //on() with no-args is default
@@ -77,6 +81,11 @@ public class Intake extends SubsystemBase {
 
   public void intakeOff() {
     setIntakeSpeed(0.0);
+  }
+
+  public void intakeReverse() {
+    setIntakeSpeed(-currentIntakeSpeed);
+    currentIntakeSpeed = -currentIntakeSpeed;
   }
 
   //Deploy arm mechanism using a Double Solenoids
@@ -97,6 +106,7 @@ public class Intake extends SubsystemBase {
   public void setCarwashSpeed(double carwashMotorStrength) {
     l_carwash_mtr.set(carwashMotorStrength);
     r_carwash_mtr.set(carwashMotorStrength);
+    currentCarwashSpeed = carwashMotorStrength;
   }
 
   public void carwashOn() {
@@ -105,6 +115,11 @@ public class Intake extends SubsystemBase {
 
   public void carwashOff() {
     setCarwashSpeed(0.0);
+  }
+
+  public void carwashReverse() {
+    setCarwashSpeed(-currentCarwashSpeed);
+    currentCarwashSpeed = -currentCarwashSpeed;
   }
 
   /**
