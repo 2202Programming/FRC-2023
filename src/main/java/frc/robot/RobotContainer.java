@@ -97,10 +97,14 @@ public class RobotContainer {
         limelight = new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
-        intake = new Intake();
-        armSS = new ArmSS();
-        elbow = new Elbow();
-        claw = new Claw_Substyem();
+        //intake = new Intake();
+        //armSS = new ArmSS();
+        //elbow = new Elbow();
+        //claw = new Claw_Substyem();
+        intake = null;
+        armSS = null;
+        elbow = null;
+        claw = null;
         break;
 
       case SwerveBot:
@@ -133,7 +137,8 @@ public class RobotContainer {
         sensors = null;
         drivetrain = null;
         intake = null;
-        armSS = new ArmSS();
+        //armSS = new ArmSS();
+        armSS = null;
         elbow = null;
         claw = null;
         break;
