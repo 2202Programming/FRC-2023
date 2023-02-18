@@ -18,6 +18,10 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
+import frc.robot.commands.Intake.Washer.CarwashForward;
+import frc.robot.commands.Intake.Washer.CarwashReverse;
+import frc.robot.commands.Intake.Washer.IntakeForward;
+import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoCommand;
@@ -211,18 +215,10 @@ public class RobotContainer {
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
         dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
         // testing on pov
-        dc.Operator().povLeft().whileTrue(new InstantCommand(
-          () -> { intake.intakeOn(); }
-        ));
-        dc.Operator().povRight().whileTrue(new InstantCommand(
-          () -> { intake.intakeOnReverse(); }
-        ));
-        dc.Operator().povUp().whileTrue(new InstantCommand(
-          () -> { intake.carwashOn(); }
-        ));
-        dc.Operator().povDown().whileTrue(new InstantCommand(
-          () -> { intake.carwashOnReverse(); }
-        ));
+        dc.Operator().povLeft().whileTrue(new IntakeForward());
+        dc.Operator().povRight().whileTrue(new IntakeReverse());
+        dc.Operator().povUp().whileTrue(new CarwashForward());
+        dc.Operator().povDown().whileTrue(new CarwashReverse());
        
 
         /******************************************************
