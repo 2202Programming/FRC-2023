@@ -275,7 +275,7 @@ public final class Constants {
         MperFT * (21.516 / 12) / 2,
         MperFT * (24.87 / 12) / 2,
         0.999, // scale [] <= 1.0
-        (99.5 / 1000.0), // wheel diameter[m]
+        0.1016, // wheel diameter[m] Comp bot is 4" wheels
         12.8,
         8.14);
 
