@@ -20,13 +20,9 @@ public class BlinkyLights extends SubsystemBase {
     candle = new CANdle(0);
     config = new CANdleConfiguration();
     config.stripType = LEDStripType.RGB; // set the strip type to RGB
-    config.brightnessScalar = 0.5; // dim the LEDs to half brightness
+    config.brightnessScalar = 1.0; // Full Bright (Blind)
     candle.configAllSettings(config);
-    candle.setLEDs(255, 165, 0); // set the CANdle LEDs to Orange
-    candle.setLEDs(0, 0, 0); //set the CANdle LEDs to Black
-
   }
-
 /*
 * Brightness on a scale from 0-1, with 1 being max brightness
 */
@@ -37,5 +33,8 @@ public class BlinkyLights extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    candle.setLEDs(255, 165, 0); // set the CANdle LEDs to Orange
+    candle.setLEDs(0, 0, 0); //set the CANdle LEDs to Black
+
   }
 }
