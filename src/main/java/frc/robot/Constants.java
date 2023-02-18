@@ -272,12 +272,12 @@ public final class Constants {
     // For 2023 CompetitionBot TODO FIX ME
     public static final WheelOffsets compBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
     public static final ChassisConfig compBotChassisConfig = new ChassisConfig(
-        MperFT * (21.516 / 12) / 2,
-        MperFT * (24.87 / 12) / 2,
+        MperFT * (23.5 / 12) / 2, //based on CAD in reference_links
+        MperFT * (19.5 / 12) / 2, //based on CAD in reference_links
         0.999, // scale [] <= 1.0
-        0.1016, // wheel diameter[m] Comp bot is 4" wheels
-        12.8,
-        8.14);
+        MperFT * (4/12), // wheel diameter[m] Comp bot is 4" wheels
+        12.8, //confirmed with vince
+        8.14); //confirmed with vince
 
   }
 
