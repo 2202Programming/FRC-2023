@@ -18,6 +18,7 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
+import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -204,18 +205,11 @@ public class RobotContainer {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
         }));
-        dc.Operator().a().whileTrue(new InstantCommand(() -> {
-          intake.intakeOn();
-        }));
         dc.Operator().b().whileTrue(new InstantCommand(() -> {
           intake.intakeReverse();
         }));
-        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
-          intake.deploy();
-        }));
-        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
-          intake.retract();
-        }));
+        dc.Operator().leftBumper().whileTrue(new intakeCompetitionToggle());
+       
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
