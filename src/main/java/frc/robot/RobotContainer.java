@@ -79,6 +79,9 @@ public class RobotContainer {
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
 
+  //commands with minor bot variants
+  Command chargeBalanceCmd;
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -98,6 +101,7 @@ public class RobotContainer {
         armSS = new ArmSS();
         elbow = new Elbow();
         claw = new Claw_Substyem();
+        chargeBalanceCmd = new ChargeStationBalance();
         break;
 
       case SwerveBot:
@@ -120,6 +124,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        chargeBalanceCmd = new ChargeStationBalanceChad();
         break;
 
       case BotOnBoard: // fall through
@@ -174,7 +179,7 @@ public class RobotContainer {
         break;
       case balance_test:
         if (drivetrain == null) break;
-        dc.Driver().rightBumper().whileTrue(new ChargeStationBalanceChad(false));
+        dc.Driver().rightBumper().whileTrue(chargeBalanceCmd);
         break;
 
       case claw_test:
@@ -194,7 +199,7 @@ public class RobotContainer {
       default:
         if (drivetrain==null) break;
         // everything subject to change
-        dc.Driver().x().whileTrue(new ChargeStationBalance());
+        dc.Driver().x().whileTrue(chargeBalanceCmd);
         dc.Driver().y().whileTrue(new InstantCommand(() -> {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
