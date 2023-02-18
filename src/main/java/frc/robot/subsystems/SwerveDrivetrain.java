@@ -363,10 +363,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     return modules[modID];
   }
 
+  //todo: eleminate this function, duplicate of resetpose
   // sets X,Y, and sets current angle (will apply sensors correction)
   public void setPose(Pose2d new_pose) {
-    m_pose = new_pose;
-    m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);
+    resetPose(new_pose);
   }
 
   // TODO: do we REALLY think this is where we need to go? field coords???
