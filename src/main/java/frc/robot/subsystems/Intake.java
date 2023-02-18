@@ -76,7 +76,11 @@ public class Intake extends SubsystemBase {
 
   public void intakeOn(){    //on() with no-args is default
     setIntakeSpeed(IntakeMotorStrength);
-  }   
+  }
+  
+  public void intakeOnReverse() {
+    setIntakeSpeed(-IntakeMotorStrength);
+  }
 
   public void intakeOff() {
     setIntakeSpeed(0.0);
@@ -110,6 +114,10 @@ public class Intake extends SubsystemBase {
 
   public void carwashOn() {
     setCarwashSpeed(CarwashMotorStrength);
+  }
+
+  public void carwashOnReverse() {
+    setCarwashSpeed(-CarwashMotorStrength);
   }
 
   public void carwashOff() {

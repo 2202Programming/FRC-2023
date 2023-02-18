@@ -8,10 +8,10 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Intake;
 
-public class intakeCompetitionToggle extends CommandBase {
+public class outtakeCompetitionToggle extends CommandBase {
   /** Creates a new intakeCompetitionToggle. */
   Intake intake;
-  public intakeCompetitionToggle() {
+  public outtakeCompetitionToggle() {
     // Use addRequirements() here to declare subsystem dependencies.
     this.intake = RobotContainer.RC().intake;
     addRequirements(intake);
@@ -21,8 +21,8 @@ public class intakeCompetitionToggle extends CommandBase {
   @Override
   public void initialize() {
     intake.deploy();
-    intake.intakeOn();
-    intake.carwashOn();
+    intake.intakeOnReverse();
+    intake.carwashOnReverse();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
