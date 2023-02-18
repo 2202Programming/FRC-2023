@@ -19,6 +19,7 @@ import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
+import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -208,16 +209,29 @@ public class RobotContainer {
       default:
         if (drivetrain == null)
           break;
-        // everything subject to change
+        // DRIVER
         dc.Driver().x().whileTrue(new ChargeStationBalance());
         dc.Driver().y().whileTrue(new InstantCommand(() -> {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
         }));
-        dc.Operator().b().whileTrue(new InstantCommand(() -> {
-          intake.intakeReverse();
-        }));
-        dc.Operator().leftBumper().whileTrue(new intakeCompetitionToggle());
+
+        //OPERATOR
+        dc.Operator().a().whileTrue(new intakeCompetitionToggle());
+        dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
+        // testing on pov
+        dc.Operator().povLeft().whileTrue(new InstantCommand(
+          () -> { intake.intakeOn(); }
+        ));
+        dc.Operator().povRight().whileTrue(new InstantCommand(
+          () -> { intake.intakeOnReverse(); }
+        ));
+        dc.Operator().povUp().whileTrue(new InstantCommand(
+          () -> { intake.carwashOn(); }
+        ));
+        dc.Operator().povDown().whileTrue(new InstantCommand(
+          () -> { intake.carwashOnReverse(); }
+        ));
        
 
         /******************************************************
