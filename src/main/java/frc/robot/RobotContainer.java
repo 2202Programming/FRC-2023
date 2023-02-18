@@ -178,7 +178,13 @@ public class RobotContainer {
         break;
 
       case claw_test:
-        break;
+      dc.Driver().rightTrigger().onTrue(new InstantCommand(() -> {
+        claw.open();
+      }));
+      dc.Driver().leftTrigger().onTrue(new InstantCommand(() -> {
+        claw.close();
+      }));
+      break;
 
       case vision_test:
         // X button to change LL pipeline
