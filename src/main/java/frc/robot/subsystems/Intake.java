@@ -90,7 +90,7 @@ public class Intake extends SubsystemBase {
   }
   
   //Returns the state of the Intake Arm
-  public static boolean isDeployed() {
+  public boolean isDeployed() {
     return (intake_solenoid.get() == DEPLOY); 
   }
 
