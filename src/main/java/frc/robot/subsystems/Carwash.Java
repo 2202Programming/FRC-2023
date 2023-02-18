@@ -15,7 +15,7 @@ import frc.robot.Constants.PCM1;
 
 public class Carwash extends SubsystemBase {
 
-  public final double CarwashMotorStrength = 0; //used for default ON
+  public double CarwashMotorStrength = 0; //used for default ON
 
 
   //Instantiations
