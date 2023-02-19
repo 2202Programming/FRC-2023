@@ -4,8 +4,10 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
+import com.ctre.phoenix.led.StrobeAnimation;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -24,6 +26,18 @@ public class BlinkyLights extends SubsystemBase {
         candle_l.setLEDs(color.red, color.green, color.blue);
         candle_r.setLEDs(color.red, color.green, color.blue);
         currentColor = color;
+    }
+
+    public void setBlinking(Color8Bit color){
+        Animation animation = new StrobeAnimation(color.red, color.green, color.blue,0,0.5,8);
+
+        candle_l.animate(animation,0);
+        candle_r.animate(animation,0);
+    }
+
+    public void stopBlinking(){
+        candle_l.clearAnimation(0);
+        candle_r.clearAnimation(0);
     }
 
     /** Creates a new BlinkyLights. */
