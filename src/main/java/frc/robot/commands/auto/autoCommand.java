@@ -12,7 +12,9 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
+import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.subsystems.hid.SwitchboardController.SBButton;
@@ -64,8 +66,15 @@ public class autoCommand extends CommandBase {
       // RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(1)).schedule();
       finalPathGroup.add(pathGroup.get(1));
     }
+    SequentialCommandGroup tempCommand = new SequentialCommandGroup(
+      RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(0)),
+      new outtakeCompetitionToggle().withTimeout(2));
+      
+      if (dc.readSideboard(SBButton.Sw12)){
+        tempCommand.addCommands(RobotContainer.RC().autoBuilder.fullAuto(pathGroup.get(1)));
+      }
 
-    RobotContainer.RC().autoBuilder.fullAuto(finalPathGroup).schedule();
+    tempCommand.schedule();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
