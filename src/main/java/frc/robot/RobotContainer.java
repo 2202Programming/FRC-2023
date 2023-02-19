@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import java.sql.Driver;
 import java.util.HashMap;
 
 import com.pathplanner.lib.auto.PIDConstants;
@@ -13,7 +12,6 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -34,6 +32,7 @@ import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.ArmPositionTest;
+import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.LockoutExampleCmd;
 import frc.robot.commands.test.MoveArmsTest;
@@ -230,6 +229,7 @@ public class RobotContainer {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
         }));
+        dc.Driver().leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
 
         //OPERATOR
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
