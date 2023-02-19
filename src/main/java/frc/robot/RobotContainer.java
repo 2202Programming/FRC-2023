@@ -4,12 +4,16 @@
 
 package frc.robot;
 
+import java.sql.Driver;
 import java.util.HashMap;
 
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -30,6 +34,7 @@ import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.MoveArmsTest;
 import frc.robot.subsystems.ArmSS;
+import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Intake;
@@ -80,6 +85,7 @@ public class RobotContainer {
   public final ArmSS armSS;
   public final Elbow elbow;
   public final Claw_Substyem claw;
+  public final BlinkyLights lights;
 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
@@ -106,6 +112,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        lights = new BlinkyLights();
         break;
 
       case SwerveBot:
@@ -117,6 +124,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        lights = null;
         break;
 
       case ChadBot:
@@ -128,6 +136,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        lights = null;
         break;
 
       case BotOnBoard: // fall through
@@ -142,6 +151,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        lights = null;
         break;
     }
 
@@ -273,5 +283,17 @@ public class RobotContainer {
         new InstantCommand(drivetrain::printPose), new ChargeStationBalance(true)));
     eventMap.put("score", new SequentialCommandGroup(new PrintCommand("***Path score"),
         new InstantCommand(drivetrain::printPose)));
+  }
+
+  public void blinkyLights() {
+    // Temp blinkylights stuff
+    switch (DriverStation.getAlliance()) {
+      case Blue:
+        lights.setColor(new Color8Bit(0, 0, 255));
+      case Red:
+        lights.setColor(new Color8Bit(255, 0, 0));
+      default:
+        lights.setColor(new Color8Bit(0, 255, 0));
+    }
   }
 }
