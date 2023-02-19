@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -130,6 +131,9 @@ public class ChargeStationBalance extends CommandBase {
         csBalancePID.calculate(filteredPitch);
         csBalancePID.calculate(filteredPitch);
         System.out.println("***Starting automatic charging station balancing***");
+
+        RobotContainer.RC().lights.setColor(new Color8Bit(0, 255, 0));
+        RobotContainer.RC().lights.setBlinking(new Color8Bit(0, 255, 0));
     }
 
     @Override
@@ -142,6 +146,8 @@ public class ChargeStationBalance extends CommandBase {
     public void end(boolean interrupted) {
         sdt.stop();
         System.out.println("***Ending charging station balancing***");
+        RobotContainer.RC().lights.stopBlinking();
+        RobotContainer.RC().blinkyLights();
     }
 
     /**

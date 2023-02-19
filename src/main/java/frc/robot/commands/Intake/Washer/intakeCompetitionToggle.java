@@ -4,6 +4,7 @@
 
 package frc.robot.commands.Intake.Washer;
 
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Intake;
@@ -23,6 +24,7 @@ public class intakeCompetitionToggle extends CommandBase {
     intake.deploy();
     intake.intakeOn();
     intake.carwashOn();
+    RobotContainer.RC().lights.setBlinking(new Color8Bit(255, 255, 0));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -35,6 +37,8 @@ public class intakeCompetitionToggle extends CommandBase {
     intake.intakeOff();
     intake.carwashOff();
     intake.retract();
+    RobotContainer.RC().lights.stopBlinking();
+    RobotContainer.RC().blinkyLights();
   }
 
   // Returns true when the command should end.
