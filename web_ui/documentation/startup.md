@@ -9,8 +9,6 @@ Here is documentation for installing, setting up, and connecting FIRST Web Compo
 Go [here](https://github.com/frc-web-components/app/releases) to download the installer. Install FWC in the directory
 `C:\Program Files\FRC Web Components`.
 
-<img src="images/startup/download_install.gif">
-
 ### Step 2:
 Open WPILib VSCode and run OutlineViewer
 
@@ -27,4 +25,4 @@ Connect to the robot using an internet connection
 Under settings, connect FWC to the IP address `10.TE.AM.2` 
 (team 2202 would be `10.22.2.2`)
 
-**Video:** To see a video of this full project, go to `web_ui/documentatopm/images/startup/video.mp4`
+**Video:** To see a video of this full project, go to `web-ui/documentatopm/images/startup/video.mp4`
