@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -306,13 +307,21 @@ public class RobotContainer {
 
   public void blinkyLights() {
     // Temp blinkylights stuff
-    switch (DriverStation.getAlliance()) {
+    System.out.println("***** Driver station: " + DriverStation.getAlliance().name());
+    Alliance alliance = DriverStation.getAlliance();
+    switch (alliance) {
       case Blue:
         lights.setColor(new Color8Bit(0, 0, 255));
+        System.out.println("*** Setting blue blinky lgihts");
+        break;
       case Red:
         lights.setColor(new Color8Bit(255, 0, 0));
+        System.out.println("*** Setting red blinky lgihts");
+        break;
       default:
         lights.setColor(new Color8Bit(0, 255, 0));
+        System.out.println("*** Setting default blinky lgihts");
+        break;
     }
   }
 }
