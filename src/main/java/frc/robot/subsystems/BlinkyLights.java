@@ -21,7 +21,8 @@ public class BlinkyLights extends SubsystemBase {
     Color8Bit currentColor;
 
     public void setColor(Color8Bit color) {
-        candle_l.setLEDs(color.red, color.blue, color.green);
+        candle_l.setLEDs(color.red, color.green, color.blue);
+        candle_r.setLEDs(color.red, color.green, color.blue);
         currentColor = color;
     }
 
