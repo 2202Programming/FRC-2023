@@ -147,7 +147,7 @@ public class ChargeStationBalance extends CommandBase {
         sdt.stop();
         System.out.println("***Ending charging station balancing***");
         RobotContainer.RC().lights.stopBlinking();
-        RobotContainer.RC().blinkyLights();
+        RobotContainer.RC().lights.setAllianceColors();
     }
 
     /**
