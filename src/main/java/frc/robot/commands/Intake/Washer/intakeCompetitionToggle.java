@@ -6,11 +6,11 @@ package frc.robot.commands.Intake.Washer;
 
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.DriverControls.Id;
+import frc.robot.RobotContainer;
 import frc.robot.commands.JoystickRumbleEndless;
-import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
+import frc.robot.subsystems.Intake;
 
 public class intakeCompetitionToggle extends CommandBase implements BlinkyLightUser {
   /** Creates a new intakeCompetitionToggle. */
