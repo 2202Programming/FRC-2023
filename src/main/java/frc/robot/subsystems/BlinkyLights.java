@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.ctre.phoenix.led.Animation;
@@ -233,6 +234,7 @@ public class BlinkyLights {
                 return null;
 
             Command colorCmd = new Command() {
+                protected Set<Subsystem> m_requirements = new HashSet<>();
                 // Read from BlinkyLightUser
                 Color8Bit currentColor;
                 boolean blinkState;
@@ -241,7 +243,7 @@ public class BlinkyLights {
 
                 @Override
                 public Set<Subsystem> getRequirements() {
-                    return null;
+                    return m_requirements;
                 }
 
                 @Override
