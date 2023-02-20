@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.BlinkyLights;
+import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 
@@ -57,7 +59,7 @@ import frc.robot.subsystems.SwerveDrivetrain;
  * 
  */
 
-public class ChargeStationBalance extends CommandBase {
+public class ChargeStationBalance extends CommandBase implements BlinkyLightUser {
 
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java
@@ -91,6 +93,7 @@ public class ChargeStationBalance extends CommandBase {
 
     LinearFilter pitchFilter = LinearFilter.singlePoleIIR(0.3, Constants.DT);
     LinearFilter pitchRateFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
+
 
     public ChargeStationBalance() {
         this(true);
@@ -130,10 +133,18 @@ public class ChargeStationBalance extends CommandBase {
         csBalancePID.reset();
         csBalancePID.calculate(filteredPitch);
         csBalancePID.calculate(filteredPitch);
-        System.out.println("***Starting automatic charging station balancing***");
 
-        RobotContainer.RC().lights.setColor(new Color8Bit(0, 255, 0));
-        RobotContainer.RC().lights.setBlinking(new Color8Bit(0, 255, 0));
+        enableLights();
+    }
+
+    @Override
+    public Color8Bit colorProvider() {
+        return BlinkyLights.GREEN;
+    }
+
+    @Override
+    public boolean requestBlink() {
+        return !isLevel();     //blink when not level
     }
 
     @Override
@@ -145,9 +156,6 @@ public class ChargeStationBalance extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         sdt.stop();
-        System.out.println("***Ending charging station balancing***");
-        RobotContainer.RC().lights.stopBlinking();
-        RobotContainer.RC().lights.setAllianceColors();
     }
 
     /**
