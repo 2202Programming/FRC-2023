@@ -10,9 +10,6 @@ import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -100,8 +97,8 @@ public class RobotContainer {
     RobotContainer.rc = this; // for singleton accesor
     robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio SN
     dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05);
-    lights = new BlinkyLights(); //lights are constructed for every robot, and the determination if they exist is inside subsystem
-
+    lights = new BlinkyLights(); // lights are constructed for every robot, protected if they dont exist
+                                 
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
@@ -147,8 +144,7 @@ public class RobotContainer {
         limelight = null;
         sensors = null;
         drivetrain = null;
-        intake = null;
-        // armSS = new ArmSS();
+        intake = null;       
         armSS = null;
         elbow = null;
         claw = null;
@@ -228,7 +224,7 @@ public class RobotContainer {
         }));
         dc.Driver().leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
 
-        //OPERATOR
+        // OPERATOR
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
         dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
 
@@ -244,7 +240,6 @@ public class RobotContainer {
         dc.Operator().povRight().whileTrue(new IntakeReverse());
         dc.Operator().povUp().whileTrue(new CarwashForward());
         dc.Operator().povDown().whileTrue(new CarwashReverse());
-       
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team

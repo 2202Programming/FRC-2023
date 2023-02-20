@@ -10,11 +10,13 @@ import frc.robot.RobotContainer;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
 
-public class intakeCompetitionToggle extends CommandBase {
+public class intakeCompetitionToggle extends CommandBase implements BlinkyLightUser {
   /** Creates a new intakeCompetitionToggle. */
   Intake intake;
   JoystickRumbleEndless rumbleCommand;
+  Color8Bit myColor = new Color8Bit(255, 255, 0);
 
   public intakeCompetitionToggle() {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -22,13 +24,24 @@ public class intakeCompetitionToggle extends CommandBase {
     addRequirements(intake);
   }
 
+  @Override
+  public Color8Bit colorProvider() {
+      return myColor;
+  }
+
+  @Override
+  public boolean requestBlink(){
+    return true;
+  }
+
+
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     intake.deploy();
     intake.intakeOn();
     intake.carwashOn();
-    RobotContainer.RC().lights.setBlinking(new Color8Bit(255, 255, 0));
+    enableLights();
     rumbleCommand = new JoystickRumbleEndless(Id.Operator);
     rumbleCommand.schedule();
   }
@@ -43,8 +56,6 @@ public class intakeCompetitionToggle extends CommandBase {
     intake.intakeOff();
     intake.carwashOff();
     intake.retract();
-    RobotContainer.RC().lights.stopBlinking();
-    RobotContainer.RC().lights.setAllianceColors();
     rumbleCommand.cancel();
   }
 
