@@ -100,6 +100,7 @@ public class RobotContainer {
     RobotContainer.rc = this; // for singleton accesor
     robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio SN
     dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05);
+    lights = new BlinkyLights(); //lights are constructed for every robot, and the determination if they exist is inside subsystem
 
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
@@ -115,7 +116,6 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
-        lights = new BlinkyLights();
         break;
 
       case SwerveBot:
@@ -127,7 +127,6 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
-        lights = null;
         break;
 
       case ChadBot:
@@ -139,7 +138,6 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
-        lights = null;
         break;
 
       case BotOnBoard: // fall through
@@ -154,7 +152,6 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
-        lights = null;
         break;
     }
     
@@ -305,23 +302,4 @@ public class RobotContainer {
         new InstantCommand(drivetrain::printPose)));
   }
 
-  public void blinkyLights() {
-    // Temp blinkylights stuff
-    System.out.println("***** Driver station: " + DriverStation.getAlliance().name());
-    Alliance alliance = DriverStation.getAlliance();
-    switch (alliance) {
-      case Blue:
-        lights.setColor(new Color8Bit(0, 0, 255));
-        System.out.println("*** Setting blue blinky lgihts");
-        break;
-      case Red:
-        lights.setColor(new Color8Bit(255, 0, 0));
-        System.out.println("*** Setting red blinky lgihts");
-        break;
-      default:
-        lights.setColor(new Color8Bit(0, 255, 0));
-        System.out.println("*** Setting default blinky lgihts");
-        break;
-    }
-  }
 }

@@ -44,7 +44,7 @@ public class intakeCompetitionToggle extends CommandBase {
     intake.carwashOff();
     intake.retract();
     RobotContainer.RC().lights.stopBlinking();
-    RobotContainer.RC().blinkyLights();
+    RobotContainer.RC().lights.setAllianceColors();
     rumbleCommand.cancel();
   }
 
