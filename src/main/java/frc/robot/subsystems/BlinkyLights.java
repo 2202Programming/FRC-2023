@@ -194,6 +194,9 @@ public class BlinkyLights {
 
         public static void release() {
             currentUser = defaultUser;
+            if (controlledLights != null){
+                controlledLights.setAllianceColors();
+            }
         };
 
         /* Static methods to intercept robot state changes */
