@@ -7,11 +7,15 @@ package frc.robot.commands.Intake.Washer;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.DriverControls.Id;
+import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.subsystems.Intake;
 
 public class intakeCompetitionToggle extends CommandBase {
   /** Creates a new intakeCompetitionToggle. */
   Intake intake;
+  JoystickRumbleEndless rumbleCommand;
+
   public intakeCompetitionToggle() {
     // Use addRequirements() here to declare subsystem dependencies.
     this.intake = RobotContainer.RC().intake;
@@ -25,6 +29,8 @@ public class intakeCompetitionToggle extends CommandBase {
     intake.intakeOn();
     intake.carwashOn();
     RobotContainer.RC().lights.setBlinking(new Color8Bit(255, 255, 0));
+    rumbleCommand = new JoystickRumbleEndless(Id.Operator);
+    rumbleCommand.schedule();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -39,6 +45,7 @@ public class intakeCompetitionToggle extends CommandBase {
     intake.retract();
     RobotContainer.RC().lights.stopBlinking();
     RobotContainer.RC().blinkyLights();
+    rumbleCommand.cancel();
   }
 
   // Returns true when the command should end.
