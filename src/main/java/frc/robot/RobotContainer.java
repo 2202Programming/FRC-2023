@@ -23,6 +23,7 @@ import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.ChargeStationBalanceChad;
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.ArmPositionTest;
 import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.MoveArmsTest;
@@ -175,6 +176,8 @@ public class RobotContainer {
         dc.Driver().b().whileTrue(new ArmVelocityTest(2.0, 3.0, 1.0));
         dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0));
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0));
+        dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(1.5));
+
         armSS.setDefaultCommand(new ArmPositionTest());
         break;
       case balance_test:

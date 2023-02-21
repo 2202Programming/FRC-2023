@@ -38,7 +38,7 @@ public class ArmSS extends SubsystemBase {
         // commands
         double velCmd; // [cm/s] computed
         final double gearRadius = 2.63398 * 2 * Math.PI; // [cm] .22 and .0037
-        final double gearRatio = (1.0 / 75.0); 
+        final double gearRatio = (1.0 / 75.0);
 
         // measured values
         double currentPos;
@@ -80,8 +80,6 @@ public class ArmSS extends SubsystemBase {
 
         Arm(int canID, CANSparkMax boss, boolean inverted) {
             this(canID);
-            ctrl.follow(boss, inverted);
-            sync = false; // no software pid sync
         }
 
         // control the arm's postion [cm]
@@ -148,10 +146,13 @@ public class ArmSS extends SubsystemBase {
         }
     } // End of Arm Class
 
+    final boolean invert_left = true;
+
     // instance variables
     // State vars
     final Arm leftArm;
     final Arm rightArm;
+    boolean follow_mode;
 
     // constants
     double maxVel = 15.0; // [cm/s]
@@ -167,20 +168,32 @@ public class ArmSS extends SubsystemBase {
 
     public ArmSS() {
         rightArm = new Arm(CAN.ARM_RIGHT_Motor);
-        leftArm = new Arm(CAN.ARM_LEFT_Motor, rightArm.ctrl, true); // TODO inverted is a guess
+        // left may follow right
+        leftArm = new Arm(CAN.ARM_LEFT_Motor, rightArm.ctrl, invert_left);
         sync = false;
         // zero our encoders at power up
         setPositions(0.0);
         ntcreate();
     }
 
+    public void setFollowMode(boolean follow) {
+        if (follow) {
+            leftArm.ctrl.follow(rightArm.ctrl, invert_left);
+            follow_mode = true;
+            sync = false; // no software pid sync
+        } else {
+            leftArm.ctrl.follow(leftArm.ctrl);
+            leftArm.ctrl.setInverted(invert_left);
+            follow_mode = false;
+        }
+    }
+
     // At Position flags for use in the commands
     public boolean armsAtPosition() {
-        // TODO fix me
-        // TODO I really mean it fix this
-        // TODO I am missing an arm, fix me
-        return (rightArm.atSetpoint() // TODO fixme when I get an arm leftArm.atSetpoint())
-                && rightArm.atSetpoint());
+        if (follow_mode)
+            return rightArm.atSetpoint();
+        else
+            return (rightArm.atSetpoint() && leftArm.atSetpoint());
     }
 
     public void setVelocityLimit(double vel_limit) {
@@ -228,6 +241,14 @@ public class ArmSS extends SubsystemBase {
         double v = MathUtil.clamp(vel_cm, -maxVel, maxVel);
         leftArm.setVelocityCmd(v);
         rightArm.setVelocityCmd(v);
+    }
+
+    //rarely used, testing only
+    public void setVelocityLeft(double speed) {
+        leftArm.setVelocityCmd(speed);
+    }
+    public void setVelocityRight(double speed) {
+        rightArm.setVelocityCmd(speed);
     }
 
     /******************

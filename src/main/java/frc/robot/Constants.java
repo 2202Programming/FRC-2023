@@ -117,8 +117,8 @@ public final class Constants {
     public static final int CMB_RIGHT_Rotate = 37;
 
     // Arms
-    public static final int ARM_LEFT_Motor = 13;
     public static final int ARM_RIGHT_Motor = 12;
+    public static final int ARM_LEFT_Motor = 13;
     public static final int RIGHT_ELBOW = 14;
     public static final int LEFT_ELBOW = 15;
 
