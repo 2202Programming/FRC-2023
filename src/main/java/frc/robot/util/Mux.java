@@ -5,8 +5,14 @@ import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.I2C.Port;
 
 public class Mux {
+  // address of mux
   private final int address;
+
+  // the i2c bus
   private final I2C i2c;
+
+  // buffer space
+  private byte[] result = new byte[1];
 
   /**
    * Constructs the multiplexer with a custom address
@@ -32,7 +38,6 @@ public class Mux {
    * @return bit field of enabled buses
    */
   public int enabledBuses() {
-    byte[] result = new byte[1];
     i2c.readOnly(result, 1);
     return result[0];
   }
