@@ -19,8 +19,8 @@ public class MatchTimer extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double timeLeft = DriverStation.getMatchTime();
-    if (timeLeft%30<1){
+    int timeLeft = (int)DriverStation.getMatchTime();  //drop fraction of seconds
+    if (timeLeft % 30 < 1) {
       System.out.println("**Match time left: " + timeLeft);
       new JoystickRumble(Id.Driver, 1.0).schedule();
     }
