@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.commands.JoystickRumble;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
@@ -172,7 +173,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.claw_test);
   }
 
   private void configureBindings(Bindings bindings) {
@@ -257,8 +258,9 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new autoCommand().andThen(new ChargeStationBalance());
-    //return new autoCommand()
+    //return new autoCommand().andThen(new ChargeStationBalance());
+    //return new autoCommand();
+    return new InstantCommand();
   }
 
   /**
