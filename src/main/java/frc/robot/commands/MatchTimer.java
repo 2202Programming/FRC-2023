@@ -22,7 +22,18 @@ public class MatchTimer extends CommandBase {
     int timeLeft = (int)DriverStation.getMatchTime();  //drop fraction of seconds
     if (timeLeft % 30 < 1) {
       System.out.println("**Match time left: " + timeLeft);
-      new JoystickRumble(Id.Driver, 1.0).schedule();
+      if(timeLeft > 125) { 
+        new JoystickRumble(Id.Driver, 1).schedule();
+      }
+      else if(timeLeft < 125 && timeLeft > 65) { 
+        new JoystickRumble(Id.Driver, 1, 2).schedule();
+      }
+      else if(timeLeft < 65 && timeLeft > 35) { 
+        new JoystickRumble(Id.Driver, 1, 3).schedule();
+      }
+      else if (timeLeft < 35){
+        new JoystickRumble(Id.Driver, 1, 4).schedule();
+      }
     }
   }
 
