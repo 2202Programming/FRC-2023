@@ -57,11 +57,12 @@ public class ArmSS extends SubsystemBase {
         final SparkMaxPIDController pid;
         final RelativeEncoder encoder;
 
-        Arm(int canID) {
+        Arm(int canID, boolean inverted) {
             // use canID to get controller and supporting objects
             ctrl = new CANSparkMax(canID, MotorType.kBrushless);
             ctrl.clearFaults();
             ctrl.restoreFactoryDefaults();
+            ctrl.setInverted(inverted);
             ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
             pid = ctrl.getPIDController();
             encoder = ctrl.getEncoder();
@@ -76,10 +77,6 @@ public class ArmSS extends SubsystemBase {
 
             ctrl.burnFlash();
             Timer.delay(.2); // this holds up the current thread
-        }
-
-        Arm(int canID, CANSparkMax boss, boolean inverted) {
-            this(canID);
         }
 
         // control the arm's postion [cm]
@@ -139,14 +136,17 @@ public class ArmSS extends SubsystemBase {
             velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
 
             // if velocity mode, use the maxVel to control it, otherwise use positionPID
-            velCmd = velocity_mode ? external_vel_cmd : velCmd;
+            velCmd = velocity_mode ? external_vel_cmd + compAdjustment: velCmd;
 
             // send our vel to the controller
             pid.setReference(velCmd, ControlType.kVelocity);
         }
     } // End of Arm Class
 
-    final boolean invert_left = true;
+    //determine which way the motor spins
+    //positive extension moves arm out
+    final boolean invert_left = false;
+    final boolean invert_right = true;
 
     // instance variables
     // State vars
@@ -164,36 +164,21 @@ public class ArmSS extends SubsystemBase {
     double syncCompensation; // amount of compensation [m/s]
 
     // controllers
-    PIDController syncPID = new PIDController(0.25, 0.0, 0.0); // arm synchronization pid. syncs left --> right
+    PIDController syncPID = new PIDController(0.5, 0.0, 0.0); // arm synchronization pid. syncs left --> right
 
     public ArmSS() {
-        rightArm = new Arm(CAN.ARM_RIGHT_Motor);
+        rightArm = new Arm(CAN.ARM_RIGHT_Motor, invert_right);
         // left may follow right
-        leftArm = new Arm(CAN.ARM_LEFT_Motor, rightArm.ctrl, invert_left);
-        sync = false;
+        leftArm = new Arm(CAN.ARM_LEFT_Motor, invert_left);  //, rightArm.ctrl, invert_left);
+        sync = true;
         // zero our encoders at power up
         setPositions(0.0);
         ntcreate();
     }
 
-    public void setFollowMode(boolean follow) {
-        if (follow) {
-            leftArm.ctrl.follow(rightArm.ctrl, invert_left);
-            follow_mode = true;
-            sync = false; // no software pid sync
-        } else {
-            leftArm.ctrl.follow(leftArm.ctrl);
-            leftArm.ctrl.setInverted(invert_left);
-            follow_mode = false;
-        }
-    }
-
     // At Position flags for use in the commands
     public boolean armsAtPosition() {
-        if (follow_mode)
-            return rightArm.atSetpoint();
-        else
-            return (rightArm.atSetpoint() && leftArm.atSetpoint());
+        return (rightArm.atSetpoint() && leftArm.atSetpoint());
     }
 
     public void setVelocityLimit(double vel_limit) {

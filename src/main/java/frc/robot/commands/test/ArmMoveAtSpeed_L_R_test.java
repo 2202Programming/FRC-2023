@@ -31,7 +31,6 @@ public class ArmMoveAtSpeed_L_R_test extends CommandBase {
   public void initialize() {
     old_max_speed = arm.getVelocityLimit();
     arm.setVelocityLimit(speed);
-    arm.setFollowMode(false);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -48,7 +47,7 @@ public class ArmMoveAtSpeed_L_R_test extends CommandBase {
         arm.setVelocityLeft(speed); 
       }
       else {
-        arm.setVelocityCmd(speed);
+        arm.setVelocityCmd(0.0);
       }
 
   }
@@ -59,7 +58,6 @@ public class ArmMoveAtSpeed_L_R_test extends CommandBase {
     arm.setPositions(0.0);
     arm.hold();
     arm.setVelocityLimit(old_max_speed);
-    arm.setFollowMode(true);
   }
 
   // Returns true when the command should end.
