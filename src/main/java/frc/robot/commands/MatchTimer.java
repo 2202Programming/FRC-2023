@@ -20,7 +20,7 @@ public class MatchTimer extends CommandBase {
   @Override
   public void execute() {
     double timeLeft = DriverStation.getMatchTime();
-    if (timeLeft%30==0){
+    if (timeLeft%30<1){
       System.out.println("**Match time left: " + timeLeft);
       new JoystickRumble(Id.Driver, 1.0).schedule();
     }
