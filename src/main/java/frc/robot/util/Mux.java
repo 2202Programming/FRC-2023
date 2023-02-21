@@ -12,7 +12,7 @@ public class Mux {
   private final I2C i2c;
 
   // buffer space
-  private byte[] result = new byte[1];
+  private byte[] buffer = new byte[1];
 
   /**
    * Constructs the multiplexer with a custom address
@@ -38,8 +38,8 @@ public class Mux {
    * @return bit field of enabled buses
    */
   public int enabledBuses() {
-    i2c.readOnly(result, 1);
-    return result[0];
+    i2c.readOnly(buffer, 1);
+    return buffer[0];
   }
 
   /**
