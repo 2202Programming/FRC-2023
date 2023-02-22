@@ -113,6 +113,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
      */
 
     private GamePiece currentGamePiece;
+    private GamePiece prevFrameGamePiece;
 
     // Color matching state vars
     ColorMatch colorMatcher = new ColorMatch();
@@ -141,7 +142,29 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
 
     @Override
     public void periodic() {
+        prevFrameGamePiece = currentGamePiece;
         currentGamePiece = getGamePiece();
+
+        if (currentGamePiece != prevFrameGamePiece) {
+            // do stuff here upon game piece change
+            switch (currentGamePiece) {
+                case Cube:
+                    
+                    break;
+                case ConeFacingFront:
+                    
+                    break;
+                case ConeFacingBack:
+                    
+                    break;
+                case None:
+                    
+                    break;
+                default:
+                    
+                    break;
+            }
+        }
     }
 
     /**
