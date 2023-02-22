@@ -10,7 +10,7 @@ package frc.robot.subsystems.hid;
 import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -203,27 +203,23 @@ public boolean readSideboard(SBButton buttonId) {
 }
 
 
-public void turnOnRumble(Id id){
+public void turnOnRumble(Id id, RumbleType type){
   switch (id) {
     case Driver:
-      driver.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 1);
-      driver.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 1);
+      driver.getHID().setRumble(type, 1);
     case Operator:
-      operator.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 1);
-      operator.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 1);
+      operator.getHID().setRumble(type, 1);
     default:
       break;
   }
 }
 
-public void turnOffRumble(Id id){
+public void turnOffRumble(Id id, RumbleType type){
   switch (id) {
     case Driver:
-      driver.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 0);
-      driver.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 0);
+      driver.getHID().setRumble(type, 0);
     case Operator:
-      operator.getHID().setRumble(GenericHID.RumbleType.kLeftRumble, 0);
-      operator.getHID().setRumble(GenericHID.RumbleType.kRightRumble, 0);
+      operator.getHID().setRumble(type, 0);
     default:
       break;
   }
