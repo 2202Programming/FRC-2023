@@ -34,16 +34,16 @@ public class MoveArmsTest extends CommandBase {
     public void initialize() {
         old_velocity_limit = arm.getVelocityLimit();
         arm.setVelocityLimit(velocity_limit);
-        arm.setPositions(0);
+        arm.setPositions(0.0);
         setpointAtZero = true;
         count = 0;
     }
 
     @Override
     public void execute() {
-    
+        arm.setSetpoints(setpointAtZero ? distance_cm : 0.0);
+        //when we get to setpoint, wait 50 frames about 1 sec to flip
         if (arm.armsAtPosition() && ++count > 50) {
-            arm.setSetpoints(setpointAtZero ? distance_cm : 0.0);
             setpointAtZero = !setpointAtZero;
             count = 0;
         }

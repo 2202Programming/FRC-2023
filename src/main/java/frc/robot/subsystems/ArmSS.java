@@ -44,7 +44,7 @@ public class ArmSS extends SubsystemBase {
         double currentPos;
 
         // state vars
-        PIDController positionPID = new PIDController(7.0, 0.150, 0.0); // outer position loop
+        PIDController positionPID = new PIDController(5.0, 0.150, 0.250); // outer position loop
         PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); // holds values for hardware
         final int hwVelSlot = 0;
 
@@ -68,7 +68,7 @@ public class ArmSS extends SubsystemBase {
             encoder = ctrl.getEncoder();
             positionPID.setTolerance(posTol, velTol);
 
-            ctrl.setSmartCurrentLimit(30, 15);
+            ctrl.setSmartCurrentLimit(45, 20);
             encoder.setPositionConversionFactor(gearRatio * gearRadius);
             encoder.setVelocityConversionFactor(gearRatio * gearRadius / 60); // rpm to rps
 
@@ -160,17 +160,17 @@ public class ArmSS extends SubsystemBase {
     double velTol = 0.25; // [cm/s]
 
     // sync instance vars
-    boolean sync = true; // should usually be true, option to change to false for testing purposes
+    boolean sync = false; // should usually be true, option to change to false for testing purposes
     double syncCompensation; // amount of compensation [m/s]
+    double error;
 
     // controllers
-    PIDController syncPID = new PIDController(0.5, 0.0, 0.0); // arm synchronization pid. syncs left --> right
+    PIDController syncPID = new PIDController(0.0, 0.0, 0.0); // arm synchronization pid. syncs left --> right
 
     public ArmSS() {
         rightArm = new Arm(CAN.ARM_RIGHT_Motor, invert_right);
         // left may follow right
         leftArm = new Arm(CAN.ARM_LEFT_Motor, invert_left);  //, rightArm.ctrl, invert_left);
-        sync = true;
         // zero our encoders at power up
         setPositions(0.0);
         ntcreate();
@@ -202,10 +202,11 @@ public class ArmSS extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Synchronization
-        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) / 2.0 : 0;
+        // Synchronization, drive left to follow right
+        error = rightArm.currentPos - leftArm.currentPos;
+        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) : 0;
         leftArm.periodic(syncCompensation);
-        rightArm.periodic(-syncCompensation);
+        rightArm.periodic(0.0);
 
         ntUpdates();
     }
@@ -213,6 +214,7 @@ public class ArmSS extends SubsystemBase {
     public void setSetpoints(double extension) {
         leftArm.setSetpoint(extension);
         rightArm.setSetpoint(extension);
+        sync = true;
     }
 
     // initializes position, doesn't move anything. Defines zero or whereever you.
@@ -231,9 +233,11 @@ public class ArmSS extends SubsystemBase {
     //rarely used, testing only
     public void setVelocityLeft(double speed) {
         leftArm.setVelocityCmd(speed);
+        sync = false;
     }
     public void setVelocityRight(double speed) {
         rightArm.setVelocityCmd(speed);
+        sync = false;
     }
 
     /******************
@@ -273,6 +277,7 @@ public class ArmSS extends SubsystemBase {
     NetworkTableEntry nt_posTol;
     NetworkTableEntry nt_velTol;
 
+    NetworkTableEntry nt_error;
     NetworkTableEntry nt_syncCompensation;
 
     public void ntcreate() {
@@ -306,6 +311,7 @@ public class ArmSS extends SubsystemBase {
         nt_maxVel = table.getEntry("Max Velocity (cm/s)");
         nt_posTol = table.getEntry("Position Tolerance (cm)");
         nt_velTol = table.getEntry("Velocity Tolerance (cm/s)");
+        nt_error = table.getEntry("Pos Error");
 
         // set doubles for values that we will update based on what is in NT, so they
         // appear
@@ -324,6 +330,7 @@ public class ArmSS extends SubsystemBase {
         nt_maxVel.setDouble(maxVel);
         nt_posTol.setDouble(posTol);
         nt_velTol.setDouble(velTol);
+        nt_error.setDouble(error);
     }
 
     private void ntUpdates() {
@@ -337,7 +344,7 @@ public class ArmSS extends SubsystemBase {
         nt_right_currentPos.setDouble(rightArm.currentPos);
         nt_right_desiredVel.setDouble(rightArm.velCmd);
         nt_right_currentVel.setDouble(rightArm.encoder.getVelocity());
-
+        nt_error.setDouble(error);
         nt_syncCompensation.setDouble(syncCompensation);
 
         // PID setters
@@ -353,8 +360,8 @@ public class ArmSS extends SubsystemBase {
         syncPID.setI(nt_sync_kI.getDouble(0.0));
         syncPID.setD(nt_sync_kD.getDouble(0.0));
 
-        leftArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
-        rightArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
+        ///leftArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
+        ///rightArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
     }
 
 }
