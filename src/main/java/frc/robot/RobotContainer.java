@@ -172,7 +172,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.balance_test);
   }
 
   private void configureBindings(Bindings bindings) {

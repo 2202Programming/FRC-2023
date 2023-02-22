@@ -38,6 +38,7 @@ public class JoystickRumble extends CommandBase {
     this.id = id;
     this.duration = duration;
     this.segments = segments;
+    this.type = type;
     if (segments<1){
       segments = 1; // need at least one segment, prevent divide by zero
     }
