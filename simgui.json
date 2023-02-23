@@ -7,10 +7,11 @@
       "/SmartDashboard/Microsoft_LifeCam_HD-3000 Sim Field": "Field2d"
     }
   },
-  "NetworkTables Info": {
-    "Connections": {
-      "open": true
-    },
-    "visible": true
+  "Plot": {
+    "Plot <0>": {
+      "window": {
+        "visible": false
+      }
+    }
   }
 }
