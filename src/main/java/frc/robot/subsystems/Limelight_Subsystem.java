@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -66,6 +67,7 @@ public class Limelight_Subsystem extends SubsystemBase {
   private Pose2d bluePose;
   final private String LL_NAME = "";// "limelight" for if left blank
   private int numAprilTags;
+  double visionTimestamp;
 
   public Limelight_Subsystem() {
     x_iir = LinearFilter.singlePoleIIR(filterTC, Constants.Tperiod);
@@ -114,6 +116,8 @@ public class Limelight_Subsystem extends SubsystemBase {
       //LL apriltags stuff
       LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
       numAprilTags = llresults.targetingResults.targets_Fiducials.length;
+      visionTimestamp = Timer.getFPGATimestamp() - (LimelightHelpers.getLatency_Pipeline(LL_NAME)/1000.0) - (LimelightHelpers.getLatency_Capture(LL_NAME)/1000.0);
+
       if (numAprilTags>0){
         megaPose = LimelightHelpers.getBotPose2d(LL_NAME);
         bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
@@ -124,7 +128,7 @@ public class Limelight_Subsystem extends SubsystemBase {
         
         nt_bluepose_x.setDouble(bluePose.getX());
         nt_bluepose_y.setDouble(bluePose.getY());
-
+        
         //this if for when we are ready to have LL update pose
         // RobotContainer.RC().drivetrain.setPose(
         //   new Pose2d(bluePose.getTranslation(), //heavy handed way to update robot pose, DL will not like
@@ -136,6 +140,10 @@ public class Limelight_Subsystem extends SubsystemBase {
 
       
     }
+  }
+
+  public double getVisionTimestamp(){
+    return visionTimestamp;
   }
 
   public Pose2d getBluePose(){
