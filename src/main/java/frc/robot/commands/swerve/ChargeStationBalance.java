@@ -5,8 +5,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -14,6 +16,7 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
+import frc.robot.util.NetworkTableUtil;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 
@@ -59,7 +62,7 @@ import frc.robot.subsystems.SwerveDrivetrain;
  * 
  */
 
-public class ChargeStationBalance extends CommandBase implements BlinkyLightUser {
+public class ChargeStationBalance extends CommandBase implements BlinkyLightUser, NetworkTableUtil {
 
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java
@@ -110,7 +113,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
         csBalancePID.setTolerance(pitchPosTol, pitchRateTol);
 
         // NT creation
-        ntcreate();
+        ntconstructor();
     }
 
     @Override
@@ -149,7 +152,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
 
     @Override
     public void execute() {
-        ntupdates();
+        ntperiod();
         sdt.drive(calculate());
     }
 
@@ -215,59 +218,59 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
 
     NetworkTable table = NetworkTableInstance.getDefault().getTable("csBalance");
 
-    NetworkTableEntry nt_rollOffset;
-    NetworkTableEntry nt_framesStable;
-    NetworkTableEntry nt_atSetpoint;
-    NetworkTableEntry nt_kP;
-    NetworkTableEntry nt_kI;
-    NetworkTableEntry nt_kD;
-    NetworkTableEntry nt_filteredGyro;
-    NetworkTableEntry nt_unfilteredGyro;
-    NetworkTableEntry nt_rollRate;
-    NetworkTableEntry nt_xSpeed;
-    NetworkTableEntry nt_xSpeedR;
-    NetworkTableEntry nt_xSpeedRR;
-    NetworkTableEntry nt_KPRR;
+    /*
+     * Publish = PUBLISHing data TO the NT
+     * Subscribe = SUBSCRIBing to data FROM the NT
+     */
+    DoublePublisher nt_pub_rollOffset;
+    DoublePublisher nt_pub_framesStable;
+    BooleanPublisher nt_pub_atSetpoint;
+    DoubleSubscriber nt_sub_kP;
+    DoubleSubscriber nt_sub_kI;
+    DoubleSubscriber nt_sub_kD;
+    DoubleSubscriber nt_pub_kPRR;
+    DoublePublisher nt_pub_filteredGyro;
+    DoublePublisher nt_pub_unfilteredGyro;
+    DoublePublisher nt_pub_rollRate;
+    DoublePublisher nt_pub_xSpeed;
+    DoublePublisher nt_pub_xSpeedR;
+    DoublePublisher nt_pub_xSpeedRR;
 
-
-    private void ntcreate() {
-        nt_framesStable = table.getEntry("Frames Stable");
-        nt_atSetpoint = table.getEntry("At Setpoint?");
-        nt_kP = table.getEntry("kP");
-        nt_kI = table.getEntry("kI");
-        nt_kD = table.getEntry("kD");
-        nt_filteredGyro = table.getEntry("Filtered Roll");
-        nt_unfilteredGyro = table.getEntry("Unfiltered Roll");
-        nt_rollRate = table.getEntry("fRollRate");
-        nt_xSpeed = table.getEntry("xSpeed");
-        nt_xSpeedR = table.getEntry("xSpeedRoll");
-        nt_xSpeedRR = table.getEntry("xSpeedRR");
-        nt_KPRR = table.getEntry("KPRR");
-
-        nt_kP.setDouble(csBalancePID.getP());
-        nt_kI.setDouble(csBalancePID.getI());
-        nt_kD.setDouble(csBalancePID.getD());
-        nt_KPRR.setDouble(kpPR);
+    @Override
+    public void ntcreate() {
+        nt_pub_framesStable = table.getDoubleTopic("Frames Stable").publish();
+        nt_pub_atSetpoint = table.getBooleanTopic("At Setpoint?").publish();
+        nt_sub_kP = table.getDoubleTopic("kP").subscribe(csBalancePID.getP());
+        nt_sub_kI = table.getDoubleTopic("kI").subscribe(csBalancePID.getI());
+        nt_sub_kD = table.getDoubleTopic("kD").subscribe(csBalancePID.getD());
+        nt_pub_filteredGyro = table.getDoubleTopic("Filtered Roll").publish();
+        nt_pub_unfilteredGyro = table.getDoubleTopic("Unfiltered Roll").publish();
+        nt_pub_rollRate = table.getDoubleTopic("fRollRate").publish();
+        nt_pub_xSpeed = table.getDoubleTopic("xSpeed").publish();
+        nt_pub_xSpeedR = table.getDoubleTopic("xSpeedRoll").publish();
+        nt_pub_xSpeedRR = table.getDoubleTopic("xSpeedRR").publish();
+        nt_pub_kPRR = table.getDoubleTopic("KPRR").subscribe(kpPR);
     }
 
-    private void ntupdates() {
-        // info
-        nt_framesStable.setDouble(levelCount);
-        nt_atSetpoint.setBoolean(csBalancePID.atSetpoint());
-        nt_filteredGyro.setDouble(filteredPitch);
-        nt_unfilteredGyro.setDouble(unfilteredPitch);
-        nt_rollRate.setDouble(pitchRate);
-        nt_xSpeed.setDouble(xSpeed);
-        nt_xSpeedR.setDouble(xSpeed_p);
-        nt_xSpeedRR.setDouble(xSpeed_pr);
+    @Override
+    public void ntupdate() {
+        // publishers
+        nt_pub_framesStable.set(levelCount);
+        nt_pub_atSetpoint.set(csBalancePID.atSetpoint());
+        nt_pub_filteredGyro.set(filteredPitch);
+        nt_pub_unfilteredGyro.set(unfilteredPitch);
+        nt_pub_rollRate.set(pitchRate);
+        nt_pub_xSpeed.set(xSpeed);
+        nt_pub_xSpeedR.set(xSpeed_p);
+        nt_pub_xSpeedRR.set(xSpeed_pr);
 
         // setters
-        csBalancePID.setP(nt_kP.getDouble(0.02));
-        csBalancePID.setI(nt_kI.getDouble(0.0));
-        csBalancePID.setD(nt_kD.getDouble(0.0));
+        csBalancePID.setP(nt_sub_kP.get());
+        csBalancePID.setI(nt_sub_kI.get());
+        csBalancePID.setD(nt_sub_kD.get());
         
-        //rollrate kp
-        kpPR = nt_KPRR.getDouble(0.0);
+        //rollrate kp setter
+        kpPR = nt_pub_kPRR.get();
 
     }
 }
