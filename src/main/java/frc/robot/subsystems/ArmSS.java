@@ -37,7 +37,7 @@ public class ArmSS extends SubsystemBase {
     class Arm {
         // commands
         double velCmd; // [cm/s] computed
-        final double gearRadius = 2.63398 * 2 * Math.PI; // [cm] .22 and .0037
+        final double gearRadius = 2.63398 * 2 * Math.PI; //2.633[cm] is drive gear radius
         final double gearRatio = (1.0 / 75.0);
 
         // measured values
