@@ -19,43 +19,24 @@ import frc.robot.subsystems.SwerveDrivetrain;
 
 /*
  *
- * feedback/discussion:
- *  Good work, lots of the hard things figured out or very very close. Main problem 
- *  I see is a blended roll/theta being used, but that value is always posititive
- *  so it won't work to catch changing direction or running from different sides.
- *  Angles don't blend that way.
- * 
- * I recommend we decouple the problem first. Don't use roll and roll.  pick one, and
- * alingn the robot to the ChargeStn.  Here's a first cut using roll.
- * 
- * 
  * Description:
- * Robot is moved into a positon on one side of the ramp and up the ramp so the bot is tilted.
+ * Robot is moved to one side of the ramp and up the ramp so the bot is tilted.
  * The heading is set to align with the field so it can drive straight up the ramp.  A rotate-to
- * command could preceed this one to rotate the bot to the proper field heading. This command
- * just deals with the balancing.
+ * command could preceed this one to rotate the bot to the proper field heading. 
+ * This command just deals with the balancing.
  *
  *  Assumptions:
  *      Robot is on the ramp, with an initial tilt.
  *      Robot is aligned, forward/back, only roll[theta] is used
  *      Either side of charge station can work, roll angle used to determin which way to move.
  *      Robot moves only in forward/back directions based on sign of roll.
- *      PID around roll controls speed, may need vmin for friction?
+ *      PID around pitch controls speed, may need vmin for friction?
  *              vmin could just be a bang-bang control and no pid.
  *  
  *      We detect level for N frames then exit.
- *      May want to low-pass filter roll for level detection
- *      Exit-on-level : false --> keep running 
+ *   
+ *      Exit-on-level : false --> keep running, till button
  *                      true --> command ends when level
- * 
- *      TODO: look at PID atSetpoint() see why we don't exit
- *      TODO: calibrate all the angles somewhere?
- * 
- *      TODO: may need to correct roll and roll with any offsets due to alignment
- *      if it is really badly aligned, back out corrected angles with eular angles for coupling
- *      TODO: look at pigeon2 docs for mounting corections, there may be some calibration to help.
- * 
- *      TODO: clean up discussion comments and dead code when we all agree and is tested
  * 
  */
 
@@ -64,36 +45,42 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java
     final double vmax = 0.9; // [m/s] fastest speed we allow
-    final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected  TODO: Try stiction fix to speed steady-state climb
-    // also could be simple bang-bang...
-    final double pitch_offset = -0.8349609375; // [deg] simple sensor correction TODO:calibrate in sensor_SS
+
+    // non-linear
+    final double VMIN_CLIMB = 0.25; // [m/s] small stiction speed if there is tilt, sign corrected
+    final double PITCHRATE_DETECTED = 10.0; // [deg/s] - we are moving
+    final double MIN_PITCH = 5.0; // [deg] min angle to know we are on the charge station (ramp)
 
     // tolerance limits
     final double pitchPosTol = 1.5; // [deg] level more or less
-    final double pitchRateTol = 3.0; // [deg/s] little motion TODO: tell it to stop being annoying
-    final int levelN = 5; // [frame-counts] stable roll for n frames, maybe use FIR?                          
+    final double pitchRateTol = 3.0; // [deg/s] allow a little motion
+    final int levelN = 5; // [frame-counts] stable pitch for n frames
 
     // Subsystems
     SwerveDrivetrain sdt; // required
-    Sensors_Subsystem sensors; // read-only, not require
+    Sensors_Subsystem sensors; // read-only, not required
 
-    //measured & output values
-    double pitchRate;                    //[deg/s]
-    double xSpeed_p;                    //[m/s]  controller on roll
-    double xSpeed_pr;                   //[m/s]  controller on rollRate
-    double xSpeed;                      //[m/s]  output vel
-    double unfilteredPitch;              //[deg/s]
-    double filteredPitch;                //[deg/s]
-    double prev_filteredPitch;           //[deg/s]
+    // measured & output values
+    double pitchRate; // [deg/s]
+    double xSpeed_p; // [m/s] controller on pitch
+    double xSpeed_pr; // [m/s] controller on pitchRate
+    double xSpeed; // [m/s] output vel
+    double unfilteredPitch; // [deg/s]
+    double filteredPitch; // [deg/s]
+    double prev_filteredPitch; // [deg/s]
 
-    // state vars, cleared on init()
+    // state vars, set on init()
     int levelCount;
-    PIDController csBalancePID = new PIDController(0.015, 0.0, 0.000); // kp [m/s per deg] kd .003 or less for TIM,  kp >.018 is unstable
-    double kpPR = -0.0055;   //[m/s/deg/s] vel compensation based on direct rollRate
+    double vmin;
+    
+    // kp [m/s per deg] kd .003 or less for TIM, kp > 0.018 is unstable
+    PIDController csBalancePID = new PIDController(0.015, 0.0, 0.000);                                                                   
+
+    //tunable constants
+    double kpPR = -0.0055; // [m/s/deg/s] vel compensation based on direct pitchRate
 
     LinearFilter pitchFilter = LinearFilter.singlePoleIIR(0.3, Constants.DT);
     LinearFilter pitchRateFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
-
 
     public ChargeStationBalance() {
         this(true);
@@ -116,17 +103,21 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     @Override
     public void initialize() {
         levelCount = 0;
-        unfilteredPitch = sensors.getPitch() - pitch_offset - 2.0;
+        unfilteredPitch = sensors.getPitch();
         pitchRate = sensors.getPitchRate();
-       
-        //reset, use current measured roll & rollRate to initialize
+
+        // non-linear, copy sign of current pitch to move in correct direction
+        // or don't add vmin if we are level
+        vmin = (Math.abs(sensors.getPitch()) > MIN_PITCH) ? Math.copySign(VMIN_CLIMB, sensors.getPitch()) : 0.0;
+
+        // reset, use current measured pitch & pitchRate to initialize
         pitchFilter.calculate(unfilteredPitch);
         pitchFilter.calculate(unfilteredPitch);
         filteredPitch = pitchFilter.calculate(unfilteredPitch);
 
-        // Same for roll Rate, should be zero
+        // Same for pitch Rate, should be zero
         pitchRateFilter.reset();
-        pitchRateFilter.calculate(pitchRate);
+        pitchRateFilter.calculate(pitchRate); // prime filter with a measurement
         pitchRateFilter.calculate(pitchRate);
 
         // set PID internal states
@@ -144,7 +135,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
 
     @Override
     public boolean requestBlink() {
-        return !isLevel();     //blink when not level
+        return !isLevel(); // blink when not level
     }
 
     @Override
@@ -161,34 +152,30 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     /**
      * 
      * Calculates swerve module command vales based on PID loop around
-     * roll.
+     * pitch, pitchrate and const climb speed. Const climb removed
+     * once we start rotating.
      * 
      * @return SwerveModuleState[] swerve speeds to command
      */
     private SwerveModuleState[] calculate() {
         // try simple 1-D around roll
-        unfilteredPitch = sensors.getPitch() - pitch_offset - 2.0;
-        filteredPitch = pitchFilter.calculate(unfilteredPitch); // simple best guess of our roll after physical alignment
+        unfilteredPitch = sensors.getPitch();
+        filteredPitch = pitchFilter.calculate(unfilteredPitch);
         pitchRate = pitchRateFilter.calculate(sensors.getPitchRate());
+
+        // non-linear vmin to speed ramp climb, zero it when pitch rate is detected
+        vmin = (Math.abs(pitchRate) > PITCHRATE_DETECTED) ? 0.0 : vmin;
 
         // pid speed + min speed in proper direction, then clamp to our max
         xSpeed_p = csBalancePID.calculate(filteredPitch);
-        xSpeed_pr = kpPR*pitchRate;
-        xSpeed = MathUtil.clamp(xSpeed_p + xSpeed_pr, -vmax, vmax);
-
-        /**
-         * if we use an unaligned start, decouple the desired speed into components
-         * double xSpeed = MathUtil.clamp(speed * Math.cos(yaw), -vmax, vmax);
-         * double ySpeed = MathUtil.clamp(speed * Math.sin(yaw), -vmax, vmax);
-         * 
-         * Keep simple 1-D for now
-         */
+        xSpeed_pr = kpPR * pitchRate;
+        xSpeed = MathUtil.clamp(xSpeed_p + xSpeed_pr + vmin, -vmax, vmax);
 
         // check for level using PID's tolerance, failure resets counter
         levelCount = (csBalancePID.atSetpoint()) ? ++levelCount : 0;
 
         // if at setpoint force xSpeed to 0
-        xSpeed = csBalancePID.atSetpoint() ? 0 : xSpeed;
+        xSpeed = csBalancePID.atSetpoint() ? 0.0 : xSpeed;
 
         // move the robot our desired speed, forward, zero y, and keep
         // current heading, no rotation
@@ -205,7 +192,6 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     public boolean isFinished() {
         return exitOnLevel && isLevel();
     }
-
 
     /**
      * ==================
@@ -228,7 +214,6 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     NetworkTableEntry nt_xSpeedR;
     NetworkTableEntry nt_xSpeedRR;
     NetworkTableEntry nt_KPRR;
-
 
     private void ntcreate() {
         nt_framesStable = table.getEntry("Frames Stable");
@@ -265,8 +250,8 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
         csBalancePID.setP(nt_kP.getDouble(0.02));
         csBalancePID.setI(nt_kI.getDouble(0.0));
         csBalancePID.setD(nt_kD.getDouble(0.0));
-        
-        //rollrate kp
+
+        // rollrate kp
         kpPR = nt_KPRR.getDouble(0.0);
 
     }
