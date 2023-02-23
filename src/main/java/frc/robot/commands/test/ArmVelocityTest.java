@@ -7,9 +7,10 @@ package frc.robot.commands.test;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.commands.utility.Lockout;
 import frc.robot.subsystems.ArmSS;
 
-public class ArmVelocityTest extends CommandBase {
+public class ArmVelocityTest extends CommandBase implements Lockout{
 
   Timer stopwatch = new Timer();
 

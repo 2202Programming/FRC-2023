@@ -2,9 +2,10 @@ package frc.robot.commands.test;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.commands.utility.Lockout;
 import frc.robot.subsystems.ArmSS;
 
-public class MoveArmsTest extends CommandBase {
+public class MoveArmsTest extends CommandBase implements Lockout {
 
     ArmSS arm = RobotContainer.RC().armSS;
     boolean setpointAtZero;
@@ -34,7 +35,7 @@ public class MoveArmsTest extends CommandBase {
     public void initialize() {
         old_velocity_limit = arm.getVelocityLimit();
         arm.setVelocityLimit(velocity_limit);
-        arm.setPositions(0.0);
+        arm.setPositions(0.0);   //defines new zero point, so lockout
         setpointAtZero = true;
         count = 0;
     }

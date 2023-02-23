@@ -6,10 +6,11 @@ package frc.robot.commands.test;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.commands.utility.Lockout;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.subsystems.ArmSS;
 
-public class ArmPositionTest extends CommandBase {
+public class ArmPositionTest extends CommandBase implements Lockout{
   ArmSS arm = RobotContainer.RC().armSS;
   HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
   double MaxLength = 39.0; // [cm]

@@ -7,9 +7,10 @@ package frc.robot.commands.test;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.commands.utility.Lockout;
 import frc.robot.subsystems.ArmSS;
 
-public class ArmMoveAtSpeed_L_R_test extends CommandBase {
+public class ArmMoveAtSpeed_L_R_test extends CommandBase implements Lockout {
   private final GenericHID m_hid = new GenericHID(0);
 
   ArmSS arm;
