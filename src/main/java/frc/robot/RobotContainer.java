@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.Intake;
+import frc.robot.commands.Lockout;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
@@ -172,7 +173,9 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings) {
       case arm_test:
-        dc.Driver().a().whileTrue(new MoveArmsTest(35.0, 18.0));
+        dc.Driver().a().whileTrue(new Lockout(
+              new MoveArmsTest(35.0, 18.0),
+          20.0));
         dc.Driver().b().whileTrue(new ArmVelocityTest(2.0, 3.0, 1.0));
         dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, true));
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, true));
