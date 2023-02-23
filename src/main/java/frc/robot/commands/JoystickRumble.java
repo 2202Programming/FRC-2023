@@ -32,7 +32,6 @@ public class JoystickRumble extends CommandBase {
   }
 
   //divide duration up into equal SEGMENTS with a fixed length silent gap between.  Segments are the # of rumble segments.
-  //in reality, the total rumble duration will be slightly longer than specified, since silent segments add to it.
   public JoystickRumble(Id id, double duration, int segments, RumbleType type) {
     dc = RobotContainer.RC().dc;
     this.id = id;
@@ -51,7 +50,7 @@ public class JoystickRumble extends CommandBase {
     timer.reset();
     timer.start();
     current_segment = 1;
-    segment_duration = duration/segments;
+    segment_duration = (duration - ((segments-1) * silent_duration))/segments;
     RobotContainer.RC().dc.turnOnRumble(id, type);
     silent_segment = false;
   }

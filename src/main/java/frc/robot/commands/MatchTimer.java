@@ -11,6 +11,9 @@ import frc.robot.Constants.DriverControls.Id;
 
 public class MatchTimer extends CommandBase {
   /** Counts down seconds left in match, does some driver notification */
+
+  boolean buzzing = false;
+
   public MatchTimer() {}
 
   // Called when the command is initially scheduled.
@@ -21,20 +24,42 @@ public class MatchTimer extends CommandBase {
   @Override
   public void execute() {
     int timeLeft = (int)DriverStation.getMatchTime();  //drop fraction of seconds
-    if (timeLeft % 30 < 1) {
-      System.out.println("**Match time left: " + timeLeft);
-      if(timeLeft > 125) { 
-        new JoystickRumble(Id.Driver, 1, 1, RumbleType.kLeftRumble).schedule();
-      }
-      else if(timeLeft < 125 && timeLeft > 65) { 
-        new JoystickRumble(Id.Driver, 1, 1, RumbleType.kLeftRumble).schedule();
-      }
-      else if(timeLeft < 65 && timeLeft > 35) { 
-        new JoystickRumble(Id.Driver, 1, 1, RumbleType.kLeftRumble).schedule();
-      }
-      else if (timeLeft < 35){
-        new JoystickRumble(Id.Driver, 1, 1, RumbleType.kLeftRumble).schedule();
-      }
+    switch(timeLeft){
+      case(120):
+        if(!buzzing){
+          new JoystickRumble(Id.Driver, 1, 1, RumbleType.kLeftRumble).schedule();
+          buzzing = true;
+        }
+        break;
+      case(118):
+        buzzing = false;
+        break;
+      case(60):
+        if(!buzzing){
+          new JoystickRumble(Id.Driver, 1, 2, RumbleType.kLeftRumble).schedule();
+          buzzing = true;
+        }
+        break;
+      case(58):
+        buzzing = false;
+        break;
+      case(30):
+        if(!buzzing){
+          new JoystickRumble(Id.Driver, 1, 3, RumbleType.kLeftRumble).schedule();
+          buzzing = true;
+        }
+        break;
+      case(28):
+        buzzing = false;
+        break;
+      case(10):
+        if(!buzzing){
+          new JoystickRumble(Id.Driver, 10, 10, RumbleType.kLeftRumble).schedule();
+          buzzing = true;
+        }
+        break;
+      default:
+        break;
     }
   }
 
