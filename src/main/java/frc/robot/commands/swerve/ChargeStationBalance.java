@@ -47,7 +47,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     final double vmax = 0.9; // [m/s] fastest speed we allow
 
     // non-linear
-    final double VMIN_CLIMB = 0.25; // [m/s] small stiction speed if there is tilt, sign corrected
+    final double VMIN_CLIMB = 0.35; // [m/s] small stiction speed if there is tilt, sign corrected
     final double PITCHRATE_DETECTED = 10.0; // [deg/s] - we are moving
     final double MIN_PITCH = 5.0; // [deg] min angle to know we are on the charge station (ramp)
 
@@ -108,7 +108,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
 
         // non-linear, copy sign of current pitch to move in correct direction
         // or don't add vmin if we are level
-        vmin = (Math.abs(sensors.getPitch()) > MIN_PITCH) ? Math.copySign(VMIN_CLIMB, sensors.getPitch()) : 0.0;
+        vmin = (Math.abs(sensors.getPitch()) > MIN_PITCH) ? Math.copySign(VMIN_CLIMB, -sensors.getPitch()) : 0.0;
 
         // reset, use current measured pitch & pitchRate to initialize
         pitchFilter.calculate(unfilteredPitch);

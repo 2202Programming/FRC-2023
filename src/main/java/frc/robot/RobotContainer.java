@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.HashMap;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
@@ -208,7 +210,7 @@ public class RobotContainer {
         if (drivetrain == null)
           break;
         // DRIVER
-        dc.Driver().x().whileTrue(new ChargeStationBalance());
+        dc.Driver().x().whileTrue(new ChargeStationBalance(false));
         dc.Driver().y().whileTrue(new InstantCommand(() -> {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
