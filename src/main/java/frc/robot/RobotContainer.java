@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.HashMap;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
@@ -88,6 +90,7 @@ public class RobotContainer {
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
 
+  Command myauto;  //fix names later
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -173,7 +176,10 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.claw_test);
+    configureBindings(Bindings.Competition);
+
+    myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A1 Place Pass Fetch Place Dock", 
+        new PathConstraints(3.8, 4.50))).andThen(new ChargeStationBalance());
   }
 
   private void configureBindings(Bindings bindings) {
@@ -258,9 +264,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    //return new autoCommand().andThen(new ChargeStationBalance());
-    //return new autoCommand();
-    return new InstantCommand();
+   return myauto;
   }
 
   /**
