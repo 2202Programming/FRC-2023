@@ -8,21 +8,22 @@
         source-provider="NetworkTables"
         style="transform: translate(206px, 51px);"
         source-key="/Position//RobotVel"
-        max="6"
+        max="4"
         min="0"
         unit="m/s"
+        precision="1"
     ></frc-accelerometer>
     <frc-gyro
         source-provider="NetworkTables"
         style="transform: translate(56px, 120px);"
         source-key="/Position/Pitch"
-        precision="4"
+        precision="1"
     ></frc-gyro>
     <frc-gyro
         source-provider="NetworkTables"
         style="transform: translate(344.5px, 120.5px);"
         source-key="/Position/Roll"
-        precision="4"
+        precision="1"
     ></frc-gyro>
     <frc-label
         text="Current Speed"
@@ -48,7 +49,7 @@
         source-provider="NetworkTables"
         style="transform: translate(200px, 455.5px);"
         source-key="/Position//Current Heading"
-        precision="4"
+        precision="1"
     ></frc-gyro>
 </dashboard-tab>
 <dashboard-tab
@@ -62,12 +63,10 @@
         has-value=""
         source-provider="NetworkTables"
         style="width: 192px; height: 40px; transform: translate(291px, 143px);"
-        label=""
-        placeholder=""
     ><input
             slot="input"
-            value="Item 1"
-            id="vaadin-combo-box-60"
+            value="Item 2"
+            id="vaadin-combo-box-1454"
             autocomplete="off"
             autocapitalize="off"
             role="combobox"
@@ -81,7 +80,7 @@
         ><label
             slot="label"
             id="label-vaadin-combo-box-60"
-            for="vaadin-combo-box-60"
+            for="vaadin-combo-box-1454"
         ></label>
         <div
             slot="error-message"
