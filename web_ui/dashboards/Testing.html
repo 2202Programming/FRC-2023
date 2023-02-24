@@ -1,0 +1,90 @@
+<dashboard-tab
+    tab-name="TeleOperated"
+    slot="tab"
+    source-provider="NetworkTables"
+    selected=""
+>
+    <frc-accelerometer
+        source-provider="NetworkTables"
+        style="transform: translate(206px, 51px);"
+        source-key="/Position//RobotVel"
+        max="10"
+        min="0"
+        precision="4"
+        num-tick-marks="6"
+    ></frc-accelerometer>
+    <frc-gyro
+        source-provider="NetworkTables"
+        style="transform: translate(56px, 120px);"
+        source-key="/Position//Current Bearing"
+    ></frc-gyro>
+    <frc-gyro
+        source-provider="NetworkTables"
+        style="transform: translate(344.5px, 120.5px);"
+        source-key="/Position/Roll"
+    ></frc-gyro>
+    <frc-gyro
+        source-provider="NetworkTables"
+        style="transform: translate(188.5px, 451px);"
+        source-key="/Position//Current Heading"
+    ></frc-gyro>
+    <frc-label
+        text="Current Speed"
+        source-provider="NetworkTables"
+        style="transform: translate(299px, 30px); width: 114.805px; height: 20px;"
+    ></frc-label>
+    <frc-label
+        text="Bearing"
+        source-provider="NetworkTables"
+        style="transform: translate(182px, 232.5px);"
+    ></frc-label>
+    <frc-label
+        text="Heading"
+        source-provider="NetworkTables"
+        style="transform: translate(314.5px, 565.5px);"
+    ></frc-label>
+    <frc-label
+        text="Roll"
+        source-provider="NetworkTables"
+        style="transform: translate(487px, 233px);"
+    ></frc-label>
+</dashboard-tab>
+<dashboard-tab
+    slot="tab"
+    tab-name="Autonomous"
+    source-provider="NetworkTables"
+>
+    <vaadin-combo-box
+        items="[&quot;Item 1&quot;,&quot;Item 2&quot;]"
+        value="Item 2"
+        has-value=""
+        source-provider="NetworkTables"
+        style="width: 192px; height: 40px; transform: translate(291px, 143px);"
+        label=""
+        placeholder=""
+    ><input
+            slot="input"
+            value="Item 1"
+            id="vaadin-combo-box-60"
+            autocomplete="off"
+            autocapitalize="off"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            spellcheck="false"
+            autocorrect="off"
+            aria-labelledby=""
+            aria-describedby=""
+            aria-activedescendant="vaadin-combo-box-item-1"
+        ><label
+            slot="label"
+            id="label-vaadin-combo-box-60"
+            for="vaadin-combo-box-60"
+        ></label>
+        <div
+            slot="error-message"
+            id="error-message-vaadin-combo-box-55"
+            hidden=""
+        ></div>
+    </vaadin-combo-box>
+</dashboard-tab>
