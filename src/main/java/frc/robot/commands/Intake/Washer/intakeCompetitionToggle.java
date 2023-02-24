@@ -4,6 +4,7 @@
 
 package frc.robot.commands.Intake.Washer;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriverControls.Id;
@@ -42,7 +43,7 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
     intake.intakeOn();
     intake.carwashOn();
     enableLights();
-    rumbleCommand = new JoystickRumbleEndless(Id.Operator);
+    rumbleCommand = new JoystickRumbleEndless(Id.Operator, RumbleType.kBothRumble);
     rumbleCommand.schedule();
   }
 

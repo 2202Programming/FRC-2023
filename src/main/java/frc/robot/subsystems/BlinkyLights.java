@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.util.RobotSpecs.RobotNames;
 
@@ -37,7 +38,7 @@ public class BlinkyLights {
 
     /** Creates a new BlinkyLights. */
     public BlinkyLights() {
-        amIReal = (RobotContainer.RC().robotSpecs.myRobotName == RobotNames.CompetitionBot2023);
+        amIReal = ((RobotContainer.RC().robotSpecs.myRobotName == RobotNames.CompetitionBot2023) && !Robot.isSimulation());
         if (amIReal) {
             System.out.println("***I have blinkylights, I must be one of the cool robots.");
             candle_l = new CANdle(3);

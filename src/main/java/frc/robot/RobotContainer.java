@@ -69,7 +69,8 @@ public class RobotContainer {
     vision_test,
     balance_test,
     arm_test,
-    claw_test
+    claw_test,
+    simulation
   }
 
   // What robot are we running?
@@ -197,6 +198,9 @@ public class RobotContainer {
         dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
         break;
 
+      case simulation:
+        break;
+        
       case claw_test:
         break;
 

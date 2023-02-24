@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -14,8 +15,9 @@ public class JoystickRumbleEndless extends CommandBase {
 
   HID_Xbox_Subsystem dc;
   Id id;
+  RumbleType type;
 
-  public JoystickRumbleEndless(Id id) {
+  public JoystickRumbleEndless(Id id, RumbleType type) {
     dc = RobotContainer.RC().dc;
     this.id = id;
 
@@ -24,7 +26,7 @@ public class JoystickRumbleEndless extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    RobotContainer.RC().dc.turnOnRumble(id);
+    RobotContainer.RC().dc.turnOnRumble(id, type);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -34,7 +36,7 @@ public class JoystickRumbleEndless extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.RC().dc.turnOffRumble(id);
+    RobotContainer.RC().dc.turnOffRumble(id, type);
   }
 
   // Returns true when the command should end.
