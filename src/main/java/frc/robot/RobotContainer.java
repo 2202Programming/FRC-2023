@@ -326,16 +326,15 @@ public class RobotContainer {
             new PrintCommand("***Eject Start"),
             new InstantCommand(drivetrain::printPose),
             new outtakeCompetitionToggle().withTimeout(1.0)
-           ));
+            ));
 
-    eventMap.put("eject",
+   eventMap.put("eject2",
         new SequentialCommandGroup(
-            new PrintCommand("***Eject"),
-            new InstantCommand(drivetrain::printPose),
-            new InstantCommand(intake::deploy),
-            new InstantCommand(intake::intakeOnReverse),
-            new WaitCommand(0.20),
-            new InstantCommand(intake::retract)));
+          new PrintCommand("***Eject2"),
+          new InstantCommand(drivetrain::printPose),
+          new outtakeCompetitionToggle().withTimeout(2.0),
+          new WaitCommand(1.5)
+          ));
 
     eventMap.put("balance",
         new SequentialCommandGroup(
@@ -350,8 +349,7 @@ public class RobotContainer {
 
     eventMap.put("intake_off",
         new SequentialCommandGroup(
-            new PrintCommand("***Intake Off")
-             ));
+            new PrintCommand("***Intake Off")));
   }
 
 }
