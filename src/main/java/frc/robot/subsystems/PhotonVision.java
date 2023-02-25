@@ -83,13 +83,13 @@ public class PhotonVision extends SubsystemBase {
 
     // setup PhotonVision's pose estimator,
     robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP, camera_arducam, robotToCam);
-    previousPoseEstimate = new Pair<>(new Pose2d(), 0.0);
-    currentPoseEstimate = new Pair<>(new Pose2d(), 0.0);
+
+    previousPoseEstimate = new Pair<>(new Pose2d(),0.0);
+    currentPoseEstimate = new Pair<>(new Pose2d(),0.0);
   }
 
   @Override
   public void periodic() {
-
     // Query the latest Apriltag result from PhotonVision
     var result_global = camera_arducam.getLatestResult();
 
@@ -113,10 +113,18 @@ public class PhotonVision extends SubsystemBase {
       // Get information from target.
       targetID = bestTarget.getFiducialId();
       if (targetID < 9) {
+        Pair<Pose2d, Double> previousPoseEstimateHolder = previousPoseEstimate;
         previousPoseEstimate = currentPoseEstimate;
         currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate.getFirst());
-        SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
-        SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
+        //Do not put value to smartDashboard if Pose2d is null
+        Optional<Pose2d> currentPoseEstimate_Optional = Optional.of(currentPoseEstimate.getFirst());
+        if(currentPoseEstimate_Optional.isPresent()) {  
+          SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
+          SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
+        }
+        else {
+          previousPoseEstimate = previousPoseEstimateHolder;
+        }
       }
     }
 
@@ -168,7 +176,6 @@ public class PhotonVision extends SubsystemBase {
     Pose2d curr_copy = new Pose2d(curr.getTranslation(), curr.getRotation());
     return new Pair<>(curr_copy, currentPoseEstimate.getSecond());
   }
-
   int getTargetID() {
     return targetID;
   }
@@ -226,6 +233,7 @@ public class PhotonVision extends SubsystemBase {
     } else {
       return new Pair<Pose2d, Double>(null, 0.0);
     }
+
   }
 
   // make a comparator class to allow for list sorting
