@@ -59,37 +59,32 @@ public class Elbow extends SubsystemBase {
     pid.setSmartMotionMaxVelocity(maxVel, PosSlot);
     pid.setSmartMotionMaxAccel(maxAccel, PosSlot);
 
+    //todo:set tol on pos pid
+
     //safety and power limits
     ctrl.setSmartCurrentLimit(10, 10,  10); //stallLimit, int freeLimit, int limitRPM);
     ntcreate();
   }
 
   // @Override
-  public void periodic(double velAdjust) {
+  public void periodic() {
    //measure 
    currentPos = encoder.getPosition();   // [deg]
-   posCmd = MathUtil.clamp(positionPID.calculate(currentPos) + velAdjust, -maxVel, maxVel);
-   velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
-   pid.setReference(velCmd, ControlType.kVelocity);
    currentVel = encoder.getVelocity();
-    if(currentVel > maxVel){
-      currentVel = maxVel;
-    }
-    if(-currentVel < -maxVel){
-      currentVel = -maxVel;
-    }
+   //calcs
+   velCmd = MathUtil.clamp(positionPID.calculate(currentPos), -maxVel, maxVel);
+   
+   //output
+   pid.setReference(velCmd, ControlType.kVelocity);
+   
   }
 
   public boolean isAtPosition() {
-    double posError = Math.abs(currentPos - desiredPos);
-    return  ((posError < posLimit) && 
-            (Math.abs(currentVel) < velLimit));
+    return positionPID.atSetpoint();
   }
 
   public void setPosition(double degrees) {
     this.desiredPos = degrees;
-    // send the desired pos to the hardware controller
-    pid.setReference(desiredPos, ControlType.kSmartMotion);
   } 
   public double getPosition() {
     return currentPos;
@@ -97,7 +92,6 @@ public class Elbow extends SubsystemBase {
 
   public void setVelocity(double vel){
     this.desiredVel = vel;
-    pid.setReference(desiredVel, ControlType.kVelocity); //smart or no?
   }
 
   public double getVelocity(){
@@ -109,12 +103,6 @@ public class Elbow extends SubsystemBase {
   }
   public void setMaxVel(double vel){
     maxVel = Math.abs(vel);
-  }
-  public double getMaxAccel(){
-    return maxAccel;
-  }
-  public void setMaxAccel(double a){
-    maxAccel = Math.abs(a);
   }
 
   NetworkTable table = NetworkTableInstance.getDefault().getTable("elbow");
@@ -128,15 +116,13 @@ public class Elbow extends SubsystemBase {
     nt_desiredPos = table.getEntry("Desired Position");
     nt_desiredVel = table.getEntry("Desired Velocity");
 
+  }
+  
+  public void ntupdates(){
     nt_currentPos.setDouble(currentPos);
     nt_currentVel.setDouble(currentVel);
     nt_desiredPos.setDouble(desiredPos);
     nt_desiredVel.setDouble(desiredVel);
-
-
-  }
-  public void ntupdates(){
-
   }
 
   
