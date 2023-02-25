@@ -12,7 +12,15 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.RelativeEncoder;
+import frc.robot.util.PIDFController;
+import edu.wpi.first.math.controller.PIDController;
 
 /*
  * Notes from Mr.L  1/27/2023
@@ -49,20 +57,23 @@ public class Claw_Substyem extends SubsystemBase {
         Cube,Cone,Empty
       }
     
-
+      //PID
+      PIDController positionPID = new PIDController(0.0, 0.0, 0.0); // outer position loop
   // constants/statics
-  static final double KServoSpd = 5.0;    // [deg/s] time to wait for a move of the wrist
+  static final double Velocity = 5.0;    // [deg/s] time to wait for a move of the wrist
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
   static final double WristMinDegrees = -90.0; // TODO: Find actual value
   static final double WristMaxDegrees = 90.0; // TODO: Find actual value
-  static final double kServoMinPWM = 0.1; // TODO: Find actual value
-  static final double kServoMaxPWM = 0.5; // TODO: Find actual value
 
   // Hardware
   private DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PCM1.CLAW_FWD, PCM1.CLAW_REV);
-  private Servo rightServo = new Servo(frc.robot.Constants.PWM.RIGHT_WRIST);
-  private Servo leftServo = new Servo(frc.robot.Constants.PWM.LEFT_WRIST);
+  final CANSparkMax claw;
+  final SparkMaxPIDController pid;
+  final RelativeEncoder encoder;
+  //sw outer loops I think
+  private CANSparkMax leftMotor = new CANSparkMax(CAN.CLAW_LEFT_MOTOR, MotorType.kBrushed);
+  private CANSparkMax rightMotor = new CANSparkMax(CAN.CLAW_RIGHT_MOTOR, MotorType.kBrushed);
   // protected CustomServo wristServo; //tbd if needed
 
   // state vars
@@ -70,11 +81,17 @@ public class Claw_Substyem extends SubsystemBase {
   private GamePieceHeld piece_held;
   private double wrist_cmd;  //[deg]
 
+
   /** Creates a new Claw. */
-  public Claw_Substyem() {
+   Claw_Substyem(int canID) {
     // Creating the custom servo if needed
     // TBD wristServo = new CustomServo(Claw.CLAW_WRIST_SERVO_PWM, WristMinDegrees,
-    // WristMaxDegrees, kServoMinPWM, kServoMaxPWM);
+    // WristMaxDegrees, , );
+    claw = new CANSparkMax(canID, MotorType.kBrushed);
+    claw.restoreFactoryDefaults();
+    claw.setIdleMode(CANSparkMax.IdleMode.kBrake);
+    pid = claw.getPIDController();
+    encoder = claw.getEncoder();
 
     piece_held = GamePieceHeld.Empty;
 
@@ -86,7 +103,7 @@ public class Claw_Substyem extends SubsystemBase {
     // Just read the left and fixup the coordinates
     // if left/right are not in sync, not much we can do.
     // they will get there.
-    double current_pos = leftServo.get();  // todo:fix any offset so math is correct
+    double current_pos = leftMotor.get();  // todo:fix any offset so math is correct
     //if customServo - wristServo.getPosition() * wristServo.getServoRange() + wristServo.getMinServoAngle();
     return current_pos;
   }
@@ -100,8 +117,8 @@ public class Claw_Substyem extends SubsystemBase {
     double right_cmd = 180.0 - left_cmd;    // mirror it, maybe rt_offset (example, needs geometry )
 
     // Command the wrist servos to 
-    rightServo.set(right_cmd);
-    leftServo.set(left_cmd);
+   rightMotor.set(right_cmd);
+    leftMotor.set(left_cmd);
 
     //save our commanded position
     wrist_cmd = degrees; 
@@ -123,7 +140,7 @@ public class Claw_Substyem extends SubsystemBase {
    * measure the servo's position.   (PWM is really a one-way street) 
    */
   public double waitEstimate(double degrees) {
-    return Math.abs(degrees - wrist_cmd)*KServoSpd;
+    return Math.abs(degrees - wrist_cmd)*Velocity;
   }
 
 

@@ -131,7 +131,10 @@ public final class Constants {
 
     // Whether to burn flash or not
     public static final boolean BURN_FLASH = false; // swerve-mk3
-    public static final int INTAKE_TOP_MOTOR = 0;
+
+    //Claw
+    public static final int CLAW_LEFT_MOTOR = 16;
+    public static final int CLAW_RIGHT_MOTOR = 17;
   }
 
   // PWM assignments on the Rio
