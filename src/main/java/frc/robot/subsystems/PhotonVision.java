@@ -62,8 +62,9 @@ public class PhotonVision extends SubsystemBase {
   private AprilTagFieldLayout fieldLayout;
   private PhotonPoseEstimator robotPoseEstimator;
   private Pair<Pose2d, Double> currentPoseEstimate;
-  private Pair<Pose2d, Double> previousPoseEstimate;
+  private SwerveDrivetrain sdt = null;
 
+  
   public PhotonVision() {
     // build path to apriltag json file in deploy directory
     File deploy = Filesystem.getDeployDirectory();
@@ -86,13 +87,15 @@ public class PhotonVision extends SubsystemBase {
 
     // setup PhotonVision's pose estimator,
     robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP, camera_arducam, robotToCam);
-    previousPoseEstimate = new Pair<>(new Pose2d(), 0.0);
-    currentPoseEstimate = new Pair<>(new Pose2d(), 0.0);
+  }
+
+  public void setDrivetrain(SwerveDrivetrain sdt)
+  {
+    this.sdt = sdt;
   }
 
   /* Used to set the starting postions either at Auto, or anytime the pose estimator needs a kick. */
   public void setInitialPose(Pair<Pose2d, Double> pose) {
-    previousPoseEstimate = pose;
     currentPoseEstimate = pose;
   }
 
@@ -120,21 +123,27 @@ public class PhotonVision extends SubsystemBase {
       // Get information from target.
       targetID = bestTarget.getFiducialId();
 
+      /* 
+          TODO: Question prevPoseEstimate would get overwriten with a null pose
+          if we don't get a real estimate, do we keep the updating from the drivetrain
+          or is this a vision only estimate?
+
+          DPL: my guess, estimate with the odometry from sdt.
+      */
+
       // only targets we care about, sometime we see number outside expected range
       if (targetID < 9) {
-        // guard, we can't estimate without a previousPoseEstimate
-        if (previousPoseEstimate.getFirst() == null) return;
+        // guard, we can't estimate without a sdt
+        if (sdt == null) return;
 
-        currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate.getFirst());
+        currentPoseEstimate = getEstimatedGlobalPose(sdt.getPose());
 
-        // TODO: DPL not sure what is going on here, npe at random in sim mode, related
-        // to Dr.J's issue?
         //don't update dash if there isn't a pose, photonVision return null if it doesn't have an estimate
         if (currentPoseEstimate.getFirst() != null) {
           SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
           SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
         }
-       previousPoseEstimate = currentPoseEstimate;       
+          
       }
     }
 

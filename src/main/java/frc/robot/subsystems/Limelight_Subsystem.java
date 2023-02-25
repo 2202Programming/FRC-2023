@@ -6,16 +6,14 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 
 public class Limelight_Subsystem extends SubsystemBase {
   /** Creates a new Limelight_Subsystem. */
@@ -35,7 +33,7 @@ public class Limelight_Subsystem extends SubsystemBase {
   private NetworkTableEntry outputTv;
   private NetworkTableEntry pipelineNTE;
   private NetworkTableEntry nt_numApriltags;
-  private NetworkTableEntry nt_botpose;
+  //private NetworkTableEntry nt_botpose;  //todo: merge in helpers_util
 
   private double x;
   private double filteredX;
@@ -62,7 +60,7 @@ public class Limelight_Subsystem extends SubsystemBase {
   private double filterTC = 0.08; // seconds, 2Hz cutoff T = 1/(2pi*f) was .2hz T=.8
   private int log_counter = 0;
 
-  private Pose2d megaPose;
+  //private Pose2d megaPose;
   private Pose2d teamPose;
   private Pose2d bluePose;
   final private String LL_NAME = "";// "limelight" for if left blank
@@ -91,14 +89,23 @@ public class Limelight_Subsystem extends SubsystemBase {
 
   }
 
+  /*
+   * LL pose estimate may need a starting point to work from.
+   * This matches PhotonVision and will be called anytime
+   * the drivetrain's pose is reset. See swerverDrivetrain.java.
+   */
+  public void setInitialPose(Pose2d pose, double time) {
+
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
 
-    pipeline = pipelineNTE.getInteger(0); 
+    pipeline = pipelineNTE.getInteger(0);
 
     if (pipeline == 1) {
-      //LL reflective tape stuff
+      // LL reflective tape stuff
       x = LimelightHelpers.getTX(LL_NAME);
       y = LimelightHelpers.getTY(LL_NAME);
       area = LimelightHelpers.getTA(LL_NAME);
@@ -106,55 +113,56 @@ public class Limelight_Subsystem extends SubsystemBase {
       filteredX = x_iir.calculate(x);
       filteredArea = area_iir.calculate(area);
       ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
-      
+
       tx.setDouble(x);
       ty.setDouble(y);
       ta.setDouble(area);
-    }
-    else if (pipeline == 0) {
-        
-      //LL apriltags stuff
+    } else if (pipeline == 0) {
+
+      // LL apriltags stuff
       LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
       numAprilTags = llresults.targetingResults.targets_Fiducials.length;
-      visionTimestamp = Timer.getFPGATimestamp() - (LimelightHelpers.getLatency_Pipeline(LL_NAME)/1000.0) - (LimelightHelpers.getLatency_Capture(LL_NAME)/1000.0);
+      visionTimestamp = Timer.getFPGATimestamp() - (LimelightHelpers.getLatency_Pipeline(LL_NAME) / 1000.0)
+          - (LimelightHelpers.getLatency_Capture(LL_NAME) / 1000.0);
 
-      if (numAprilTags>0){
-        megaPose = LimelightHelpers.getBotPose2d(LL_NAME);
+      if (numAprilTags > 0) {
+        //megaPose = LimelightHelpers.getBotPose2d(LL_NAME);
         bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
-        if(DriverStation.getAlliance() == Alliance.Blue)
+        if (DriverStation.getAlliance() == Alliance.Blue)
           teamPose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
         else
           teamPose = LimelightHelpers.getBotPose2d_wpiRed(LL_NAME);
-        
+
         nt_bluepose_x.setDouble(bluePose.getX());
         nt_bluepose_y.setDouble(bluePose.getY());
-        
-        //this if for when we are ready to have LL update pose
+
+        // this if for when we are ready to have LL update pose
         // RobotContainer.RC().drivetrain.setPose(
-        //   new Pose2d(bluePose.getTranslation(), //heavy handed way to update robot pose, DL will not like
-        //   RobotContainer.RC().drivetrain.getPose().getRotation())); //do not update facing, only X,Y
+        // new Pose2d(bluePose.getTranslation(), //heavy handed way to update robot
+        // pose, DL will not like
+        // RobotContainer.RC().drivetrain.getPose().getRotation())); //do not update
+        // facing, only X,Y
 
       }
 
       nt_numApriltags.setInteger(numAprilTags);
 
-      
     }
   }
 
-  public double getVisionTimestamp(){
+  public double getVisionTimestamp() {
     return visionTimestamp;
   }
 
-  public Pose2d getBluePose(){
+  public Pose2d getBluePose() {
     return bluePose;
   }
 
-  public Pose2d getTeamPose(){
+  public Pose2d getTeamPose() {
     return teamPose;
   }
 
-  public int getNumApriltags(){
+  public int getNumApriltags() {
     return numAprilTags;
   }
 

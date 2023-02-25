@@ -152,6 +152,10 @@ public class RobotContainer {
         break;
     }
     
+    //Allow PV to get odometry
+    if (photonVision!= null) {
+      photonVision.setDrivetrain(drivetrain);
+    }
     configureBindings(Bindings.arm_test);
     initEvents(); // setup event hashmap
 
