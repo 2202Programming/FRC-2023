@@ -23,6 +23,7 @@ import frc.robot.subsystems.hid.SwitchboardController.SBButton;
 public class TestAutoPathGroup extends CommandBase {
 
     String pathName;
+    SequentialCommandGroup cmd;
 
     PathConstraints constraints;
 
@@ -54,11 +55,14 @@ public class TestAutoPathGroup extends CommandBase {
 
         this.pathGroup = PathPlanner.loadPathGroup(pathName, new PathConstraints(0, 0));
 
-        for (int i = 0; i < this.pathGroup.size() - 1; i++) {
+        for (int i = 0; i < this.pathGroup.size(); i++) {
             if (sbValues.get(i)) pathGroupFinal.add(pathGroup.get(i));
         }
 
-        SequentialCommandGroup cmd = new SequentialCommandGroup(RobotContainer.RC().autoBuilder.fullAuto(pathGroupFinal));
+        if (pathGroupFinal.size() == 0) { cmd = new SequentialCommandGroup(); }
+        else {
+            cmd = new SequentialCommandGroup(RobotContainer.RC().autoBuilder.fullAuto(pathGroupFinal));
+        }
 
         if (dc.readSideboard(SBButton.Sw12)) cmd.addCommands(new ChargeStationBalance());
 

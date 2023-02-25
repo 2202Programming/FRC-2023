@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.HashMap;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
@@ -24,6 +26,7 @@ import frc.robot.commands.Intake.Washer.IntakeForward;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.auto.TestAutoPathGroup;
 import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -172,7 +175,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.balance_test);
   }
 
   private void configureBindings(Bindings bindings) {
@@ -257,7 +260,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new autoCommand().andThen(new ChargeStationBalance());
+    //return new autoCommand().andThen(new ChargeStationBalance());
+    return new TestAutoPathGroup("autopath1", new PathConstraints(1, 1));
+    //return autoBuilder.fullAuto(PathPlanner.loadPath("A1 Pass Dock", 
+    //  new PathConstraints(3.8, 4.50))).andThen(new ChargeStationBalance());
   }
 
   /**
