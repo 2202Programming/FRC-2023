@@ -237,7 +237,7 @@ public class RobotContainer {
         if (drivetrain == null)
           break;
         // DRIVER
-        dc.Driver().x().whileTrue(new ChargeStationBalance());
+        dc.Driver().x().whileTrue(new ChargeStationBalance(false));
         dc.Driver().y().whileTrue(new InstantCommand(() -> {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
