@@ -65,7 +65,7 @@ public class Limelight_Subsystem extends SubsystemBase {
   private Pose2d bluePose;
   final private String LL_NAME = "";// "limelight" for if left blank
   private int numAprilTags;
-  double visionTimestamp;
+  private double visionTimestamp;
 
   public Limelight_Subsystem() {
     x_iir = LinearFilter.singlePoleIIR(filterTC, Constants.Tperiod);

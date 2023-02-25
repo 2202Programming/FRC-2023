@@ -164,9 +164,6 @@ public class RobotContainer {
       // apriltag is pipeline 0
       limelight.setPipeline(0);
     }
-
-    initEvents(); // setup event hashmap
-
     // set default commands, if sub-system exists
     if (drivetrain != null) {
       drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
@@ -181,13 +178,15 @@ public class RobotContainer {
           RobotContainer.RC().eventMap, // events that may be in the path
           true, // correct path for mirrored depending on alliance color.
           drivetrain);
+          
+      myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing",
+          new PathConstraints(3.5, 4.5))).andThen(new ChargeStationBalance());
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.balance_test);
+    configureBindings(Bindings.vision_test);
 
-    myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing",
-        new PathConstraints(3.5, 4.5))).andThen(new ChargeStationBalance());
+
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -322,6 +321,7 @@ public class RobotContainer {
         new PrintCommand("***Path score"),
         new InstantCommand(drivetrain::printPose)));
 
+    if (intake != null)
     eventMap.put("eject_start",
         new SequentialCommandGroup(
             new PrintCommand("***Eject Start"),
@@ -332,6 +332,7 @@ public class RobotContainer {
             new WaitCommand(0.20),
             new InstantCommand(intake::retract)));
 
+    if (intake != null)
     eventMap.put("eject",
         new SequentialCommandGroup(
             new PrintCommand("***Eject"),
@@ -347,6 +348,7 @@ public class RobotContainer {
             new InstantCommand(drivetrain::printPose),
             new ChargeStationBalance(false)));
 
+    if (intake != null)
     eventMap.put("intake_on",
         new SequentialCommandGroup(
             new PrintCommand("***Intake On"),
@@ -355,6 +357,7 @@ public class RobotContainer {
               intake.intakeOn();
             })));
 
+    if (intake != null)
     eventMap.put("intake_off",
         new SequentialCommandGroup(
             new PrintCommand("***Intake Off"),

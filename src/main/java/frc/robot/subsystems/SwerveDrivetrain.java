@@ -530,7 +530,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     if (limelight.getNumApriltags() > 0) {
       // only if we have a tag in view
       // Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
-      m_poseEstimator.addVisionMeasurement(limelight.getBluePose(), limelight.visionTimestamp);
+      m_poseEstimator.addVisionMeasurement(limelight.getBluePose(), limelight.getVisionTimestamp());
     }
     m_pose_integ = m_poseEstimator.getEstimatedPosition();
   }
