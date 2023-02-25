@@ -156,7 +156,6 @@ public class RobotContainer {
     if (photonVision!= null) {
       photonVision.setDrivetrain(drivetrain);
     }
-    configureBindings(Bindings.arm_test);
     initEvents(); // setup event hashmap
 
     if (limelight != null) {
@@ -183,10 +182,10 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.vision_test);
+    configureBindings(Bindings.balance_test);
 
-    myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A1 Place Pass Fetch Place Dock", 
-        new PathConstraints(3.8, 4.50))).andThen(new ChargeStationBalance());
+    myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing", 
+        new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
 
     //Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
