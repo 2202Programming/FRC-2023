@@ -148,8 +148,10 @@ public class SwerveDrivetrain extends SubsystemBase {
   private LinearFilter bearingFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
   private LinearFilter velocityFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
 
-  public final SwerveDrivePoseEstimator m_poseEstimator;
-
+  public final SwerveDrivePoseEstimator m_poseEstimator_ll;
+  public final SwerveDrivePoseEstimator m_poseEstimator_pv;
+  private Pose2d llPose;
+  private Pose2d pvPose;
   public final Field2d m_field = new Field2d();
 
   public SwerveDrivetrain() {
@@ -180,13 +182,21 @@ public class SwerveDrivetrain extends SubsystemBase {
      * Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings.
      * The numbers used below are robot specific, and should be tuned.
      */
-    m_poseEstimator = new SwerveDrivePoseEstimator(
+    m_poseEstimator_ll = new SwerveDrivePoseEstimator(
         kinematics,
         sensors.getRotation2d(),
         meas_pos,
         new Pose2d(), // initial pose ()
         VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)), // std x,y, heading from odmetry
         VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))); // std x, y heading from vision
+
+    m_poseEstimator_pv = new SwerveDrivePoseEstimator(
+      kinematics,
+      sensors.getRotation2d(),
+      meas_pos,
+      new Pose2d(), // initial pose ()
+      VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)), // std x,y, heading from odmetry
+      VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))); // std x, y heading from vision
 
     m_odometry = new SwerveDriveOdometry(kinematics, sensors.getRotation2d(), meas_pos);
     // cur_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
@@ -519,26 +529,57 @@ public class SwerveDrivetrain extends SubsystemBase {
     // update states
     old_pose = m_pose;
     m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
+    // vision  from here down
+    if (limelight != null) {
+      m_poseEstimator_ll.update(sensors.getRotation2d(), meas_pos);
+      llPoseEstimatorUpdate();
+    }
 
-    // limelight from here down
-    if (limelight == null)
-      return;
+    if (photonVision != null){
+      m_poseEstimator_pv.update(sensors.getRotation2d(), meas_pos);
+      pvPoseEstimatorUpdate();
+    }
 
     // WIP use other poseEstimator
-    m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
+    if (limelight == null && photonVision != null) 
+      if (pvPose != null)
+        setPose(pvPose); // update main pose with vision integrated pose if we have a target
+    else if (photonVision == null && limelight != null)
+      if (llPose != null)
+        setPose(llPose);
+    else if (photonVision != null && limelight != null)
+      if (limelight.getNumApriltags() > photonVision.getAprilTargets().size()) //ll has more targets
+        setPose(llPose);
+      else setPose(pvPose);
 
-    if (limelight.getNumApriltags() > 0) {
+  }
+
+  void pvPoseEstimatorUpdate(){
+    
+    if (photonVision.hasAprilTarget() ) {
       // only if we have a tag in view
       // Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
-      m_poseEstimator.addVisionMeasurement(limelight.getBluePose(), limelight.getVisionTimestamp());
+      m_poseEstimator_pv.addVisionMeasurement(photonVision.getPoseEstimate().getFirst(), photonVision.getVisionTimestamp());
 
-      m_pose_integ = m_poseEstimator.getEstimatedPosition();
-      setPose(m_pose_integ); // update main pose with vision integrated pose if we have a target
-      
+      pvPose = m_poseEstimator_pv.getEstimatedPosition();
     }
   }
 
+  void llPoseEstimatorUpdate(){
+    
+    if (limelight.getNumApriltags() > 0) {
+      // only if we have a tag in view
+      // Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
+      m_poseEstimator_ll.addVisionMeasurement(limelight.getBluePose(), limelight.getVisionTimestamp());
+
+      llPose = m_poseEstimator_ll.getEstimatedPosition();
+    }
+  }
 }
+
+
+
+
 
 // TODO: Move to a TEST/Tuning command - DPL 2/21/22
 // private void pidTuning() { //if drivetrain tuning
