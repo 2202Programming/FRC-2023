@@ -6,14 +6,18 @@ package frc.robot;
 
 import java.util.HashMap;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.commands.JoystickRumble;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
@@ -70,7 +74,8 @@ public class RobotContainer {
     vision_test,
     balance_test,
     arm_test,
-    claw_test
+    claw_test,
+    simulation
   }
 
   // What robot are we running?
@@ -91,6 +96,7 @@ public class RobotContainer {
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
 
+  Command myauto;  //fix names later
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -179,7 +185,13 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.vision_test);
+
+    myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A1 Place Pass Fetch Place Dock", 
+        new PathConstraints(3.8, 4.50))).andThen(new ChargeStationBalance());
+
+    //Quiet some of the noise
+    DriverStation.silenceJoystickConnectionWarning(true);
   }
 
   private void configureBindings(Bindings bindings) {
@@ -200,6 +212,9 @@ public class RobotContainer {
         dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
         break;
 
+      case simulation:
+        break;
+        
       case claw_test:
         break;
 
@@ -211,6 +226,10 @@ public class RobotContainer {
         dc.Driver().a().whileTrue(new CenterTapeYaw());
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().whileTrue(new CenterTapeYawSkew());
+        dc.Driver().y().whileTrue(new InstantCommand(() -> {
+          // calibrate robot gryo to to field 0 degrees
+          drivetrain.resetAnglePose(new Rotation2d(0));
+        }));
         break;
 
       case Competition:
@@ -267,7 +286,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new autoCommand().andThen(new ChargeStationBalance());
+   return myauto;
   }
 
   /**

@@ -5,11 +5,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DriverControls.Id;
 
 public class MatchTimer extends CommandBase {
   /** Counts down seconds left in match, does some driver notification */
+
+  boolean buzzing = false;
+
   public MatchTimer() {}
 
   // Called when the command is initially scheduled.
@@ -19,10 +23,43 @@ public class MatchTimer extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double timeLeft = DriverStation.getMatchTime();
-    if (timeLeft%30==0){
-      System.out.println("**Match time left: " + timeLeft);
-      new JoystickRumble(Id.Driver, 1.0).schedule();
+    int timeLeft = (int)DriverStation.getMatchTime();  //drop fraction of seconds
+    switch(timeLeft){
+      case(120):
+        if(!buzzing){
+          new JoystickRumble(Id.Driver, 1, 1, RumbleType.kLeftRumble).schedule();
+          buzzing = true;
+        }
+        break;
+      case(118):
+        buzzing = false;
+        break;
+      case(60):
+        if(!buzzing){
+          new JoystickRumble(Id.Driver, 1, 2, RumbleType.kLeftRumble).schedule();
+          buzzing = true;
+        }
+        break;
+      case(58):
+        buzzing = false;
+        break;
+      case(30):
+        if(!buzzing){
+          new JoystickRumble(Id.Driver, 1, 3, RumbleType.kLeftRumble).schedule();
+          buzzing = true;
+        }
+        break;
+      case(28):
+        buzzing = false;
+        break;
+      case(10):
+        if(!buzzing){
+          new JoystickRumble(Id.Driver, 10, 10, RumbleType.kLeftRumble).schedule();
+          buzzing = true;
+        }
+        break;
+      default:
+        break;
     }
   }
 

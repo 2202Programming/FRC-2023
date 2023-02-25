@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -23,19 +24,20 @@ public class JoystickRumble extends CommandBase {
   double silent_duration = 0.2;
   boolean finished = false;
   boolean silent_segment = false;
+  RumbleType type;
 
   //rumble the joystick given by id, duration in sec
   public JoystickRumble(Id id, double duration) {
-    this(id, duration, 1);
+    this(id, duration, 1, RumbleType.kBothRumble);
   }
 
   //divide duration up into equal SEGMENTS with a fixed length silent gap between.  Segments are the # of rumble segments.
-  //in reality, the total rumble duration will be slightly longer than specified, since silent segments add to it.
-  public JoystickRumble(Id id, double duration, int segments) {
+  public JoystickRumble(Id id, double duration, int segments, RumbleType type) {
     dc = RobotContainer.RC().dc;
     this.id = id;
     this.duration = duration;
     this.segments = segments;
+    this.type = type;
     if (segments<1){
       segments = 1; // need at least one segment, prevent divide by zero
     }
@@ -48,8 +50,8 @@ public class JoystickRumble extends CommandBase {
     timer.reset();
     timer.start();
     current_segment = 1;
-    segment_duration = duration/segments;
-    RobotContainer.RC().dc.turnOnRumble(id);
+    segment_duration = (duration - ((segments-1) * silent_duration))/segments;
+    RobotContainer.RC().dc.turnOnRumble(id, type);
     silent_segment = false;
   }
 
@@ -61,7 +63,7 @@ public class JoystickRumble extends CommandBase {
         silent_segment = false;
         timer.reset();
         timer.start();
-        RobotContainer.RC().dc.turnOnRumble(id);
+        RobotContainer.RC().dc.turnOnRumble(id, type);
       }
     }
     else if (timer.hasElapsed(segment_duration)){ 
@@ -71,7 +73,7 @@ public class JoystickRumble extends CommandBase {
       }
       else { //more segments to go, start a silent segment (these don't count against total segment count)
         silent_segment = true;
-        RobotContainer.RC().dc.turnOffRumble(id);
+        RobotContainer.RC().dc.turnOffRumble(id, type);
         timer.reset();
         timer.start();
       }
@@ -81,7 +83,7 @@ public class JoystickRumble extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.RC().dc.turnOffRumble(id);
+    RobotContainer.RC().dc.turnOffRumble(id, type);
     timer.stop();
   }
 

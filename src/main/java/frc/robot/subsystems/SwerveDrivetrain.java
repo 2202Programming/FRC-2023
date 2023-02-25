@@ -100,7 +100,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   // used to update postion esimates
   double kTimeoffset = .1; // [s] measurement delay from photonvis TODO:measure this???
   private final PhotonVision photonVision;
-
+  private final Limelight_Subsystem limelight;
   // Network tables
   private NetworkTable table;
   private NetworkTable postionTable;
@@ -154,6 +154,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   public SwerveDrivetrain() {
     sensors = RobotContainer.RC().sensors;
     photonVision = RobotContainer.RC().photonVision;
+    limelight = RobotContainer.RC().limelight;
 
     var MT = CANSparkMax.MotorType.kBrushless;
     modules = new SwerveModuleMK3[] {
@@ -510,17 +511,17 @@ public class SwerveDrivetrain extends SubsystemBase {
     m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
 
 
-    // PhotonVision from here down
-    if (photonVision == null)
+    // limelight from here down
+    if (limelight == null)
       return;
 
       // WIP use other poseEstimator
     m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
     
-    if (photonVision.hasAprilTarget()) {
+    if (limelight.getNumApriltags()>0) {
       // only if we have a tag in view
-      ////Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
-      ///  STILL A PROBLEM  m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
+      // Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
+      m_poseEstimator.addVisionMeasurement(limelight.getBluePose(), limelight.visionTimestamp);
     }
     m_pose_integ = m_poseEstimator.getEstimatedPosition();
   }
