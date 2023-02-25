@@ -125,16 +125,17 @@ public final class Constants {
     public static final int ARM_LEFT_Motor = 13;
     public static final int RIGHT_ELBOW = 14;
     public static final int LEFT_ELBOW = 15;
-
+    
+    //Claw
+    public static final int CLAW_LEFT_MOTOR = 16;
+    public static final int CLAW_RIGHT_MOTOR = 17;
+    
     // IMU
     public static final int PIGEON_IMU_CAN = 60;
 
     // Whether to burn flash or not
     public static final boolean BURN_FLASH = false; // swerve-mk3
-
-    //Claw
-    public static final int CLAW_LEFT_MOTOR = 16;
-    public static final int CLAW_RIGHT_MOTOR = 17;
+    
   }
 
   // PWM assignments on the Rio

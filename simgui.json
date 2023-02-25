@@ -2,9 +2,23 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Arducam_OV9281_USB_Camera Sim Field": "Field2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Global_Shutter_Camera Sim Field": "Field2d",
       "/SmartDashboard/Microsoft_LifeCam_HD-3000 Sim Field": "Field2d"
+    }
+  },
+  "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
+    "transitory": {
+      "photonvision": {
+        "Arducam_OV9281_USB_Camera": {
+          "open": true
+        },
+        "open": true
+      }
     }
   }
 }

@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.JoystickRumble;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
@@ -28,13 +27,11 @@ import frc.robot.commands.Intake.Washer.IntakeForward;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
-import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.ArmPositionTest;
-import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmVelocityTest;
 import frc.robot.commands.test.LockoutExampleCmd;
 import frc.robot.commands.test.MoveArmsTest;
@@ -109,17 +106,14 @@ public class RobotContainer {
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
-        photonVision = null; // new PhotonVision();
-        limelight = null; // new Limelight_Subsystem();
+        photonVision = new PhotonVision();
+        limelight = new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
-        // armSS = new ArmSS();
-        // elbow = new Elbow();
-        // claw = new Claw_Substyem();
-        armSS = null;
-        elbow = null;
-        claw = null;
+        armSS = new ArmSS();
+        elbow = new Elbow();
+        claw = new Claw_Substyem();
         break;
 
       case SwerveBot:

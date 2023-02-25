@@ -99,7 +99,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   // used to update postion esimates
   double kTimeoffset = .1; // [s] measurement delay from photonvis TODO:measure this???
-  private final PhotonVision photonVision;
+  //private final PhotonVision photonVision;
   private final Limelight_Subsystem limelight;
   // Network tables
   private NetworkTable table;
@@ -153,7 +153,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   public SwerveDrivetrain() {
     sensors = RobotContainer.RC().sensors;
-    photonVision = RobotContainer.RC().photonVision;
+    //photonVision = RobotContainer.RC().photonVision;
     limelight = RobotContainer.RC().limelight;
 
     var MT = CANSparkMax.MotorType.kBrushless;

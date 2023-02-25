@@ -4,23 +4,21 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.RelativeEncoder;
-import frc.robot.util.PIDFController;
-import edu.wpi.first.math.controller.PIDController;
 
 /*
  * Notes from Mr.L  1/27/2023
@@ -68,33 +66,39 @@ public class Claw_Substyem extends SubsystemBase {
 
   // Hardware
   private DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PCM1.CLAW_FWD, PCM1.CLAW_REV);
-  final CANSparkMax claw;
-  final SparkMaxPIDController pid;
-  final RelativeEncoder encoder;
-  //sw outer loops I think
-  private CANSparkMax leftMotor = new CANSparkMax(CAN.CLAW_LEFT_MOTOR, MotorType.kBrushed);
-  private CANSparkMax rightMotor = new CANSparkMax(CAN.CLAW_RIGHT_MOTOR, MotorType.kBrushed);
-  // protected CustomServo wristServo; //tbd if needed
+  
+  //TODO Encoder counts if that style is used
+  final static int COUNTS_PER_REV = 100; //fix me
 
-  // state vars
+  //sw outer loops I think
+  final CANSparkMax leftMotor = new CANSparkMax(CAN.CLAW_LEFT_MOTOR, MotorType.kBrushed);
+  final SparkMaxPIDController leftPid = leftMotor.getPIDController();
+  final RelativeEncoder leftEncoder= leftMotor.getAlternateEncoder(COUNTS_PER_REV);
+  
+  final CANSparkMax rightMotor = new CANSparkMax(CAN.CLAW_RIGHT_MOTOR, MotorType.kBrushed);
+  final SparkMaxPIDController rightPid = rightMotor.getPIDController();
+  final RelativeEncoder rightEncoder = rightMotor.getAlternateEncoder(COUNTS_PER_REV);
+
+  // state varsSs
   private boolean is_open;
   private GamePieceHeld piece_held;
   private double wrist_cmd;  //[deg]
 
 
   /** Creates a new Claw. */
-   Claw_Substyem(int canID) {
+   public Claw_Substyem() {
     // Creating the custom servo if needed
-    // TBD wristServo = new CustomServo(Claw.CLAW_WRIST_SERVO_PWM, WristMinDegrees,
+    // TBD wristServo = new CustomServo(clawCtrl.CLAW_WRIST_SERVO_PWM, WristMinDegrees,
     // WristMaxDegrees, , );
-    claw = new CANSparkMax(canID, MotorType.kBrushed);
-    claw.restoreFactoryDefaults();
-    claw.setIdleMode(CANSparkMax.IdleMode.kBrake);
-    pid = claw.getPIDController();
-    encoder = claw.getEncoder();
+ 
+    leftMotor.restoreFactoryDefaults();
+    rightMotor.restoreFactoryDefaults();
+    leftMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+    rightMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+    
+    //TODO finsih claw motor pids
 
-    piece_held = GamePieceHeld.Empty;
-
+    piece_held = GamePieceHeld.Cube;
   }
 
   // getting the angles current position

@@ -13,10 +13,10 @@ import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.SimPhotonCamera;
 import org.photonvision.SimVisionSystem;
 import org.photonvision.SimVisionTarget;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 
@@ -36,7 +36,11 @@ import frc.robot.RobotContainer;
 
 public class PhotonVision extends SubsystemBase {
 
-  private PhotonCamera camera_global;
+  // Cameras we have
+  String camera1 = "Microsoft_LifeCam_HD-3000";
+  String camera2 = "Arducam_OV9281_USB_Camera";
+
+  // private PhotonCamera camera_global;
   private PhotonCamera camera_microsoft;
   private PhotonCamera camera_arducam;
   private boolean hasAprilTargets;
@@ -57,8 +61,8 @@ public class PhotonVision extends SubsystemBase {
   // private Transform3d alternateCameraToTarget;
   private AprilTagFieldLayout fieldLayout;
   private PhotonPoseEstimator robotPoseEstimator;
-  private Pair<Pose2d, Double> currentPoseEstimate;// = new Pose2d();
-  private Pair<Pose2d, Double> previousPoseEstimate; // = new Pair<>(new Pose2d(), 0.0);
+  private Pair<Pose2d, Double> currentPoseEstimate;
+  private Pair<Pose2d, Double> previousPoseEstimate;
 
   public PhotonVision() {
     // build path to apriltag json file in deploy directory
@@ -73,19 +77,23 @@ public class PhotonVision extends SubsystemBase {
     }
 
     // Assemble the list of cameras & mount locations
-    //camera_global = new PhotonCamera("Global_Shutter_Camera");
-    camera_microsoft = new PhotonCamera("Microsoft_LifeCam_HD-3000");
-    camera_arducam = new PhotonCamera("Arducam_OV9281_USB_Camera");
+    camera_microsoft = new PhotonCamera(camera1);
+    camera_arducam = new PhotonCamera(camera2);
     robotToCam = new Transform3d(new Translation3d(0.0, 0.0, 0.75), new Rotation3d(0, 0, 0)); // Cam mounted facing
-                                                                                             // forward
+                                                                                              // forward
     var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
     camList.add(new Pair<PhotonCamera, Transform3d>(camera_arducam, robotToCam));
 
     // setup PhotonVision's pose estimator,
     robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP, camera_arducam, robotToCam);
+    previousPoseEstimate = new Pair<>(new Pose2d(), 0.0);
+    currentPoseEstimate = new Pair<>(new Pose2d(), 0.0);
+  }
 
-    previousPoseEstimate = new Pair<>(new Pose2d(),0.0);
-    currentPoseEstimate = new Pair<>(new Pose2d(),0.0);
+  /* Used to set the starting postions either at Auto, or anytime the pose estimator needs a kick. */
+  public void setInitialPose(Pair<Pose2d, Double> pose) {
+    previousPoseEstimate = pose;
+    currentPoseEstimate = pose;
   }
 
   @Override
@@ -99,9 +107,8 @@ public class PhotonVision extends SubsystemBase {
     if (hasAprilTargets) {
       // Get a list of currently tracked targets.
       AprilTargets = result_global.getTargets();
-
-      // don't we need to read the best target befor use?
       bestTarget = result_global.getBestTarget();
+
       // Get information from target.
       yaw = bestTarget.getYaw();
       pitch = bestTarget.getPitch();
@@ -112,19 +119,22 @@ public class PhotonVision extends SubsystemBase {
 
       // Get information from target.
       targetID = bestTarget.getFiducialId();
+
+      // only targets we care about, sometime we see number outside expected range
       if (targetID < 9) {
-        Pair<Pose2d, Double> previousPoseEstimateHolder = previousPoseEstimate;
-        previousPoseEstimate = currentPoseEstimate;
+        // guard, we can't estimate without a previousPoseEstimate
+        if (previousPoseEstimate.getFirst() == null) return;
+
         currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate.getFirst());
-        //Do not put value to smartDashboard if Pose2d is null
-        Optional<Pose2d> currentPoseEstimate_Optional = Optional.of(currentPoseEstimate.getFirst());
-        if(currentPoseEstimate_Optional.isPresent()) {  
+
+        // TODO: DPL not sure what is going on here, npe at random in sim mode, related
+        // to Dr.J's issue?
+        //don't update dash if there isn't a pose, photonVision return null if it doesn't have an estimate
+        if (currentPoseEstimate.getFirst() != null) {
           SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
           SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
         }
-        else {
-          previousPoseEstimate = previousPoseEstimateHolder;
-        }
+       previousPoseEstimate = currentPoseEstimate;       
       }
     }
 
@@ -176,6 +186,7 @@ public class PhotonVision extends SubsystemBase {
     Pose2d curr_copy = new Pose2d(curr.getTranslation(), curr.getRotation());
     return new Pair<>(curr_copy, currentPoseEstimate.getSecond());
   }
+
   int getTargetID() {
     return targetID;
   }
@@ -240,12 +251,7 @@ public class PhotonVision extends SubsystemBase {
   class PhotonTrackedTargetComparator implements Comparator<PhotonTrackedTarget> {
     @Override
     public int compare(PhotonTrackedTarget a, PhotonTrackedTarget b) {
-      int temp = 0;
-      if (a.getArea() > b.getArea())
-        temp = 1;
-      if (a.getArea() < b.getArea())
-        temp = -1;
-      return temp;
+      return (a.getArea() > b.getArea()) ? 1 : -1;
     }
   }
 
@@ -260,6 +266,7 @@ public class PhotonVision extends SubsystemBase {
 
     // Update PhotonVision based on our new robot position.
     simVision1.processFrame(sim_drivetrain.getPose());
+    simVision2.processFrame(sim_drivetrain.getPose());
 
     /*
      * raw data mode - WIP
@@ -293,7 +300,7 @@ public class PhotonVision extends SubsystemBase {
     double minTargetArea = 10; // square pixels
 
     simVision1 = new SimVisionSystem(
-        "Global_Shutter_Camera",
+        camera1,
         camDiagFOV,
         new Transform3d(new Translation3d(0, 0, camHeightOffGround), new Rotation3d(0, camPitch, 0)),
         maxLEDRange,
@@ -302,7 +309,7 @@ public class PhotonVision extends SubsystemBase {
         minTargetArea);
 
     simVision2 = new SimVisionSystem(
-        "Microsoft_LifeCam_HD-3000",
+        camera2,
         camDiagFOV,
         new Transform3d(new Translation3d(0, 0, camHeightOffGround), new Rotation3d(0, camPitch, 0)),
         maxLEDRange,
@@ -320,10 +327,11 @@ public class PhotonVision extends SubsystemBase {
 
     // RAW WIP simCam = new SimPhotonCamera("MyCamera");
     // Assemble the list of cameras & mount locations
-    /* WIP Raw data mode
-    sim_camera_global = new SimPhotonCamera("Global_Shutter_Camera");
-    sim_camera_microsoft = new SimPhotonCamera("Microsoft_LifeCam_HD-3000");
-    */
+    /*
+     * WIP Raw data mode
+     * sim_camera_global = new SimPhotonCamera("Global_Shutter_Camera");
+     * sim_camera_microsoft = new SimPhotonCamera("Microsoft_LifeCam_HD-3000");
+     */
   }
 
 }
