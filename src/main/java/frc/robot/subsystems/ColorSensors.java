@@ -13,14 +13,21 @@ import com.revrobotics.ColorSensorV3.ProximitySensorMeasurementRate;
 import com.revrobotics.ColorSensorV3.ProximitySensorResolution;
 import com.revrobotics.ColorSensorV3.RawColor;
 
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.Mux;
+import frc.robot.util.NetworkTableUtil;
 
-public class ColorSensors extends SubsystemBase implements AutoCloseable {
+public class ColorSensors extends SubsystemBase implements AutoCloseable, NetworkTableUtil {
 
     private class SensorData {
         RawColor color;
@@ -32,6 +39,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
     private final List<ColorSensorV3> colorSensors = new ArrayList<>();
     private final int numSensors = 3;
     private volatile SensorData[] colorSensorData = new SensorData[numSensors];
+    private ColorMatchResult[] results;
 
     // mux
     private final Mux mux = new Mux();
@@ -78,6 +86,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
         });
 
         notifier.startPeriodic(Constants.DT); 
+
+        ntconstructor();
     }
 
     /**
@@ -165,6 +175,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
                     break;
             }
         }
+
+        ntperiod();
     }
 
     /**
@@ -183,7 +195,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
      */
     public GamePiece getGamePiece() {
         // Creates an results array and loops throug each sensor to try to match the color to the game piece colors
-        ColorMatchResult[] results = new ColorMatchResult[numSensors];
+        results = new ColorMatchResult[numSensors];
         for (int i = 0; i < numSensors; i++) {
             RawColor rawColor = colorSensorData[i].color;
             results[i] = colorMatcher.matchColor(new Color(rawColor.red, rawColor.green, rawColor.blue));   
@@ -200,15 +212,16 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
             else if (result.color.equals(CONE_YELLOW)) numYellow++;
         }
         if (numPurple == 3) return GamePiece.Cube;
-        else if (numYellow >= 2) return getConeOrientation(results);
+        else if (numYellow >= 2) return getConeOrientation();
         else return GamePiece.None;
         
     }
 
     /**
-     * 
+     * Gets the orientation of the cone based on the end color sensors, in the following order: 
+     * (a) if a matching color is found; (b) the sign of the difference in proximity between the two
      */
-    public GamePiece getConeOrientation(ColorMatchResult[] results) {
+    public GamePiece getConeOrientation() {
         // if no color is detected from the front color sensor then skinny end probably facing front
         if (results[0] == null) return GamePiece.ConeFacingFront;
         // if no color is detected from the back color sensor then skinny end probably facinb back
@@ -217,4 +230,63 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
         // if the distance from sensor to object is greater in the front sensor than the second skinny end probably facing front, else facing back
         return ((colorSensorData[0].distance - colorSensorData[2].distance) > 0) ? GamePiece.ConeFacingFront : GamePiece.ConeFacingBack;
     }
+
+
+
+    /**
+     * NetworkTables
+     */
+
+     NetworkTable nt = NetworkTableInstance.getDefault().getTable("Color Sensors");
+
+     DoublePublisher sensor1_r = nt.getDoubleTopic("Sensor 1 Red").publish();
+     DoublePublisher sensor1_g = nt.getDoubleTopic("Sensor 1 Green").publish();
+     DoublePublisher sensor1_b = nt.getDoubleTopic("Sensor 1 Blue").publish();
+     DoublePublisher sensor1_ir = nt.getDoubleTopic("Sensor 1 IR").publish();
+     DoublePublisher sensor1_prox = nt.getDoubleTopic("Sensor 1 Proximity").publish();
+     BooleanPublisher sensor1_object = nt.getBooleanTopic("Sensor 1 Object Detected").publish();
+
+     DoublePublisher sensor2_r = nt.getDoubleTopic("Sensor 2 Red").publish();
+     DoublePublisher sensor2_g = nt.getDoubleTopic("Sensor 2 Green").publish();
+     DoublePublisher sensor2_b = nt.getDoubleTopic("Sensor 2 Blue").publish();
+     DoublePublisher sensor2_ir = nt.getDoubleTopic("Sensor 2 IR").publish();
+     DoublePublisher sensor2_prox = nt.getDoubleTopic("Sensor 2 Proximity").publish();
+     BooleanPublisher sensor2_object = nt.getBooleanTopic("Sensor 2 Object Detected").publish();
+
+     DoublePublisher sensor3_r = nt.getDoubleTopic("Sensor 3 Red").publish();
+     DoublePublisher sensor3_g = nt.getDoubleTopic("Sensor 3 Green").publish();
+     DoublePublisher sensor3_b = nt.getDoubleTopic("Sensor 3 Blue").publish();
+     DoublePublisher sensor3_ir = nt.getDoubleTopic("Sensor 3 IR").publish();
+     DoublePublisher sensor3_prox = nt.getDoubleTopic("Sensor 3 Proximity").publish();
+     BooleanPublisher sensor3_object = nt.getBooleanTopic("Sensor 3 Object Detected?").publish();
+
+    @Override
+    public void ntcreate() {
+        // don't need to do anything here
+    }
+
+    @Override
+    public void ntupdate() {
+        sensor1_r.set(colorSensorData[0].color.red);
+        sensor1_g.set(colorSensorData[0].color.green);
+        sensor1_b.set(colorSensorData[0].color.blue);
+        sensor1_ir.set(colorSensorData[0].color.ir);
+        sensor1_prox.set(colorSensorData[0].distance);
+        sensor1_object.set(results[0] != null);
+
+        sensor2_r.set(colorSensorData[1].color.red);
+        sensor2_g.set(colorSensorData[1].color.green);
+        sensor2_b.set(colorSensorData[1].color.blue);
+        sensor2_ir.set(colorSensorData[1].color.ir);
+        sensor2_prox.set(colorSensorData[1].distance);
+        sensor2_object.set(results[1] != null);
+
+        sensor3_r.set(colorSensorData[2].color.red);
+        sensor3_g.set(colorSensorData[2].color.green);
+        sensor3_b.set(colorSensorData[2].color.blue);
+        sensor3_ir.set(colorSensorData[2].color.ir);
+        sensor3_prox.set(colorSensorData[2].distance);
+        sensor3_object.set(results[2] != null);
+    }
+
 }
