@@ -108,14 +108,14 @@ public class RobotContainer {
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
-        photonVision =null;// new PhotonVision();
-        limelight = null;//new Limelight_Subsystem();
+        photonVision = null;// new PhotonVision();
+        limelight = null;// new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
-        armSS = null;//new ArmSS();
-        elbow = null; //new Elbow();
-        claw = null;//new Claw_Substyem();
+        armSS = null;// new ArmSS();
+        elbow = null; // new Elbow();
+        claw = null;// new Claw_Substyem();
         break;
 
       case SwerveBot:
@@ -325,11 +325,8 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new PrintCommand("***Eject Start"),
             new InstantCommand(drivetrain::printPose),
-            new InstantCommand(intake::deploy),
-            new WaitCommand(0.20),
-            new InstantCommand(intake::intakeOnReverse),
-            new WaitCommand(0.20),
-            new InstantCommand(intake::retract)));
+            new outtakeCompetitionToggle().withTimeout(1.0)
+           ));
 
     eventMap.put("eject",
         new SequentialCommandGroup(
@@ -349,15 +346,12 @@ public class RobotContainer {
     eventMap.put("intake_on",
         new SequentialCommandGroup(
             new PrintCommand("***Intake On"),
-            new InstantCommand(() -> {
-              intake.deploy();
-              intake.intakeOn();
-            })));
+            new intakeCompetitionToggle().withTimeout(2.0)));
 
     eventMap.put("intake_off",
         new SequentialCommandGroup(
-            new PrintCommand("***Intake Off"),
-            new InstantCommand(intake::intakeOff)));
+            new PrintCommand("***Intake Off")
+             ));
   }
 
 }
