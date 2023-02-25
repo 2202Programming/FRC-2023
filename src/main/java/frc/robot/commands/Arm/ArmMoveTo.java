@@ -34,6 +34,14 @@ import frc.robot.subsystems.Elbow;
  * Moves arm and elbow to a specific postion using default velocities.
  * The real work is in the ArmSS.
  */
+
+ /* I found some measerments relating to the ammount of rotations
+ * Its 22 inches from the center of the april tag to the center of the cone node
+ * The Robot wheel has a circumfrence of aproximately 12.57
+ * Dividing those out we get 1.75 rotations
+ * We dont know the exact gear ratios, so we will be using X (The current idea is 8.5)
+ * 1.75 * x = Amount of rotations for imput. 
+ */
 public class ArmMoveTo extends CommandBase {
   /** Creates a new MoveOut. */
   final ArmSS armSS;

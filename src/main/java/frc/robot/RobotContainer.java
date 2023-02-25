@@ -6,28 +6,43 @@ package frc.robot;
 
 import java.util.HashMap;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.Constants.Intake;
+import frc.robot.commands.JoystickRumble;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
+import frc.robot.commands.Intake.Washer.CarwashForward;
+import frc.robot.commands.Intake.Washer.CarwashReverse;
+import frc.robot.commands.Intake.Washer.IntakeForward;
+import frc.robot.commands.Intake.Washer.IntakeReverse;
+import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
+import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
-import frc.robot.commands.swerve.ChargeStationBalanceChad;
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.commands.swerve.RobotCentricDrive;
+import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
+import frc.robot.commands.test.ArmPositionTest;
+import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmVelocityTest;
+import frc.robot.commands.test.LockoutExampleCmd;
 import frc.robot.commands.test.MoveArmsTest;
 import frc.robot.subsystems.ArmSS;
+import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Elbow;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
@@ -59,7 +74,8 @@ public class RobotContainer {
     vision_test,
     balance_test,
     arm_test,
-    claw_test
+    claw_test,
+    simulation
   }
 
   // What robot are we running?
@@ -75,10 +91,12 @@ public class RobotContainer {
   public final ArmSS armSS;
   public final Elbow elbow;
   public final Claw_Substyem claw;
+  public final BlinkyLights lights;
 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
 
+  Command myauto;  //fix names later
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -86,18 +104,22 @@ public class RobotContainer {
     RobotContainer.rc = this; // for singleton accesor
     robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio SN
     dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05);
-
+    lights = new BlinkyLights(); // lights are constructed for every robot, protected if they dont exist
+                                 
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
-        photonVision = new PhotonVision();
-        limelight = new Limelight_Subsystem();
+        photonVision = null; // new PhotonVision();
+        limelight = null; // new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
-        armSS = new ArmSS();
-        elbow = new Elbow();
-        claw = new Claw_Substyem();
+        // armSS = new ArmSS();
+        // elbow = new Elbow();
+        // claw = new Claw_Substyem();
+        armSS = null;
+        elbow = null;
+        claw = null;
         break;
 
       case SwerveBot:
@@ -129,12 +151,15 @@ public class RobotContainer {
         limelight = null;
         sensors = null;
         drivetrain = null;
-        intake = null;
-        armSS = new ArmSS();
+        intake = null;       
+        armSS = null;
         elbow = null;
         claw = null;
         break;
     }
+    
+    configureBindings(Bindings.arm_test);
+    initEvents(); // setup event hashmap
 
     if (limelight != null) {
       // apriltag is pipeline 0
@@ -160,25 +185,44 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.vision_test);
+
+    myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A1 Place Pass Fetch Place Dock", 
+        new PathConstraints(3.8, 4.50))).andThen(new ChargeStationBalance());
+
+    //Quiet some of the noise
+    DriverStation.silenceJoystickConnectionWarning(true);
   }
 
   private void configureBindings(Bindings bindings) {
     // add bindings based on current user mode
     switch (bindings) {
       case arm_test:
-        dc.Driver().a().whileTrue(new MoveArmsTest(20.0, 25.0));
+        dc.Driver().a().whileTrue(new MoveArmsTest(35.0, 18.0).WithLockout(20.0));
         dc.Driver().b().whileTrue(new ArmVelocityTest(2.0, 3.0, 1.0));
-        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0));
-        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0));
+        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, true));
+        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, true));
+        dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
+        dc.Driver().leftBumper().whileTrue(new LockoutExampleCmd().WithLockout(5.0));
+        armSS.setDefaultCommand(new ArmPositionTest());
         break;
       case balance_test:
-        if (drivetrain == null) break;
-        dc.Driver().rightBumper().whileTrue(new ChargeStationBalanceChad(false));
+        if (drivetrain == null)
+          break;
+        dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
         break;
 
-      case claw_test:
+      case simulation:
         break;
+        
+      case claw_test:
+      dc.Driver().rightTrigger().onTrue(new InstantCommand(() -> {
+        claw.open();
+      }));
+      dc.Driver().leftTrigger().onTrue(new InstantCommand(() -> {
+        claw.close();
+      }));
+      break;
 
       case vision_test:
         // X button to change LL pipeline
@@ -188,17 +232,40 @@ public class RobotContainer {
         dc.Driver().a().whileTrue(new CenterTapeYaw());
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().whileTrue(new CenterTapeYawSkew());
-        break;
-
-      case Competition:
-      default:
-        if (drivetrain==null) break;
-        // everything subject to change
-        dc.Driver().x().whileTrue(new ChargeStationBalance());
         dc.Driver().y().whileTrue(new InstantCommand(() -> {
           // calibrate robot gryo to to field 0 degrees
           drivetrain.resetAnglePose(new Rotation2d(0));
         }));
+        break;
+
+      case Competition:
+      default:
+        if (drivetrain == null)
+          break;
+        // DRIVER
+        dc.Driver().x().whileTrue(new ChargeStationBalance(false));
+        dc.Driver().y().whileTrue(new InstantCommand(() -> {
+          // calibrate robot gryo to to field 0 degrees
+          drivetrain.resetAnglePose(new Rotation2d(0));
+        }));
+        dc.Driver().leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
+
+        // OPERATOR
+        dc.Operator().a().whileTrue(new intakeCompetitionToggle());
+        dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
+
+        // testing deploying / retracting intake on bumpers
+        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
+          intake.deploy();
+        }));
+        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
+          intake.retract();
+        }));
+        // testing on pov
+        dc.Operator().povLeft().whileTrue(new IntakeForward());
+        dc.Operator().povRight().whileTrue(new IntakeReverse());
+        dc.Operator().povUp().whileTrue(new CarwashForward());
+        dc.Operator().povDown().whileTrue(new CarwashReverse());
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
@@ -215,6 +282,7 @@ public class RobotContainer {
          * dc.Operator().y().whileTrue(new topRow());
          ********************************************************/
         break;
+
     }
   }
 
@@ -224,7 +292,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new autoCommand().andThen(new ChargeStationBalanceChad());
+   return myauto;
   }
 
   /**
@@ -243,5 +311,16 @@ public class RobotContainer {
         new InstantCommand(drivetrain::printPose), new ChargeStationBalance(true)));
     eventMap.put("score", new SequentialCommandGroup(new PrintCommand("***Path score"),
         new InstantCommand(drivetrain::printPose)));
+
+    eventMap.put("eject", new SequentialCommandGroup(new PrintCommand("***Eject score"),
+        new InstantCommand(drivetrain::printPose)));
+    eventMap.put("balance", new SequentialCommandGroup(
+        new PrintCommand("***Balance score"),
+        new InstantCommand(drivetrain::printPose),
+        new ChargeStationBalance(false)));
+
+    eventMap.put("intake_on", new SequentialCommandGroup(new PrintCommand("***Intake On score"),
+        new InstantCommand(drivetrain::printPose)));
   }
+
 }

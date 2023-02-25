@@ -87,8 +87,10 @@ public final class Constants {
    */
   public static final class CAN {
     // CAN ID for non-motor devices
-    public static final int PDP = 0; // this must be 0
-    public static final int PCM1 = 1; // default ID for PCM
+
+    //DL PROBLEM TO WORK WITH OTHER BOTS
+    public static final int PDP = 1; //for rev
+    public static final int PCM1 = 2; //for rev
 
     // drive train CANCoders
     public static final int DT_BL_CANCODER = 28;
@@ -99,6 +101,8 @@ public final class Constants {
     // Intake motor
     public static final int INTAKE_RIGHT_MTR = 19;
     public static final int INTAKE_LEFT_MTR = 18;
+    public static final int CARWASH_RIGHT_MTR = 11;
+    public static final int CARWASH_LEFT_MTR = 10;
 
     // drive train drive / angle motors - sparkmax neo
     public static final int DT_FL_DRIVE = 20;
@@ -117,8 +121,8 @@ public final class Constants {
     public static final int CMB_RIGHT_Rotate = 37;
 
     // Arms
-    public static final int ARM_LEFT_Motor = 13;
     public static final int ARM_RIGHT_Motor = 12;
+    public static final int ARM_LEFT_Motor = 13;
     public static final int RIGHT_ELBOW = 14;
     public static final int LEFT_ELBOW = 15;
 
@@ -127,6 +131,10 @@ public final class Constants {
 
     // Whether to burn flash or not
     public static final boolean BURN_FLASH = false; // swerve-mk3
+
+    //Claw
+    public static final int CLAW_LEFT_MOTOR = 16;
+    public static final int CLAW_RIGHT_MOTOR = 17;
   }
 
   // PWM assignments on the Rio
@@ -149,14 +157,12 @@ public final class Constants {
   // PWM assignments on the Rio
   public static final class PCM1 {
     // Double Solenoid
-    public static final int INTAKE_UP_SOLENOID_PCM = 2; // test value
-    public static final int INTAKE_DOWN_SOLENOID_PCM = 3; // test value
-    public static final int POSITIONER_UP_SOLENOID_PCM = 0; // test value
-    public static final int POSITIONER_DOWN_SOLENOID_PCM = 1; // test value
+    public static final int INTAKE_UP_SOLENOID_PCM = 1; // test value
+    public static final int INTAKE_DOWN_SOLENOID_PCM = 0; // test value
 
     // claw double Solenoid
-    public static final int CLAW_FWD = 4;
-    public static final int CLAW_REV = 5;
+    public static final int CLAW_FWD = 2;
+    public static final int CLAW_REV = 3;
 
   }
 
@@ -178,7 +184,7 @@ public final class Constants {
   }
 
   // Intake Constants
-  public static final class Intake {
+  public static final class Intake_Constants {
     // PID values to get copied to the hardware
     public static PIDFController r_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
     public static PIDFController l_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
@@ -266,18 +272,18 @@ public final class Constants {
 
     // FOR 2022 Chad Bot - degrees
     public static final WheelOffsets chadBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
-    public static final ChassisConfig chadBotChassisConfig = new ChassisConfig(MperFT * (21.516 / 12) / 2,
+    public static final ChassisConfig chadBotChassisConfig = new ChassisConfig(MperFT * (21.516 / 12.0) / 2.0,
         MperFT * (24.87 / 12) / 2, 0.995, 99.5 / 1000.0, 12.8, 8.14);
 
     // For 2023 CompetitionBot TODO FIX ME
-    public static final WheelOffsets compBotOffsets = new WheelOffsets(-175.60, -115.40, -162.15, 158.81);
+    public static final WheelOffsets compBotOffsets = new WheelOffsets(129.03, -83.94, -57.83, 139.38);
     public static final ChassisConfig compBotChassisConfig = new ChassisConfig(
-        MperFT * (21.516 / 12) / 2,
-        MperFT * (24.87 / 12) / 2,
+        MperFT * (23.5 / 12.0) / 2.0, //based on CAD in reference_links
+        MperFT * (19.5 / 12.0) / 2.0, //based on CAD in reference_links
         0.999, // scale [] <= 1.0
-        (99.5 / 1000.0), // wheel diameter[m]
-        12.8,
-        8.14);
+        MperFT * (4.0/12.0), // wheel diameter[m] Comp bot is 4" wheels
+        12.8, //confirmed with vince
+        8.14); //confirmed with vince
 
   }
 

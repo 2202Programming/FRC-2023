@@ -100,7 +100,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   // used to update postion esimates
   double kTimeoffset = .1; // [s] measurement delay from photonvis TODO:measure this???
   private final PhotonVision photonVision;
-
+  private final Limelight_Subsystem limelight;
   // Network tables
   private NetworkTable table;
   private NetworkTable postionTable;
@@ -154,6 +154,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   public SwerveDrivetrain() {
     sensors = RobotContainer.RC().sensors;
     photonVision = RobotContainer.RC().photonVision;
+    limelight = RobotContainer.RC().limelight;
 
     var MT = CANSparkMax.MotorType.kBrushless;
     modules = new SwerveModuleMK3[] {
@@ -333,12 +334,14 @@ public class SwerveDrivetrain extends SubsystemBase {
       est_pose_od_x.setDouble(m_pose.getX());
       est_pose_od_y.setDouble(m_pose.getY());
       est_pose_od_h.setDouble(m_pose.getRotation().getDegrees());
+      m_field.setRobotPose(m_odometry.getPoseMeters());
 
+      if (m_pose_integ == null) return;
       est_pose_integ_x.setDouble(m_pose_integ.getX());
       est_pose_integ_y.setDouble(m_pose_integ.getY());
       est_pose_integ_h.setDouble(m_pose_integ.getRotation().getDegrees());
       
-      m_field.setRobotPose(m_odometry.getPoseMeters());
+      
       // if Drivetrain tuning
       // pidTuning();
     }
@@ -361,10 +364,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     return modules[modID];
   }
 
+  //todo: eleminate this function, duplicate of resetpose
   // sets X,Y, and sets current angle (will apply sensors correction)
   public void setPose(Pose2d new_pose) {
-    m_pose = new_pose;
-    m_odometry.resetPosition(sensors.getRotation2d(), meas_pos, m_pose);
+    resetPose(new_pose);
   }
 
   // TODO: do we REALLY think this is where we need to go? field coords???
@@ -507,17 +510,18 @@ public class SwerveDrivetrain extends SubsystemBase {
     old_pose = m_pose;
     m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
 
-    // WIP use other poseEstimator
-    m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
 
-    // PhotonVision from here down
-    if (photonVision == null)
+    // limelight from here down
+    if (limelight == null)
       return;
 
-    if (photonVision.hasAprilTarget()) {
+      // WIP use other poseEstimator
+    m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
+    
+    if (limelight.getNumApriltags()>0) {
       // only if we have a tag in view
-      ////Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
-      ///  STILL A PROBLEM  m_poseEstimator.addVisionMeasurement(pose.getFirst(), pose.getSecond() - kTimeoffset);
+      // Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
+      m_poseEstimator.addVisionMeasurement(limelight.getBluePose(), limelight.visionTimestamp);
     }
     m_pose_integ = m_poseEstimator.getEstimatedPosition();
   }

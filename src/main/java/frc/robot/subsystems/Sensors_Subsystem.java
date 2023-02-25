@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.NTStrings;
@@ -39,9 +40,6 @@ public class Sensors_Subsystem extends SubsystemBase {
    * 
    * 
    */
-
-  final double Kgyro = -1.0; // ccw is positive, just like geometry class
-
   private NetworkTable table;
   private NetworkTable positionTable;
   
@@ -107,6 +105,13 @@ public class Sensors_Subsystem extends SubsystemBase {
   double m_roll;
   double m_pitch;
   double m_yaw;
+  //offsets measured at power up
+  final int BIAS_SAMPLES = 5; //[count]
+  final double BIAS_DELAY = 0.2; //[s]
+  double m_roll_bias;  //[deg]
+  double m_pitch_bias; //[deg]
+  double m_yaw_bias;   //[deg] measured, but not corrected for
+  
   double m_yaw_d;
   final RotationPositions m_rot = new RotationPositions();
 
@@ -114,7 +119,9 @@ public class Sensors_Subsystem extends SubsystemBase {
   YawSensor c_yaw_type = YawSensor.kPigeon;
   GyroStatus c_gryo_status = GyroStatus.UsingPigeon;
 
-  double log_counter = 0;
+  final int NT_UPDATE_FRAME = 20;
+  int log_counter = 0;
+
   //set this to true to default to pigeon
   public Pose2d autoStartPose;
   public Pose2d autoEndPose;
@@ -150,40 +157,42 @@ public class Sensors_Subsystem extends SubsystemBase {
     nt_pitch = positionTable.getEntry("Pitch");
     nt_roll = positionTable.getEntry("Roll");
 
-    //allow Sensors to calibrate in it's own thread
-    new Thread(()->{
-      try {
-        Thread.sleep(1000); // wait a second so gyro is done booting before calibrating.
-        calibrate();
-      } catch (Exception e) {
-      }
-    }).start();
-
-    log(20);
+    calibrate();
+    log();
   }
 
 
   //@Override
   public void calibrate() {
-    //TODO: measure angles, average and remove offsets.
-
-    reset();
+    double roll_bias=0.0, pitch_bias=0.0, yaw_bias=0.0;
+    for (int i=0; i< BIAS_SAMPLES; i++)
+    {
+      roll_bias +=  m_pigeon.getRoll();
+      pitch_bias +=  m_pigeon.getPitch();
+      yaw_bias += m_pigeon.getYaw();
+      Timer.delay(BIAS_DELAY);
+    }
+    //save bias value to subtract from live measurements
+    m_roll_bias =  roll_bias/(double)BIAS_SAMPLES;
+    m_pitch_bias = pitch_bias/(double)BIAS_SAMPLES;
+    m_yaw_bias = yaw_bias/(double)BIAS_SAMPLES;
   }
 
   @Override
   public void periodic() {  
-    m_yaw = ModMath.fmod360_2(-m_pigeon.getYaw()); //CCW positive, inverting here to match all the NavX code previously written.
-    m_pitch = m_pigeon.getPitch();
-    m_roll = m_pigeon.getRoll();
+    //CCW positive, inverting here to match all the NavX code previously written.
+    m_yaw = ModMath.fmod360_2(-m_pigeon.getYaw()); 
+    m_pitch = m_pigeon.getPitch() - m_pitch_bias;
+    m_roll = m_pigeon.getRoll() - m_roll_bias;
     getRotationPositions(m_rot);
     m_pigeon.getRawGyro(m_xyz_dps);
     m_yaw_d = m_xyz_dps[2];
 
-    log(20);
+    log_counter++;
+    log();
   }
 
   
-
   void setupSimulation() {
     // m_gyroSim_ahrs = new AHRS_GyroSim(m_ahrs);
     // m_gyroSim SimDevice
@@ -194,10 +203,8 @@ public class Sensors_Subsystem extends SubsystemBase {
     // m_gyroSim.setAngle(-m_drivetrainSimulator.getHeading().getDegrees());
   }
 
-  public void log(double mod) {
-
-    log_counter++;
-    if ((log_counter % mod)==0) {
+  public void log() {
+    if ((log_counter % NT_UPDATE_FRAME)==0) {
      
       CANJNI.getCANStatus(m_canStatus);
       nt_canUtilization.setDouble(m_canStatus.percentBusUtilization);
@@ -217,12 +224,8 @@ public class Sensors_Subsystem extends SubsystemBase {
     }
   }
 
-  public void reset() {
-
-  }
 
   // All accessors return values measured in the periodic()
-
   public double getRoll() {   
       return m_roll;
   }
@@ -243,6 +246,7 @@ public class Sensors_Subsystem extends SubsystemBase {
     return m_xyz_dps[2];
   }
 
+  /* not sure why these would be needed - Mr.L 2//22/2023
   public double getTotalTilt() {
     return Math.sqrt(Math.pow(getPitch(), 2) + Math.pow(getRoll(), 2));
   }
@@ -250,12 +254,7 @@ public class Sensors_Subsystem extends SubsystemBase {
   public double getTotalTiltRate() {
     return Math.sqrt(Math.pow(getPitchRate(), 2) + Math.pow(getRollRate(), 2));
   }
-
-  // @Override
-  public void close() throws Exception {
-    // //m_gyro.close();
-    // m_gyro_ahrs.close();
-  }
+  */
 
   /**
    * Return the heading of the robot in degrees.

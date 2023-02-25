@@ -37,18 +37,18 @@ public class ArmSS extends SubsystemBase {
     class Arm {
         // commands
         double velCmd; // [cm/s] computed
-        final double gearRadius = 2.63398 * 2 * Math.PI; //[cm] .22  and .0037
-        final double gearRatio = (1.0/75.0); //3.35 fudge factor orig.
-        
+        final double gearRadius = 2.63398 * 2 * Math.PI; //2.633[cm] is drive gear radius
+        final double gearRatio = (1.0 / 75.0);
+
         // measured values
         double currentPos;
 
         // state vars
-        PIDController positionPID = new PIDController(7.0, 0.150, 0.0); // outer position loop
-        PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); // holds values for hwVelpid vel
+        PIDController positionPID = new PIDController(5.0, 0.150, 0.250); // outer position loop
+        PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); // holds values for hardware
         final int hwVelSlot = 0;
 
-        //Testing Mode
+        // Testing Mode
         boolean velocity_mode = false;
         double external_vel_cmd = 0.0;
 
@@ -57,27 +57,27 @@ public class ArmSS extends SubsystemBase {
         final SparkMaxPIDController pid;
         final RelativeEncoder encoder;
 
-        Arm(int canID) {
+        Arm(int canID, boolean inverted) {
             // use canID to get controller and supporting objects
-            //TODO: Set current limit
             ctrl = new CANSparkMax(canID, MotorType.kBrushless);
+            ctrl.clearFaults();
             ctrl.restoreFactoryDefaults();
+            ctrl.setInverted(inverted);
             ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
             pid = ctrl.getPIDController();
             encoder = ctrl.getEncoder();
             positionPID.setTolerance(posTol, velTol);
 
-            ctrl.setSmartCurrentLimit(30, 15);
-            encoder.setPositionConversionFactor(gearRatio * gearRadius); 
-            encoder.setVelocityConversionFactor(gearRatio * gearRadius / 60); //rpm to rps 
+            ctrl.setSmartCurrentLimit(45, 20);
+            encoder.setPositionConversionFactor(gearRatio * gearRadius);
+            encoder.setVelocityConversionFactor(gearRatio * gearRadius / 60); // rpm to rps
 
             // write the hwVelPID constants to the sparkmax
             hwVelPID.copyTo(pid, hwVelSlot, 50, 5);
-            
-            ctrl.burnFlash();
-            Timer.delay(.2);  //this holds up the current thread
-        }
 
+            ctrl.burnFlash();
+            Timer.delay(.2); // this holds up the current thread
+        }
 
         // control the arm's postion [cm]
         void setSetpoint(double x_cm) {
@@ -95,14 +95,14 @@ public class ArmSS extends SubsystemBase {
             return positionPID.atSetpoint();
         }
 
-        //Sets the position of the physical position (Doesn't move anything)
-        void setPosition(double x_cm){
-            encoder.setPosition(x_cm); 
+        // Sets the position of the physical position (Doesn't move anything)
+        void setPosition(double x_cm) {
+            encoder.setPosition(x_cm);
             positionPID.reset();
             setSetpoint(x_cm);
         }
 
-        double getPosition(){
+        double getPosition() {
             return currentPos;
         }
 
@@ -120,7 +120,7 @@ public class ArmSS extends SubsystemBase {
         }
 
         void hold() {
-            pid.setReference(0.0, ControlType.kVelocity);            
+            pid.setReference(0.0, ControlType.kVelocity);
             currentPos = encoder.getPosition();
             setSetpoint(currentPos);
             positionPID.reset();
@@ -135,55 +135,60 @@ public class ArmSS extends SubsystemBase {
             // command hard 0.0 if POS is at tollerence
             velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
 
-            //if velocity mode, use the maxVel to control it, otherwise use positionPID 
-            velCmd = velocity_mode ? external_vel_cmd : velCmd;
+            // if velocity mode, use the maxVel to control it, otherwise use positionPID
+            velCmd = velocity_mode ? external_vel_cmd + compAdjustment: velCmd;
 
             // send our vel to the controller
-            pid.setReference(velCmd, ControlType.kVelocity); 
+            pid.setReference(velCmd, ControlType.kVelocity);
         }
-    } //End of Arm Class
+    } // End of Arm Class
+
+    //determine which way the motor spins
+    //positive extension moves arm out
+    final boolean invert_left = false;
+    final boolean invert_right = true;
 
     // instance variables
     // State vars
     final Arm leftArm;
     final Arm rightArm;
+    boolean follow_mode;
 
     // constants
-    double maxVel = 2.0;  // [cm/s]
-    double posTol = 0.30;  // [cm]
+    double maxVel = 15.0; // [cm/s]
+    double posTol = 0.30; // [cm]
     double velTol = 0.25; // [cm/s]
 
     // sync instance vars
-    boolean sync = true; // should usually be true, option to change to false for testing purposes
+    boolean sync = false; // should usually be true, option to change to false for testing purposes
     double syncCompensation; // amount of compensation [m/s]
+    double error;
 
     // controllers
-    PIDController syncPID = new PIDController(0.25, 0.0, 0.0); // arm synchronization pid. syncs left --> right
+    PIDController syncPID = new PIDController(0.0, 0.0, 0.0); // arm synchronization pid. syncs left --> right
 
     public ArmSS() {
-        leftArm = new Arm(CAN.ARM_LEFT_Motor);
-        rightArm = new Arm(CAN.ARM_RIGHT_Motor);
-        //zero our encoders at power up
+        rightArm = new Arm(CAN.ARM_RIGHT_Motor, invert_right);
+        // left may follow right
+        leftArm = new Arm(CAN.ARM_LEFT_Motor, invert_left);  //, rightArm.ctrl, invert_left);
+        // zero our encoders at power up
         setPositions(0.0);
         ntcreate();
     }
+
     // At Position flags for use in the commands
     public boolean armsAtPosition() {
-        //TODO fix me
-        //TODO  I really mean it fix this
-        //TODO I am missing an arm, fix me
-        return (rightArm.atSetpoint()   //TODO fixme when I get an arm       leftArm.atSetpoint())
-             && rightArm.atSetpoint());
+        return (rightArm.atSetpoint() && leftArm.atSetpoint());
     }
 
-    public void setVelocityLimit(double vel_limit){
+    public void setVelocityLimit(double vel_limit) {
         leftArm.setMaxVel(vel_limit);
         rightArm.setMaxVel(vel_limit);
     }
 
-    public double getVelocityLimit(){
-       //arms should have same vel_limit
-       return leftArm.getMaxVel();
+    public double getVelocityLimit() {
+        // arms should have same vel_limit
+        return leftArm.getMaxVel();
     }
 
     public void hold() {
@@ -197,11 +202,11 @@ public class ArmSS extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Synchronization
-        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) / 2.0 : 0;
-        syncCompensation = 0.0;   // force off since we are testing one arm at the moment TODO: remove.
+        // Synchronization, drive left to follow right
+        error = rightArm.currentPos - leftArm.currentPos;
+        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) : 0;
         leftArm.periodic(syncCompensation);
-        rightArm.periodic(-syncCompensation);
+        rightArm.periodic(0.0);
 
         ntUpdates();
     }
@@ -209,21 +214,31 @@ public class ArmSS extends SubsystemBase {
     public void setSetpoints(double extension) {
         leftArm.setSetpoint(extension);
         rightArm.setSetpoint(extension);
+        sync = true;
     }
 
-    //initializes position, doesn't move anything.  Defines zero or whereever you.
+    // initializes position, doesn't move anything. Defines zero or whereever you.
     public void setPositions(double extension) {
-        leftArm.setPosition(extension); 
+        leftArm.setPosition(extension);
         rightArm.setPosition(extension);
     }
 
-    //Testing mode, use with care since there are no limit switches
+    // Testing mode, use with care since there are no limit switches
     public void setVelocityCmd(double vel_cm) {
         double v = MathUtil.clamp(vel_cm, -maxVel, maxVel);
         leftArm.setVelocityCmd(v);
         rightArm.setVelocityCmd(v);
     }
 
+    //rarely used, testing only
+    public void setVelocityLeft(double speed) {
+        leftArm.setVelocityCmd(speed);
+        sync = false;
+    }
+    public void setVelocityRight(double speed) {
+        rightArm.setVelocityCmd(speed);
+        sync = false;
+    }
 
     /******************
      * Network Table Stuff.
@@ -262,6 +277,7 @@ public class ArmSS extends SubsystemBase {
     NetworkTableEntry nt_posTol;
     NetworkTableEntry nt_velTol;
 
+    NetworkTableEntry nt_error;
     NetworkTableEntry nt_syncCompensation;
 
     public void ntcreate() {
@@ -295,6 +311,7 @@ public class ArmSS extends SubsystemBase {
         nt_maxVel = table.getEntry("Max Velocity (cm/s)");
         nt_posTol = table.getEntry("Position Tolerance (cm)");
         nt_velTol = table.getEntry("Velocity Tolerance (cm/s)");
+        nt_error = table.getEntry("Pos Error");
 
         // set doubles for values that we will update based on what is in NT, so they
         // appear
@@ -313,6 +330,7 @@ public class ArmSS extends SubsystemBase {
         nt_maxVel.setDouble(maxVel);
         nt_posTol.setDouble(posTol);
         nt_velTol.setDouble(velTol);
+        nt_error.setDouble(error);
     }
 
     private void ntUpdates() {
@@ -326,7 +344,7 @@ public class ArmSS extends SubsystemBase {
         nt_right_currentPos.setDouble(rightArm.currentPos);
         nt_right_desiredVel.setDouble(rightArm.velCmd);
         nt_right_currentVel.setDouble(rightArm.encoder.getVelocity());
-
+        nt_error.setDouble(error);
         nt_syncCompensation.setDouble(syncCompensation);
 
         // PID setters
@@ -342,8 +360,8 @@ public class ArmSS extends SubsystemBase {
         syncPID.setI(nt_sync_kI.getDouble(0.0));
         syncPID.setD(nt_sync_kD.getDouble(0.0));
 
-        leftArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
-        rightArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
+        ///leftArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
+        ///rightArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
     }
 
 }
