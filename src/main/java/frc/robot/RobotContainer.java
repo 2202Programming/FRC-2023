@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
@@ -93,7 +94,8 @@ public class RobotContainer {
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
 
-  Command myauto;  //fix names later
+  Command myauto; // fix names later
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -102,7 +104,7 @@ public class RobotContainer {
     robotSpecs = new RobotSpecs(); // mechanism to pull different specs based on roborio SN
     dc = new HID_Xbox_Subsystem(0.3, 0.9, 0.05);
     lights = new BlinkyLights(); // lights are constructed for every robot, protected if they dont exist
-                                 
+
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
@@ -145,15 +147,15 @@ public class RobotContainer {
         limelight = null;
         sensors = null;
         drivetrain = null;
-        intake = null;       
+        intake = null;
         armSS = null;
         elbow = null;
         claw = null;
         break;
     }
-    
-    //Allow PV to get odometry
-    if (photonVision!= null) {
+
+    // Allow PV to get odometry
+    if (photonVision != null) {
       photonVision.setDrivetrain(drivetrain);
     }
     initEvents(); // setup event hashmap
@@ -184,10 +186,10 @@ public class RobotContainer {
     // Edit the binding confiuration for testing
     configureBindings(Bindings.balance_test);
 
-    myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing", 
-        new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
+    myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing",
+        new PathConstraints(3.5, 4.5))).andThen(new ChargeStationBalance());
 
-    //Quiet some of the noise
+    // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
   }
 
@@ -211,15 +213,15 @@ public class RobotContainer {
 
       case simulation:
         break;
-        
+
       case claw_test:
-      dc.Driver().rightTrigger().onTrue(new InstantCommand(() -> {
-        claw.open();
-      }));
-      dc.Driver().leftTrigger().onTrue(new InstantCommand(() -> {
-        claw.close();
-      }));
-      break;
+        dc.Driver().rightTrigger().onTrue(new InstantCommand(() -> {
+          claw.open();
+        }));
+        dc.Driver().leftTrigger().onTrue(new InstantCommand(() -> {
+          claw.close();
+        }));
+        break;
 
       case vision_test:
         // X button to change LL pipeline
@@ -289,7 +291,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-   return myauto;
+    return myauto;
   }
 
   /**
@@ -301,23 +303,62 @@ public class RobotContainer {
       return; // guard for bot-on-board
 
     eventMap.put("start",
-        new SequentialCommandGroup(new PrintCommand("***Path Start"), new InstantCommand(drivetrain::printPose)));
+        new SequentialCommandGroup(
+            new PrintCommand("***Path Start"),
+            new InstantCommand(drivetrain::printPose)));
+
     eventMap.put("middle",
-        new SequentialCommandGroup(new PrintCommand("***Path Middle"), new InstantCommand(drivetrain::printPose)));
-    eventMap.put("end", new SequentialCommandGroup(new PrintCommand("***Path End"),
-        new InstantCommand(drivetrain::printPose), new ChargeStationBalance(true)));
-    eventMap.put("score", new SequentialCommandGroup(new PrintCommand("***Path score"),
+        new SequentialCommandGroup(
+            new PrintCommand("***Path Middle"),
+            new InstantCommand(drivetrain::printPose)));
+
+    eventMap.put("end",
+        new SequentialCommandGroup(
+            new PrintCommand("***Path End"),
+            new InstantCommand(drivetrain::printPose),
+            new ChargeStationBalance(true)));
+
+    eventMap.put("score", new SequentialCommandGroup(
+        new PrintCommand("***Path score"),
         new InstantCommand(drivetrain::printPose)));
 
-    eventMap.put("eject", new SequentialCommandGroup(new PrintCommand("***Eject score"),
-        new InstantCommand(drivetrain::printPose)));
-    eventMap.put("balance", new SequentialCommandGroup(
-        new PrintCommand("***Balance score"),
-        new InstantCommand(drivetrain::printPose),
-        new ChargeStationBalance(false)));
+    eventMap.put("eject_start",
+        new SequentialCommandGroup(
+            new PrintCommand("***Eject Start"),
+            new InstantCommand(drivetrain::printPose),
+            new InstantCommand(intake::deploy),
+            new WaitCommand(0.20),
+            new InstantCommand(intake::intakeOnReverse),
+            new WaitCommand(0.20),
+            new InstantCommand(intake::retract)));
 
-    eventMap.put("intake_on", new SequentialCommandGroup(new PrintCommand("***Intake On score"),
-        new InstantCommand(drivetrain::printPose)));
+    eventMap.put("eject",
+        new SequentialCommandGroup(
+            new PrintCommand("***Eject"),
+            new InstantCommand(drivetrain::printPose),
+            new InstantCommand(intake::deploy),
+            new InstantCommand(intake::intakeOnReverse),
+            new WaitCommand(0.20),
+            new InstantCommand(intake::retract)));
+
+    eventMap.put("balance",
+        new SequentialCommandGroup(
+            new PrintCommand("***Balance"),
+            new InstantCommand(drivetrain::printPose),
+            new ChargeStationBalance(false)));
+
+    eventMap.put("intake_on",
+        new SequentialCommandGroup(
+            new PrintCommand("***Intake On"),
+            new InstantCommand(() -> {
+              intake.deploy();
+              intake.intakeOn();
+            })));
+
+    eventMap.put("intake_off",
+        new SequentialCommandGroup(
+            new PrintCommand("***Intake Off"),
+            new InstantCommand(intake::intakeOff)));
   }
 
 }
