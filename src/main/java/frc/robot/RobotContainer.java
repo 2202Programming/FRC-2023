@@ -178,7 +178,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.vision_test);
 
     myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A1 Place Pass Fetch Place Dock", 
         new PathConstraints(3.8, 4.50))).andThen(new ChargeStationBalance());
@@ -216,6 +216,10 @@ public class RobotContainer {
         dc.Driver().a().whileTrue(new CenterTapeYaw());
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().whileTrue(new CenterTapeYawSkew());
+        dc.Driver().y().whileTrue(new InstantCommand(() -> {
+          // calibrate robot gryo to to field 0 degrees
+          drivetrain.resetAnglePose(new Rotation2d(0));
+        }));
         break;
 
       case Competition:

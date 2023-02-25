@@ -38,6 +38,7 @@ public class PhotonVision extends SubsystemBase {
 
   private PhotonCamera camera_global;
   private PhotonCamera camera_microsoft;
+  private PhotonCamera camera_arducam;
   private boolean hasAprilTargets;
   private boolean hasTapeTargets;
   private List<PhotonTrackedTarget> AprilTargets;
@@ -72,15 +73,16 @@ public class PhotonVision extends SubsystemBase {
     }
 
     // Assemble the list of cameras & mount locations
-    camera_global = new PhotonCamera("Global_Shutter_Camera");
+    //camera_global = new PhotonCamera("Global_Shutter_Camera");
     camera_microsoft = new PhotonCamera("Microsoft_LifeCam_HD-3000");
+    camera_arducam = new PhotonCamera("Arducam_OV9281_USB_Camera");
     robotToCam = new Transform3d(new Translation3d(0.0, 0.0, 0.75), new Rotation3d(0, 0, 0)); // Cam mounted facing
                                                                                              // forward
     var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
-    camList.add(new Pair<PhotonCamera, Transform3d>(camera_global, robotToCam));
+    camList.add(new Pair<PhotonCamera, Transform3d>(camera_arducam, robotToCam));
 
     // setup PhotonVision's pose estimator,
-    robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP, camera_global, robotToCam);
+    robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP, camera_arducam, robotToCam);
     previousPoseEstimate = new Pair<>(new Pose2d(), 0.0);
     currentPoseEstimate = new Pair<>(new Pose2d(), 0.0);
   }
@@ -89,7 +91,7 @@ public class PhotonVision extends SubsystemBase {
   public void periodic() {
 
     // Query the latest Apriltag result from PhotonVision
-    var result_global = camera_global.getLatestResult();
+    var result_global = camera_arducam.getLatestResult();
 
     // Check if the latest result has any targets.
     hasAprilTargets = result_global.hasTargets();
@@ -113,7 +115,6 @@ public class PhotonVision extends SubsystemBase {
       if (targetID < 9) {
         previousPoseEstimate = currentPoseEstimate;
         currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate.getFirst());
-
         SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
         SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
       }
