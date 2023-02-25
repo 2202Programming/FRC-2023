@@ -4,10 +4,8 @@
 
 package frc.robot.commands.Intake.Washer;
 
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants.DriverControls.Id;
 import frc.robot.RobotContainer;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
@@ -43,8 +41,9 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
     intake.intakeOn();
     intake.carwashOn();
     enableLights();
-    rumbleCommand = new JoystickRumbleEndless(Id.Operator, RumbleType.kBothRumble);
-    rumbleCommand.schedule();
+    // DPL - trying to use this cmd in auto, dont schedule anything new
+    //rumbleCommand = new JoystickRumbleEndless(Id.Operator, RumbleType.kBothRumble);
+    //rumbleCommand.schedule();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -57,7 +56,7 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
     intake.intakeOff();
     intake.carwashOff();
     intake.retract();
-    rumbleCommand.cancel();
+    //rumbleCommand.cancel();
   }
 
   // Returns true when the command should end.
