@@ -252,5 +252,15 @@ public class RobotContainer {
         new InstantCommand(drivetrain::printPose), new ChargeStationBalance(true)));
     eventMap.put("score", new SequentialCommandGroup(new PrintCommand("***Path score"),
         new InstantCommand(drivetrain::printPose)));
+
+    eventMap.put("eject", new SequentialCommandGroup(new PrintCommand("***Eject score"),
+        new InstantCommand(drivetrain::printPose)));
+    eventMap.put("balance", new SequentialCommandGroup(
+        new PrintCommand("***Balance score"),
+        new InstantCommand(drivetrain::printPose),
+        new ChargeStationBalance(false)));
+
+    eventMap.put("intake_on", new SequentialCommandGroup(new PrintCommand("***Intake On score"),
+        new InstantCommand(drivetrain::printPose)));
   }
 }
