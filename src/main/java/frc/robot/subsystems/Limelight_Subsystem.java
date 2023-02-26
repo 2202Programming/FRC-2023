@@ -60,7 +60,6 @@ public class Limelight_Subsystem extends SubsystemBase {
   private double filterTC = 0.08; // seconds, 2Hz cutoff T = 1/(2pi*f) was .2hz T=.8
   private int log_counter = 0;
 
-  private Pose2d megaPose;
   private Pose2d teamPose;
   private Pose2d bluePose;
   final private String LL_NAME = "";// "limelight" for if left blank
@@ -117,7 +116,7 @@ public class Limelight_Subsystem extends SubsystemBase {
           - (LimelightHelpers.getLatency_Capture(LL_NAME) / 1000.0);
 
       if (numAprilTags > 0) {
-        megaPose = LimelightHelpers.getBotPose2d(LL_NAME);
+        LimelightHelpers.getBotPose2d(LL_NAME);
         bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
         if (DriverStation.getAlliance() == Alliance.Blue)
           teamPose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
