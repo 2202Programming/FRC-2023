@@ -36,7 +36,7 @@ import frc.robot.RobotContainer;
 
 public class PhotonVision extends SubsystemBase {
 
-  private PhotonCamera camera_global;
+  //private PhotonCamera camera_global;
   private PhotonCamera camera_microsoft;
   private PhotonCamera camera_arducam;
   private boolean hasAprilTargets;
@@ -276,6 +276,7 @@ public class PhotonVision extends SubsystemBase {
     sim_drivetrain = RobotContainer.RC().drivetrain;
 
     // target size in inches TODO: these are bogus fix them
+    // have these been fixed??? i can't tell and im lazy - ER
     double targetWidth = Units.inchesToMeters(6.0); // Units.inchesToMeters(41.30) - Units.inchesToMeters(6.70); //
                                                     // meter
     double targetHeight = Units.inchesToMeters(6.0); // Units.inchesToMeters(98.19) - Units.inchesToMeters(81.19); //
