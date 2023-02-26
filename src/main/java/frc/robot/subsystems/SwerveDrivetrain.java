@@ -542,15 +542,34 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     // WIP use other poseEstimator
     if (limelight == null && photonVision != null) 
-      if (pvPose != null)
+      if (pvPose != null){
+        double x_dif = Math.abs(pvPose.getX() -  m_pose.getX()) / 16.54099;
+        double y_dif = Math.abs(pvPose.getY() - m_pose.getY()) / 8.002778;
         setPose(pvPose); // update main pose with vision integrated pose if we have a target
+        new PrintCommand("***UPDATED BY PV \n -----> X: " + x_dif + "%   Y: " + y_dif + "%");
+      }
     else if (photonVision == null && limelight != null)
       if (llPose != null)
+      {
+        double x_dif = Math.abs(llPose.getX() -  m_pose.getX()) / 16.54099;
+        double y_dif = Math.abs(llPose.getY() - m_pose.getY()) / 8.002778;
         setPose(llPose);
+        new PrintCommand("***UPDATED BY LL \n -----> X: " + x_dif + "%   Y: " + y_dif+ "%");
+      }
     else if (photonVision != null && limelight != null)
-      if (limelight.getNumApriltags() > photonVision.getAprilTargets().size()) //ll has more targets
+      if (limelight.getNumApriltags() > photonVision.getAprilTargets().size()){ //ll has more targets
+        double x_dif = Math.abs(llPose.getX() -  m_pose.getX()) / 16.54099;
+        double y_dif = Math.abs(llPose.getY() - m_pose.getY()) / 8.002778;
         setPose(llPose);
-      else setPose(pvPose);
+        new PrintCommand("***UPDATED BY LL \n -----> X: " + x_dif + "%   Y: " + y_dif+ "%");
+      }
+      else{ 
+        double x_dif = Math.abs(pvPose.getX() -  m_pose.getX()) / 16.54099;
+        double y_dif = Math.abs(pvPose.getY() - m_pose.getY()) / 8.002778;
+        setPose(pvPose);
+        new PrintCommand("***UPDATED BY PV \n -----> X: " + x_dif + "%   Y: " + y_dif+ "%");
+      }
+
 
   }
 
