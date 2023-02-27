@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import frc.robot.Constants.CAN;
 import frc.robot.util.PIDFController;
+import frc.robot.util.VelocityControlled;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkMax;
 
@@ -19,7 +20,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
-public class Elbow extends SubsystemBase {
+public class Elbow extends SubsystemBase implements VelocityControlled {
   double velCmd; //calculated
   double posCmd; //calculated
   static int PosSlot = 0;
@@ -42,7 +43,6 @@ public class Elbow extends SubsystemBase {
 
   // measurements
   double currentPos;
-  double desiredPos;
   double currentVel;
   double desiredVel;
 
@@ -79,18 +79,29 @@ public class Elbow extends SubsystemBase {
    
   }
 
-  public boolean isAtPosition() {
+  public boolean atSetpoint() {
     return positionPID.atSetpoint();
   }
 
+
+  public void setSetpoint(double degrees){
+      positionPID.setSetpoint(degrees);
+  }
+
+  // sets encoder to a default positon, doesn't move anything
   public void setPosition(double degrees) {
-    this.desiredPos = degrees;
+      encoder.setPosition(degrees);
   } 
+
+  public double getSetpoint() {
+    return positionPID.getSetpoint();
+  }
+
   public double getPosition() {
     return currentPos;
   }
 
-  public void setVelocity(double vel){
+  public void setVelocityCmd(double vel){
     this.desiredVel = vel;
   }
 
@@ -101,9 +112,21 @@ public class Elbow extends SubsystemBase {
   public double getMaxVel(){
     return maxVel;
   }
+
   public void setMaxVel(double vel){
     maxVel = Math.abs(vel);
   }
+
+  public void hold(){
+    //zero the velocity
+    pid.setReference(0.0, ControlType.kVelocity);
+    //set positionPID to where we are
+    currentPos = encoder.getPosition();
+    setSetpoint(currentPos);
+    positionPID.reset();
+    positionPID.calculate(currentPos);  //give pid one measurement where we are
+  }
+
 
   NetworkTable table = NetworkTableInstance.getDefault().getTable("elbow");
   NetworkTableEntry nt_currentPos;
@@ -121,7 +144,7 @@ public class Elbow extends SubsystemBase {
   public void ntupdates(){
     nt_currentPos.setDouble(currentPos);
     nt_currentVel.setDouble(currentVel);
-    nt_desiredPos.setDouble(desiredPos);
+    nt_desiredPos.setDouble(positionPID.getSetpoint());
     nt_desiredVel.setDouble(desiredVel);
   }
 

@@ -62,7 +62,7 @@ public class ArmMoveTo extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    armSS.setPositions(length);
+    armSS.setPosition(length);
     elbow.setPosition(angle);
   }
 
@@ -84,6 +84,6 @@ public class ArmMoveTo extends CommandBase {
   @Override
   public boolean isFinished() {
     // everything is arm extension and elbo angle
-    return armSS.armsAtPosition() && elbow.isAtPosition();
+    return armSS.atSetpoint() && elbow.atSetpoint();
   }
 }

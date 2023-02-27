@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.util.PIDFController;
+import frc.robot.util.VelocityControlled;
 
 /*
  * 1/27/23 notes from MrL
@@ -29,12 +30,12 @@ import frc.robot.util.PIDFController;
  *  Desired positon wouldn't be a SubSystem Argument. It would be part of api.
  */
 
-public class ArmSS extends SubsystemBase {
+public class ArmSS extends SubsystemBase implements VelocityControlled{
 
     /**
      * Arm - does one arm
      */
-    class Arm {
+    class Arm implements VelocityControlled {
         // commands
         double velCmd; // [cm/s] computed
         final double gearRadius = 2.63398 * 2 * Math.PI; //2.633[cm] is drive gear radius
@@ -42,6 +43,7 @@ public class ArmSS extends SubsystemBase {
 
         // measured values
         double currentPos;
+        double currentVel;
 
         // state vars
         PIDController positionPID = new PIDController(5.0, 0.150, 0.250); // outer position loop
@@ -80,46 +82,50 @@ public class ArmSS extends SubsystemBase {
         }
 
         // control the arm's postion [cm]
-        void setSetpoint(double x_cm) {
+        public void setSetpoint(double x_cm) {
             positionPID.setSetpoint(x_cm);
             velocity_mode = false;
             external_vel_cmd = 0.0;
         }
 
         // where we want to be is tracked by positionPID setpoint
-        double getSetpoint() {
+        public double getSetpoint() {
             return positionPID.getSetpoint();
         }
 
-        boolean atSetpoint() {
+        public boolean atSetpoint() {
             return positionPID.atSetpoint();
         }
 
         // Sets the position of the physical position (Doesn't move anything)
-        void setPosition(double x_cm) {
+        public void setPosition(double x_cm) {
             encoder.setPosition(x_cm);
             positionPID.reset();
             setSetpoint(x_cm);
         }
 
-        double getPosition() {
+        public double getPosition() {
             return currentPos;
         }
 
-        void setMaxVel(double v) {
+        public void setMaxVel(double v) {
             maxVel = Math.abs(v);
         }
 
-        double getMaxVel() {
+        public double getMaxVel() {
             return maxVel;
         }
 
-        void setVelocityCmd(double v_cm) {
+        public void setVelocityCmd(double v_cm) {
             velocity_mode = true;
             external_vel_cmd = v_cm;
         }
 
-        void hold() {
+        public double getVelocity() {
+            return currentVel;
+        }
+
+        public void hold() {
             pid.setReference(0.0, ControlType.kVelocity);
             currentPos = encoder.getPosition();
             setSetpoint(currentPos);
@@ -130,6 +136,8 @@ public class ArmSS extends SubsystemBase {
         void periodic(double compAdjustment) {
             // read encoder for current position
             currentPos = encoder.getPosition();
+            currentVel = encoder.getVelocity();
+
             // run position pid to get velocity
             velCmd = MathUtil.clamp(positionPID.calculate(currentPos) + compAdjustment, -maxVel, maxVel);
             // command hard 0.0 if POS is at tollerence
@@ -172,28 +180,8 @@ public class ArmSS extends SubsystemBase {
         // left may follow right
         leftArm = new Arm(CAN.ARM_LEFT_Motor, invert_left);  //, rightArm.ctrl, invert_left);
         // zero our encoders at power up
-        setPositions(0.0);
+        setPosition(0.0);
         ntcreate();
-    }
-
-    // At Position flags for use in the commands
-    public boolean armsAtPosition() {
-        return (rightArm.atSetpoint() && leftArm.atSetpoint());
-    }
-
-    public void setVelocityLimit(double vel_limit) {
-        leftArm.setMaxVel(vel_limit);
-        rightArm.setMaxVel(vel_limit);
-    }
-
-    public double getVelocityLimit() {
-        // arms should have same vel_limit
-        return leftArm.getMaxVel();
-    }
-
-    public void hold() {
-        leftArm.hold();
-        rightArm.hold();
     }
 
     /*
@@ -211,14 +199,43 @@ public class ArmSS extends SubsystemBase {
         ntUpdates();
     }
 
-    public void setSetpoints(double extension) {
+    // At Position flags for use in the commands
+    public boolean atSetpoint() {
+        return (rightArm.atSetpoint() && leftArm.atSetpoint());
+    }
+
+    public void setMaxVel(double vel_limit) {
+        leftArm.setMaxVel(vel_limit);
+        rightArm.setMaxVel(vel_limit);
+    }
+
+    public double getMaxVel() {
+        // arms should have same vel_limit
+        return rightArm.getMaxVel();
+    }
+
+    public void hold() {
+        leftArm.hold();
+        rightArm.hold();
+    }
+
+    public void setSetpoint(double extension) {
         leftArm.setSetpoint(extension);
         rightArm.setSetpoint(extension);
         sync = true;
     }
+    
+    public double getSetpoint() {
+        // arms track, so just use right one
+        return rightArm.getSetpoint();
+    }
+
+    public double getPosition() {
+        return (leftArm.getPosition() + rightArm.getPosition())/2.0;
+    }
 
     // initializes position, doesn't move anything. Defines zero or whereever you.
-    public void setPositions(double extension) {
+    public void setPosition(double extension) {
         leftArm.setPosition(extension);
         rightArm.setPosition(extension);
     }
@@ -230,7 +247,11 @@ public class ArmSS extends SubsystemBase {
         rightArm.setVelocityCmd(v);
     }
 
-    //rarely used, testing only
+    public double getVelocity() {
+        return (leftArm.getVelocity() + rightArm.getVelocity())/2.0;
+    }
+
+    //rarely used, testing only since arms are bolted together
     public void setVelocityLeft(double speed) {
         leftArm.setVelocityCmd(speed);
         sync = false;
@@ -364,4 +385,5 @@ public class ArmSS extends SubsystemBase {
         ///rightArm.positionPID.setTolerance(nt_posTol.getDouble(0.5), nt_velTol.getDouble(0.5));
     }
 
+   
 }

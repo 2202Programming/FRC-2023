@@ -28,8 +28,8 @@ public class ArmMoveAtSpeed_L_R_test extends CommandBase implements Lockout {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    old_max_speed = arm.getVelocityLimit();
-    arm.setVelocityLimit(speed);
+    old_max_speed = arm.getMaxVel();
+    arm.setMaxVel(speed);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -54,9 +54,9 @@ public class ArmMoveAtSpeed_L_R_test extends CommandBase implements Lockout {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    arm.setPositions(0.0);
+    arm.setPosition(0.0);
     arm.hold();
-    arm.setVelocityLimit(old_max_speed);
+    arm.setMaxVel(old_max_speed);
   }
 
   // Returns true when the command should end.

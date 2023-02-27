@@ -6,16 +6,16 @@ package frc.robot.commands.test;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.RobotContainer;
 import frc.robot.commands.utility.Lockout;
-import frc.robot.subsystems.ArmSS;
+import frc.robot.util.VelocityControlled;
 
-public class ArmVelocityTest extends CommandBase implements Lockout{
+public class GenericVelocityTest extends CommandBase implements Lockout{
 
   Timer stopwatch = new Timer();
 
-  ArmSS arm;
-  double vel, runTime, pauseTime;
+  final VelocityControlled device;
+  final double vel, runTime, pauseTime;
+  double old_max_speed;
 
   // states
   double cmdVel;
@@ -23,17 +23,20 @@ public class ArmVelocityTest extends CommandBase implements Lockout{
   boolean running;
 
   /**
-   * Creates a new ArmVelocityTest.
+   * Creates a new deviceVelocityTest.
    * 
-   * Runs the are at a fixed speed for given period,
+   * Runs the device at fixed speed for given period,
    * pauses, then runs in reverse for given period.
    * 
-   *
+   * Take CAUTION to start in the middle of the devices range, there are no position
+   * checks if the hardware doesn't have them.
+   * 
    * Runs until button is released.
    */
 
-  public ArmVelocityTest(double vel, double runTime, double pauseTime) {
-    this.arm = RobotContainer.RC().armSS;
+  public GenericVelocityTest(VelocityControlled device,
+    double vel, double runTime, double pauseTime) {
+    this.device = device;
     this.vel = vel;
     this.runTime = runTime;
     this.pauseTime = pauseTime;
@@ -42,6 +45,7 @@ public class ArmVelocityTest extends CommandBase implements Lockout{
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    old_max_speed = device.getMaxVel();
     running = true;
     cmdVel = vel;
     stopwatch.start();
@@ -51,23 +55,23 @@ public class ArmVelocityTest extends CommandBase implements Lockout{
   @Override
   public void execute() {
     if (running) {
-      // moving the arm
+      // moving the device
       if (stopwatch.hasElapsed(runTime)) {
         running = false;
         cmdVel = cmdVel * -1.0; // flip the direction
         stopwatch.reset();
-        arm.setVelocityCmd(0.0);
+        device.setVelocityCmd(0.0);
       } else
-        arm.setVelocityCmd(cmdVel);
+        device.setVelocityCmd(cmdVel);
       return;
     }
 
     // pausing
-    arm.setVelocityCmd(0.0);
+    device.setVelocityCmd(0.0);
     if (stopwatch.hasElapsed(pauseTime)) {
       running = true;
       stopwatch.reset();
-      arm.setVelocityCmd(cmdVel);
+      device.setVelocityCmd(cmdVel);
     }
   }
 
@@ -75,7 +79,8 @@ public class ArmVelocityTest extends CommandBase implements Lockout{
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    arm.hold();
+    device.hold();
+    device.setMaxVel(old_max_speed);
   }
 
   // Returns true when the command should end.

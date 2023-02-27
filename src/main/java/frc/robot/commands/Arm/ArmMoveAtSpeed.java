@@ -30,8 +30,8 @@ public class ArmMoveAtSpeed extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    old_max_speed = arm.getVelocityLimit();
-    arm.setVelocityLimit(speed);
+    old_max_speed = arm.getMaxVel();
+    arm.setMaxVel(speed);
     arm.setVelocityCmd(speed);
   }
 
@@ -43,9 +43,9 @@ public class ArmMoveAtSpeed extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if (zero_position) arm.setPositions(0.0);
+    if (zero_position) arm.setPosition(0.0);
     arm.hold();
-    arm.setVelocityLimit(old_max_speed);
+    arm.setMaxVel(old_max_speed);
   }
 
   // Returns true when the command should end.
