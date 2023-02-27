@@ -61,7 +61,8 @@ public class GenericJoystickPositionTest extends CommandBase implements Lockout 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double native_pos = MathUtil.clamp(stick.getAsDouble(), -1.0, 1.0);
+    // neg stick is away from you, so invert stick measurement
+    double native_pos = MathUtil.clamp(-stick.getAsDouble(), -1.0, 1.0);
     double pos = offset + native_pos * range;
     device.setSetpoint(pos);
   }

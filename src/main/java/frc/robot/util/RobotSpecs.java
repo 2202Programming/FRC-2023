@@ -48,7 +48,7 @@ public class RobotSpecs {
 
         //if we are simulated, use the competionBot so we have everything
         if (RobotBase.isSimulation()) {
-            myRobotName = RobotNames.CompetitionBot2023;
+            myRobotName = RobotNames.BotOnBoard;//CompetitionBot2023;
         }
         //setup to handle any swerve both we have
         switch(myRobotName){

@@ -148,7 +148,7 @@ public class RobotContainer {
         sensors = null;
         drivetrain = null;
         intake = null;
-        armSS = null;
+        armSS = new ArmSS();
         elbow = null;
         claw = null;
         break;
@@ -158,14 +158,11 @@ public class RobotContainer {
     if (photonVision != null) {
       photonVision.setDrivetrain(drivetrain);
     }
-    initEvents(); // setup event hashmap
 
     if (limelight != null) {
       // apriltag is pipeline 0
       limelight.setPipeline(0);
     }
-
-    initEvents(); // setup event hashmap
 
     // set default commands, if sub-system exists
     if (drivetrain != null) {
@@ -182,12 +179,16 @@ public class RobotContainer {
           true, // correct path for mirrored depending on alliance color.
           drivetrain);
 
-      // Edit the binding confiuration for testing
-      configureBindings(Bindings.Competition);
-
+     
       myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing",
           new PathConstraints(3.5, 4.5))).andThen(new ChargeStationBalance());
     }
+
+    initEvents();
+
+    // Edit the binding confiuration for testing
+    configureBindings(Bindings.arm_test);
+
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
   }

@@ -168,7 +168,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled{
     double velTol = 0.25; // [cm/s]
 
     // sync instance vars
-    boolean sync = false; // should usually be true, option to change to false for testing purposes
+    boolean sync = false; // don't think we need this, +- 3mm without.
     double syncCompensation; // amount of compensation [m/s]
     double error;
 
@@ -192,7 +192,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled{
     public void periodic() {
         // Synchronization, drive left to follow right
         error = rightArm.currentPos - leftArm.currentPos;
-        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) : 0;
+        syncCompensation = sync ? syncPID.calculate(leftArm.currentPos, rightArm.currentPos) : 0.0;
         leftArm.periodic(syncCompensation);
         rightArm.periodic(0.0);
 

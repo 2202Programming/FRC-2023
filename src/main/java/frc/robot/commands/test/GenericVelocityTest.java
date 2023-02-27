@@ -46,6 +46,7 @@ public class GenericVelocityTest extends CommandBase implements Lockout{
   @Override
   public void initialize() {
     old_max_speed = device.getMaxVel();
+    device.setMaxVel(vel);
     running = true;
     cmdVel = vel;
     stopwatch.start();
