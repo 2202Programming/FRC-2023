@@ -75,7 +75,7 @@ public class Claw_Substyem extends SubsystemBase {
   final SparkMaxPIDController leftPid = leftMotor.getPIDController();
   final RelativeEncoder leftEncoder= leftMotor.getAlternateEncoder(COUNTS_PER_REV);
   
-  final CANSparkMax rightMotor = new CANSparkMax(CAN.CLAW_RIGHT_MOTOR, MotorType.kBrushed);
+  final CANSparkMax rightMotor = new CANSparkMax(CAN.CLAW_ROTATE_MOTOR, MotorType.kBrushed);
   final SparkMaxPIDController rightPid = rightMotor.getPIDController();
   final RelativeEncoder rightEncoder = rightMotor.getAlternateEncoder(COUNTS_PER_REV);
 

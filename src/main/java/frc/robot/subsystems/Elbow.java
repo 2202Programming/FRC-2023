@@ -19,14 +19,16 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 
 public class Elbow extends SubsystemBase implements VelocityControlled {
   double velCmd; //calculated
   double posCmd; //calculated
+  boolean velocityMode;
   static int PosSlot = 0;
   static double maxVel = 5.0;   //[deg/s]
   static double maxAccel = 5.0;  //[deg/s^2]
-  final double gearRatio = (1.0 / 175.0);
+  final double gearRatio = (360.0/175.0);
 
   // at position limits
   static double posLimit = 3.0; //[deg]
@@ -47,13 +49,15 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   double desiredVel;
 
   public Elbow() {
-    ctrl = new CANSparkMax(CAN.LEFT_ELBOW, MotorType.kBrushless);
+    ctrl = new CANSparkMax(CAN.ELBOW_Motor, MotorType.kBrushless);
+    ctrl.clearFaults();
     ctrl.restoreFactoryDefaults();
-    ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
+    ctrl.setIdleMode(CANSparkMax.IdleMode.kCoast);
     pid = ctrl.getPIDController();
     encoder = ctrl.getEncoder();
-    encoder.setPositionConversionFactor(gearRatio * 360.0);   //[deg]
-    encoder.setVelocityConversionFactor(gearRatio * 360.0 / 60.0);   //[deg/s]
+    encoder.setPositionConversionFactor(gearRatio);   //[deg]
+    encoder.setVelocityConversionFactor(gearRatio / 60.0);   //[deg/s]
+    encoder.setPosition(0.0);
     // configure the hardware pid
     hwPID.copyTo(pid, 0);
     pid.setSmartMotionMaxVelocity(maxVel, PosSlot);
@@ -62,7 +66,9 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
     //todo:set tol on pos pid
 
     //safety and power limits
-    ctrl.setSmartCurrentLimit(10, 10,  10); //stallLimit, int freeLimit, int limitRPM);
+    ctrl.setSmartCurrentLimit(20, 20,  10); //stallLimit, int freeLimit, int limitRPM);
+    ctrl.burnFlash();
+    Timer.delay(.2);
     ntcreate();
   }
 
@@ -72,11 +78,12 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
    currentPos = encoder.getPosition();   // [deg]
    currentVel = encoder.getVelocity();
    //calcs
-   velCmd = MathUtil.clamp(positionPID.calculate(currentPos), -maxVel, maxVel);
+   desiredVel =  (velocityMode) ? desiredVel : MathUtil.clamp(positionPID.calculate(currentPos), -maxVel, maxVel);
    
    //output
-   pid.setReference(velCmd, ControlType.kVelocity);
-   
+  // desiredVel = 0.0;
+ //  pid.setReference(desiredVel, ControlType.kVelocity);
+   ntupdates();
   }
 
   public boolean atSetpoint() {
@@ -86,6 +93,8 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   public void setSetpoint(double degrees){
       positionPID.setSetpoint(degrees);
+      velocityMode = false;
+      desiredVel = 0.0;
   }
 
   // sets encoder to a default positon, doesn't move anything
@@ -103,6 +112,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   public void setVelocityCmd(double vel){
     this.desiredVel = vel;
+    velocityMode = true;
   }
 
   public double getVelocity(){
@@ -119,7 +129,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   public void hold(){
     //zero the velocity
-    pid.setReference(0.0, ControlType.kVelocity);
+   // pid.setReference(0.0, ControlType.kVelocity);
     //set positionPID to where we are
     currentPos = encoder.getPosition();
     setSetpoint(currentPos);
@@ -142,8 +152,8 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   }
   
   public void ntupdates(){
-    nt_currentPos.setDouble(currentPos);
-    nt_currentVel.setDouble(currentVel);
+    nt_currentPos.setDouble(encoder.getPosition());
+    nt_currentVel.setDouble(encoder.getVelocity());
     nt_desiredPos.setDouble(positionPID.getSetpoint());
     nt_desiredVel.setDouble(desiredVel);
   }

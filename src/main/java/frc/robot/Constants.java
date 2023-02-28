@@ -123,12 +123,12 @@ public final class Constants {
     // Arms
     public static final int ARM_RIGHT_Motor = 12;
     public static final int ARM_LEFT_Motor = 13;
-    public static final int RIGHT_ELBOW = 14;
-    public static final int LEFT_ELBOW = 15;
+    public static final int ELBOW_Motor = 14;
+    public static final int WRIST_Motor = 15;
     
     //Claw
     public static final int CLAW_LEFT_MOTOR = 16;
-    public static final int CLAW_RIGHT_MOTOR = 17;
+    public static final int CLAW_ROTATE_MOTOR = 17;
     
     // IMU
     public static final int PIGEON_IMU_CAN = 60;
@@ -140,9 +140,6 @@ public final class Constants {
 
   // PWM assignments on the Rio
   public static final class PWM {
-    public static final int RIGHT_WRIST = 0;
-    public static final int LEFT_WRIST = 1;
-
     // dpl unused public static final int INTAKE = 0;
   }
 

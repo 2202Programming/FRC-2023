@@ -63,6 +63,7 @@ public class GenericJoystickPositionTest extends CommandBase implements Lockout 
   public void execute() {
     // neg stick is away from you, so invert stick measurement
     double native_pos = MathUtil.clamp(-stick.getAsDouble(), -1.0, 1.0);
+
     double pos = offset + native_pos * range;
     device.setSetpoint(pos);
   }
