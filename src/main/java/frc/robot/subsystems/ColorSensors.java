@@ -206,7 +206,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
         int numPurple = 0;
         int numYellow = 0;
         for (ColorMatchResult result : results) {
-            if (result.color == null) continue;
+            if (result == null) continue;
 
             if (result.color.equals(CUBE_PURPLE)) numPurple++;
             else if (result.color.equals(CONE_YELLOW)) numYellow++;
