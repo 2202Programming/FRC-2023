@@ -45,7 +45,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
     private final Mux mux = new Mux();
 
     // notifier
-    private final Notifier notifier;
+    // private final Notifier notifier;
 
     /**
      * Constructs the ColorSensors subsystem
@@ -76,16 +76,16 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
         }
 
         // Recommended to run this in a thread due to multiple posts on ChiefDelphi on how the onboard I2C port can be shady and can be expensive
-        notifier = new Notifier(() -> {
-            for (int i = 0; i < colorSensorData.length; i++) {
-                mux.setEnabledBuses(sensorMuxPorts[i]);
-                ColorSensorV3 sensor = colorSensors.get(i);
-                colorSensorData[i].color = sensor.getRawColor();
-                colorSensorData[i].distance = sensor.getProximity();
-            }
-        });
+        // notifier = new Notifier(() -> {
+        //     for (int i = 0; i < colorSensorData.length; i++) {
+        //         mux.setEnabledBuses(sensorMuxPorts[i]);
+        //         ColorSensorV3 sensor = colorSensors.get(i);
+        //         colorSensorData[i].color = sensor.getRawColor();
+        //         colorSensorData[i].distance = sensor.getProximity();
+        //     }
+        // });
 
-        notifier.startPeriodic(Constants.DT); 
+        // notifier.startPeriodic(Constants.DT); 
 
         ntconstructor();
     }
@@ -112,8 +112,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
 
     @Override
     public void close() {
-        notifier.stop();
-        notifier.close();
+        // notifier.stop();
+        // notifier.close();
     }
 
     /**
@@ -152,6 +152,14 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
 
     @Override
     public void periodic() {
+        // updating color sensor data
+        for (int i = 0; i < colorSensorData.length; i++) {
+            mux.setEnabledBuses(sensorMuxPorts[i]);
+            ColorSensorV3 sensor = colorSensors.get(i);
+            colorSensorData[i].color = sensor.getRawColor();
+            colorSensorData[i].distance = sensor.getProximity();
+        }
+
         prevFrameGamePiece = currentGamePiece;
         currentGamePiece = getGamePiece();
 
