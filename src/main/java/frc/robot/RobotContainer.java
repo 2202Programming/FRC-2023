@@ -36,6 +36,7 @@ import frc.robot.commands.test.MoveArmsTest;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
+import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Limelight_Subsystem;
@@ -86,6 +87,7 @@ public class RobotContainer {
   public final Elbow elbow;
   public final Claw_Substyem claw;
   public final BlinkyLights lights;
+  public final ColorSensors colorSensors;
 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
@@ -113,6 +115,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        colorSensors = null;
         break;
 
       case SwerveBot:
@@ -124,6 +127,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        colorSensors = null;
         break;
 
       case ChadBot:
@@ -135,6 +139,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        colorSensors = new ColorSensors();
         break;
 
       case BotOnBoard: // fall through
@@ -148,6 +153,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        colorSensors = null;
         break;
     }
 
