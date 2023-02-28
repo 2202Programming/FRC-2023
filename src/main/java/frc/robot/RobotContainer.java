@@ -185,7 +185,7 @@ public class RobotContainer {
       // Edit the binding confiuration for testing
       configureBindings(Bindings.Competition);
 
-      myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing",
+      myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A1 3-Piece Balance",
           new PathConstraints(3.5, 4.5))).andThen(new ChargeStationBalance());
     }
     // Quiet some of the noise
@@ -332,9 +332,15 @@ public class RobotContainer {
         new SequentialCommandGroup(
           new PrintCommand("***Eject2"),
           new InstantCommand(drivetrain::printPose),
-          new outtakeCompetitionToggle().withTimeout(2.0),
-          new WaitCommand(1.5)
+          new outtakeCompetitionToggle().withTimeout(2.0)
           ));
+
+    eventMap.put("eject3",
+          new SequentialCommandGroup(
+            new PrintCommand("***Eject3"),
+            new InstantCommand(drivetrain::printPose),
+            new outtakeCompetitionToggle().withTimeout(2.0)
+            ));
 
     eventMap.put("balance",
         new SequentialCommandGroup(
