@@ -165,6 +165,9 @@ public class Limelight_Subsystem extends SubsystemBase {
   public int getNumApriltags() {
     return numAprilTags;
   }
+  public boolean hasAprilTarget() {
+    return getNumApriltags() > 0;
+  }
 
   public double getX() {
     return x;

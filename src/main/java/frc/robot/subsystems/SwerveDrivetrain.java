@@ -541,52 +541,26 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
 
     // WIP use other poseEstimator
-    if (limelight == null && photonVision != null) 
-      if (pvPose != null){
+    if (limelight != null && photonVision != null)
+    {
+      /*
+      if (photonVision.hasAprilTarget() && pvPose != null){
         Pose2d prev_m_Pose = m_pose;
         setPose(pvPose); // update main pose with vision integrated pose if we have a target
-        double visionX_dif = Math.abs(pvPose.getX() -  m_pose.getX()) / 16.54099;
-        double visionY_dif = Math.abs(pvPose.getY() - m_pose.getY()) / 8.002778;
         double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX()) / 16.54099;
         double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY()) / 8.002778;
         System.out.println("***UPDATED BY PV \n -----> X Fixed: " + x_dif + "%   Y Fixed: " + y_dif
-           + "%\n -----> X Filtered: " + visionX_dif + "%   Y Filtered: "+visionY_dif);
-      }
-    else if (photonVision == null && limelight != null)
-      if (llPose != null)
-      {
+           + "%");
+      }*/
+      if (limelight.hasAprilTarget() && llPose != null){ // else if with photonvision
         Pose2d prev_m_Pose = m_pose;
         setPose(llPose);
-        double visionX_dif = Math.abs(llPose.getX() -  m_pose.getX()) / 16.54099;
-        double visionY_dif = Math.abs(llPose.getY() - m_pose.getY()) / 8.002778;
         double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX()) / 16.54099;
         double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY()) / 8.002778;
         System.out.println("***UPDATED BY LL \n -----> X: " + x_dif + "%   Y: " + y_dif+ "%   Y Fixed: " + y_dif
-            + "%\n -----> X Filtered: " + visionX_dif + "%   Y Filtered: "+visionY_dif);
+            + "%");
       }
-    else if (photonVision != null && limelight != null)
-      if (limelight.getNumApriltags() > photonVision.getAprilTargets().size())
-      { //limelight has more targets
-        Pose2d prev_m_Pose = m_pose;
-        setPose(llPose);
-        double visionX_dif = Math.abs(llPose.getX() -  m_pose.getX()) / 16.54099;
-        double visionY_dif = Math.abs(llPose.getY() - m_pose.getY()) / 8.002778;
-        double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX()) / 16.54099;
-        double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY()) / 8.002778;
-        System.out.println("***UPDATED BY LL \n -----> X: " + x_dif + "%   Y: " + y_dif+ "%   Y Fixed: " + y_dif
-            + "%\n -----> X Filtered: " + visionX_dif + "%   Y Filtered: "+visionY_dif);
-      }
-      else{ 
-        Pose2d prev_m_Pose = m_pose;
-        setPose(pvPose); // update main pose with vision integrated pose if we have a target
-        double visionX_dif = Math.abs(pvPose.getX() -  m_pose.getX()) / 16.54099;
-        double visionY_dif = Math.abs(pvPose.getY() - m_pose.getY()) / 8.002778;
-        double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX()) / 16.54099;
-        double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY()) / 8.002778;
-        System.out.println("***UPDATED BY PV \n -----> X Fixed: " + x_dif + "%   Y Fixed: " + y_dif
-           + "%\n -----> X Filtered: " + visionX_dif + "%   Y Filtered: "+visionY_dif);
-      }
-
+    }
 
   }
 
