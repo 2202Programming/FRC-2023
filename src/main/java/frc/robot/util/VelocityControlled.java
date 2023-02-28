@@ -32,6 +32,7 @@ public double getPosition();
 public void setMaxVel(double velocityMax);
 public double getMaxVel();
 public void setVelocityCmd(double velocity);
+public double getVelocityCmd();
 public double getVelocity();
 
 public void hold();   

@@ -4,11 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -19,146 +14,123 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
-
-/*
- * Notes from Mr.L  1/27/2023
- * 
- * Some of your variables would make for a good API
- * 
- *      is_open the state can be read off the Pnumatics 
- *      pieceheld -->  enum  HasPiece()  returns NONE, CUBE, CONE
- *     
- *      Is angle is wrist angle??, that may be a PWM Server (see vacuum bot)
- *      it won't need a PID, but will need a pwm port. 
- *      
- */
-// 2 wrist servos, 1 left/right each have a 0 position, have one mirror the other, (switch signs & mapping)
-// call 180 angle 0 and work from one way to the other - 0 wrist won't be 0 servo 
-
-/*
- * notes from Mr.L 2/7/23
- * 
- * Format imports, variable section and code in general 
- *    (shift-alt-O) organizes imports
- *    (shift-ctrl-P format document)
- * 
- *  custom servo commented out for now, so can compile
- * 
- * Is the wrist here or in the Arm??? 
- * 
- */
+import frc.robot.util.NeoServo;
+import frc.robot.util.PIDFController;
 
 //Eventually will need 2 solenoids 
 public class Claw_Substyem extends SubsystemBase {
 
-   public enum GamePieceHeld{  //TODO how do we know???
-        Cube,Cone,Empty
-      }
-    
-      //PID
-      PIDController positionPID = new PIDController(0.0, 0.0, 0.0); // outer position loop
-  // constants/statics
-  static final double Velocity = 5.0;    // [deg/s] time to wait for a move of the wrist
+  public enum GamePieceHeld { 
+    Cube, Cone, Empty
+  }
+
+  // solnoid constants
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
+
+  // Wrist constants & constraints - all TODO
+  final int WRIST_STALL_CURRENT = 10;
+  final int WRIST_FREE_CURRENT = 10;
+  double wrist_maxAccel = 10.0;
+  double wrist_maxVel = 20.0;
+  double wrist_posTol = 3.0;
+  double wrist_velTol = 2.0;
+  final double wrist_conversionFactor = 360.0/1.0; //GR=1.0
   static final double WristMinDegrees = -90.0; // TODO: Find actual value
   static final double WristMaxDegrees = 90.0; // TODO: Find actual value
 
+  // Rotation Constants
+  final int ROTATE_STALL_CURRENT = 10;
+  final int ROTATE_FREE_CURRENT = 10;
+  double rotate_maxAccel = 10.0;
+  double rotate_maxVel = 20.0;
+  double rotate_posTol = 3.0;
+  double rotate_velTol = 2.0;
+  final double rotate_conversionFactor = 360.0/100.0; //GR=100.0
+
   // Hardware
-  private DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PCM1.CLAW_FWD, PCM1.CLAW_REV);
-  
-  //TODO Encoder counts if that style is used
-  final static int COUNTS_PER_REV = 100; //fix me
+  final DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PCM1.CLAW_FWD, PCM1.CLAW_REV);
+  final NeoServo wrist_servo;
+  final NeoServo rotate_servo;
 
-  //sw outer loops I think
-  final CANSparkMax leftMotor = new CANSparkMax(CAN.CLAW_LEFT_MOTOR, MotorType.kBrushed);
-  final SparkMaxPIDController leftPid = leftMotor.getPIDController();
-  final RelativeEncoder leftEncoder= leftMotor.getAlternateEncoder(COUNTS_PER_REV);
-  
-  final CANSparkMax rightMotor = new CANSparkMax(CAN.CLAW_ROTATE_MOTOR, MotorType.kBrushed);
-  final SparkMaxPIDController rightPid = rightMotor.getPIDController();
-  final RelativeEncoder rightEncoder = rightMotor.getAlternateEncoder(COUNTS_PER_REV);
+  // PIDS for NeoServos
+  // TODO (It's what arm values are rn, will need to change)
+  PIDController wrist_positionPID = new PIDController(5.0, 0.150, 0.250);
+  PIDFController wrist_hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
+  // TODO (It's what arm values are rn, will need to change)
+  PIDController rotate_positionPID = new PIDController(5.0, 0.150, 0.250);
+  PIDFController rotate_hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
 
-  // state varsSs
+  // state vars
   private boolean is_open;
   private GamePieceHeld piece_held;
-  private double wrist_cmd;  //[deg]
+  private double wrist_cmd; // [deg]
 
+  public Claw_Substyem() {
+    wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, false);
+    rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, false);
 
-  /** Creates a new Claw. */
-   public Claw_Substyem() {
-    // Creating the custom servo if needed
-    // TBD wristServo = new CustomServo(clawCtrl.CLAW_WRIST_SERVO_PWM, WristMinDegrees,
-    // WristMaxDegrees, , );
- 
-    leftMotor.restoreFactoryDefaults();
-    rightMotor.restoreFactoryDefaults();
-    leftMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
-    rightMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
-    
-    //TODO finsih claw motor pids
+    wrist_servo
+        .setConversionFactor(wrist_conversionFactor)
+        .setSmartCurrentLimit(WRIST_STALL_CURRENT, WRIST_FREE_CURRENT)
+        .setVelocityHW_PID(wrist_hwVelPID, wrist_maxVel, wrist_maxAccel)
+        .setMaxVel(wrist_maxVel);
+    wrist_servo.positionPID.setTolerance(wrist_posTol, wrist_velTol);
+
+    rotate_servo
+        .setConversionFactor(rotate_conversionFactor)
+        .setSmartCurrentLimit(ROTATE_STALL_CURRENT, ROTATE_FREE_CURRENT)
+        .setVelocityHW_PID(rotate_hwVelPID, rotate_maxVel, rotate_maxAccel)
+        .setMaxVel(rotate_maxVel);
+    rotate_servo.positionPID.setTolerance(rotate_posTol, rotate_velTol);
 
     piece_held = GamePieceHeld.Cube;
   }
 
+  // accessors for servos for testing
+  public NeoServo getWrist() {
+    return wrist_servo;
+  }
+
+  public NeoServo getRotator() {
+    return rotate_servo;
+  }
+
   // getting the angles current position
-  public double getAngle() {
-
-    // Just read the left and fixup the coordinates
-    // if left/right are not in sync, not much we can do.
-    // they will get there.
-    double current_pos = leftMotor.get();  // todo:fix any offset so math is correct
-    //if customServo - wristServo.getPosition() * wristServo.getServoRange() + wristServo.getMinServoAngle();
-    return current_pos;
+  public double getWristAngle() {
+    return wrist_servo.getPosition();
+  }
+  
+  // getting the angles current position
+  public double getRotatetAngle() {
+    return rotate_servo.getPosition();
+  }
+  
+  public boolean wristAtSetpoint() {
+    return wrist_servo.atSetpoint();
   }
 
-  // Not sure if the part below is correct?
-  public void setAngle(double degrees) {
-
-    // do some math on the requested angle to get left/right settings
-    // assume left "unmirrored"
-    double left_cmd =  degrees;             // todo: may need to add left_offset
-    double right_cmd = 180.0 - left_cmd;    // mirror it, maybe rt_offset (example, needs geometry )
-
-    // Command the wrist servos to 
-   rightMotor.set(right_cmd);
-    leftMotor.set(left_cmd);
-
-    //save our commanded position
-    wrist_cmd = degrees; 
-
-    //TODO handle a timer to know if we are at position...
-
+  
+  public void setWristAngle(double degrees) {
+    wrist_servo.setSetpoint(degrees);
+  }
+  public boolean rotateAtSetpoint() {
+    return rotate_servo.atSetpoint();
   }
 
-  public boolean atAngle() {
-    //TODO: 2/7/23 need to figure out tolerance for when at position
-
-    return false;
-  }
-
-  /*
-   * waitEstimate(degrees) -
-   * creates an estimate in seconds that it will take the wrist to move from
-   * where we are to where we want...  This might be needed if we can't actually
-   * measure the servo's position.   (PWM is really a one-way street) 
-   */
-  public double waitEstimate(double degrees) {
-    return Math.abs(degrees - wrist_cmd)*Velocity;
-  }
-
-
-
+ 
   @Override
   public void periodic() {
-    clawStatus();  
+    wrist_servo.periodic();
+    rotate_servo.periodic();
+
+    clawStatus();
     // check any lightgates
 
-    // TODO: 2/7/23 how do we know what game piece?  Work with HW guys see what they are thinking
-    //2/15/23 HW people thinking that there will be three color sensors/lightgate in the intake
   }
 
-  // setting solenoid  NOTE:2/7 don't need OpenClaw... there will be a Claw Object so it will read  claw.open() or claw.close() 
+  // setting solenoid NOTE:2/7 don't need OpenClaw... there will be a Claw Object
+  // so it will read claw.open() or claw.close()
   public void open() {
     solenoid.set(OPEN);
     is_open = true;
@@ -186,7 +158,6 @@ public class Claw_Substyem extends SubsystemBase {
    ******** NETWORK TABLES ***********
    */
   NetworkTable table = NetworkTableInstance.getDefault().getTable("Claw");
-
   NetworkTableEntry nt_servoPos;
   NetworkTableEntry nt_angle;
   NetworkTableEntry nt_isOpen;
@@ -194,15 +165,14 @@ public class Claw_Substyem extends SubsystemBase {
 
   public void ntcreate() {
     nt_servoPos = table.getEntry("wrist_cmd");
-    nt_angle = table.getEntry("Current Angle");
-    nt_isOpen = table.getEntry("Is Claw Open");
+    nt_angle = table.getEntry("wrist_angle");
+    nt_isOpen = table.getEntry("Claw Open");
     nt_gamePieceHeld = table.getEntry("Game Piece Held");
   }
 
   public void ntupdates() {
-    // info
     nt_servoPos.setDouble(wrist_cmd);
-    nt_angle.setDouble(getAngle());
+    nt_angle.setDouble(getWristAngle());
     nt_isOpen.setBoolean(is_open);
     nt_gamePieceHeld.setString(piece_held.toString());
 

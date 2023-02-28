@@ -18,9 +18,9 @@ public class PlaceGamePiece extends SequentialCommandGroup {
     //Don't know class name, claw for now, for the claw angle to place
     this.addCommands(
       //Angles obv. not accurate, just put in random numbers
-      new GamePieceAngle("nonbottomgrid", 50.0),
-      new GamePieceAngle("bottomgrid", 30.0),
-      new GamePieceAngle("grab", 25.0)
+      //new MoveWrist("nonbottomgrid", 50.0),
+      //new MoveWrist("bottomgrid", 30.0),
+      //new MoveWrist("grab", 25.0)
       /*
 
       Mr.L - these open/close will happen very fast, what is the intent?

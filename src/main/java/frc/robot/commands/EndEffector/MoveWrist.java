@@ -8,42 +8,47 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Claw_Substyem;
 
-public class GamePieceAngle extends CommandBase {
+public class MoveWrist extends CommandBase {
   final Claw_Substyem claw;
   final double angle;
-  final String name;
+  final double maxVel;
+
+  double old_maxVel;
+ 
   /** Creates a new GamePieceAngle. */
-  public GamePieceAngle(String name, double angle) {
+  public MoveWrist(double angle) {
+    this(angle, -1.0);
+  }
+  public MoveWrist(double angle, double maxVel)  {
     this.claw = RobotContainer.RC().claw;
-    this.name = name;
     this.angle = angle;
-    
+    this.maxVel = (maxVel < 0.0) ? claw.getWrist().getMaxVel() : maxVel;
+
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    claw.setAngle(angle);
-    //System.out.println("Moving to" + angle);
+    old_maxVel = claw.getWrist().getMaxVel();
+    claw.setWristAngle(angle);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    // nothing to do, but wait for the wrist to move
+  }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    //0.0 or whatever is default
-    //Mr.L don't chance position at end we jsut got here, next command may need something else
-    // claw.setAngle(0.0);
+    claw.getWrist().setMaxVel(old_maxVel);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    //when claw is at desired angle
-    return claw.atAngle();
+    return claw.wristAtSetpoint();
   }
 }
