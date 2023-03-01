@@ -11,6 +11,7 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -252,18 +253,23 @@ public class RobotContainer {
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
         dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
 
-        // testing deploying / retracting intake on bumpers
-        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
-          intake.deploy();
+        // pose rest when driving test
+        dc.Driver().leftBumper().onTrue(new InstantCommand(() -> {
+          drivetrain.resetPose(new Pose2d(0.0, 0.0, new Rotation2d(0.0)));
         }));
-        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
-          intake.retract();
-        }));
-        // testing on pov
-        dc.Operator().povLeft().whileTrue(new IntakeForward());
-        dc.Operator().povRight().whileTrue(new IntakeReverse());
-        dc.Operator().povUp().whileTrue(new CarwashForward());
-        dc.Operator().povDown().whileTrue(new CarwashReverse());
+
+        // // testing deploying / retracting intake on bumpers
+        // dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
+        //   intake.deploy();
+        // }));
+        // dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
+        //   intake.retract();
+        // }));
+        // // testing on pov
+        // dc.Operator().povLeft().whileTrue(new IntakeForward());
+        // dc.Operator().povRight().whileTrue(new IntakeReverse());
+        // dc.Operator().povUp().whileTrue(new CarwashForward());
+        // dc.Operator().povDown().whileTrue(new CarwashReverse());
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
