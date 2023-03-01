@@ -11,20 +11,22 @@ import frc.robot.util.PIDFController;
 import frc.robot.util.VelocityControlled;
 
 public class Elbow extends SubsystemBase implements VelocityControlled {
-  int STALL_CURRENT = 30;
-  int FREE_CURRENT = 30;
+  final int STALL_CURRENT = 40;
+  final int FREE_CURRENT = 20;
 
-  double maxVel = 5.0; // [deg/s]
-  double maxAccel = 5.0; // [deg/s^2]
-  final double conversionFactor = (360.0 / 175.0);
+  // mechanical gearing motor rotations to degrees with gear ratio
+  final double conversionFactor = (360.0 / 175.0); 
 
-  // positionPID at position limits
-  static double posLimit = 3.0; // [deg]
-  static double velLimit = 5.0; // [deg/s]
+  // positionPID at position tolerances 
+  double posTol = 3.0; // [deg]
+  double velTol = 2.0; // [deg/s]
+  
+  //motion speed limits
+  double velLimit = 10.0; // [deg/s]
+  double accelLimit = 5.0; // [deg/s^2]  - only in future smartmode
 
-  // NeoServo
+  // NeoServo  - TODO (It's what arm values are rn, will need to change)
   final NeoServo elbow_servo;
-  // TODO (It's what arm values are rn, will need to change)
   PIDController positionPID = new PIDController(5.0, 0.150, 0.250);
   PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
 
@@ -34,9 +36,10 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
     elbow_servo
         .setConversionFactor(conversionFactor)
         .setSmartCurrentLimit(STALL_CURRENT, FREE_CURRENT)
-        .setVelocityHW_PID(maxVel, maxAccel)
-        .setMaxVel(maxVel);
-    elbow_servo.positionPID.setTolerance(posLimit, velLimit);
+        .setVelocityHW_PID(velLimit, accelLimit)
+        .setMaxVelocity(velLimit)
+        .setTolerance(posTol, velTol)
+        .burnFlash();
     ntcreate();
   }
 

@@ -14,12 +14,14 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Timer;
 
-/** Add your docs here. */
 public class NeoServo implements VelocityControlled {
 
-    // command
-    double velCmd; // computed
-    double maxVelocity;
+    // commands
+    double velocity_cmd; // computed from pid, or external_vel_cmd
+    double maxVelocity; // limits
+    double arbFeedforward = 0.0; // for specialized control cases
+    double external_vel_cmd = 0.0; // for velocity_mode == true
+    boolean velocity_mode = false;
 
     // measured values
     double currentPos;
@@ -27,22 +29,19 @@ public class NeoServo implements VelocityControlled {
 
     // state vars
     final public PIDController positionPID;
-    final public PIDFController hwVelPIDcfg;
+    final public PIDFController hwVelPIDcfg; // hold hardward pid settings, gets copied to hw
     final int hwVelSlot;
-
-    // Testing Mode
-    boolean velocity_mode = false;
-    double external_vel_cmd = 0.0;
 
     // hardware
     final CANSparkMax ctrl;
     final SparkMaxPIDController pid;
     final RelativeEncoder encoder;
 
-    public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg ,boolean inverted) {
+    public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted) {
         this(canID, positionPID, hwVelPIDcfg, inverted, 0);
     }
-    public NeoServo(int canID, PIDController positionPID ,PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot) {
+
+    public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot) {
         // use canID to get controller and supporting objects
         ctrl = new CANSparkMax(canID, MotorType.kBrushless);
         ctrl.clearFaults();
@@ -56,7 +55,7 @@ public class NeoServo implements VelocityControlled {
         this.hwVelPIDcfg = hwVelPIDcfg;
     }
 
-    // methods to tune the servo
+    // methods to tune the servo very SmartMax Neo specific
     public NeoServo setConversionFactor(double conversionFactor) {
         encoder.setPositionConversionFactor(conversionFactor);
         encoder.setVelocityConversionFactor(conversionFactor / 60);
@@ -69,19 +68,39 @@ public class NeoServo implements VelocityControlled {
     }
 
     public NeoServo setSmartCurrentLimit(int stallLimit, int freeLimit) {
-        ctrl.setSmartCurrentLimit(45, 20);
+        // sets curren limits, but RPMLimit is not enabled, 10K is default
+        return setSmartCurrentLimit(stallLimit, freeLimit, 10000);
+    }
+
+    public NeoServo setSmartCurrentLimit(int stallLimit, int freeLimit, int rpmLimit) {
+        ctrl.setSmartCurrentLimit(stallLimit, freeLimit, rpmLimit);
         return this;
     }
 
-    public NeoServo setVelocityHW_PID(double smVelMax, double smAccelMax ) {
+    public NeoServo setVelocityHW_PID(double smVelMax, double smAccelMax) {
         // write the hwVelPIDcfgcfg constants to the sparkmax
         hwVelPIDcfg.copyTo(pid, hwVelSlot, smVelMax, smAccelMax);
+        return this;
+    }
+
+    public NeoServo burnFlash() {
         ctrl.burnFlash();
         Timer.delay(.2); // this holds up the current thread
         return this;
     }
 
-    // control Servo's setpoint
+    // defers to setMaxVel(), but returns this for config chaining
+    public NeoServo setMaxVelocity(double maxVelocity) {
+        //defer to the VelocityControlled API
+        setMaxVel(maxVelocity);
+        return this;
+    }
+    
+    /*
+     *       VelocityControlled API
+     * 
+    */
+    // Servo's position setpoint
     public void setSetpoint(double pos) {
         positionPID.setSetpoint(pos);
         velocity_mode = false;
@@ -98,8 +117,9 @@ public class NeoServo implements VelocityControlled {
 
     // Sets the encoder position (Doesn't move anything)
     public void setPosition(double pos) {
-        encoder.setPosition(pos);
-        positionPID.reset();
+        encoder.setPosition(pos);        // tell our encoder we are at pos
+        positionPID.reset();             // clear any history in the pid
+        positionPID.calculate(pos, pos); // tell our pid we want that position; measured, setpoint same
     }
 
     public double getPosition() {
@@ -123,16 +143,21 @@ public class NeoServo implements VelocityControlled {
         return currentVel;
     }
 
-    public double getVelocityCmd(){
-        return velCmd;
+    public double getVelocityCmd() {
+        return velocity_cmd;
+    }
+
+    void setArbFeedforward(double aff) {
+        arbFeedforward = aff;
     }
 
     public void hold() {
-        pid.setReference(0.0, ControlType.kVelocity);
+        external_vel_cmd = 0.0;
         currentPos = encoder.getPosition();
-        setSetpoint(currentPos);
+
+        // set our setpoint, but stay in whatever control mode is being used
+        positionPID.calculate(currentPos, currentPos);
         positionPID.reset();
-        positionPID.calculate(currentPos);
     }
 
     public void periodic() {
@@ -140,19 +165,26 @@ public class NeoServo implements VelocityControlled {
     }
 
     public void periodic(double compAdjustment) {
-        // meaure -read encoder for current position
+        // measure -read encoder for current position and velocity
         currentPos = encoder.getPosition();
         currentVel = encoder.getVelocity();
 
+        // velocity_mode, update position setpoint so we don't jump back on mode switch
+        if (velocity_mode) {
+            positionPID.setSetpoint(currentPos);
+        }
+
         // calculate - run position pid to get velocity
-        velCmd = MathUtil.clamp(positionPID.calculate(currentPos) + compAdjustment, -maxVelocity, maxVelocity);
+        velocity_cmd = MathUtil.clamp(positionPID.calculate(currentPos) + compAdjustment, -maxVelocity, maxVelocity);
+
+        // if velocity mode, use external_vel_cmd, otherwise use positionPID
+        velocity_cmd = velocity_mode ? external_vel_cmd + compAdjustment : velocity_cmd;
+
         // command hard 0.0 if POS is at tollerence
-        velCmd = positionPID.atSetpoint() ? 0.0 : velCmd;
-
-        // if velocity mode, use the maxVel to control it, otherwise use positionPID
-        velCmd = velocity_mode ? external_vel_cmd + compAdjustment : velCmd;
-
+        /// velocity_cmd = positionPID.atSetpoint() ? 0.0 : velocity_cmd;
         // output - send our vel to the controller
-        pid.setReference(velCmd, ControlType.kVelocity);
+
+        // potential use of feedforward
+        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFeedforward);
     }
 } // End of Arm Class

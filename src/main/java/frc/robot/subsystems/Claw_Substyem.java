@@ -29,20 +29,20 @@ public class Claw_Substyem extends SubsystemBase {
   static final Value CLOSE = Value.kReverse;
 
   // Wrist constants & constraints - all TODO
-  final int WRIST_STALL_CURRENT = 10;
+  final int WRIST_STALL_CURRENT = 20;
   final int WRIST_FREE_CURRENT = 10;
-  double wrist_maxAccel = 10.0;
+  double wrist_maxAccel = 10.0;  //only used if in smartmode, a future
   double wrist_maxVel = 20.0;
   double wrist_posTol = 3.0;
   double wrist_velTol = 2.0;
-  final double wrist_conversionFactor = 360.0/150.0; //GR=1.0
-  static final double WristMinDegrees = -90.0; // TODO: Find actual value
-  static final double WristMaxDegrees = 90.0; // TODO: Find actual value
+  final double wrist_conversionFactor = 360.0/150.0; //GR=150.0
+  static final double WristMinDegrees = -90.0; 
+  static final double WristMaxDegrees = 90.0; 
 
   // Rotation Constants
-  final int ROTATE_STALL_CURRENT = 10;
+  final int ROTATE_STALL_CURRENT = 20;
   final int ROTATE_FREE_CURRENT = 10;
-  double rotate_maxAccel = 10.0;
+  double rotate_maxAccel = 10.0; //only used if in smartmode, a future
   double rotate_maxVel = 20.0;
   double rotate_posTol = 3.0;
   double rotate_velTol = 2.0;
@@ -73,16 +73,18 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo
         .setConversionFactor(wrist_conversionFactor)
         .setSmartCurrentLimit(WRIST_STALL_CURRENT, WRIST_FREE_CURRENT)
-        .setVelocityHW_PID(wrist_maxVel, wrist_maxAccel)
-        .setMaxVel(wrist_maxVel);
-    wrist_servo.positionPID.setTolerance(wrist_posTol, wrist_velTol);
-
+        .setVelocityHW_PID(wrist_maxVel, wrist_maxAccel)        
+        .setTolerance(wrist_posTol, wrist_velTol)
+        .setMaxVelocity(wrist_maxVel)
+        .burnFlash();
+    
     rotate_servo
         .setConversionFactor(rotate_conversionFactor)
         .setSmartCurrentLimit(ROTATE_STALL_CURRENT, ROTATE_FREE_CURRENT)
         .setVelocityHW_PID(rotate_maxVel, rotate_maxAccel)
-        .setMaxVel(rotate_maxVel);
-    rotate_servo.positionPID.setTolerance(rotate_posTol, rotate_velTol);
+        .setTolerance(rotate_posTol, rotate_velTol)
+        .setMaxVelocity(rotate_maxVel)
+        .burnFlash();
 
     piece_held = GamePieceHeld.Cube;
   }

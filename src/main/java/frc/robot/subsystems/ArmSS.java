@@ -25,8 +25,8 @@ import frc.robot.util.VelocityControlled;
  */
 
 public class ArmSS extends SubsystemBase implements VelocityControlled {
-    int STALL_CURRENT = 40;
-    int FREE_CURRENT = 10;
+    final int STALL_CURRENT = 50;
+    final int FREE_CURRENT = 20;
 
     final double gearRadius = 2.63398 * 2 * Math.PI; //2.633[cm] is drive gear radius
     final double gearRatio = (1.0 / 75.0);
@@ -60,7 +60,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     double syncCompensation; // amount of compensation [m/s]
     
     // computed values from position pid
-    double error;
+    double pos_error;
 
     // controllers
     PIDController syncPID = new PIDController(0.0, 0.0, 0.0); // arm synchronization pid. syncs left --> right
@@ -78,21 +78,19 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     }
     // finish the arm servo configurations
     void configure(NeoServo arm) {
+        // rest of Neo and servo PID stuff
         arm.setConversionFactor(conversionFactor)
         .setSmartCurrentLimit(STALL_CURRENT, FREE_CURRENT)
-        .setVelocityHW_PID(maxVel, maxAccel);
-        arm.setMaxVel(maxVel);
-        arm.positionPID.setTolerance(posTol, velTol);
+        .setVelocityHW_PID(maxVel, maxAccel)
+        .setTolerance(posTol, velTol)
+        .setMaxVelocity(maxVel)
+        .burnFlash();
     }
-
-    /*
-     * Looks at various pids and desired positions to see if we are there
-     */
 
     @Override
     public void periodic() {
         // Synchronization, drive left to follow right
-        error = rightArm.getPosition() - leftArm.getPosition();
+        pos_error = rightArm.getPosition() - leftArm.getPosition();
         syncCompensation = sync ? syncPID.calculate(leftArm.getPosition(), rightArm.getPosition()) : 0.0;
         leftArm.periodic(syncCompensation);
         rightArm.periodic(0.0);
@@ -153,6 +151,10 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
 
     public double getVelocity() {
         return (leftArm.getVelocity() + rightArm.getVelocity()) / 2.0;
+    }
+
+    public double getPositionError() {
+        return pos_error;
     }
 
     // rarely used, testing only since arms are bolted together
@@ -256,7 +258,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         nt_maxVel.setDouble(maxVel);
         nt_posTol.setDouble(posTol);
         nt_velTol.setDouble(velTol);
-        nt_error.setDouble(error);
+        nt_error.setDouble(pos_error);
     }
 
     private void ntUpdates() {
@@ -270,7 +272,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         nt_right_currentPos.setDouble(rightArm.getPosition());
         nt_right_desiredVel.setDouble(rightArm.getVelocityCmd());
         nt_right_currentVel.setDouble(rightArm.getVelocity());
-        nt_error.setDouble(error);
+        nt_error.setDouble(pos_error);
         nt_syncCompensation.setDouble(syncCompensation);
 
         // PID setters
