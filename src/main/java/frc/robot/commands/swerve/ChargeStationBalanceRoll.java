@@ -44,30 +44,22 @@ import frc.robot.subsystems.SwerveDrivetrain;
  *      May want to low-pass filter roll for level detection
  *      Exit-on-level : false --> keep running 
  *                      true --> command ends when level
+ *
  * 
- *      TODO: look at PID atSetpoint() see why we don't exit
- *      TODO: calibrate all the angles somewhere?
- * 
- *      TODO: may need to correct roll and roll with any offsets due to alignment
- *      if it is really badly aligned, back out corrected angles with eular angles for coupling
- *      TODO: look at pigeon2 docs for mounting corections, there may be some calibration to help.
- * 
- *      TODO: clean up discussion comments and dead code when we all agree and is tested
- * 
+ *  SEE non-roll version for latest
  */
-
+@Deprecated //don't use with Comp2023 bot, it uses pitch and has a speedup
 public class ChargeStationBalanceRoll extends CommandBase {
 
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java
     final double vmax = 0.9; // [m/s] fastest speed we allow
-    final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected  TODO: Try stiction fix to speed steady-state climb
+    final double vmin = 0.0; // [m/s] small stiction speed if there is tilt, sign corrected  
     // also could be simple bang-bang...
-    final double roll_offset = -0.8349609375; // [deg] simple sensor correction TODO:calibrate in sensor_SS
 
     // tolerance limits
     final double rollPosTol = 1.5; // [deg] level more or less
-    final double rollRateTol = 3.0; // [deg/s] little motion TODO: tell it to stop being annoying
+    final double rollRateTol = 3.0; // [deg/s] little motion
     final int levelN = 5; // [frame-counts] stable roll for n frames, maybe use FIR?                          
 
     // Subsystems
@@ -112,11 +104,10 @@ public class ChargeStationBalanceRoll extends CommandBase {
     @Override
     public void initialize() {
         levelCount = 0;
-        unfilteredRoll = sensors.getPitch() - roll_offset - 2.0;
+        unfilteredRoll = sensors.getPitch();
         rollRate = sensors.getPitchRate();
        
         //reset, use current measured roll & rollRate to initialize
-        rollFilter.calculate(unfilteredRoll);
         rollFilter.calculate(unfilteredRoll);
         filteredRoll = rollFilter.calculate(unfilteredRoll);
 
@@ -127,7 +118,6 @@ public class ChargeStationBalanceRoll extends CommandBase {
 
         // set PID internal states
         csBalancePID.reset();
-        csBalancePID.calculate(filteredRoll);
         csBalancePID.calculate(filteredRoll);
         System.out.println("***Starting automatic charging station balancing***");
     }
@@ -153,7 +143,7 @@ public class ChargeStationBalanceRoll extends CommandBase {
      */
     private SwerveModuleState[] calculate() {
         // try simple 1-D around roll
-        unfilteredRoll = sensors.getPitch() - roll_offset - 2.0;
+        unfilteredRoll = sensors.getPitch();
         filteredRoll = rollFilter.calculate(unfilteredRoll); // simple best guess of our roll after physical alignment
         rollRate = rollRateFilter.calculate(sensors.getPitchRate());
 

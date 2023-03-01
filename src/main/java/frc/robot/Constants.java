@@ -168,18 +168,6 @@ public final class Constants {
   public static final class PCM2 {
   }
 
-  public static final class RobotPhysical {
-  }
-
-  // Magazine constants
-  public static final class Magazine {
-  }
-
-  public static final class ArmSettings {
-
-    public static final double MAX_VELOCITY = 1.0; // TODO: update me
-
-  }
 
   // Intake Constants
   public static final class Intake_Constants {
@@ -273,7 +261,7 @@ public final class Constants {
     public static final ChassisConfig chadBotChassisConfig = new ChassisConfig(MperFT * (21.516 / 12.0) / 2.0,
         MperFT * (24.87 / 12) / 2, 0.995, 99.5 / 1000.0, 12.8, 8.14);
 
-    // For 2023 CompetitionBot TODO FIX ME
+    // For 2023 CompetitionBot
     public static final WheelOffsets compBotOffsets = new WheelOffsets(129.03, -83.94, -57.83, 139.38);
     public static final ChassisConfig compBotChassisConfig = new ChassisConfig(
         MperFT * (23.5 / 12.0) / 2.0, //based on CAD in reference_links

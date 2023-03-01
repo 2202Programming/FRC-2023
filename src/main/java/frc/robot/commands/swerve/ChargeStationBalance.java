@@ -47,9 +47,12 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     final double vmax = 0.9; // [m/s] fastest speed we allow
 
     // non-linear
-    final double VMIN_CLIMB = 0.35; // [m/s] small stiction speed if there is tilt, sign corrected
+    static final double VMIN_CLIMB_DEFAULT = 0.35; // [m/s] small stiction speed if there is tilt, sign corrected
     final double PITCHRATE_DETECTED = 10.0; // [deg/s] - we are moving
     final double MIN_PITCH = 5.0; // [deg] min angle to know we are on the charge station (ramp)
+    
+    //allow the command to have different vmin_climb
+    final double vmin_climb;
 
     // tolerance limits
     final double pitchPosTol = 1.5; // [deg] level more or less
@@ -85,11 +88,17 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     public ChargeStationBalance() {
         this(true);
     }
-
     public ChargeStationBalance(boolean exitOnLevel) {
+        this(true, VMIN_CLIMB_DEFAULT);
+    }
+    public ChargeStationBalance(double vmin_climb) {
+        this(true, vmin_climb);
+    }
+    public ChargeStationBalance(boolean exitOnLevel, double vmin_climb) {
         this.exitOnLevel = exitOnLevel;
         sdt = RobotContainer.RC().drivetrain;
         sensors = RobotContainer.RC().sensors;
+        this.vmin_climb = vmin_climb;
         addRequirements(sdt);
 
         // pid setpoint is always 0.0, aka level, include tolerances
@@ -107,22 +116,19 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
         pitchRate = sensors.getPitchRate();
 
         // non-linear, copy sign of current pitch to move in correct direction
-        // or don't add vmin if we are level
-        vmin = (Math.abs(sensors.getPitch()) > MIN_PITCH) ? Math.copySign(VMIN_CLIMB, -sensors.getPitch()) : 0.0;
+        // or don't add vmin if we are level. note the sign of pitch being flipped.
+        vmin = (Math.abs(unfilteredPitch) > MIN_PITCH) ? Math.copySign(vmin_climb, -unfilteredPitch) : 0.0;
 
         // reset, use current measured pitch & pitchRate to initialize
-        pitchFilter.calculate(unfilteredPitch);
-        pitchFilter.calculate(unfilteredPitch);
+        pitchFilter.reset();
         filteredPitch = pitchFilter.calculate(unfilteredPitch);
 
         // Same for pitch Rate, should be zero
         pitchRateFilter.reset();
         pitchRateFilter.calculate(pitchRate); // prime filter with a measurement
-        pitchRateFilter.calculate(pitchRate);
 
         // set PID internal states
         csBalancePID.reset();
-        csBalancePID.calculate(filteredPitch);
         csBalancePID.calculate(filteredPitch);
 
         enableLights();
