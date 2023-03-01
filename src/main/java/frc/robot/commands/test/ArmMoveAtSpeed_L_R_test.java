@@ -48,7 +48,9 @@ public class ArmMoveAtSpeed_L_R_test extends CommandBase implements Lockout {
       else {
         arm.setVelocityCmd(0.0);
       }
-
+      //this is a test command that is used to align pos
+      // so set positions to zero
+      arm.setPosition(0.0);
   }
 
   // Called once the command ends or is interrupted.
@@ -57,6 +59,8 @@ public class ArmMoveAtSpeed_L_R_test extends CommandBase implements Lockout {
     arm.setPosition(0.0);
     arm.hold();
     arm.setMaxVel(old_max_speed);
+    //done moving to new zero, set it so
+    arm.setSetpoint(0.0);
   }
 
   // Returns true when the command should end.

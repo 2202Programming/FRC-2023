@@ -11,7 +11,7 @@ import frc.robot.subsystems.ArmSS;
 public class ArmMoveAtSpeed extends CommandBase {
  
   ArmSS arm;
-  boolean zero_position = false;
+  final boolean zero_position;
   double speed; //[cm/s]
   double old_max_speed;
 
@@ -43,7 +43,11 @@ public class ArmMoveAtSpeed extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if (zero_position) arm.setPosition(0.0);
+    arm.setVelocityCmd(0.0);
+    if (zero_position) {
+       arm.setPosition(0.0);
+       arm.setSetpoint(0.0);
+    }
     arm.hold();
     arm.setMaxVel(old_max_speed);
   }

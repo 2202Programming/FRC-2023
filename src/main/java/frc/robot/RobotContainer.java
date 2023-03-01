@@ -31,6 +31,8 @@ import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
+import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
+import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
@@ -193,11 +195,13 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings) {
       case arm_test:
-       // dc.Driver().a().whileTrue(new GenericPositionTest(armSS, 10.0, 10.0).WithLockout(20.0));
-        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 10.0, 3.0, 1.0));
-        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, true));
+      armSS.setMaxVel(8.0);
+        dc.Driver().a().whileTrue(new GenericPositionTest(armSS, 10.0, 5.0).WithLockout(20.0));
+        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 5.0, 3.0, 1.0));
+        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, true));
-       // dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
+        
+        dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
      //   dc.Driver().leftBumper().whileTrue(new LockoutExampleCmd().WithLockout(5.0));
 
      //   armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, 

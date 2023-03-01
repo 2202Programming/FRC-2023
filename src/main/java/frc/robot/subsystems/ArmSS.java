@@ -26,7 +26,7 @@ import frc.robot.util.VelocityControlled;
 
 public class ArmSS extends SubsystemBase implements VelocityControlled {
     int STALL_CURRENT = 40;
-    int FREE_CURRENT = 40;
+    int FREE_CURRENT = 10;
 
     final double gearRadius = 2.63398 * 2 * Math.PI; //2.633[cm] is drive gear radius
     final double gearRatio = (1.0 / 75.0);
@@ -35,7 +35,8 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     // state vars
     PIDController positionPID_rt = new PIDController(5.0, 0.150, 0.250); // outer position loop
     PIDController positionPID_lt = new PIDController(5.0, 0.150, 0.250); // outer position loop
-    PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); // holds values for hardware
+    PIDFController hwVelPID_rt = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); 
+    PIDFController hwVelPID_lt = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); 
     final int hwVelSlot = 0;
 
     // positive extension moves arm out
@@ -65,8 +66,8 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     PIDController syncPID = new PIDController(0.0, 0.0, 0.0); // arm synchronization pid. syncs left --> right
 
     public ArmSS() {
-        rightArm = new NeoServo(CAN.ARM_RIGHT_Motor, positionPID_rt, invert_right);
-        leftArm = new NeoServo(CAN.ARM_LEFT_Motor, positionPID_lt, invert_left);
+        rightArm = new NeoServo(CAN.ARM_RIGHT_Motor, positionPID_rt,hwVelPID_rt, invert_right);
+        leftArm = new NeoServo(CAN.ARM_LEFT_Motor, positionPID_lt, hwVelPID_lt, invert_left);
         configure(rightArm);
         configure(leftArm);
 
@@ -79,7 +80,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     void configure(NeoServo arm) {
         arm.setConversionFactor(conversionFactor)
         .setSmartCurrentLimit(STALL_CURRENT, FREE_CURRENT)
-        .setVelocityHW_PID(hwVelPID, maxVel, maxAccel);
+        .setVelocityHW_PID(maxVel, maxAccel);
         arm.setMaxVel(maxVel);
         arm.positionPID.setTolerance(posTol, velTol);
     }

@@ -35,7 +35,7 @@ public class Claw_Substyem extends SubsystemBase {
   double wrist_maxVel = 20.0;
   double wrist_posTol = 3.0;
   double wrist_velTol = 2.0;
-  final double wrist_conversionFactor = 360.0/1.0; //GR=1.0
+  final double wrist_conversionFactor = 360.0/150.0; //GR=1.0
   static final double WristMinDegrees = -90.0; // TODO: Find actual value
   static final double WristMaxDegrees = 90.0; // TODO: Find actual value
 
@@ -67,20 +67,20 @@ public class Claw_Substyem extends SubsystemBase {
   private double wrist_cmd; // [deg]
 
   public Claw_Substyem() {
-    wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, false);
-    rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, false);
+    wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, false);
+    rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, rotate_hwVelPID, false);
 
     wrist_servo
         .setConversionFactor(wrist_conversionFactor)
         .setSmartCurrentLimit(WRIST_STALL_CURRENT, WRIST_FREE_CURRENT)
-        .setVelocityHW_PID(wrist_hwVelPID, wrist_maxVel, wrist_maxAccel)
+        .setVelocityHW_PID(wrist_maxVel, wrist_maxAccel)
         .setMaxVel(wrist_maxVel);
     wrist_servo.positionPID.setTolerance(wrist_posTol, wrist_velTol);
 
     rotate_servo
         .setConversionFactor(rotate_conversionFactor)
         .setSmartCurrentLimit(ROTATE_STALL_CURRENT, ROTATE_FREE_CURRENT)
-        .setVelocityHW_PID(rotate_hwVelPID, rotate_maxVel, rotate_maxAccel)
+        .setVelocityHW_PID(rotate_maxVel, rotate_maxAccel)
         .setMaxVel(rotate_maxVel);
     rotate_servo.positionPID.setTolerance(rotate_posTol, rotate_velTol);
 

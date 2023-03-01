@@ -27,7 +27,7 @@ public class NeoServo implements VelocityControlled {
 
     // state vars
     final public PIDController positionPID;
-    public PIDFController hwVelPID;
+    final public PIDFController hwVelPIDcfg;
     final int hwVelSlot;
 
     // Testing Mode
@@ -39,10 +39,10 @@ public class NeoServo implements VelocityControlled {
     final SparkMaxPIDController pid;
     final RelativeEncoder encoder;
 
-    public NeoServo(int canID, PIDController positionPID ,boolean inverted) {
-        this(canID, positionPID, inverted, 0);
+    public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg ,boolean inverted) {
+        this(canID, positionPID, hwVelPIDcfg, inverted, 0);
     }
-    public NeoServo(int canID, PIDController positionPID ,boolean inverted, int hwVelSlot) {
+    public NeoServo(int canID, PIDController positionPID ,PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot) {
         // use canID to get controller and supporting objects
         ctrl = new CANSparkMax(canID, MotorType.kBrushless);
         ctrl.clearFaults();
@@ -53,6 +53,7 @@ public class NeoServo implements VelocityControlled {
         encoder = ctrl.getEncoder();
         this.positionPID = positionPID;
         this.hwVelSlot = hwVelSlot;
+        this.hwVelPIDcfg = hwVelPIDcfg;
     }
 
     // methods to tune the servo
@@ -72,9 +73,9 @@ public class NeoServo implements VelocityControlled {
         return this;
     }
 
-    public NeoServo setVelocityHW_PID(PIDFController hwpid, double smVelMax, double smAccelMax ) {
-        // write the hwVelPID constants to the sparkmax
-        hwVelPID.copyTo(pid, hwVelSlot, smVelMax, smAccelMax);
+    public NeoServo setVelocityHW_PID(double smVelMax, double smAccelMax ) {
+        // write the hwVelPIDcfgcfg constants to the sparkmax
+        hwVelPIDcfg.copyTo(pid, hwVelSlot, smVelMax, smAccelMax);
         ctrl.burnFlash();
         Timer.delay(.2); // this holds up the current thread
         return this;
@@ -99,7 +100,6 @@ public class NeoServo implements VelocityControlled {
     public void setPosition(double pos) {
         encoder.setPosition(pos);
         positionPID.reset();
-        setSetpoint(pos);
     }
 
     public double getPosition() {

@@ -29,12 +29,12 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
 
   public Elbow() {
-    elbow_servo = new NeoServo(CAN.ELBOW_Motor, positionPID, true);
+    elbow_servo = new NeoServo(CAN.ELBOW_Motor, positionPID, hwVelPID, true);
     // finish the config
     elbow_servo
         .setConversionFactor(conversionFactor)
         .setSmartCurrentLimit(STALL_CURRENT, FREE_CURRENT)
-        .setVelocityHW_PID(hwVelPID, maxVel, maxAccel)
+        .setVelocityHW_PID(maxVel, maxAccel)
         .setMaxVel(maxVel);
     elbow_servo.positionPID.setTolerance(posLimit, velLimit);
     ntcreate();
