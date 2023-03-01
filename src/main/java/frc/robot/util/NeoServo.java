@@ -95,7 +95,12 @@ public class NeoServo implements VelocityControlled {
         setMaxVel(maxVelocity);
         return this;
     }
-    
+
+    public NeoServo setBrakeMode(CANSparkMax.IdleMode mode) {
+        ctrl.setIdleMode(mode);
+        return this;
+    }
+
     /*
      *       VelocityControlled API
      * 
