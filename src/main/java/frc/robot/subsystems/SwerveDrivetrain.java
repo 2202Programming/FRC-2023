@@ -128,9 +128,9 @@ public class SwerveDrivetrain extends SubsystemBase {
   private NetworkTableEntry est_pose_integ_h;
 
   // ll pose updating
-  private DoublePublisher nt_x_diff;
-  private DoublePublisher nt_y_diff;
-  private DoublePublisher nt_yaw_diff;
+  private NetworkTableEntry nt_x_diff;
+  private NetworkTableEntry nt_y_diff;
+  private NetworkTableEntry nt_yaw_diff;
 
   double drive_kP = DriveTrain.drivePIDF.getP();
   double drive_kI = DriveTrain.drivePIDF.getI();
@@ -240,9 +240,9 @@ public class SwerveDrivetrain extends SubsystemBase {
     est_pose_integ_h = table.getEntry("est_int_h");
 
     // ll pose estimating
-    nt_x_diff = table.getDoubleTopic("vision_x_diff").publish();
-    nt_y_diff = table.getDoubleTopic("vision_y_diff").publish();
-    nt_yaw_diff = table.getDoubleTopic("vision_yaw_diff").publish();
+    nt_x_diff = table.getEntry("vision_x_diff");
+    nt_y_diff = table.getEntry("vision_y_diff");
+    nt_yaw_diff = table.getEntry("vision_yaw_diff");
 
     SmartDashboard.putData("Field", m_field);
 
@@ -368,10 +368,7 @@ public class SwerveDrivetrain extends SubsystemBase {
       est_pose_integ_y.setDouble(m_pose_integ.getY());
       est_pose_integ_h.setDouble(m_pose_integ.getRotation().getDegrees());
 
-      // vision pose updating NTs
-      nt_x_diff.set(x_diff);
-      nt_y_diff.set(y_diff);
-      nt_yaw_diff.set(yaw_diff);
+
 
       // if Drivetrain tuning
       // pidTuning();
@@ -566,6 +563,10 @@ public class SwerveDrivetrain extends SubsystemBase {
       x_diff = Math.abs(prev_m_Pose.getX() -  m_pose.getX());
       y_diff = Math.abs(prev_m_Pose.getY() - m_pose.getY());
       yaw_diff = Math.abs(prev_m_Pose.getRotation().getDegrees() - m_pose.getRotation().getDegrees());
+      // vision pose updating NTs
+      nt_x_diff.setDouble(x_diff);
+      nt_y_diff.setDouble(y_diff);
+      nt_yaw_diff.setDouble(yaw_diff);
     }
     
 
