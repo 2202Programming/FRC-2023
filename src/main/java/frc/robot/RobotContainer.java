@@ -28,8 +28,6 @@ import frc.robot.commands.Intake.Washer.IntakeForward;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
-import frc.robot.commands.auto.TestAutoPathGroup;
-import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
@@ -204,7 +202,7 @@ public class RobotContainer {
       case arm_test:
         armSS.setMaxVel(8.0);
 
-        //turn on some networking watch/updates fod debugging
+        // turn on some networking watch/updates fod debugging
         var wrist = claw.getWrist();
         armSS.getWatcher();
         claw.getWatcher();
@@ -216,10 +214,8 @@ public class RobotContainer {
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
 
         dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
-        // dc.Driver().leftBumper().whileTrue(new LockoutExampleCmd().WithLockout(5.0));
 
-        // armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS,
-        // dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
+        //armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
       case balance_test:
         if (drivetrain == null)
@@ -307,10 +303,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    //return new autoCommand().andThen(new ChargeStationBalance());
-    return new TestAutoPathGroup("autopath1", new PathConstraints(1, 1));
-    //return autoBuilder.fullAuto(PathPlanner.loadPath("A1 Pass Dock", 
-    //  new PathConstraints(3.8, 4.50))).andThen(new ChargeStationBalance());
     return myauto;
   }
 
