@@ -11,7 +11,6 @@ import com.revrobotics.ColorSensorV3.ColorSensorResolution;
 import com.revrobotics.ColorSensorV3.GainFactor;
 import com.revrobotics.ColorSensorV3.ProximitySensorMeasurementRate;
 import com.revrobotics.ColorSensorV3.ProximitySensorResolution;
-import com.revrobotics.ColorSensorV3.RawColor;
 
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.IntegerPublisher;
@@ -30,7 +29,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
 
     // a "struct"
     private class SensorData {
-        RawColor color;
+        Color color;
+        double ir;
         double distance;
     }
 
@@ -84,8 +84,9 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
             for (int i = 0; i < colorSensorData.length; i++) {
                 mux.setEnabledBuses(sensorMuxPorts[i]);
                 ColorSensorV3 sensor = colorSensors.get(i);
-                colorSensorData[i].color = sensor.getRawColor();
+                colorSensorData[i].color = sensor.getColor();
                 colorSensorData[i].distance = sensor.getProximity();
+                colorSensorData[i].ir = sensor.getRawColor().ir;
             }
         });
 
@@ -100,7 +101,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
      * @param sensorIndex The index of the sensor to retrieve color of
      * @return the RawColor (includes r, g, b, ir) as detected by a color sensor
      */
-    public RawColor getColor(int sensorIndex) {
+    public Color getColor(int sensorIndex) {
         return colorSensorData[sensorIndex].color;
     }
 
@@ -208,8 +209,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
         // loops throug each sensor to try to match the color to the game piece colors
         results = new ColorMatchResult[numSensors];
         for (int i = 0; i < numSensors; i++) {
-            RawColor rawColor = colorSensorData[i].color;
-            results[i] = colorMatcher.matchColor(new Color(rawColor.red, rawColor.green, rawColor.blue));   
+            Color color = colorSensorData[i].color;
+            results[i] = colorMatcher.matchColor(color);
         }
 
 
@@ -291,7 +292,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
         nt_sensor0_r.set(colorSensorData[0].color.red);
         nt_sensor0_g.set(colorSensorData[0].color.green);
         nt_sensor0_b.set(colorSensorData[0].color.blue);
-        nt_sensor0_ir.set(colorSensorData[0].color.ir);
+        nt_sensor0_ir.set(colorSensorData[0].ir);
         nt_sensor0_prox.set(colorSensorData[0].distance);
         nt_sensor0_object.set((results[0] == null) ? "Nothing" : (results[0].color.equals(CONE_YELLOW)) ? "Cone" : "Cube");
 
@@ -299,7 +300,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
         nt_sensor1_r.set(colorSensorData[1].color.red);
         nt_sensor1_g.set(colorSensorData[1].color.green);
         nt_sensor1_b.set(colorSensorData[1].color.blue);
-        nt_sensor1_ir.set(colorSensorData[1].color.ir);
+        nt_sensor1_ir.set(colorSensorData[1].ir);
         nt_sensor1_prox.set(colorSensorData[1].distance);
         nt_sensor1_object.set((results[1] == null) ? "Nothing" : (results[1].color.equals(CONE_YELLOW)) ? "Cone" : "Cube");
 
@@ -307,7 +308,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
         nt_sensor2_r.set(colorSensorData[2].color.red);
         nt_sensor2_g.set(colorSensorData[2].color.green);
         nt_sensor2_b.set(colorSensorData[2].color.blue);
-        nt_sensor2_ir.set(colorSensorData[2].color.ir);
+        nt_sensor2_ir.set(colorSensorData[2].ir);
         nt_sensor2_prox.set(colorSensorData[2].distance);
         nt_sensor2_object.set((results[2] == null) ? "Nothing" : (results[2].color.equals(CONE_YELLOW)) ? "Cone" : "Cube");
 
