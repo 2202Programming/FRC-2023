@@ -34,7 +34,7 @@ public class Claw_Substyem extends SubsystemBase {
   final int WRIST_STALL_CURRENT = 20;
   final int WRIST_FREE_CURRENT = 10;
   double wrist_maxAccel = 10.0;  //only used if in smartmode, a future
-  double wrist_maxVel = 20.0;
+  double wrist_maxVel = 120.0;
   double wrist_posTol = 3.0;
   double wrist_velTol = 2.0;
   final double wrist_conversionFactor = 360.0/150.0; //GR=150.0
@@ -57,8 +57,8 @@ public class Claw_Substyem extends SubsystemBase {
 
   // PIDS for NeoServos
   // TODO (It's what arm values are rn, will need to change)
-  PIDController wrist_positionPID = new PIDController(5.0, 0.150, 0.250);
-  PIDFController wrist_hwVelPID = new PIDFController(0.00, 0.0000, 0.0, 0.050);
+  PIDController wrist_positionPID = new PIDController(6.50, 0.01, 0.0);
+  PIDFController wrist_hwVelPID = new PIDFController(0.0035, 0.0000, 0.2, 0.01250/4.0);
 
   // TODO (It's what arm values are rn, will need to change)
   PIDController rotate_positionPID = new PIDController(5.0, 0.150, 0.250);

@@ -12,14 +12,15 @@ public class GenericPositionTest extends CommandBase implements Lockout {
     int count = 0;
 
     // Test constraints
-    final double distance;
+    final double minPos, maxPos;
     final double velocity_limit;
 
     double old_velocity_limit;
 
-    public GenericPositionTest(VelocityControlled device, double distance, double velocity_limit) {
+    public GenericPositionTest(VelocityControlled device, double minPos, double maxPos, double velocity_limit) {
         this.device = device;
-        this.distance = distance;
+        this.minPos = minPos;
+        this.maxPos = maxPos;
         this.velocity_limit = velocity_limit;
     }
 
@@ -27,14 +28,13 @@ public class GenericPositionTest extends CommandBase implements Lockout {
     public void initialize() {
         old_velocity_limit = device.getMaxVel();
         device.setMaxVel(velocity_limit);
-        device.setPosition(0.0); // defines new zero point, so lockout
         setpointAtZero = true;
         count = 0;
     }
 
     @Override
     public void execute() {
-        device.setSetpoint(setpointAtZero ? distance : 0.0);
+        device.setSetpoint(setpointAtZero ? maxPos : minPos);
         // when we get to setpoint, wait 50 frames about 1 sec to flip
         if (device.atSetpoint() && ++count > WaitCount) {
             setpointAtZero = !setpointAtZero;

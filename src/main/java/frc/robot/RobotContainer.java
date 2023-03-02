@@ -34,6 +34,7 @@ import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
+import frc.robot.commands.utility.NeoWatcher;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
@@ -148,8 +149,8 @@ public class RobotContainer {
         drivetrain = null;
         intake = null;
         armSS = new ArmSS();
-        elbow = null;//new Elbow();
-        claw = new Claw_Substyem();//null;
+        elbow = null;// new Elbow();
+        claw = new Claw_Substyem();// null;
         break;
     }
 
@@ -178,7 +179,6 @@ public class RobotContainer {
           true, // correct path for mirrored depending on alliance color.
           drivetrain);
 
-     
       myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing",
           new PathConstraints(3.5, 4.5))).andThen(new ChargeStationBalance());
     }
@@ -196,19 +196,21 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings) {
       case arm_test:
-      armSS.setMaxVel(8.0);
-      VelocityControlled wrist = claw.getWrist();
-        dc.Driver().a().whileTrue(new GenericPositionTest(wrist, 30.0, 5.0).WithLockout(20.0));
-        dc.Driver().b().whileTrue(new GenericVelocityTest(wrist, 5.0, 3.0, 1.0));
-        
-        //dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(5.0, false));
-        //dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
-        
-        //dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
-        //dc.Driver().leftBumper().whileTrue(new LockoutExampleCmd().WithLockout(5.0));
+        armSS.setMaxVel(8.0);
+        VelocityControlled wrist = claw.getWrist();
+        var cmd = new NeoWatcher("wrist", wrist);
+        cmd.schedule();
+        dc.Driver().a().whileTrue(new GenericPositionTest(wrist, -120.0, 120.0, 120.0));
+        dc.Driver().b().whileTrue(new GenericVelocityTest(wrist, 30.0, 3.0, 2.0));
 
-     //   armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, 
-      //    dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
+        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
+        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
+
+        dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
+        // dc.Driver().leftBumper().whileTrue(new LockoutExampleCmd().WithLockout(5.0));
+
+        // armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS,
+        // dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
       case balance_test:
         if (drivetrain == null)
@@ -331,16 +333,14 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new PrintCommand("***Eject Start"),
             new InstantCommand(drivetrain::printPose),
-            new outtakeCompetitionToggle().withTimeout(1.0)
-            ));
+            new outtakeCompetitionToggle().withTimeout(1.0)));
 
-   eventMap.put("eject2",
+    eventMap.put("eject2",
         new SequentialCommandGroup(
-          new PrintCommand("***Eject2"),
-          new InstantCommand(drivetrain::printPose),
-          new outtakeCompetitionToggle().withTimeout(2.0),
-          new WaitCommand(1.5)
-          ));
+            new PrintCommand("***Eject2"),
+            new InstantCommand(drivetrain::printPose),
+            new outtakeCompetitionToggle().withTimeout(2.0),
+            new WaitCommand(1.5)));
 
     eventMap.put("balance",
         new SequentialCommandGroup(
