@@ -540,6 +540,15 @@ public class SwerveDrivetrain extends SubsystemBase {
       pvPoseEstimatorUpdate();
     }
 
+    if ((limelight != null) && (llPose != null) && (limelight.getNumApriltags() > 0)) { //just use LL for now
+      Pose2d prev_m_Pose = m_pose;
+      setPose(llPose);
+      double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX());
+      double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY());
+      System.out.println("***UPDATED BY LL, X change is "+ x_dif + "m, Y diff is " + y_dif + "m.");
+    }
+    
+
     // WIP use other poseEstimator
     if (limelight != null && photonVision != null)
     {
@@ -552,14 +561,14 @@ public class SwerveDrivetrain extends SubsystemBase {
         System.out.println("***UPDATED BY PV \n -----> X Fixed: " + x_dif + "%   Y Fixed: " + y_dif
            + "%");
       }*/
-      if (limelight.hasAprilTarget() && llPose != null){ // else if with photonvision
-        Pose2d prev_m_Pose = m_pose;
-        setPose(llPose);
-        double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX()) / 16.54099;
-        double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY()) / 8.002778;
-        System.out.println("***UPDATED BY LL \n -----> X: " + x_dif + "%   Y: " + y_dif+ "%   Y Fixed: " + y_dif
-            + "%");
-      }
+      // if (limelight.hasAprilTarget() && llPose != null){ // else if with photonvision
+      //   Pose2d prev_m_Pose = m_pose;
+      //   setPose(llPose);
+      //   double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX()) / 16.54099;
+      //   double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY()) / 8.002778;
+      //   System.out.println("***UPDATED BY LL \n -----> X: " + x_dif + "%   Y: " + y_dif+ "%   Y Fixed: " + y_dif
+      //       + "%");
+      // }
     }
 
   }
