@@ -200,6 +200,10 @@ public class RobotContainer {
         VelocityControlled wrist = claw.getWrist();
         var cmd = new NeoWatcher("wrist", wrist);
         cmd.schedule();
+
+        var cmdarm = armSS.getWatcher();
+        cmdarm.schedule();
+
         dc.Driver().a().whileTrue(new GenericPositionTest(wrist, -120.0, 120.0, 120.0));
         dc.Driver().b().whileTrue(new GenericVelocityTest(wrist, 30.0, 3.0, 2.0));
 
