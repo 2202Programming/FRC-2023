@@ -35,6 +35,7 @@ public class beginPlacement extends CommandBase {
     boolean lateral; //isLeft 
     boolean vertical; //isMiddle
     //TODO: REPLACE WITH ENUMS
+    //TODO: Once replaced with enums, maybe move dc.operator calls to robotcontainer to stay consistent
     //Get operator buttons
     if (dc.Operator().leftBumper().getAsBoolean()) {
       lateral = false;
