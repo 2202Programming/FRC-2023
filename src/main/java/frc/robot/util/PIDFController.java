@@ -36,6 +36,10 @@ public class PIDFController extends PIDController {
         setF(Kf);
     }
 
+    public PIDFController(PIDFController src) {
+        this(src.getP(), src.getI(), src.getD(), src.getF(), src.getPeriod() );
+    }
+
     public void setPIDF(double kP, double kI, double kD, double kF){
         setPID(kP, kI, kD);
         setF(kF);
@@ -123,6 +127,36 @@ public class PIDFController extends PIDController {
       m_smartMaxVel = smartMaxVel;
       m_smartMaxAccel = smartMaxAccel;
     }
+
+    // compares an updated PIDF with this one and updates it and the hardware
+    public void copyChangesTo(SparkMaxPIDController dest, int slot, PIDFController updated) {
+        // update pid values that have changed
+        if (getP() != updated.getP() ){
+            setP(updated.getP());
+            dest.setP(getP(), slot);
+        }
+
+        if (getI() != updated.getI() ){
+            setI(updated.getI());
+            dest.setI(getI(), slot);
+        }
+
+        if (getD() != updated.getD() ){
+            setD(updated.getD());
+            dest.setD(getD(), slot);
+        }
+
+        if (getF() != updated.getF() ){
+            setF(updated.getF());
+            dest.setFF(getF(), slot);
+        }
+
+        if (getIzone() != updated.getIzone() ){
+            setIzone(updated.getIzone());
+            dest.setIZone(getIzone(), slot);
+        }
+    }
+
 
     public void copyTo(WPI_TalonSRX dest, int slot ) {
       dest.config_kP(slot, this.getP());

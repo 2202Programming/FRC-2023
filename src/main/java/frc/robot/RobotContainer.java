@@ -34,7 +34,6 @@ import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
-import frc.robot.commands.utility.NeoWatcher;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
@@ -46,7 +45,6 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
-import frc.robot.util.VelocityControlled;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -197,12 +195,11 @@ public class RobotContainer {
     switch (bindings) {
       case arm_test:
         armSS.setMaxVel(8.0);
-        VelocityControlled wrist = claw.getWrist();
-        var cmd = new NeoWatcher("wrist", wrist); // this isn't JavaScript, use Command, not var
-        cmd.schedule();
 
-        var cmdarm = armSS.getWatcher();
-        cmdarm.schedule();
+        //turn on some networking watch/updates fod debugging
+        var wrist = claw.getWrist();
+        armSS.getWatcher();
+        claw.getWatcher();
 
         dc.Driver().a().whileTrue(new GenericPositionTest(wrist, -120.0, 120.0, 120.0));
         dc.Driver().b().whileTrue(new GenericVelocityTest(wrist, 30.0, 3.0, 2.0));

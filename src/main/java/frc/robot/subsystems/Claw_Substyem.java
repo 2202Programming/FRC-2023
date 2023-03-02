@@ -13,6 +13,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
@@ -22,7 +24,7 @@ import frc.robot.util.PIDFController;
 //Eventually will need 2 solenoids 
 public class Claw_Substyem extends SubsystemBase {
 
-  public enum GamePieceHeld { 
+  public enum GamePieceHeld {
     Cube, Cone, Empty
   }
 
@@ -33,32 +35,31 @@ public class Claw_Substyem extends SubsystemBase {
   // Wrist constants & constraints - all TODO
   final int WRIST_STALL_CURRENT = 20;
   final int WRIST_FREE_CURRENT = 10;
-  double wrist_maxAccel = 10.0;  //only used if in smartmode, a future
+  double wrist_maxAccel = 10.0; // only used if in smartmode, a future
   double wrist_maxVel = 120.0;
   double wrist_posTol = 3.0;
   double wrist_velTol = 2.0;
-  final double wrist_conversionFactor = 360.0/150.0; //GR=150.0
-  static final double WristMinDegrees = -90.0; 
-  static final double WristMaxDegrees = 90.0; 
+  final double wrist_conversionFactor = 360.0 / 150.0; // GR=150.0
+  static final double WristMinDegrees = -90.0;
+  static final double WristMaxDegrees = 90.0;
 
   // Rotation Constants
   final int ROTATE_STALL_CURRENT = 20;
   final int ROTATE_FREE_CURRENT = 10;
-  double rotate_maxAccel = 10.0; //only used if in smartmode, a future
+  double rotate_maxAccel = 10.0; // only used if in smartmode, a future
   double rotate_maxVel = 20.0;
   double rotate_posTol = 3.0;
   double rotate_velTol = 2.0;
-  final double rotate_conversionFactor = 360.0/100.0; //GR=100.0
+  final double rotate_conversionFactor = 360.0 / 100.0; // GR=100.0
 
   // Hardware
   final DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PCM1.CLAW_FWD, PCM1.CLAW_REV);
   final NeoServo wrist_servo;
   final NeoServo rotate_servo;
 
-  // PIDS for NeoServos
-  // TODO (It's what arm values are rn, will need to change)
+  // PIDS for NeoServos - first pass on wrist tuning
   PIDController wrist_positionPID = new PIDController(6.50, 0.01, 0.0);
-  PIDFController wrist_hwVelPID = new PIDFController(0.0035, 0.0000, 0.2, 0.01250/4.0);
+  PIDFController wrist_hwVelPID = new PIDFController(0.0035, 0.0000, 0.2, 0.01250 / 4.0);
 
   // TODO (It's what arm values are rn, will need to change)
   PIDController rotate_positionPID = new PIDController(5.0, 0.150, 0.250);
@@ -72,16 +73,16 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, false);
     rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, rotate_hwVelPID, false);
 
-    wrist_servo
+    wrist_servo.setName(getName() + "/wrist")
         .setConversionFactor(wrist_conversionFactor)
         .setSmartCurrentLimit(WRIST_STALL_CURRENT, WRIST_FREE_CURRENT)
-        .setVelocityHW_PID(wrist_maxVel, wrist_maxAccel)        
+        .setVelocityHW_PID(wrist_maxVel, wrist_maxAccel)
         .setTolerance(wrist_posTol, wrist_velTol)
         .setMaxVelocity(wrist_maxVel)
         .setBrakeMode(IdleMode.kCoast)
         .burnFlash();
-    
-    rotate_servo
+
+    rotate_servo.setName(getName() + "/rotator")
         .setConversionFactor(rotate_conversionFactor)
         .setSmartCurrentLimit(ROTATE_STALL_CURRENT, ROTATE_FREE_CURRENT)
         .setVelocityHW_PID(rotate_maxVel, rotate_maxAccel)
@@ -92,7 +93,6 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo.setPosition(0.0);
     rotate_servo.setSetpoint(0.0);
     rotate_servo.setPosition(0.0);
-
 
     piece_held = GamePieceHeld.Cube;
   }
@@ -110,31 +110,30 @@ public class Claw_Substyem extends SubsystemBase {
   public double getWristAngle() {
     return wrist_servo.getPosition();
   }
-  
+
   // getting the angles current position
   public double getRotatetAngle() {
     return rotate_servo.getPosition();
   }
-  
+
   public boolean wristAtSetpoint() {
     return wrist_servo.atSetpoint();
   }
 
-  
   public void setWristAngle(double degrees) {
     wrist_servo.setSetpoint(degrees);
   }
+
   public boolean rotateAtSetpoint() {
     return rotate_servo.atSetpoint();
   }
 
- 
   @Override
   public void periodic() {
     wrist_servo.periodic();
     rotate_servo.periodic();
 
-    //clawStatus();
+    // clawStatus();
     // check any lightgates
 
   }
@@ -164,28 +163,59 @@ public class Claw_Substyem extends SubsystemBase {
     return value;
   }
 
-  /**
-   ******** NETWORK TABLES ***********
-   */
-  NetworkTable table = NetworkTableInstance.getDefault().getTable("Claw");
-  NetworkTableEntry nt_servoPos;
-  NetworkTableEntry nt_angle;
-  NetworkTableEntry nt_isOpen;
-  NetworkTableEntry nt_gamePieceHeld;
-
-  public void ntcreate() {
-    nt_servoPos = table.getEntry("wrist_cmd");
-    nt_angle = table.getEntry("wrist_angle");
-    nt_isOpen = table.getEntry("Claw Open");
-    nt_gamePieceHeld = table.getEntry("Game Piece Held");
+  public Command getWatcher() {
+    wrist_servo.getWatcher();
+    rotate_servo.getWatcher();
+    var cmd = new ClawWatcher();
+    cmd.schedule();
+    return cmd;
   }
 
-  public void ntupdates() {
-    nt_servoPos.setDouble(wrist_servo.getPosition());
-    nt_angle.setDouble(getWristAngle());
-    nt_isOpen.setBoolean(is_open);
-    nt_gamePieceHeld.setString(piece_held.toString());
+  class ClawWatcher extends CommandBase {
+    /**
+     ******** NETWORK TABLES ***********
+     */
+    NetworkTable table = NetworkTableInstance.getDefault().getTable(Claw_Substyem.this.getName());
+    NetworkTableEntry nt_isOpen;
+    NetworkTableEntry nt_gamePieceHeld;
 
+    ClawWatcher() {
+      // keep updates even when disabled, self-decoration
+      this.runsWhenDisabled();
+      ntcreate();
+    }
+
+    // Called when the command is initially scheduled.
+    @Override
+    public void initialize() {
+    }
+
+    // Called every time the scheduler runs while the command is scheduled.
+    @Override
+    public void execute() {
+      ntupdates();
+    }
+
+    // Returns true when the command should end.
+    @Override
+    public boolean isFinished() {
+      return false;
+    }
+
+    @Override
+    public boolean runsWhenDisabled() {
+      return true;
+    }
+
+    public void ntcreate() {
+      nt_isOpen = table.getEntry("Open");
+      nt_gamePieceHeld = table.getEntry("Game Piece");
+    }
+
+    public void ntupdates() {
+      nt_isOpen.setBoolean(is_open);
+      nt_gamePieceHeld.setString(piece_held.toString());
+    }
   }
 
 }
