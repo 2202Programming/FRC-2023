@@ -179,8 +179,10 @@ public class RobotContainer {
           true, // correct path for mirrored depending on alliance color.
           drivetrain);
           
-      myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A4 Pass Fetch Place",
-          new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
+      // myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A4 Pass Fetch Place",
+      //     new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
+      myauto = autoBuilder.fullAuto(PathPlanner.loadPath("visiontest1",
+      new PathConstraints(1, 1)));
     }
 
     // Edit the binding confiuration for testing
