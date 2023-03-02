@@ -26,6 +26,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -126,6 +127,11 @@ public class SwerveDrivetrain extends SubsystemBase {
   private NetworkTableEntry est_pose_integ_y;
   private NetworkTableEntry est_pose_integ_h;
 
+  // ll pose updating
+  private DoublePublisher nt_x_diff;
+  private DoublePublisher nt_y_diff;
+  private DoublePublisher nt_yaw_diff;
+
   double drive_kP = DriveTrain.drivePIDF.getP();
   double drive_kI = DriveTrain.drivePIDF.getI();
   double drive_kD = DriveTrain.drivePIDF.getD();
@@ -150,6 +156,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   public final SwerveDrivePoseEstimator m_poseEstimator_ll;
   public final SwerveDrivePoseEstimator m_poseEstimator_pv;
+  private double x_diff; // [m]
+  private double y_diff; // [m]
+  private double yaw_diff; // [deg]
+
   private Pose2d llPose;
   private Pose2d pvPose;
   public final Field2d m_field = new Field2d();
@@ -228,6 +238,11 @@ public class SwerveDrivetrain extends SubsystemBase {
     est_pose_integ_x = table.getEntry("est_int_x");
     est_pose_integ_y = table.getEntry("est_int_y");
     est_pose_integ_h = table.getEntry("est_int_h");
+
+    // ll pose estimating
+    nt_x_diff = table.getDoubleTopic("vision_x_diff").publish();
+    nt_y_diff = table.getDoubleTopic("vision_y_diff").publish();
+    nt_yaw_diff = table.getDoubleTopic("vision_yaw_diff").publish();
 
     SmartDashboard.putData("Field", m_field);
 
@@ -352,6 +367,11 @@ public class SwerveDrivetrain extends SubsystemBase {
       est_pose_integ_x.setDouble(m_pose_integ.getX());
       est_pose_integ_y.setDouble(m_pose_integ.getY());
       est_pose_integ_h.setDouble(m_pose_integ.getRotation().getDegrees());
+
+      // vision pose updating NTs
+      nt_x_diff.set(x_diff);
+      nt_y_diff.set(y_diff);
+      nt_yaw_diff.set(yaw_diff);
 
       // if Drivetrain tuning
       // pidTuning();
@@ -543,9 +563,9 @@ public class SwerveDrivetrain extends SubsystemBase {
     if ((limelight != null) && (llPose != null) && (limelight.getNumApriltags() > 0)) { //just use LL for now
       Pose2d prev_m_Pose = m_pose;
       setPose(llPose);
-      double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX());
-      double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY());
-      System.out.println("***UPDATED BY LL, X change is "+ x_dif + "m, Y diff is " + y_dif + "m.");
+      x_diff = Math.abs(prev_m_Pose.getX() -  m_pose.getX());
+      y_diff = Math.abs(prev_m_Pose.getY() - m_pose.getY());
+      yaw_diff = Math.abs(prev_m_Pose.getRotation().getDegrees() - m_pose.getRotation().getDegrees());
     }
     
 
