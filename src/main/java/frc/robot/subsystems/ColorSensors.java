@@ -135,13 +135,13 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
     ColorMatch colorMatcher = new ColorMatch();
 
     // Colors to be matched
-    public static Color CONE_YELLOW = new Color(236, 223, 76); // TODO change to better values
-    public static Color CUBE_PURPLE = new Color(63, 16, 184);
+    public static Color CONE_YELLOW = new Color(0.35, 0.55, 0.0); // TODO change to better values
+    public static Color CUBE_PURPLE = new Color(0.3, 0.2, 0.5);
 
     /* Confidence threshold, which is the Euclidean vector distance between the actual color vector and the expected color vector, 
      * which is 1 - (euclidean distance between actual, matched color)
     */
-    final double CONFIDENCE_THRESHOLD = 0.90; // TODO change to better values
+    final double CONFIDENCE_THRESHOLD = 0.85; // TODO change to better values
 
     // enum of possible game piece orientations to return
     public enum GamePiece {
@@ -213,13 +213,14 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
             results[i] = colorMatcher.matchColor(color);
         }
 
-
+        numPurple = 0;
+        numYellow = 0;
         // Counts matches to each color and if 3 purple return cube, if >=2 yellow run through cone detection, otherwise return 0
-        for (ColorMatchResult result : results) {
-            if (result == null) continue;
-
-            if (result.color.equals(CUBE_PURPLE)) numPurple++;
-            else if (result.color.equals(CONE_YELLOW)) numYellow++;
+        for (int i = 0; i < numSensors; i++) {
+            if (colorSensorData[i].distance < 10.0) results[i] = null;
+            if (results[i] == null) continue;
+            if (results[i].color.equals(CUBE_PURPLE)) numPurple++;
+            else if (results[i].color.equals(CONE_YELLOW)) numYellow++;
         }
         if (numPurple == 3) return GamePiece.Cube;
         else if (numYellow >= 2) return getConeOrientation();
