@@ -28,6 +28,8 @@ import frc.robot.commands.Intake.Washer.IntakeForward;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.auto.TestAutoPathGroup;
+import frc.robot.commands.auto.autoCommand;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
@@ -37,6 +39,7 @@ import frc.robot.commands.test.GenericVelocityTest;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
+import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Limelight_Subsystem;
@@ -88,6 +91,7 @@ public class RobotContainer {
   public final Elbow elbow;
   public final Claw_Substyem claw;
   public final BlinkyLights lights;
+  public final ColorSensors colorSensors;
 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
@@ -114,6 +118,7 @@ public class RobotContainer {
         armSS = null;// new ArmSS();
         elbow = null; // new Elbow();
         claw = null;// new Claw_Substyem();
+        colorSensors = null;
         break;
 
       case SwerveBot:
@@ -125,6 +130,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        colorSensors = null;
         break;
 
       case ChadBot:
@@ -136,6 +142,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        colorSensors = new ColorSensors();
         break;
 
       case BotOnBoard: // fall through
@@ -149,6 +156,7 @@ public class RobotContainer {
         armSS = new ArmSS();
         elbow = null;// new Elbow();
         claw = new Claw_Substyem();// null;
+        colorSensors = null;
         break;
     }
 
@@ -299,6 +307,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    //return new autoCommand().andThen(new ChargeStationBalance());
+    return new TestAutoPathGroup("autopath1", new PathConstraints(1, 1));
+    //return autoBuilder.fullAuto(PathPlanner.loadPath("A1 Pass Dock", 
+    //  new PathConstraints(3.8, 4.50))).andThen(new ChargeStationBalance());
     return myauto;
   }
 
