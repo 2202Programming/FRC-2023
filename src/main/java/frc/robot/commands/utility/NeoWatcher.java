@@ -11,16 +11,16 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class NeoWatcher extends CommandBase {
-  final VelocityControlled device;
+  final VelocityControlled device; // why this class and not NeoServo class if this is a *neo* watcher? doesn't really matter functionally, just curious nren 03-02-2023
   final String name;
-  NetworkTable table;
+  NetworkTable table; // probably move this down to with the NTEs nren 03-02-2023
   /** Creates a new NeoWatcher. */
   public NeoWatcher(String name, VelocityControlled device) {
     this.name = name;
     this.device = device;
-    table = NetworkTableInstance.getDefault().getTable(name);
+    table = NetworkTableInstance.getDefault().getTable(name); // also move this down into the ntcreate() method nren 03-02-2023
     // Use addRequirements() here to declare subsystem dependencies.
-    this.runsWhenDisabled();
+    this.runsWhenDisabled(); // point of this line? nren 03-02-2023
     ntcreate();
   }
 
@@ -49,7 +49,6 @@ public class NeoWatcher extends CommandBase {
     nt_currentVel.setDouble(device.getVelocity());
     nt_desiredPos.setDouble(device.getSetpoint());
     nt_desiredVel.setDouble(device.getVelocityCmd());
-
   }
 
   // Called once the command ends or is interrupted.

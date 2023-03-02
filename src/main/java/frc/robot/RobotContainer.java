@@ -198,7 +198,7 @@ public class RobotContainer {
       case arm_test:
         armSS.setMaxVel(8.0);
         VelocityControlled wrist = claw.getWrist();
-        var cmd = new NeoWatcher("wrist", wrist);
+        var cmd = new NeoWatcher("wrist", wrist); // this isn't JavaScript, use Command, not var
         cmd.schedule();
 
         var cmdarm = armSS.getWatcher();
