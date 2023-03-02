@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.CANSparkMax.IdleMode;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -56,7 +58,8 @@ public class Claw_Substyem extends SubsystemBase {
   // PIDS for NeoServos
   // TODO (It's what arm values are rn, will need to change)
   PIDController wrist_positionPID = new PIDController(5.0, 0.150, 0.250);
-  PIDFController wrist_hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
+  PIDFController wrist_hwVelPID = new PIDFController(0.00, 0.0000, 0.0, 0.050);
+
   // TODO (It's what arm values are rn, will need to change)
   PIDController rotate_positionPID = new PIDController(5.0, 0.150, 0.250);
   PIDFController rotate_hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
@@ -64,7 +67,6 @@ public class Claw_Substyem extends SubsystemBase {
   // state vars
   private boolean is_open;
   private GamePieceHeld piece_held;
-  private double wrist_cmd; // [deg]
 
   public Claw_Substyem() {
     wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, false);
@@ -76,6 +78,7 @@ public class Claw_Substyem extends SubsystemBase {
         .setVelocityHW_PID(wrist_maxVel, wrist_maxAccel)        
         .setTolerance(wrist_posTol, wrist_velTol)
         .setMaxVelocity(wrist_maxVel)
+        .setBrakeMode(IdleMode.kCoast)
         .burnFlash();
     
     rotate_servo
@@ -85,6 +88,11 @@ public class Claw_Substyem extends SubsystemBase {
         .setTolerance(rotate_posTol, rotate_velTol)
         .setMaxVelocity(rotate_maxVel)
         .burnFlash();
+    wrist_servo.setSetpoint(0.0);
+    wrist_servo.setPosition(0.0);
+    rotate_servo.setSetpoint(0.0);
+    rotate_servo.setPosition(0.0);
+
 
     piece_held = GamePieceHeld.Cube;
   }
@@ -126,7 +134,7 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo.periodic();
     rotate_servo.periodic();
 
-    clawStatus();
+    //clawStatus();
     // check any lightgates
 
   }
@@ -173,7 +181,7 @@ public class Claw_Substyem extends SubsystemBase {
   }
 
   public void ntupdates() {
-    nt_servoPos.setDouble(wrist_cmd);
+    nt_servoPos.setDouble(wrist_servo.getPosition());
     nt_angle.setDouble(getWristAngle());
     nt_isOpen.setBoolean(is_open);
     nt_gamePieceHeld.setString(piece_held.toString());

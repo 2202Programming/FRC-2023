@@ -45,6 +45,7 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
+import frc.robot.util.VelocityControlled;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -147,8 +148,8 @@ public class RobotContainer {
         drivetrain = null;
         intake = null;
         armSS = new ArmSS();
-        elbow = new Elbow();
-        claw = null;
+        elbow = null;//new Elbow();
+        claw = new Claw_Substyem();//null;
         break;
     }
 
@@ -196,13 +197,15 @@ public class RobotContainer {
     switch (bindings) {
       case arm_test:
       armSS.setMaxVel(8.0);
-        dc.Driver().a().whileTrue(new GenericPositionTest(armSS, 10.0, 5.0).WithLockout(20.0));
-        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 5.0, 3.0, 1.0));
-        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));
-        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, true));
+      VelocityControlled wrist = claw.getWrist();
+        dc.Driver().a().whileTrue(new GenericPositionTest(wrist, 30.0, 5.0).WithLockout(20.0));
+        dc.Driver().b().whileTrue(new GenericVelocityTest(wrist, 5.0, 3.0, 1.0));
         
-        dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
-     //   dc.Driver().leftBumper().whileTrue(new LockoutExampleCmd().WithLockout(5.0));
+        //dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(5.0, false));
+        //dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
+        
+        //dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
+        //dc.Driver().leftBumper().whileTrue(new LockoutExampleCmd().WithLockout(5.0));
 
      //   armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, 
       //    dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
