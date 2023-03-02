@@ -254,20 +254,22 @@ public class RobotContainer {
         // OPERATOR
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
         dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
-
+        
         // testing deploying / retracting intake on bumpers
-        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
+       /* dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
           intake.deploy();
         }));
         dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
           intake.retract();
         }));
+        */
         // testing on pov
         dc.Operator().povLeft().whileTrue(new IntakeForward());
         dc.Operator().povRight().whileTrue(new IntakeReverse());
         dc.Operator().povUp().whileTrue(new CarwashForward());
         dc.Operator().povDown().whileTrue(new CarwashReverse());
 
+        
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
          * dc.Driver().leftTrigger().whileTrue(new RobotOrFieldCentric());
