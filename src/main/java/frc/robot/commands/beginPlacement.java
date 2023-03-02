@@ -25,6 +25,8 @@ public class beginPlacement extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    //TODO: Pull from Nathanael's color sensor subsystem code
+    //TODO: Move game piece and orientation code into here
     //Get game piece color
     boolean piece = true; //isCube
     //Get game piece orientation
