@@ -28,6 +28,7 @@ import frc.robot.commands.Intake.Washer.IntakeForward;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
@@ -231,11 +232,8 @@ public class RobotContainer {
         }));
         dc.Driver().a().whileTrue(new CenterTapeYaw());
         dc.Driver().b().whileTrue(new CenterTapeSkew());
-        dc.Driver().x().whileTrue(new CenterTapeYawSkew());
-        dc.Driver().y().whileTrue(new InstantCommand(() -> {
-          // calibrate robot gryo to to field 0 degrees
-          drivetrain.resetAnglePose(new Rotation2d(0));
-        }));
+        dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
+        dc.Driver().y().onTrue(new AllianceAwareGyroReset(true));
         break;
 
       case Competition:
