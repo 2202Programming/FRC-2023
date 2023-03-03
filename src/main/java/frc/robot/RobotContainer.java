@@ -31,6 +31,7 @@ import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.commands.swerve.MoveToPoseAutobuilder;
 import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.ArmPositionTest;
@@ -234,6 +235,10 @@ public class RobotContainer {
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(true));
+
+        dc.Driver().povLeft().onTrue(new MoveToPoseAutobuilder(new PathConstraints(1, 1), Constants.FieldPoses.blueScorePose1));
+        dc.Driver().povUp().onTrue(new MoveToPoseAutobuilder(new PathConstraints(1, 1), Constants.FieldPoses.blueScorePose2));
+        dc.Driver().povRight().onTrue(new MoveToPoseAutobuilder(new PathConstraints(1, 1), Constants.FieldPoses.blueScorePose3));
         break;
 
       case Competition:

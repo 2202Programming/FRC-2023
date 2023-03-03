@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.util.PIDFController;
 
 /**
@@ -290,6 +291,18 @@ public final class Constants {
 
   public final static class NTStrings {
     public final static String NT_Name_Position = "Position";
+  }
+
+  public final static class FieldPoses {
+    public final static Pose2d blueScorePose1 = new Pose2d(new Translation2d(1.85,0.50), Rotation2d.fromDegrees(180)); //lowest scoring position in Y
+    public final static Pose2d blueScorePose2 = new Pose2d(new Translation2d(1.85,1.05), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose3 = new Pose2d(new Translation2d(1.85,1.60), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose4 = new Pose2d(new Translation2d(1.85,2.15), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose5 = new Pose2d(new Translation2d(1.85,2.70), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose6 = new Pose2d(new Translation2d(1.85,3.30), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose7 = new Pose2d(new Translation2d(1.85,3.80), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose8 = new Pose2d(new Translation2d(1.85,4.40), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose9 = new Pose2d(new Translation2d(1.85,5.00), Rotation2d.fromDegrees(180)); //highest scoring position in Y
   }
 
   public final static class MagazineSettings {
