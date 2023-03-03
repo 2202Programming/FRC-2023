@@ -7,6 +7,7 @@ package frc.robot.util;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
@@ -15,6 +16,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,7 +39,7 @@ public class NeoServo implements VelocityControlled {
     // state vars
     final public PIDController positionPID;
     final public PIDFController hwVelPIDcfg; // matches hardware setting
-    final PIDFController prevVelPIDcfg;      // soft copy to edit /w NT and compare with hwVelPIDcfg
+    final PIDFController prevVelPIDcfg; // soft copy to edit /w NT and compare with hwVelPIDcfg
     final int hwVelSlot;
 
     // hardware
@@ -65,7 +67,7 @@ public class NeoServo implements VelocityControlled {
     }
 
     public NeoServo setName(String name) {
-        this.name  =name;
+        this.name = name;
         return this;
     }
 
@@ -166,8 +168,13 @@ public class NeoServo implements VelocityControlled {
         return velocity_cmd;
     }
 
-    void setArbFeedforward(double aff) {
-        arbFeedforward = aff;
+    public void setArbFeedforward(double aff) {
+        //uses percent power, on range of -1. to 1.0
+        if (Math.abs(aff) > 1.0) {
+            DriverStation.reportError("|ArbFF| > 1, check your math. Using ZERO.", true);
+            arbFeedforward = 0.0;
+        } else
+            arbFeedforward = aff;
     }
 
     public void hold() {
@@ -204,7 +211,7 @@ public class NeoServo implements VelocityControlled {
         // output - send our vel to the controller
 
         // potential use of feedforward
-        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFeedforward);
+        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFeedforward, ArbFFUnits.kPercentOut);
     }
 
     public Command getWatcher() {
@@ -215,53 +222,45 @@ public class NeoServo implements VelocityControlled {
 
     class NeoWatcher extends CommandBase {
         NetworkTable table;
+        NetworkTableEntry nt_arbFF;
         NetworkTableEntry nt_currentPos;
         NetworkTableEntry nt_desiredPos;
         NetworkTableEntry nt_desiredVel;
         NetworkTableEntry nt_currentVel;
 
         NeoWatcher() {
-            table = NetworkTableInstance.getDefault().getTable(name); 
-            // keep updates even when disabled, self-decoration 
-            this.runsWhenDisabled(); 
+            table = NetworkTableInstance.getDefault().getTable(name);
+            // keep updates even when disabled, self-decoration
+            this.runsWhenDisabled();
             ntcreate();
-        }
-
-        // Called when the command is initially scheduled.
-        @Override
-        public void initialize() {
         }
 
         // Called every time the scheduler runs while the command is scheduled.
         @Override
         public void execute() {
-            ntUpdates();
+            ntupdates();
         }
 
         public void ntcreate() {
+            nt_arbFF = table.getEntry("ArbFF");
             nt_currentPos = table.getEntry("Position");
             nt_currentVel = table.getEntry("Velocity");
             nt_desiredPos = table.getEntry("PositionCmd");
             nt_desiredVel = table.getEntry("VelocityCmd");
 
-            //put the a copy on dashboard to edit
-            SmartDashboard.putData(name+"/hwVelPIDcfg", prevVelPIDcfg);
+            // put the a copy on dashboard to edit
+            SmartDashboard.putData(name + "/hwVelPIDcfg", prevVelPIDcfg);
         }
 
-        public void ntUpdates() {
+        public void ntupdates() {
+            nt_arbFF.setDouble(arbFeedforward);
             nt_currentPos.setDouble(getPosition());
             nt_currentVel.setDouble(getVelocity());
             nt_desiredPos.setDouble(getSetpoint());
             nt_desiredVel.setDouble(getVelocityCmd());
 
-            //look for PIDF config changes
+            // look for PIDF config changes
             hwVelPIDcfg.copyChangesTo(pid, hwVelSlot, prevVelPIDcfg);
-
-        }
-
-        // Called once the command ends or is interrupted.
-        @Override
-        public void end(boolean interrupted) {
         }
 
         // Returns true when the command should end.

@@ -152,7 +152,7 @@ public class RobotContainer {
         drivetrain = null;
         intake = null;
         armSS = new ArmSS();
-        elbow = null;// new Elbow();
+        elbow = new Elbow();
         claw = new Claw_Substyem();// null;
         colorSensors = null;
         break;
@@ -206,6 +206,7 @@ public class RobotContainer {
         var wrist = claw.getWrist();
         armSS.getWatcher();
         claw.getWatcher();
+        elbow.getWatcher();
 
         dc.Driver().a().whileTrue(new GenericPositionTest(wrist, -120.0, 120.0, 120.0));
         dc.Driver().b().whileTrue(new GenericVelocityTest(wrist, 30.0, 3.0, 2.0));

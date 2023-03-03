@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -43,6 +45,9 @@ public class Claw_Substyem extends SubsystemBase {
   static final double WristMinDegrees = -90.0;
   static final double WristMaxDegrees = 90.0;
 
+  // compensate for wrist and elbow rotation
+  double maxArbFF = 0.0;
+
   // Rotation Constants
   final int ROTATE_STALL_CURRENT = 20;
   final int ROTATE_FREE_CURRENT = 10;
@@ -64,6 +69,8 @@ public class Claw_Substyem extends SubsystemBase {
   // TODO (It's what arm values are rn, will need to change)
   PIDController rotate_positionPID = new PIDController(5.0, 0.150, 0.250);
   PIDFController rotate_hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
+
+  DoubleSupplier elbowAngle;
 
   // state vars
   private boolean is_open;
@@ -94,7 +101,15 @@ public class Claw_Substyem extends SubsystemBase {
     rotate_servo.setSetpoint(0.0);
     rotate_servo.setPosition(0.0);
 
+    // default elbow angle supplier in case we are testing
+    elbowAngle = this::zero;
+
     piece_held = GamePieceHeld.Cube;
+  }
+
+  // some of my most complex code
+  double zero() {
+    return 0.0;
   }
 
   // accessors for servos for testing
@@ -104,6 +119,10 @@ public class Claw_Substyem extends SubsystemBase {
 
   public NeoServo getRotator() {
     return rotate_servo;
+  }
+
+  public void setElbowDoubleSupplier(DoubleSupplier func) {
+    elbowAngle = func;
   }
 
   // getting the angles current position
@@ -130,16 +149,17 @@ public class Claw_Substyem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // calculate holding power needed from angle and maxArbFF term
+    double arbff = maxArbFF * Math.sin(
+        Math.toRadians(elbowAngle.getAsDouble() + wrist_servo.getPosition()));
+    wrist_servo.setArbFeedforward(arbff);
     wrist_servo.periodic();
     rotate_servo.periodic();
 
     // clawStatus();
     // check any lightgates
-
   }
 
-  // setting solenoid NOTE:2/7 don't need OpenClaw... there will be a Claw Object
-  // so it will read claw.open() or claw.close()
   public void open() {
     solenoid.set(OPEN);
     is_open = true;
@@ -178,6 +198,7 @@ public class Claw_Substyem extends SubsystemBase {
     NetworkTable table = NetworkTableInstance.getDefault().getTable(Claw_Substyem.this.getName());
     NetworkTableEntry nt_isOpen;
     NetworkTableEntry nt_gamePieceHeld;
+    NetworkTableEntry nt_maxArbFF;
 
     ClawWatcher() {
       // keep updates even when disabled, self-decoration
@@ -210,11 +231,17 @@ public class Claw_Substyem extends SubsystemBase {
     public void ntcreate() {
       nt_isOpen = table.getEntry("Open");
       nt_gamePieceHeld = table.getEntry("Game Piece");
+      nt_maxArbFF = table.getEntry("/wrist/maxArbFF");
+
+      // default value for mutables
+      nt_maxArbFF.setDouble(maxArbFF);
     }
 
     public void ntupdates() {
       nt_isOpen.setBoolean(is_open);
       nt_gamePieceHeld.setString(piece_held.toString());
+      // get mutable values
+      maxArbFF = nt_maxArbFF.getDouble(maxArbFF);
     }
   }
 

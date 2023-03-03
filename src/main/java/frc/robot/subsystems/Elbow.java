@@ -4,6 +4,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.util.NeoServo;
@@ -15,17 +17,20 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   final int FREE_CURRENT = 20;
 
   // mechanical gearing motor rotations to degrees with gear ratio
-  final double conversionFactor = (360.0 / 175.0); 
+  final double conversionFactor = (360.0 / 175.0);
 
-  // positionPID at position tolerances 
+  // positionPID at position tolerances
   double posTol = 3.0; // [deg]
   double velTol = 2.0; // [deg/s]
-  
-  //motion speed limits
-  double velLimit = 10.0; // [deg/s]
-  double accelLimit = 5.0; // [deg/s^2]  - only in future smartmode
 
-  // NeoServo  - TODO (It's what arm values are rn, will need to change)
+  // motion speed limits
+  double velLimit = 10.0; // [deg/s]
+  double accelLimit = 5.0; // [deg/s^2] - only in future smartmode
+
+  // ArbFeedforward to compensate for static torque
+  double maxArbFF = 0.0; // [%power] -1.0 to 1.0
+
+  // NeoServo - TODO (It's what arm values are rn, will need to change)
   final NeoServo elbow_servo;
   PIDController positionPID = new PIDController(5.0, 0.150, 0.250);
   PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
@@ -33,20 +38,21 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   public Elbow() {
     elbow_servo = new NeoServo(CAN.ELBOW_Motor, positionPID, hwVelPID, true);
     // finish the config
-    elbow_servo
+    elbow_servo.setName(getName()+"/servo")
         .setConversionFactor(conversionFactor)
         .setSmartCurrentLimit(STALL_CURRENT, FREE_CURRENT)
         .setVelocityHW_PID(velLimit, accelLimit)
         .setMaxVelocity(velLimit)
         .setTolerance(posTol, velTol)
         .burnFlash();
-    ntcreate();
   }
 
   // @Override
   public void periodic() {
+
+    double arbFF = maxArbFF * Math.sin(Math.toRadians(elbow_servo.getPosition()));
+    elbow_servo.setArbFeedforward(arbFF);
     elbow_servo.periodic();
-    ntupdates();
   }
 
   public boolean atSetpoint() {
@@ -94,25 +100,51 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
     elbow_servo.hold();
   }
 
-  NetworkTable table = NetworkTableInstance.getDefault().getTable("elbow");
-  NetworkTableEntry nt_currentPos;
-  NetworkTableEntry nt_desiredPos;
-  NetworkTableEntry nt_desiredVel;
-  NetworkTableEntry nt_currentVel;
-
-  public void ntcreate() {
-    nt_currentPos = table.getEntry("Position");
-    nt_currentVel = table.getEntry("Velocity");
-    nt_desiredPos = table.getEntry("PositionCmd");
-    nt_desiredVel = table.getEntry("VelocityCmd");
-
+  public Command getWatcher() {
+    var cmd = new Watcher();
+    cmd.schedule();
+    return cmd;
   }
 
-  public void ntupdates() {
-    nt_currentPos.setDouble(elbow_servo.getPosition());
-    nt_currentVel.setDouble(elbow_servo.getVelocity());
-    nt_desiredPos.setDouble(elbow_servo.getSetpoint());
-    nt_desiredVel.setDouble(elbow_servo.getVelocityCmd());
+  class Watcher extends CommandBase {
+    NetworkTable table;
+    NetworkTableEntry nt_arbFF;
+
+    Watcher() {
+      // create and start the servo's watcher cmd
+      elbow_servo.getWatcher();
+      this.runsWhenDisabled();
+      ntcreate();
+    }
+
+    // Called every time the scheduler runs while the command is scheduled.
+    @Override
+    public void execute() {
+      ntupdates();
+    }
+
+    @Override
+    public boolean isFinished() {
+      return false;
+    }
+
+    @Override
+    public boolean runsWhenDisabled() {
+      return true;
+    }
+
+    public void ntcreate() {
+      table = NetworkTableInstance.getDefault().getTable(Elbow.this.getName());
+      nt_arbFF = table.getEntry("maxArbFF");
+
+      //put the initial values for mutables
+      nt_arbFF.setDouble(maxArbFF);
+    }
+
+    public void ntupdates() {
+      //get mutable values
+      maxArbFF = nt_arbFF.getDouble(maxArbFF);
+    }
   }
 
 }
