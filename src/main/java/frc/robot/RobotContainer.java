@@ -28,6 +28,7 @@ import frc.robot.commands.Intake.Washer.IntakeForward;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -234,11 +235,11 @@ public class RobotContainer {
         dc.Driver().a().whileTrue(new CenterTapeYaw());
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
-        dc.Driver().y().onTrue(new AllianceAwareGyroReset(true));
+        dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); //disable vision rot
 
-        dc.Driver().povLeft().onTrue(new MoveToPoseAutobuilder(new PathConstraints(1, 1), Constants.FieldPoses.blueScorePose1));
-        dc.Driver().povUp().onTrue(new MoveToPoseAutobuilder(new PathConstraints(1, 1), Constants.FieldPoses.blueScorePose2));
-        dc.Driver().povRight().onTrue(new MoveToPoseAutobuilder(new PathConstraints(1, 1), Constants.FieldPoses.blueScorePose3));
+        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), 1));
+        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), 2));
+        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), 3));
         break;
 
       case Competition:

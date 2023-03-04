@@ -37,5 +37,8 @@ public class AllianceAwareGyroReset extends InstantCommand {
     if(disableVisionPoseRotation){
       RobotContainer.RC().drivetrain.disableVisionPoseRotation();
     }
+    else {
+      RobotContainer.RC().drivetrain.enableVisionPoseRotation();
+    }
   }
 }
