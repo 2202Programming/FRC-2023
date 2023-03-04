@@ -40,7 +40,6 @@ import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
-import frc.robot.Constants.ScoringBlock;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;

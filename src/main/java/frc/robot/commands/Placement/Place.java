@@ -4,19 +4,14 @@
 
 package frc.robot.commands.Placement;
 
-import frc.robot.commands.Arm.ArmMoveTo;
-import frc.robot.commands.auto.goToScoringPosition;
-
 import com.pathplanner.lib.PathConstraints;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.ColorSensors;
-import frc.robot.subsystems.ColorSensors.GamePiece;
-import frc.robot.Constants;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
+import frc.robot.commands.auto.goToScoringPosition;
+import frc.robot.subsystems.ColorSensors;
+import frc.robot.subsystems.ColorSensors.GamePiece;
 
 public class Place extends CommandBase {
 
@@ -44,6 +39,8 @@ public class Place extends CommandBase {
       //arm move out to desired points (Top) JASON!!
       case Middle:
       //arm move out to desired points (Middle) JASON!!
+      default:
+        break;
     }
   }
   private void Cube() {
@@ -53,6 +50,8 @@ public class Place extends CommandBase {
       //arm move out to desired points (Top Center) JASON!!
       case Middle:
       //arm move out to desired points (Middle Center) JASON!!
+      default:
+        break;
     }
   }
   private void Bottom() {
