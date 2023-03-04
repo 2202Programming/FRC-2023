@@ -253,7 +253,9 @@ public class RobotContainer {
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); //disable vision rot
 
         dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), ScoringBlock.Left));
+        //up and down for center trio request per Alek
         dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Center));
+        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Center));
         dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Right));
         break;
 
