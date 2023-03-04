@@ -45,15 +45,19 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
         .setMaxVelocity(velLimit)
         .setTolerance(posTol, velTol)
         .burnFlash();
-        elbow_servo.setPosition(0.0);
+    
+    // Starting point
+    elbow_servo.setPosition(0.0);
+    
+    // elbow rotates, define the range at +- 180 degrees
+    positionPID.enableContinuousInput(-180.0, 180.0);
   }
 
   // @Override
   public void periodic() {
-
-    //wip - look at pos & cmd quadrant to determing aff
-    double err = (elbow_servo.getSetpoint() - elbow_servo.getPosition());
-    double arbFF = maxArbFF * Math.sin(Math.toRadians(elbow_servo.getPosition()));
+    // use our desired postion to set a min %pwr for gravity - sin(pos),
+    // where 0 deg is hanging vertical. +-180 is vertical up.
+    double arbFF = maxArbFF * Math.sin(Math.toRadians(elbow_servo.getSetpoint()));
     elbow_servo.setArbFeedforward(arbFF);
     elbow_servo.periodic();
   }
