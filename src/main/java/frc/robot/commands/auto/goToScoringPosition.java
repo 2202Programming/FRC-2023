@@ -96,7 +96,6 @@ public class goToScoringPosition extends CommandBase {
       }
       pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.redScorePoses[scoringBlock][scoringTrioAdjusted]);
     }
-    System.out.println("Scheduling a path, Current time is: " + Timer.getFPGATimestamp());
     pathCommand.schedule();
   }
 
@@ -107,7 +106,6 @@ public class goToScoringPosition extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println("Command Ending, Current time is: " + Timer.getFPGATimestamp());
   }
 
   // Returns true when the command should end.
