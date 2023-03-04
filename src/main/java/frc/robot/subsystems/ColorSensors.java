@@ -171,26 +171,16 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
 
         // if and only if (so algo only runs once per object) an object is detected for an entire sec find out what it is, then do something based on what it is
         if (framesObject == 20) {
-            currentGamePiece = getGamePiece();
-            switch (currentGamePiece) {
-                case Cube:
-                    
-                    break;
-                case ConeFacingFront:
-                    
-                    break;
-                case ConeFacingBack:
-                    
-                    break;
-                case None:
-                    
-                    break;
-                default:
-                    
-                    break;
+            GamePiece lastGamePiece = currentGamePiece;
+            GamePiece detectedGamePiece = getGamePiece();
+            //Could present condition where we dont detect that a piece has moved inside the robot. In that case should use a flag.
+            if (lastGamePiece == GamePiece.None) {
+                if (detectedGamePiece != GamePiece.None) {
+                    currentGamePiece = detectedGamePiece;
+                } 
             }
         }
-
+        
         ntperiod();
     }
 
@@ -201,6 +191,9 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
      */
     public GamePiece getCurrentGamePiece() {
         return currentGamePiece;
+    }
+    public void clearCurrentGamePiece() {
+        currentGamePiece = GamePiece.None;
     }
 
     /**

@@ -73,7 +73,7 @@ public class Place extends CommandBase {
   public void initialize() {
     //Next move robot to placement position based on cube/isLeft
     //placeholder: Check which color/orentation of peice
-    GamePiece piece = sensors.getGamePiece();
+    GamePiece piece = sensors.getCurrentGamePiece();
     if (verticalRequest == Vertical.bottom) {
 
     }
