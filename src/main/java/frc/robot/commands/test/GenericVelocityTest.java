@@ -16,11 +16,12 @@ public class GenericVelocityTest extends CommandBase implements Lockout{
   final VelocityControlled device;
   final double vel, runTime, pauseTime;
   double old_max_speed;
-
+  double activeRuntime;  // gets doubled have 1st pass to move about zero
   // states
   double cmdVel;
   double time;
   boolean running;
+  int pass=0;
 
   /**
    * Creates a new deviceVelocityTest.
@@ -47,8 +48,10 @@ public class GenericVelocityTest extends CommandBase implements Lockout{
   public void initialize() {
     old_max_speed = device.getMaxVel();
     device.setMaxVel(vel);
+    activeRuntime = runTime;
     running = true;
     cmdVel = vel;
+    pass=0;
     stopwatch.start();
   }
 
@@ -57,10 +60,14 @@ public class GenericVelocityTest extends CommandBase implements Lockout{
   public void execute() {
     if (running) {
       // moving the device
-      if (stopwatch.hasElapsed(runTime)) {
+      if (stopwatch.hasElapsed(activeRuntime)) {
         running = false;
+        ++pass;
         cmdVel = cmdVel * -1.0; // flip the direction
         stopwatch.reset();
+        //double the runTime so we swing on both sides of zero.  
+        // did i forget to mention that this command assumes you start at zero.
+        if (pass == 1) {activeRuntime = 2.0 * runTime;}
         device.setVelocityCmd(0.0);
       } else
         device.setVelocityCmd(cmdVel);

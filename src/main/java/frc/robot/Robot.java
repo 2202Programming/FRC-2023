@@ -103,6 +103,7 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     BlinkyLightController.onTestPeriodic();
+    RobotContainer.RC().testPeriodic();
   }
 
   /** This function is called once when the robot is first started up. */

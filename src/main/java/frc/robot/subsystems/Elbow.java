@@ -28,12 +28,12 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   double accelLimit = 5.0; // [deg/s^2] - only in future smartmode
 
   // ArbFeedforward to compensate for static torque
-  double maxArbFF = 0.0; // [%power] -1.0 to 1.0
+  double maxArbFF = 0.09; // [%power] -1.0 to 1.0  Tested with SMax Client %pwr mode
 
   // NeoServo - TODO (It's what arm values are rn, will need to change)
   final NeoServo elbow_servo;
-  PIDController positionPID = new PIDController(5.0, 0.150, 0.250);
-  PIDFController hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
+  PIDController positionPID = new PIDController(1.0, 0.0, 0.0);  //(5.0, 0.150, 0.250);
+  PIDFController hwVelPID = new PIDFController(0.005, 0.0000, 0.00, 0.003125);
 
   public Elbow() {
     elbow_servo = new NeoServo(CAN.ELBOW_Motor, positionPID, hwVelPID, true);
@@ -45,11 +45,14 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
         .setMaxVelocity(velLimit)
         .setTolerance(posTol, velTol)
         .burnFlash();
+        elbow_servo.setPosition(0.0);
   }
 
   // @Override
   public void periodic() {
 
+    //wip - look at pos & cmd quadrant to determing aff
+    double err = (elbow_servo.getSetpoint() - elbow_servo.getPosition());
     double arbFF = maxArbFF * Math.sin(Math.toRadians(elbow_servo.getPosition()));
     elbow_servo.setArbFeedforward(arbFF);
     elbow_servo.periodic();

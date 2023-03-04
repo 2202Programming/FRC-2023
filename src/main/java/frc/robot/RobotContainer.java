@@ -32,6 +32,7 @@ import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
+import frc.robot.commands.test.GenericMoveAtSpeed;
 import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
 import frc.robot.subsystems.ArmSS;
@@ -203,16 +204,19 @@ public class RobotContainer {
         armSS.setMaxVel(8.0);
 
         // turn on some networking watch/updates fod debugging
-        var wrist = claw.getWrist();
+        //var wrist = claw.getWrist();
         armSS.getWatcher();
         claw.getWatcher();
         elbow.getWatcher();
 
-        dc.Driver().a().whileTrue(new GenericPositionTest(wrist, -120.0, 120.0, 120.0));
-        dc.Driver().b().whileTrue(new GenericVelocityTest(wrist, 30.0, 3.0, 2.0));
+        dc.Driver().a().whileTrue(new GenericPositionTest(elbow, -90.0, 90.0, 15.0));
+        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 30.0, 3.0, 1.0));
 
-        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
-        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
+        dc.Driver().povUp().whileTrue(new GenericMoveAtSpeed(elbow, 10.0, true));
+        dc.Driver().povDown().whileTrue(new GenericMoveAtSpeed(elbow, -5.0, true));
+
+        //dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
+        //dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
 
         dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
 
@@ -296,6 +300,10 @@ public class RobotContainer {
         break;
 
     }
+  }
+
+  public void testPeriodic() {
+    elbow.periodic();
   }
 
   /**
