@@ -24,7 +24,7 @@ import frc.robot.Constants.PCM1;
 
 public class Intake extends SubsystemBase {
 
-  double IntakeMotorStrength = 0.6; //used for default ON
+  double IntakeMotorStrength = 0.54; //used for default ON
   double CarwashMotorStrength = 0.5; // used for default ON TODO move to constatns (same with above)
 
   private double currentIntakeSpeed;

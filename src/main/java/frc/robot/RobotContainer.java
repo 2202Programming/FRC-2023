@@ -197,7 +197,7 @@ public class RobotContainer {
     initEvents();
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.vision_test);
+    configureBindings(Bindings.Competition);
 
 
 
@@ -287,18 +287,24 @@ public class RobotContainer {
         }));
         */
         // testing on pov
-        dc.Operator().povLeft().whileTrue(new IntakeForward());
-        dc.Operator().povRight().whileTrue(new IntakeReverse());
-        dc.Operator().povUp().whileTrue(new CarwashForward());
-        dc.Operator().povDown().whileTrue(new CarwashReverse());
+        //dc.Operator().povLeft().whileTrue(new IntakeForward());
+        //dc.Operator().povRight().whileTrue(new IntakeReverse());
+        //dc.Operator().povUp().whileTrue(new CarwashForward());
+        //dc.Operator().povDown().whileTrue(new CarwashReverse());
 
         // PLACEMENT
         Place placeCommand; // Save placeCommand to for cancelling later
         Trigger rt = dc.Driver().rightTrigger(); // save right tigger for concinseness in the next new commands
+        // Top Place
         rt.and(dc.Operator().leftBumper().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top)));
         rt.and(dc.Operator().rightBumper().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top)));
+        // Middle Place
         rt.and(dc.Operator().leftTrigger().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle)));
         rt.and(dc.Operator().rightTrigger().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle)));
+        // Bottom Place
+        rt.and(dc.Operator().povLeft().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Bottom)));
+        rt.and(dc.Operator().povDown().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Center, VerticalScoringLane.Bottom)));
+        rt.and(dc.Operator().povRight().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Bottom)));
         
         // create trigger for either of the sicks being touched
         Trigger sticksTouched  = dc.Operator().leftStick().or(dc.Operator().rightStick());
