@@ -5,16 +5,21 @@
 package frc.robot.commands.EndEffector;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.util.VelocityControlled;
 
-public class Elbow0 extends CommandBase {
+public class GenericZeroPos extends CommandBase {
   /** Creates a new Elbow0. */
-  public Elbow0() {
-    // Use addRequirements() here to declare subsystem dependencies.
+  final VelocityControlled device;
+
+  public GenericZeroPos(VelocityControlled device){
+    this.device = device;
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    this.device.setPosition(0.0);
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
