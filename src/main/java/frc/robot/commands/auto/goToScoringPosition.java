@@ -45,10 +45,9 @@ public class goToScoringPosition extends CommandBase {
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
       //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
-      if(RobotContainer.RC().dc.Driver().povLeft().getAsBoolean()) scoringBlock = 2;
-      else if(RobotContainer.RC().dc.Driver().povRight().getAsBoolean()) scoringBlock = 0;
-      else if(RobotContainer.RC().dc.Driver().povDown().getAsBoolean()) scoringBlock = 1;
-      else scoringBlock = 1; //TODO: Set default to be closest Scoring Block!
+      if(RobotContainer.RC().dc.Driver().leftBumper().getAsBoolean()) scoringBlock = 2;
+      else if(RobotContainer.RC().dc.Driver().rightBumper().getAsBoolean()) scoringBlock = 0;
+      else scoringBlock = 1;
 
       //FOR BLUE: left is largest index of scoring trio
       switch(horizontalScoringLane){
@@ -67,10 +66,9 @@ public class goToScoringPosition extends CommandBase {
     }
     else { //RED ALLIANCE
       //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
-      if(RobotContainer.RC().dc.Driver().povLeft().getAsBoolean()) scoringBlock = 0;
-      else if(RobotContainer.RC().dc.Driver().povRight().getAsBoolean()) scoringBlock = 2;
-      else if(RobotContainer.RC().dc.Driver().povDown().getAsBoolean()) scoringBlock = 1;
-      else scoringBlock = 1; //TODO: Set default to be closest Scoring Block!
+      if(RobotContainer.RC().dc.Driver().leftBumper().getAsBoolean()) scoringBlock = 0;
+      else if(RobotContainer.RC().dc.Driver().rightBumper().getAsBoolean()) scoringBlock = 2;
+      else scoringBlock = 1;
 
       //FOR RED: left is smallest index of scoring trio
       switch(horizontalScoringLane){
