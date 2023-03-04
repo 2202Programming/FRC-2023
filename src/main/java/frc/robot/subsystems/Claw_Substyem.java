@@ -62,8 +62,9 @@ public class Claw_Substyem extends SubsystemBase {
   final NeoServo rotate_servo;
 
   // PIDS for NeoServos - first pass on wrist tuning
-  PIDController wrist_positionPID = new PIDController(8.0, 0.05, 0.0);
-  PIDFController wrist_hwVelPID = new PIDFController(0.00055, 0.000004, 0., 0.00185);
+  // Testing showed 200 [deg/sec] was good to go! Still lots of overshoot on vel step response. 25% 3/4/23
+  PIDController wrist_positionPID = new PIDController(8.0, 0.005, 0.05);
+  PIDFController wrist_hwVelPID = new PIDFController(0.0005, 0.0000064, 0.01, 0.0018);
 
   // TODO (It's what arm values are rn, will need to change)
   PIDController rotate_positionPID = new PIDController(5.0, 0.150, 0.250);
@@ -74,6 +75,8 @@ public class Claw_Substyem extends SubsystemBase {
   // state vars
   private boolean is_open;
   private GamePieceHeld piece_held;
+  boolean trackElbow = true;
+  double elbowOffset = 90.0;
 
   public Claw_Substyem() {
     wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, true);
@@ -140,6 +143,7 @@ public class Claw_Substyem extends SubsystemBase {
 
   public void setWristAngle(double degrees) {
     wrist_servo.setSetpoint(degrees);
+    trackElbow = false;
   }
 
   public boolean rotateAtSetpoint() {
@@ -152,11 +156,29 @@ public class Claw_Substyem extends SubsystemBase {
     double arbff = maxArbFF * Math.sin(
         Math.toRadians(elbowAngle.getAsDouble() + wrist_servo.getSetpoint()));
     wrist_servo.setArbFeedforward(arbff);
+
+    if(trackElbow) {
+      wrist_servo.setSetpoint(elbowOffset - elbowAngle.getAsDouble());
+    }
+
     wrist_servo.periodic();
     rotate_servo.periodic();
 
     // clawStatus();
     // check any lightgates
+  }
+
+  public void setElbowOffset(double deg)
+  {
+    this.elbowOffset = deg;
+  }
+
+  public void trackElbow(boolean enable) {
+    this.trackElbow = enable;
+  }
+
+  public boolean isTrackingElbow() {
+    return trackElbow;
   }
 
   public void open() {

@@ -127,6 +127,10 @@ public class NeoServo implements VelocityControlled {
         external_vel_cmd = 0.0;
     }
 
+    public boolean isVelocityMode() {
+        return velocity_mode;
+    }
+    
     public double getSetpoint() {
         return positionPID.getSetpoint();
     }

@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.CANSparkMax.IdleMode;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -17,14 +19,14 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   final int FREE_CURRENT = 20;
 
   // mechanical gearing motor rotations to degrees with gear ratio
-  final double conversionFactor = (360.0 / 210.0);
+  final double conversionFactor = (360.0 / 210.0);  // hardware lies?
 
   // positionPID at position tolerances
   double posTol = 3.0; // [deg]
   double velTol = 2.0; // [deg/s]
 
   // motion speed limits
-  double velLimit = 10.0; // [deg/s]
+  double velLimit = 60.0; // [deg/s]
   double accelLimit = 5.0; // [deg/s^2] - only in future smartmode
 
   // ArbFeedforward to compensate for static torque
@@ -32,8 +34,8 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   // NeoServo - TODO (It's what arm values are rn, will need to change)
   final NeoServo elbow_servo;
-  PIDController positionPID = new PIDController(1.0, 0.0, 0.0);  //(5.0, 0.150, 0.250);
-  PIDFController hwVelPID = new PIDFController(0.005, 0.00005, 0.00, .003);   //0.003125);
+  PIDController positionPID = new PIDController(5.0, 0.083, 0.0);  //(5.0, 0.150, 0.250);
+  PIDFController hwVelPID = new PIDFController(0.0042, 0.0000052, 0.00, .003);   //0.003125);
 
   public Elbow() {
     elbow_servo = new NeoServo(CAN.ELBOW_Motor, positionPID, hwVelPID, true);
@@ -45,12 +47,10 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
         .setMaxVelocity(velLimit)
         .setTolerance(posTol, velTol)
         .burnFlash();
-    
+    elbow_servo.setBrakeMode(IdleMode.kCoast);// TEMP FOR TESTING
     // Starting point
     elbow_servo.setPosition(0.0);
-    
-    // elbow rotates, define the range at +- 180 degrees
-    positionPID.enableContinuousInput(-180.0, 180.0);
+
   }
 
   // @Override
@@ -58,6 +58,8 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
     // use our desired postion to set a min %pwr for gravity - sin(pos),
     // where 0 deg is hanging vertical. +-180 is vertical up.
     double arbFF = maxArbFF * Math.sin(Math.toRadians(elbow_servo.getSetpoint()));
+    //don't use arbff if using velocity mode
+    arbFF = (elbow_servo.isVelocityMode()) ? 0.0 : arbFF;
     elbow_servo.setArbFeedforward(arbFF);
     elbow_servo.periodic();
   }

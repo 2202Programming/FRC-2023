@@ -35,6 +35,7 @@ import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.GenericMoveAtSpeed;
 import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
+import frc.robot.commands.test.GenericZeroPos;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
@@ -202,16 +203,17 @@ public class RobotContainer {
     switch (bindings) {
       case arm_test:
         // turn on some networking watch/updates for debugging
-        //var wrist = claw.getWrist();
         armSS.getWatcher();
         claw.getWatcher();
         elbow.getWatcher();
-        var wrist = claw.getWrist();
-        dc.Driver().a().whileTrue(new GenericPositionTest(wrist, -90.0, 160.0, 150.0));
-        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 30.0, 3.0, 1.0));
+        claw.setElbowDoubleSupplier(elbow::getPosition);
+        
+        dc.Driver().rightBumper().whileTrue(new GenericZeroPos(elbow));
+        dc.Driver().a().whileTrue(new GenericPositionTest(elbow, 45.0, 90.0, 30.0));
+        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 90.0, 1.50, 1.0));
 
-        dc.Driver().povUp().whileTrue(new GenericMoveAtSpeed(elbow, 10.0, true));
-        dc.Driver().povDown().whileTrue(new GenericMoveAtSpeed(elbow, -5.0, true));
+        dc.Driver().povUp().whileTrue(new GenericMoveAtSpeed(elbow, 10.0, false));
+        dc.Driver().povDown().whileTrue(new GenericMoveAtSpeed(elbow, -5.0, false));
 
         //dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
         //dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
