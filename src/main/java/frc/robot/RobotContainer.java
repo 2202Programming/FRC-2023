@@ -268,11 +268,11 @@ public class RobotContainer {
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(false));
         dc.Driver().leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
 
-        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
+        //dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
         //up and down for center trio request per Alek
-        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
-        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
-        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Right));
+        //dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
+        //dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
+        //dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Right));
 
         // OPERATOR
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
