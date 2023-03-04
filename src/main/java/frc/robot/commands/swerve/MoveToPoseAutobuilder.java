@@ -36,6 +36,7 @@ public class MoveToPoseAutobuilder extends CommandBase {
   @Override
   public void initialize() {
     Rotation2d bearing = PoseMath.getHeading2Target(sdt.getPose(), finalPose); //direction directly from point A to B.
+    //using bearing as your exit and entry angle
     PathPoint startPoint = new PathPoint(sdt.getPose().getTranslation(), bearing, sdt.getPose().getRotation());
     PathPoint endPoint = new PathPoint(finalPose.getTranslation(), bearing, finalPose.getRotation());
     System.out.println("From Point:" + sdt.getPose().getTranslation());

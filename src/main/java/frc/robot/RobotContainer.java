@@ -229,17 +229,14 @@ public class RobotContainer {
 
       case vision_test:
         // X button to change LL pipeline
-        dc.Driver().leftBumper().onTrue(new InstantCommand(() -> {
-          limelight.togglePipeline();
-        }));
         dc.Driver().a().whileTrue(new CenterTapeYaw());
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); //disable vision rot
 
-        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), 1));
-        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), 2));
-        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), 3));
+        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), goToScoringPosition.ScoringTrio.Left));
+        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Center));
+        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Right));
         break;
 
       case Competition:
