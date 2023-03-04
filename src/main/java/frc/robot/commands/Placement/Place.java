@@ -36,9 +36,11 @@ public class Place extends CommandBase {
     //TODO depending on how arm clears, we may want to stall this until the above is finished
     switch (verticalRequest) {
       case Top: 
-      //arm move out to desired points (Top) JASON!!
+        //arm move out to desired points (Top) JASON!!
+        break;
       case Middle:
-      //arm move out to desired points (Middle) JASON!!
+        //arm move out to desired points (Middle) JASON!!
+        break;
       default:
         break;
     }
@@ -47,9 +49,11 @@ public class Place extends CommandBase {
     move();    
     switch (verticalRequest){
       case Top: 
-      //arm move out to desired points (Top Center) JASON!!
+        //arm move out to desired points (Top Center) JASON!!
+        break;
       case Middle:
-      //arm move out to desired points (Middle Center) JASON!!
+        //arm move out to desired points (Middle Center) JASON!!
+        break;
       default:
         break;
     }
@@ -71,11 +75,16 @@ public class Place extends CommandBase {
       switch (piece) {
         case Cube:
           Cube();
+          break;
         case ConeFacingBack:
           Cone(false); //TODO: CHECK assumption
+          break;
         case ConeFacingFront:
           Cone(true); //TODO: Check assumption
+          break;
         case None:
+
+          break;
       }
     }
 
