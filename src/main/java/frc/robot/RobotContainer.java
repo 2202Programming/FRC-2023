@@ -269,6 +269,14 @@ public class RobotContainer {
         dc.Operator().povUp().whileTrue(new CarwashForward());
         dc.Operator().povDown().whileTrue(new CarwashReverse());
 
+        // PLACEMENT
+        if (dc.Driver().rightTrigger().getAsBoolean()) {
+          dc.Operator().leftBumper().onTrue(new Place());
+          dc.Operator().rightBumper().onTrue(new Place());
+          dc.Operator().leftTrigger().onTrue(new Place());
+          dc.Operator().rightTrigger().onTrue(new Place());
+        }
+
         
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
