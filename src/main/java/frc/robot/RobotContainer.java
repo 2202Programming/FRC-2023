@@ -110,14 +110,14 @@ public class RobotContainer {
     // Construct sub-systems based on robot Name Specs
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
-        photonVision = new PhotonVision();
+        photonVision = null; //new PhotonVision();
         limelight = new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
-        armSS = new ArmSS();
-        elbow = new Elbow();
-        claw = new Claw_Substyem();
+        armSS = null; //new ArmSS();
+        elbow = null; //new Elbow();
+        claw = null; //new Claw_Substyem();
         break;
 
       case SwerveBot:
@@ -188,7 +188,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.vision_test);
+    configureBindings(Bindings.Competition);
 
 
 
@@ -236,6 +236,7 @@ public class RobotContainer {
         dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), goToScoringPosition.ScoringTrio.Left));
         dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Center));
         dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Right));
+        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Center));
         break;
 
       case Competition:
@@ -244,11 +245,15 @@ public class RobotContainer {
           break;
         // DRIVER
         dc.Driver().x().whileTrue(new ChargeStationBalance(false));
-        dc.Driver().y().whileTrue(new InstantCommand(() -> {
-          // calibrate robot gryo to to field 0 degrees
-          drivetrain.resetAnglePose(new Rotation2d(0));
-        }));
+        dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); //disable vision rot
+
         dc.Driver().leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
+
+        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), goToScoringPosition.ScoringTrio.Left));
+        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Center));
+        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Right));
+        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Center));
+    
 
         // OPERATOR
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());

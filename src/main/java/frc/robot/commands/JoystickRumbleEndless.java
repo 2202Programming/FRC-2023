@@ -26,7 +26,7 @@ public class JoystickRumbleEndless extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    RobotContainer.RC().dc.turnOnRumble(id, type);
+    //RobotContainer.RC().dc.turnOnRumble(id, type);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -36,7 +36,7 @@ public class JoystickRumbleEndless extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.RC().dc.turnOffRumble(id, type);
+    //RobotContainer.RC().dc.turnOffRumble(id, type);
   }
 
   // Returns true when the command should end.
