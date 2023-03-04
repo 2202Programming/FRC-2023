@@ -63,6 +63,7 @@ public class PhotonVision extends SubsystemBase {
   private PhotonPoseEstimator robotPoseEstimator;
   private Pair<Pose2d, Double> currentPoseEstimate;
   private SwerveDrivetrain sdt = null;
+  private Pair<Pose2d, Double> previousPoseEstimate;
 
   
   public PhotonVision() {
@@ -87,6 +88,9 @@ public class PhotonVision extends SubsystemBase {
 
     // setup PhotonVision's pose estimator,
     robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP, camera_arducam, robotToCam);
+    previousPoseEstimate = new Pair<>(new Pose2d(), 0.0);
+    currentPoseEstimate = new Pair<>(new Pose2d(), 0.0);
+
   }
 
   public void setDrivetrain(SwerveDrivetrain sdt)
@@ -133,15 +137,22 @@ public class PhotonVision extends SubsystemBase {
 
       // only targets we care about, sometime we see number outside expected range
       if (targetID < 9) {
+        Pair<Pose2d, Double> previousPoseEstimateHolder = previousPoseEstimate;
+        previousPoseEstimate = currentPoseEstimate;
+
         // guard, we can't estimate without a sdt
         if (sdt == null) return;
 
-        currentPoseEstimate = getEstimatedGlobalPose(sdt.getPose());
+        //currentPoseEstimate = getEstimatedGlobalPose(sdt.getPose());
+        currentPoseEstimate = getEstimatedGlobalPose(previousPoseEstimate.getFirst());
 
         //don't update dash if there isn't a pose, photonVision return null if it doesn't have an estimate
         if (currentPoseEstimate.getFirst() != null) {
           SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
           SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
+        }
+        else {
+          previousPoseEstimate = previousPoseEstimateHolder;
         }
           
       }
@@ -171,6 +182,10 @@ public class PhotonVision extends SubsystemBase {
       }
 
     }
+  }
+
+  public double getVisionTimestamp(){
+    return currentPoseEstimate.getSecond();
   }
 
   public boolean hasAprilTarget() {
@@ -251,7 +266,7 @@ public class PhotonVision extends SubsystemBase {
       return new Pair<Pose2d, Double>(result.get().estimatedPose.toPose2d(),
           currentTime - result.get().timestampSeconds);
     } else {
-      return new Pair<Pose2d, Double>(null, 0.0);
+      return new Pair<Pose2d, Double>(sdt.getPose(), 0.0);
     }
 
   }

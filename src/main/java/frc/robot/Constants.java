@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.util.PIDFController;
 
 /**
@@ -277,6 +278,37 @@ public final class Constants {
     public final static String NT_Name_Position = "Position";
   }
 
+  public final static class FieldPoses {
+    public final static Pose2d blueScorePose1 = new Pose2d(new Translation2d(2.0,0.50), Rotation2d.fromDegrees(180)); //lowest scoring position in Y
+    public final static Pose2d blueScorePose2 = new Pose2d(new Translation2d(2.0,1.05), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose3 = new Pose2d(new Translation2d(2.0,1.60), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose4 = new Pose2d(new Translation2d(2.0,2.15), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose5 = new Pose2d(new Translation2d(2.0,2.70), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose6 = new Pose2d(new Translation2d(2.0,3.30), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose7 = new Pose2d(new Translation2d(2.0,3.80), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose8 = new Pose2d(new Translation2d(2.0,4.40), Rotation2d.fromDegrees(180));
+    public final static Pose2d blueScorePose9 = new Pose2d(new Translation2d(2.0,5.00), Rotation2d.fromDegrees(180)); //highest scoring position in Y
+
+    public final static Pose2d redScorePose1 = new Pose2d(new Translation2d(7.0,0.50), Rotation2d.fromDegrees(0)); //lowest scoring position in Y.  FIX X
+    public final static Pose2d redScorePose2 = new Pose2d(new Translation2d(7.0,1.05), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose3 = new Pose2d(new Translation2d(7.0,1.60), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose4 = new Pose2d(new Translation2d(7.0,2.15), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose5 = new Pose2d(new Translation2d(7.0,2.70), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose6 = new Pose2d(new Translation2d(7.0,3.30), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose7 = new Pose2d(new Translation2d(7.0,3.80), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose8 = new Pose2d(new Translation2d(7.0,4.40), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose9 = new Pose2d(new Translation2d(7.0,5.00), Rotation2d.fromDegrees(0)); //highest scoring position in Y
+  
+    public final static Pose2d[][] blueScorePoses =  {{blueScorePose1,blueScorePose2,blueScorePose3},
+                                                    {blueScorePose4,blueScorePose5,blueScorePose6},
+                                                    {blueScorePose7,blueScorePose8,blueScorePose9}};
+
+    public final static Pose2d[][] redScorePoses =   {{redScorePose1,redScorePose2,redScorePose3},
+                                                    {redScorePose4,redScorePose5,redScorePose6},
+                                                    {redScorePose7,redScorePose8,redScorePose9}};                                                 
+
+  }
+
   public final static class MagazineSettings {
     public final static double defaultFrontIntakeSpeed = 0.5;
     public final static double defaultSideIntakeSpeed = 0.3;
@@ -360,6 +392,8 @@ public final class Constants {
     public static final double geoX = 175.60; // wheel and chassis height in x-direction
     public static final double geoY = 115.40; // wheel and chassis height in y-direction
     public static final double geoZ = 162.15; // wheel and chassis height in z-direction
+  
+  //
 
     // length of string
     private double stringLength;
@@ -437,4 +471,25 @@ public final class Constants {
       this.value = value;
     }
   }
+  //Enums for placement
+  public enum HorizontalScoringLane {
+    Left,
+    Right,
+    Center
+  }
+  public enum VerticalScoringLane{
+    Middle,
+    Top,
+    Bottom
+  }
+  public enum ScoringBlock {
+    Left(0), Center(1), Right(2);
+
+    public final int value;
+
+    ScoringBlock(int value) {
+      this.value = value;
+    }
+  }    
 }
+
