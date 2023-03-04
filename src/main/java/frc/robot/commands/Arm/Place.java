@@ -13,23 +13,21 @@ import frc.robot.subsystems.ColorSensors.GamePiece;
 
 public class Place extends CommandBase {
   //TODO swich to Enums, dont worry Mr. L
-  enum horizontal{
+  public enum Horizontal{
     left,
     right,
     center
   }
-  enum vertical{
+  public enum Vertical{
     middle,
     top,
     bottom
   }
-
-  public double armExtend;
   public ColorSensors sensors;
   /** Creates a new Place. */
-  private horizontal horizontalRequest;
-  private vertical verticalRequest;
-  public Place(ColorSensors sensors,horizontal horizontalRequest, vertical verticalRequest) {
+  private Horizontal horizontalRequest;
+  private Vertical verticalRequest;
+  public Place(ColorSensors sensors,Horizontal horizontalRequest, Vertical verticalRequest) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.horizontalRequest = horizontalRequest;
     this.verticalRequest = verticalRequest;
@@ -76,7 +74,7 @@ public class Place extends CommandBase {
     //Next move robot to placement position based on cube/isLeft
     //placeholder: Check which color/orentation of peice
     GamePiece piece = sensors.getGamePiece();
-    if (verticalRequest == vertical.bottom) {
+    if (verticalRequest == Vertical.bottom) {
 
     }
     switch (piece) {
@@ -106,8 +104,6 @@ public class Place extends CommandBase {
   // Returns true when the command should end.
   //after that all finishes, stow the arm wrist and elbow, pull from constants. 
   //TODO put into command scheduler
-  ArmMoveTo(null,null);
-  
   @Override
   public boolean isFinished() {
     return false;

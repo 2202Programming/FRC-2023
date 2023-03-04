@@ -34,6 +34,9 @@ import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
+import frc.robot.commands.Arm.Place;
+import frc.robot.commands.Arm.Place.Horizontal;
+import frc.robot.commands.Arm.Place.Vertical;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
@@ -282,10 +285,10 @@ public class RobotContainer {
 
         // PLACEMENT
         if (dc.Driver().rightTrigger().getAsBoolean()) {
-          dc.Operator().leftBumper().onTrue(new Place());
-          dc.Operator().rightBumper().onTrue(new Place());
-          dc.Operator().leftTrigger().onTrue(new Place());
-          dc.Operator().rightTrigger().onTrue(new Place());
+          dc.Operator().leftBumper().onTrue(new Place(colorSensors, Horizontal.left, Vertical.top));
+          dc.Operator().rightBumper().onTrue(new Place(colorSensors, Horizontal.right, Vertical.top));
+          dc.Operator().leftTrigger().onTrue(new Place(colorSensors, Horizontal.left, Vertical.middle));
+          dc.Operator().rightTrigger().onTrue(new Place(colorSensors, Horizontal.right, Vertical.middle));
         }
 
         
