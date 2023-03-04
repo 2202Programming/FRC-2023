@@ -126,6 +126,12 @@ public class SwerveDrivetrain extends SubsystemBase {
   private NetworkTableEntry est_pose_integ_y;
   private NetworkTableEntry est_pose_integ_h;
 
+  // ll pose updating
+  private NetworkTableEntry nt_x_diff;
+  private NetworkTableEntry nt_y_diff;
+  private NetworkTableEntry nt_yaw_diff;
+  private boolean visionPoseUsingRotation = true;
+
   double drive_kP = DriveTrain.drivePIDF.getP();
   double drive_kI = DriveTrain.drivePIDF.getI();
   double drive_kD = DriveTrain.drivePIDF.getD();
@@ -148,8 +154,14 @@ public class SwerveDrivetrain extends SubsystemBase {
   private LinearFilter bearingFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
   private LinearFilter velocityFilter = LinearFilter.singlePoleIIR(0.1, Constants.DT);
 
-  public final SwerveDrivePoseEstimator m_poseEstimator;
+  public final SwerveDrivePoseEstimator m_poseEstimator_ll;
+  public final SwerveDrivePoseEstimator m_poseEstimator_pv;
+  private double x_diff; // [m]
+  private double y_diff; // [m]
+  private double yaw_diff; // [deg]
 
+  private Pose2d llPose;
+  private Pose2d pvPose;
   public final Field2d m_field = new Field2d();
 
   public SwerveDrivetrain() {
@@ -180,13 +192,21 @@ public class SwerveDrivetrain extends SubsystemBase {
      * Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings.
      * The numbers used below are robot specific, and should be tuned.
      */
-    m_poseEstimator = new SwerveDrivePoseEstimator(
+    m_poseEstimator_ll = new SwerveDrivePoseEstimator(
         kinematics,
         sensors.getRotation2d(),
         meas_pos,
         new Pose2d(), // initial pose ()
         VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)), // std x,y, heading from odmetry
         VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))); // std x, y heading from vision
+
+    m_poseEstimator_pv = new SwerveDrivePoseEstimator(
+      kinematics,
+      sensors.getRotation2d(),
+      meas_pos,
+      new Pose2d(), // initial pose ()
+      VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)), // std x,y, heading from odmetry
+      VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))); // std x, y heading from vision
 
     m_odometry = new SwerveDriveOdometry(kinematics, sensors.getRotation2d(), meas_pos);
     // cur_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
@@ -218,6 +238,11 @@ public class SwerveDrivetrain extends SubsystemBase {
     est_pose_integ_x = table.getEntry("est_int_x");
     est_pose_integ_y = table.getEntry("est_int_y");
     est_pose_integ_h = table.getEntry("est_int_h");
+
+    // ll pose estimating
+    nt_x_diff = table.getEntry("vision_x_diff");
+    nt_y_diff = table.getEntry("vision_y_diff");
+    nt_yaw_diff = table.getEntry("vision_yaw_diff");
 
     SmartDashboard.putData("Field", m_field);
 
@@ -342,6 +367,8 @@ public class SwerveDrivetrain extends SubsystemBase {
       est_pose_integ_x.setDouble(m_pose_integ.getX());
       est_pose_integ_y.setDouble(m_pose_integ.getY());
       est_pose_integ_h.setDouble(m_pose_integ.getRotation().getDegrees());
+
+
 
       // if Drivetrain tuning
       // pidTuning();
@@ -520,23 +547,91 @@ public class SwerveDrivetrain extends SubsystemBase {
     old_pose = m_pose;
     m_pose = m_odometry.update(sensors.getRotation2d(), meas_pos);
 
-    // limelight from here down
-    if (limelight == null)
-      return;
+    // vision  from here down
+    if (limelight != null) {
+      m_poseEstimator_ll.update(sensors.getRotation2d(), meas_pos); //this should happen every robot cycle, regardless of vision targets.
+      llPoseEstimatorUpdate();
+    }
+
+    if (photonVision != null){
+      m_poseEstimator_pv.update(sensors.getRotation2d(), meas_pos); //this should happen every robot cycle, regardless of vision targets.
+      pvPoseEstimatorUpdate();
+    }
+
+    if ((limelight != null) && (llPose != null) && (limelight.getNumApriltags() > 0)) { //just use LL for now
+      Pose2d prev_m_Pose = m_pose;
+      if (visionPoseUsingRotation) {
+        setPose(llPose); //update robot pose from swervedriveposeestimator, include vision-based rotation
+      }
+      else{
+        setPose(new Pose2d(llPose.getTranslation(), prev_m_Pose.getRotation())); //update robot translation from swervedriveposeestimator, do not update rotation
+      }
+      x_diff = Math.abs(prev_m_Pose.getX() -  m_pose.getX());
+      y_diff = Math.abs(prev_m_Pose.getY() - m_pose.getY());
+      yaw_diff = Math.abs(prev_m_Pose.getRotation().getDegrees() - m_pose.getRotation().getDegrees());
+      // vision pose updating NTs
+      nt_x_diff.setDouble(x_diff);
+      nt_y_diff.setDouble(y_diff);
+      nt_yaw_diff.setDouble(yaw_diff);
+    }
+    
 
     // WIP use other poseEstimator
-    m_poseEstimator.update(sensors.getRotation2d(), meas_pos);
-
-    if (limelight.getNumApriltags() > 0) {
-      // only if we have a tag in view
-      // Pair<Pose2d, Double> pose = photonVision.getPoseEstimate();
-      m_poseEstimator.addVisionMeasurement(limelight.getBluePose(), limelight.visionTimestamp);
+    if (limelight != null && photonVision != null)
+    {
+      /*
+      if (photonVision.hasAprilTarget() && pvPose != null){
+        Pose2d prev_m_Pose = m_pose;
+        setPose(pvPose); // update main pose with vision integrated pose if we have a target
+        double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX()) / 16.54099;
+        double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY()) / 8.002778;
+        System.out.println("***UPDATED BY PV \n -----> X Fixed: " + x_dif + "%   Y Fixed: " + y_dif
+           + "%");
+      }*/
+      // if (limelight.hasAprilTarget() && llPose != null){ // else if with photonvision
+      //   Pose2d prev_m_Pose = m_pose;
+      //   setPose(llPose);
+      //   double x_dif = Math.abs(prev_m_Pose.getX() -  m_pose.getX()) / 16.54099;
+      //   double y_dif = Math.abs(prev_m_Pose.getY() - m_pose.getY()) / 8.002778;
+      //   System.out.println("***UPDATED BY LL \n -----> X: " + x_dif + "%   Y: " + y_dif+ "%   Y Fixed: " + y_dif
+      //       + "%");
+      // }
     }
-    m_pose_integ = m_poseEstimator.getEstimatedPosition();
+
   }
 
+  void pvPoseEstimatorUpdate(){
+    
+    if (photonVision.hasAprilTarget() ) {
+      // this should happen only if we have a tag in view
+      // OK if it is run only intermittanly.  Uses latency of vision pose.
+      m_poseEstimator_pv.addVisionMeasurement(photonVision.getPoseEstimate().getFirst(), photonVision.getVisionTimestamp());
+
+      pvPose = m_poseEstimator_pv.getEstimatedPosition();
+    }
+  }
+
+  void llPoseEstimatorUpdate(){
+    
+    if (limelight.getNumApriltags() > 0) {
+      // this should happen only if we have a tag in view
+      // OK if it is run only intermittanly.  Uses latency of vision pose.
+      m_poseEstimator_ll.addVisionMeasurement(limelight.getBluePose(), limelight.getVisionTimestamp());
+
+      llPose = m_poseEstimator_ll.getEstimatedPosition();
+    }
+  }
+
+public void disableVisionPoseRotation() {
+  visionPoseUsingRotation = false;
 }
 
+public void enableVisionPoseRotation() {
+  visionPoseUsingRotation = true;
+}
+
+
+}
 // TODO: Move to a TEST/Tuning command - DPL 2/21/22
 // private void pidTuning() { //if drivetrain tuning
 
