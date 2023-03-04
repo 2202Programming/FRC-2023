@@ -21,20 +21,21 @@ import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.util.PoseMath;
+import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.ScoringBlock;
 
 public class goToScoringPosition extends CommandBase {
   /** Creates a new goToScoringPosition. */
 
-  ScoringBlock scoringPosition;
+  HorizontalScoringLane horizontalScoringLane;
   PathConstraints constraints;
   SwerveDrivetrain sdt;
   PPSwerveControllerCommand pathCommand;
 
   //pick correct scoring pose based on alliance
-  public goToScoringPosition(PathConstraints constraints, ScoringBlock scoringPosition) {
+  public goToScoringPosition(PathConstraints constraints, HorizontalScoringLane horizontalScoringLane) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.scoringPosition = scoringPosition;
+    this.horizontalScoringLane = horizontalScoringLane;
     this.constraints = constraints;
     sdt = RobotContainer.RC().drivetrain;
   }
@@ -52,7 +53,7 @@ public class goToScoringPosition extends CommandBase {
       else scoringBlock = 1;
 
       //FOR BLUE: left is largest index of scoring trio
-      switch(scoringPosition){
+      switch(horizontalScoringLane){
         case Left:
           scoringAdjusted = 2;
           break;
@@ -73,7 +74,7 @@ public class goToScoringPosition extends CommandBase {
       else scoringBlock = 1;
 
       //FOR RED: left is smallest index of scoring trio
-      switch(scoringPosition){
+      switch(horizontalScoringLane){
         case Left:
           scoringAdjusted = 0;
           break;

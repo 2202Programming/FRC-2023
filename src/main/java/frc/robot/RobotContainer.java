@@ -28,6 +28,7 @@ import frc.robot.commands.Intake.Washer.IntakeForward;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.Placement.Place;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
@@ -36,7 +37,6 @@ import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
-import frc.robot.commands.Arm.Place;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.Constants.ScoringBlock;
@@ -252,11 +252,11 @@ public class RobotContainer {
         dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); //disable vision rot
 
-        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), ScoringBlock.Left));
+        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
         //up and down for center trio request per Alek
-        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Center));
-        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Center));
-        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Right));
+        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
+        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
+        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Right));
         break;
 
       case Competition:
@@ -290,14 +290,14 @@ public class RobotContainer {
         dc.Operator().povDown().whileTrue(new CarwashReverse());
 
         // PLACEMENT
-        if (dc.Driver().rightTrigger().getAsBoolean()) {
-          dc.Operator().leftBumper().onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top));
-          dc.Operator().rightBumper().onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top));
-          dc.Operator().leftTrigger().onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle));
-          dc.Operator().rightTrigger().onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle));
-        }
+          if (dc.Driver().rightTrigger().getAsBoolean()) {
+            dc.Operator().leftBumper().onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top));
+            dc.Operator().rightBumper().onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top));
+            dc.Operator().leftTrigger().onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle));
+            dc.Operator().rightTrigger().onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle));
+          }
 
-        
+    
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
          * dc.Driver().leftTrigger().whileTrue(new RobotOrFieldCentric());

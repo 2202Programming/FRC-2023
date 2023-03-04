@@ -192,6 +192,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
     public GamePiece getCurrentGamePiece() {
         return currentGamePiece;
     }
+
+    //Every time we place or eject a game peice, Call this method. This will clear lines 172-179, and allow us to detect peices again
     public void clearCurrentGamePiece() {
         currentGamePiece = GamePiece.None;
     }
