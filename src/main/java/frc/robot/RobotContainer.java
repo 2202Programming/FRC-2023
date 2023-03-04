@@ -37,6 +37,7 @@ import frc.robot.commands.test.GenericVelocityTest;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
+import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Limelight_Subsystem;
@@ -88,6 +89,7 @@ public class RobotContainer {
   public final Elbow elbow;
   public final Claw_Substyem claw;
   public final BlinkyLights lights;
+  public final ColorSensors colorSensors;
 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
@@ -114,6 +116,7 @@ public class RobotContainer {
         armSS = null;// new ArmSS();
         elbow = null; // new Elbow();
         claw = null;// new Claw_Substyem();
+        colorSensors = null;
         break;
 
       case SwerveBot:
@@ -125,6 +128,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        colorSensors = null;
         break;
 
       case ChadBot:
@@ -136,6 +140,7 @@ public class RobotContainer {
         armSS = null;
         elbow = null;
         claw = null;
+        colorSensors = new ColorSensors();
         break;
 
       case BotOnBoard: // fall through
@@ -148,7 +153,8 @@ public class RobotContainer {
         intake = null;
         armSS = new ArmSS();
         elbow = new Elbow();
-        claw = null;
+        claw = new Claw_Substyem();// null;
+        colorSensors = null;
         break;
     }
 
@@ -177,7 +183,6 @@ public class RobotContainer {
           true, // correct path for mirrored depending on alliance color.
           drivetrain);
 
-     
       myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing",
           new PathConstraints(3.5, 4.5))).andThen(new ChargeStationBalance());
     }
@@ -195,17 +200,23 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings) {
       case arm_test:
-      armSS.setMaxVel(8.0);
-        dc.Driver().a().whileTrue(new GenericPositionTest(armSS, 10.0, 5.0).WithLockout(20.0));
-        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 5.0, 3.0, 1.0));
-        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));
-        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, true));
-        
-        dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
-     //   dc.Driver().leftBumper().whileTrue(new LockoutExampleCmd().WithLockout(5.0));
+        armSS.setMaxVel(8.0);
 
-     //   armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, 
-      //    dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
+        // turn on some networking watch/updates fod debugging
+        var wrist = claw.getWrist();
+        armSS.getWatcher();
+        claw.getWatcher();
+        elbow.getWatcher();
+
+        dc.Driver().a().whileTrue(new GenericPositionTest(wrist, -120.0, 120.0, 120.0));
+        dc.Driver().b().whileTrue(new GenericVelocityTest(wrist, 30.0, 3.0, 2.0));
+
+        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
+        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
+
+        dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
+
+        //armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
       case balance_test:
         if (drivetrain == null)
@@ -338,16 +349,14 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new PrintCommand("***Eject Start"),
             new InstantCommand(drivetrain::printPose),
-            new outtakeCompetitionToggle().withTimeout(1.0)
-            ));
+            new outtakeCompetitionToggle().withTimeout(1.0)));
 
-   eventMap.put("eject2",
+    eventMap.put("eject2",
         new SequentialCommandGroup(
-          new PrintCommand("***Eject2"),
-          new InstantCommand(drivetrain::printPose),
-          new outtakeCompetitionToggle().withTimeout(2.0),
-          new WaitCommand(1.5)
-          ));
+            new PrintCommand("***Eject2"),
+            new InstantCommand(drivetrain::printPose),
+            new outtakeCompetitionToggle().withTimeout(2.0),
+            new WaitCommand(1.5)));
 
     eventMap.put("balance",
         new SequentialCommandGroup(

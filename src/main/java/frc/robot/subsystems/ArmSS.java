@@ -5,6 +5,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.util.NeoServo;
@@ -28,15 +31,15 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     final int STALL_CURRENT = 50;
     final int FREE_CURRENT = 20;
 
-    final double gearRadius = 2.63398 * 2 * Math.PI; //2.633[cm] is drive gear radius
+    final double gearRadius = 2.63398 * 2 * Math.PI; // 2.633[cm] is drive gear radius
     final double gearRatio = (1.0 / 75.0);
-    final double conversionFactor = gearRadius*gearRatio;
- 
+    final double conversionFactor = gearRadius * gearRatio;
+
     // state vars
     PIDController positionPID_rt = new PIDController(5.0, 0.150, 0.250); // outer position loop
     PIDController positionPID_lt = new PIDController(5.0, 0.150, 0.250); // outer position loop
-    PIDFController hwVelPID_rt = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); 
-    PIDFController hwVelPID_lt = new PIDFController(0.002141, 0.00005, 0.15, 0.05017); 
+    PIDFController hwVelPID_rt = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
+    PIDFController hwVelPID_lt = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
     final int hwVelSlot = 0;
 
     // positive extension moves arm out
@@ -58,7 +61,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     // sync instance vars
     boolean sync = false; // don't think we need this, +- 3mm without.
     double syncCompensation; // amount of compensation [m/s]
-    
+
     // computed values from position pid
     double pos_error;
 
@@ -66,25 +69,27 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     PIDController syncPID = new PIDController(0.0, 0.0, 0.0); // arm synchronization pid. syncs left --> right
 
     public ArmSS() {
-        rightArm = new NeoServo(CAN.ARM_RIGHT_Motor, positionPID_rt,hwVelPID_rt, invert_right);
+        rightArm = new NeoServo(CAN.ARM_RIGHT_Motor, positionPID_rt, hwVelPID_rt, invert_right);
         leftArm = new NeoServo(CAN.ARM_LEFT_Motor, positionPID_lt, hwVelPID_lt, invert_left);
+        rightArm.setName(getName()+"/ArmServo_right");
+        leftArm.setName(getName()+"/ArmServo_left");
         configure(rightArm);
         configure(leftArm);
 
+
         // zero our encoders at power up
         setPosition(0.0);
-        
-        ntcreate();
     }
+
     // finish the arm servo configurations
     void configure(NeoServo arm) {
         // rest of Neo and servo PID stuff
         arm.setConversionFactor(conversionFactor)
-        .setSmartCurrentLimit(STALL_CURRENT, FREE_CURRENT)
-        .setVelocityHW_PID(maxVel, maxAccel)
-        .setTolerance(posTol, velTol)
-        .setMaxVelocity(maxVel)
-        .burnFlash();
+                .setSmartCurrentLimit(STALL_CURRENT, FREE_CURRENT)
+                .setVelocityHW_PID(maxVel, maxAccel)
+                .setTolerance(posTol, velTol)
+                .setMaxVelocity(maxVel)
+                .burnFlash();
     }
 
     @Override
@@ -94,7 +99,6 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         syncCompensation = sync ? syncPID.calculate(leftArm.getPosition(), rightArm.getPosition()) : 0.0;
         leftArm.periodic(syncCompensation);
         rightArm.periodic(0.0);
-        ntUpdates();
     }
 
     // At Position flags for use in the commands
@@ -146,7 +150,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     }
 
     public double getVelocityCmd() {
-        return (leftArm.getVelocityCmd() + rightArm.getVelocityCmd())/2.0;
+        return (leftArm.getVelocityCmd() + rightArm.getVelocityCmd()) / 2.0;
     }
 
     public double getVelocity() {
@@ -168,130 +172,100 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         sync = false;
     }
 
-    /******************
-     * Network Table Stuff.
-     * 
-     * Should most of this be in the arm class? Probably.
-     * Is it easier to look at and fix if it's in the ArmSS class? Probably.
-     *************/
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("arm");
-
-    // PID controllers
-    NetworkTableEntry nt_left_kP;
-    NetworkTableEntry nt_left_kI;
-    NetworkTableEntry nt_left_kD;
-
-    NetworkTableEntry nt_right_kP;
-    NetworkTableEntry nt_right_kI;
-    NetworkTableEntry nt_right_kD;
-
-    NetworkTableEntry nt_sync_kP;
-    NetworkTableEntry nt_sync_kI;
-    NetworkTableEntry nt_sync_kD;
-
-    // positions/vels
-    NetworkTableEntry nt_left_desiredPos;
-    NetworkTableEntry nt_left_currentPos;
-    NetworkTableEntry nt_left_desiredVel;
-    NetworkTableEntry nt_left_currentVel;
-
-    NetworkTableEntry nt_right_desiredPos;
-    NetworkTableEntry nt_right_currentPos;
-    NetworkTableEntry nt_right_desiredVel;
-    NetworkTableEntry nt_right_currentVel;
-
-    // maxs, mins, tols
-    NetworkTableEntry nt_maxVel;
-    NetworkTableEntry nt_posTol;
-    NetworkTableEntry nt_velTol;
-
-    NetworkTableEntry nt_error;
-    NetworkTableEntry nt_syncCompensation;
-
-    public void ntcreate() {
-        // PIDs
-        nt_left_kP = table.getEntry("Left kP");
-        nt_left_kI = table.getEntry("Left kI");
-        nt_left_kD = table.getEntry("Left kD");
-
-        nt_right_kP = table.getEntry("Right kP");
-        nt_right_kI = table.getEntry("Right kI");
-        nt_right_kD = table.getEntry("Right kD");
-
-        nt_sync_kP = table.getEntry("Sync kP");
-        nt_sync_kI = table.getEntry("Sync kI");
-        nt_sync_kD = table.getEntry("Sync kD");
-
-        // des/cur pos/vel
-        nt_left_desiredPos = table.getEntry("Left Desired Position");
-        nt_left_currentPos = table.getEntry("Left Current Position");
-        nt_left_desiredVel = table.getEntry("Left Desired Velocity");
-        nt_left_currentVel = table.getEntry("Left Current Velocity");
-
-        nt_right_desiredPos = table.getEntry("right Desired Position");
-        nt_right_currentPos = table.getEntry("right Current Position");
-        nt_right_desiredVel = table.getEntry("right Desired Velocity");
-        nt_right_currentVel = table.getEntry("right Current Velocity");
-
-        nt_syncCompensation = table.getEntry("Sync Compensation");
-
-        // maxs, mins, tols
-        nt_maxVel = table.getEntry("Max Velocity (cm/s)");
-        nt_posTol = table.getEntry("Position Tolerance (cm)");
-        nt_velTol = table.getEntry("Velocity Tolerance (cm/s)");
-        nt_error = table.getEntry("Pos Error");
-
-        // set doubles for values that we will update based on what is in NT, so they
-        // appear
-        nt_left_kP.setDouble(leftArm.positionPID.getP());
-        nt_left_kI.setDouble(leftArm.positionPID.getI());
-        nt_left_kD.setDouble(leftArm.positionPID.getD());
-
-        nt_right_kP.setDouble(rightArm.positionPID.getP());
-        nt_right_kI.setDouble(rightArm.positionPID.getI());
-        nt_right_kD.setDouble(rightArm.positionPID.getD());
-
-        nt_sync_kP.setDouble(syncPID.getP());
-        nt_sync_kI.setDouble(syncPID.getI());
-        nt_sync_kD.setDouble(syncPID.getD());
-
-        nt_maxVel.setDouble(maxVel);
-        nt_posTol.setDouble(posTol);
-        nt_velTol.setDouble(velTol);
-        nt_error.setDouble(pos_error);
+    public Command getWatcher() {
+        var cmd = new ArmSSWatcher();
+        cmd.runsWhenDisabled();
+        cmd.schedule();
+        return cmd;
     }
 
-    private void ntUpdates() {
-        // info (get)
-        nt_left_desiredPos.setDouble(leftArm.getSetpoint());
-        nt_left_currentPos.setDouble(leftArm.getPosition());
-        nt_left_desiredVel.setDouble(leftArm.getVelocityCmd());
-        nt_left_currentVel.setDouble(leftArm.getVelocity());
+    class ArmSSWatcher extends CommandBase {
 
-        nt_right_desiredPos.setDouble(rightArm.getSetpoint());
-        nt_right_currentPos.setDouble(rightArm.getPosition());
-        nt_right_desiredVel.setDouble(rightArm.getVelocityCmd());
-        nt_right_currentVel.setDouble(rightArm.getVelocity());
-        nt_error.setDouble(pos_error);
-        nt_syncCompensation.setDouble(syncCompensation);
+        /******************
+         * Network Table Stuff.
+         * 
+         * Should most of this be in the arm class? Probably.
+         * Is it easier to look at and fix if it's in the ArmSS class? Probably.
+         *************/
+        NetworkTable table = NetworkTableInstance.getDefault().getTable(ArmSS.this.getName());
 
-        // PID setters
-        leftArm.positionPID.setP(nt_left_kP.getDouble(0.0));
-        leftArm.positionPID.setI(nt_left_kI.getDouble(0.0));
-        leftArm.positionPID.setD(nt_left_kD.getDouble(0.0));
+        // maxs, mins, tols
+        NetworkTableEntry nt_maxVel;
+        NetworkTableEntry nt_posTol;
+        NetworkTableEntry nt_velTol;
 
-        rightArm.positionPID.setP(nt_right_kP.getDouble(0.0));
-        rightArm.positionPID.setI(nt_right_kI.getDouble(0.0));
-        rightArm.positionPID.setD(nt_right_kD.getDouble(0.0));
+        NetworkTableEntry nt_error;
+        NetworkTableEntry nt_syncCompensation;
 
-        syncPID.setP(nt_sync_kP.getDouble(0.0));
-        syncPID.setI(nt_sync_kI.getDouble(0.0));
-        syncPID.setD(nt_sync_kD.getDouble(0.0));
+        ArmSSWatcher() {
+            rightArm.getWatcher();
+            leftArm.getWatcher();
+            ntcreate();
+        }
 
-        /// leftArm.positionPID.setTolerance(nt_posTol.getDouble(0.5),
-        /// nt_velTol.getDouble(0.5));
-        /// rightArm.positionPID.setTolerance(nt_posTol.getDouble(0.5),
-        /// nt_velTol.getDouble(0.5));
+        // Called when the command is initially scheduled.
+        @Override
+        public void initialize() {
+        }
+
+        // Called every time the scheduler runs while the command is scheduled.
+        @Override
+        public void execute() {
+            ntUpdates();
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+
+        }
+
+        @Override
+        public boolean runsWhenDisabled() {
+            return true;
+        }
+
+        void ntcreate() {
+            // PIDs
+            
+            var tname = ArmSS.this.getName();
+            SmartDashboard.putData(tname+"/positionPID_lt", leftArm.positionPID);
+            SmartDashboard.putData(tname+"/positionPID_rt", rightArm.positionPID);
+            SmartDashboard.putData(tname+"/syncPID", syncPID);
+
+            nt_syncCompensation = table.getEntry("/SyncComp");
+
+            // maxs, mins, tols
+            nt_maxVel = table.getEntry("MaxVelocity");
+            nt_posTol = table.getEntry("Position Tolerance");
+            nt_velTol = table.getEntry("Velocity Tolerance");
+            nt_error = table.getEntry("Position Error");
+
+            //init with correct values
+            nt_maxVel.setDouble(maxVel);
+            nt_posTol.setDouble(posTol);
+            nt_velTol.setDouble(velTol);
+            nt_error.setDouble(pos_error);
+        }
+
+        private void ntUpdates() {
+            // info (get)
+            nt_error.setDouble(pos_error);
+            nt_syncCompensation.setDouble(syncCompensation);
+
+            //look for updates from NT for editable values
+            maxVel = nt_maxVel.getDouble(maxVel);
+            double _posTol = nt_posTol.getDouble(posTol);
+            double _velTol = nt_velTol.getDouble(velTol);
+
+            //update with new values
+            setMaxVel(maxVel);
+            positionPID_lt.setTolerance(_posTol, _velTol);
+            positionPID_rt.setTolerance(_posTol, _velTol);
+
+            nt_posTol.setDouble(posTol);
+            nt_velTol.setDouble(velTol);
+        }
     }
 
 }

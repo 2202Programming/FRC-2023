@@ -7,14 +7,23 @@ package frc.robot.util;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 
 public class NeoServo implements VelocityControlled {
+    String name = "no-name";
 
     // commands
     double velocity_cmd; // computed from pid, or external_vel_cmd
@@ -29,7 +38,8 @@ public class NeoServo implements VelocityControlled {
 
     // state vars
     final public PIDController positionPID;
-    final public PIDFController hwVelPIDcfg; // hold hardward pid settings, gets copied to hw
+    final public PIDFController hwVelPIDcfg; // matches hardware setting
+    final PIDFController prevVelPIDcfg; // soft copy to edit /w NT and compare with hwVelPIDcfg
     final int hwVelSlot;
 
     // hardware
@@ -53,6 +63,12 @@ public class NeoServo implements VelocityControlled {
         this.positionPID = positionPID;
         this.hwVelSlot = hwVelSlot;
         this.hwVelPIDcfg = hwVelPIDcfg;
+        this.prevVelPIDcfg = new PIDFController(hwVelPIDcfg);
+    }
+
+    public NeoServo setName(String name) {
+        this.name = name;
+        return this;
     }
 
     // methods to tune the servo very SmartMax Neo specific
@@ -91,7 +107,7 @@ public class NeoServo implements VelocityControlled {
 
     // defers to setMaxVel(), but returns this for config chaining
     public NeoServo setMaxVelocity(double maxVelocity) {
-        //defer to the VelocityControlled API
+        // defer to the VelocityControlled API
         setMaxVel(maxVelocity);
         return this;
     }
@@ -102,9 +118,9 @@ public class NeoServo implements VelocityControlled {
     }
 
     /*
-     *       VelocityControlled API
+     * VelocityControlled API
      * 
-    */
+     */
     // Servo's position setpoint
     public void setSetpoint(double pos) {
         positionPID.setSetpoint(pos);
@@ -122,8 +138,8 @@ public class NeoServo implements VelocityControlled {
 
     // Sets the encoder position (Doesn't move anything)
     public void setPosition(double pos) {
-        encoder.setPosition(pos);        // tell our encoder we are at pos
-        positionPID.reset();             // clear any history in the pid
+        encoder.setPosition(pos); // tell our encoder we are at pos
+        positionPID.reset(); // clear any history in the pid
         positionPID.calculate(pos, pos); // tell our pid we want that position; measured, setpoint same
     }
 
@@ -152,8 +168,13 @@ public class NeoServo implements VelocityControlled {
         return velocity_cmd;
     }
 
-    void setArbFeedforward(double aff) {
-        arbFeedforward = aff;
+    public void setArbFeedforward(double aff) {
+        //uses percent power, on range of -1. to 1.0
+        if (Math.abs(aff) > 1.0) {
+            DriverStation.reportError("|ArbFF| > 1, check your math. Using ZERO.", true);
+            arbFeedforward = 0.0;
+        } else
+            arbFeedforward = aff;
     }
 
     public void hold() {
@@ -190,6 +211,68 @@ public class NeoServo implements VelocityControlled {
         // output - send our vel to the controller
 
         // potential use of feedforward
-        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFeedforward);
+        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFeedforward, ArbFFUnits.kPercentOut);
     }
-} // End of Arm Class
+
+    public Command getWatcher() {
+        var cmd = new NeoWatcher();
+        cmd.schedule();
+        return cmd;
+    }
+
+    class NeoWatcher extends CommandBase {
+        NetworkTable table;
+        NetworkTableEntry nt_arbFF;
+        NetworkTableEntry nt_currentPos;
+        NetworkTableEntry nt_desiredPos;
+        NetworkTableEntry nt_desiredVel;
+        NetworkTableEntry nt_currentVel;
+
+        NeoWatcher() {
+            table = NetworkTableInstance.getDefault().getTable(name);
+            // keep updates even when disabled, self-decoration
+            this.runsWhenDisabled();
+            ntcreate();
+        }
+
+        // Called every time the scheduler runs while the command is scheduled.
+        @Override
+        public void execute() {
+            ntupdates();
+        }
+
+        public void ntcreate() {
+            nt_arbFF = table.getEntry("ArbFF");
+            nt_currentPos = table.getEntry("Position");
+            nt_currentVel = table.getEntry("Velocity");
+            nt_desiredPos = table.getEntry("PositionCmd");
+            nt_desiredVel = table.getEntry("VelocityCmd");
+
+            // put the a copy on dashboard to edit
+            SmartDashboard.putData(name + "/hwVelPIDcfg", prevVelPIDcfg);
+        }
+
+        public void ntupdates() {
+            nt_arbFF.setDouble(arbFeedforward);
+            nt_currentPos.setDouble(getPosition());
+            nt_currentVel.setDouble(getVelocity());
+            nt_desiredPos.setDouble(getSetpoint());
+            nt_desiredVel.setDouble(getVelocityCmd());
+
+            // look for PIDF config changes
+            hwVelPIDcfg.copyChangesTo(pid, hwVelSlot, prevVelPIDcfg);
+        }
+
+        // Returns true when the command should end.
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+
+        @Override
+        public boolean runsWhenDisabled() {
+            return true;
+        }
+    }
+
+}

@@ -7,9 +7,24 @@ package frc.robot.commands.test;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.commands.utility.Lockout;
 
+/**
+ * 
+ * Usage example for locking out command from multiple button hits.
+ * This is good for testing or in some cases competiton where a double press
+ * of a button would be bad.
+ * 
+ * Bind a command to a button, then decorate the command withlockout()
+ * 
+ * You can copy the following line into RobotContainer to see the example work.
+ *   dc.Driver().leftBumper()
+ *       .whileTrue(new LockoutExampleCmd().WithLockout(15.0));
+ * 
+ */
+
 /* To use the withLockout() decorator, you must use 'implements lockout' */
 public class LockoutExampleCmd extends CommandBase implements Lockout {
   int count;
+
   /** Creates a new LockoutExampleCmd. */
   public LockoutExampleCmd() {
 
