@@ -206,8 +206,8 @@ public class RobotContainer {
         armSS.getWatcher();
         claw.getWatcher();
         elbow.getWatcher();
-
-        dc.Driver().a().whileTrue(new GenericPositionTest(elbow, -90.0, 90.0, 15.0));
+        var wrist = claw.getWrist();
+        dc.Driver().a().whileTrue(new GenericPositionTest(wrist, -90.0, 160.0, 150.0));
         dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 30.0, 3.0, 1.0));
 
         dc.Driver().povUp().whileTrue(new GenericMoveAtSpeed(elbow, 10.0, true));

@@ -17,7 +17,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   final int FREE_CURRENT = 20;
 
   // mechanical gearing motor rotations to degrees with gear ratio
-  final double conversionFactor = (360.0 / 175.0);
+  final double conversionFactor = (360.0 / 210.0);
 
   // positionPID at position tolerances
   double posTol = 3.0; // [deg]
@@ -33,7 +33,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   // NeoServo - TODO (It's what arm values are rn, will need to change)
   final NeoServo elbow_servo;
   PIDController positionPID = new PIDController(1.0, 0.0, 0.0);  //(5.0, 0.150, 0.250);
-  PIDFController hwVelPID = new PIDFController(0.005, 0.0000, 0.00, 0.003125);
+  PIDFController hwVelPID = new PIDFController(0.005, 0.00005, 0.00, .003);   //0.003125);
 
   public Elbow() {
     elbow_servo = new NeoServo(CAN.ELBOW_Motor, positionPID, hwVelPID, true);

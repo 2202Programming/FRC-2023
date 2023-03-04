@@ -44,8 +44,8 @@ public class Claw_Substyem extends SubsystemBase {
   static final double WristMinDegrees = -90.0;
   static final double WristMaxDegrees = 90.0;
 
-  // compensate for wrist and elbow rotation
-  double maxArbFF = 0.0;
+  // compensate for wrist rotation
+  double maxArbFF = 0.02;
 
   // Rotation Constants
   final int ROTATE_STALL_CURRENT = 20;
@@ -62,8 +62,8 @@ public class Claw_Substyem extends SubsystemBase {
   final NeoServo rotate_servo;
 
   // PIDS for NeoServos - first pass on wrist tuning
-  PIDController wrist_positionPID = new PIDController(6.50, 0.01, 0.0);
-  PIDFController wrist_hwVelPID = new PIDFController(0.0035, 0.0000, 0.2, 0.01250 / 4.0);
+  PIDController wrist_positionPID = new PIDController(8.0, 0.05, 0.0);
+  PIDFController wrist_hwVelPID = new PIDFController(0.00055, 0.000004, 0., 0.00185);
 
   // TODO (It's what arm values are rn, will need to change)
   PIDController rotate_positionPID = new PIDController(5.0, 0.150, 0.250);
@@ -76,7 +76,7 @@ public class Claw_Substyem extends SubsystemBase {
   private GamePieceHeld piece_held;
 
   public Claw_Substyem() {
-    wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, false);
+    wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, true);
     rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, rotate_hwVelPID, false);
 
     wrist_servo.setName(getName() + "/wrist")
@@ -99,8 +99,6 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo.setPosition(0.0);
     rotate_servo.setSetpoint(0.0);
     rotate_servo.setPosition(0.0);
-
-    wrist_positionPID.enableContinuousInput(-180.0, 180.0);
 
     // default elbow angle supplier in case we are testing
     elbowAngle = this::zero;
@@ -152,7 +150,7 @@ public class Claw_Substyem extends SubsystemBase {
   public void periodic() {
     // calculate holding power needed from angle and maxArbFF term
     double arbff = maxArbFF * Math.sin(
-        Math.toRadians(elbowAngle.getAsDouble() + wrist_servo.getPosition()));
+        Math.toRadians(elbowAngle.getAsDouble() + wrist_servo.getSetpoint()));
     wrist_servo.setArbFeedforward(arbff);
     wrist_servo.periodic();
     rotate_servo.periodic();
