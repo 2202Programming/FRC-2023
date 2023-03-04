@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
@@ -268,11 +269,11 @@ public class RobotContainer {
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(false));
         dc.Driver().leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
 
-        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), ScoringBlock.Left));
+        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
         //up and down for center trio request per Alek
-        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Center));
-        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Center));
-        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Right));
+        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
+        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
+        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Right));
 
         // OPERATOR
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
@@ -293,14 +294,17 @@ public class RobotContainer {
         dc.Operator().povDown().whileTrue(new CarwashReverse());
 
         // PLACEMENT
-          if (dc.Driver().rightTrigger().getAsBoolean()) {
-            dc.Operator().leftBumper().onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top));
-            dc.Operator().rightBumper().onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top));
-            dc.Operator().leftTrigger().onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle));
-            dc.Operator().rightTrigger().onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle));
-          }
+        Place placeCommand; // Save placeCommand to for cancelling later
+        Trigger rt = dc.Driver().rightTrigger(); // save right tigger for concinseness in the next new commands
+        rt.and(dc.Operator().leftBumper().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top)));
+        rt.and(dc.Operator().rightBumper().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top)));
+        rt.and(dc.Operator().leftTrigger().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle)));
+        rt.and(dc.Operator().rightTrigger().onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle)));
+        
+        // create trigger for either of the sicks being touched
+        Trigger sticksTouched  = dc.Operator().leftStick().or(dc.Operator().rightStick());
+        placeCommand.until(sticksTouched); // modify the command to interrupt the command when the sicks are touched
 
-    
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
          * dc.Driver().leftTrigger().whileTrue(new RobotOrFieldCentric());
