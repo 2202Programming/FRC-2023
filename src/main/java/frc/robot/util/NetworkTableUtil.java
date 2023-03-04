@@ -10,6 +10,11 @@ public interface NetworkTableUtil {
      */
     default boolean necessaryForCompetition() { return false; }
 
+    /*
+     * Tell us who you are for the table
+     */
+    String getTableName();
+
     /**
      * Create NetworkTables here
      */

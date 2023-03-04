@@ -7,9 +7,9 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
+import frc.robot.commands.utility.WatcherCmd;
 import frc.robot.util.NeoServo;
 import frc.robot.util.PIDFController;
 import frc.robot.util.VelocityControlled;
@@ -75,7 +75,6 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         leftArm.setName(getName()+"/ArmServo_left");
         configure(rightArm);
         configure(leftArm);
-
 
         // zero our encoders at power up
         setPosition(0.0);
@@ -173,13 +172,10 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     }
 
     public Command getWatcher() {
-        var cmd = new ArmSSWatcher();
-        cmd.runsWhenDisabled();
-        cmd.schedule();
-        return cmd;
+        return new ArmSSWatcher();
     }
 
-    class ArmSSWatcher extends CommandBase {
+    class ArmSSWatcher extends WatcherCmd {
 
         /******************
          * Network Table Stuff.
@@ -193,44 +189,27 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         NetworkTableEntry nt_maxVel;
         NetworkTableEntry nt_posTol;
         NetworkTableEntry nt_velTol;
-
         NetworkTableEntry nt_error;
         NetworkTableEntry nt_syncCompensation;
 
         ArmSSWatcher() {
+            super();
             rightArm.getWatcher();
             leftArm.getWatcher();
-            ntcreate();
-        }
-
-        // Called when the command is initially scheduled.
-        @Override
-        public void initialize() {
-        }
-
-        // Called every time the scheduler runs while the command is scheduled.
-        @Override
-        public void execute() {
-            ntUpdates();
         }
 
         @Override
-        public boolean isFinished() {
-            return false;
-
+        public String getTableName() {
+            return ArmSS.this.getName();
         }
 
         @Override
-        public boolean runsWhenDisabled() {
-            return true;
-        }
-
-        void ntcreate() {
+        public void ntcreate() {
             // PIDs
-            
-            var tname = ArmSS.this.getName();
-            SmartDashboard.putData(tname+"/positionPID_lt", leftArm.positionPID);
-            SmartDashboard.putData(tname+"/positionPID_rt", rightArm.positionPID);
+            NetworkTable table = getTable();
+            var tname = getTableName();
+            SmartDashboard.putData(tname+"/positionPID_lt", positionPID_lt);
+            SmartDashboard.putData(tname+"/positionPID_rt", positionPID_rt);
             SmartDashboard.putData(tname+"/syncPID", syncPID);
 
             nt_syncCompensation = table.getEntry("/SyncComp");
@@ -248,7 +227,8 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
             nt_error.setDouble(pos_error);
         }
 
-        private void ntUpdates() {
+        @Override
+        public void ntupdate() {
             // info (get)
             nt_error.setDouble(pos_error);
             nt_syncCompensation.setDouble(syncCompensation);

@@ -11,15 +11,14 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
+import frc.robot.commands.utility.WatcherCmd;
 import frc.robot.util.NeoServo;
 import frc.robot.util.PIDFController;
 
@@ -100,6 +99,8 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo.setPosition(0.0);
     rotate_servo.setSetpoint(0.0);
     rotate_servo.setPosition(0.0);
+
+    wrist_positionPID.enableContinuousInput(-180.0, 180.0);
 
     // default elbow angle supplier in case we are testing
     elbowAngle = this::zero;
@@ -186,49 +187,24 @@ public class Claw_Substyem extends SubsystemBase {
   public Command getWatcher() {
     wrist_servo.getWatcher();
     rotate_servo.getWatcher();
-    var cmd = new ClawWatcher();
-    cmd.schedule();
-    return cmd;
+    return new ClawWatcher();
   }
 
-  class ClawWatcher extends CommandBase {
-    /**
-     ******** NETWORK TABLES ***********
-     */
-    NetworkTable table = NetworkTableInstance.getDefault().getTable(Claw_Substyem.this.getName());
+  /**
+   ******** NETWORK TABLES ***********
+   */
+  class ClawWatcher extends WatcherCmd {
     NetworkTableEntry nt_isOpen;
     NetworkTableEntry nt_gamePieceHeld;
     NetworkTableEntry nt_maxArbFF;
 
-    ClawWatcher() {
-      // keep updates even when disabled, self-decoration
-      this.runsWhenDisabled();
-      ntcreate();
-    }
-
-    // Called when the command is initially scheduled.
     @Override
-    public void initialize() {
-    }
-
-    // Called every time the scheduler runs while the command is scheduled.
-    @Override
-    public void execute() {
-      ntupdates();
-    }
-
-    // Returns true when the command should end.
-    @Override
-    public boolean isFinished() {
-      return false;
-    }
-
-    @Override
-    public boolean runsWhenDisabled() {
-      return true;
+    public String getTableName() {
+      return Claw_Substyem.this.getName();
     }
 
     public void ntcreate() {
+      NetworkTable table = getTable();
       nt_isOpen = table.getEntry("Open");
       nt_gamePieceHeld = table.getEntry("Game Piece");
       nt_maxArbFF = table.getEntry("/wrist/maxArbFF");
@@ -237,7 +213,7 @@ public class Claw_Substyem extends SubsystemBase {
       nt_maxArbFF.setDouble(maxArbFF);
     }
 
-    public void ntupdates() {
+    public void ntupdate() {
       nt_isOpen.setBoolean(is_open);
       nt_gamePieceHeld.setString(piece_held.toString());
       // get mutable values
