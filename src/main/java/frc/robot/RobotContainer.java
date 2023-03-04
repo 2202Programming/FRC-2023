@@ -114,7 +114,7 @@ public class RobotContainer {
     switch (robotSpecs.myRobotName) {
       case CompetitionBot2023:
         photonVision = null;// new PhotonVision();
-        limelight = null;// new Limelight_Subsystem();
+        limelight = new Limelight_Subsystem();
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
