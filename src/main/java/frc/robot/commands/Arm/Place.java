@@ -10,24 +10,17 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.ColorSensors.GamePiece;
+import frc.robot.Constants;
+import frc.robot.Constants.HorizontalScoringLane;
+import frc.robot.Constants.VerticalScoringLane;
 
 public class Place extends CommandBase {
-  //TODO swich to Enums, dont worry Mr. L
-  public enum Horizontal{
-    left,
-    right,
-    center
-  }
-  public enum Vertical{
-    middle,
-    top,
-    bottom
-  }
+
   public ColorSensors sensors;
   /** Creates a new Place. */
-  private Horizontal horizontalRequest;
-  private Vertical verticalRequest;
-  public Place(ColorSensors sensors,Horizontal horizontalRequest, Vertical verticalRequest) {
+  private HorizontalScoringLane horizontalRequest;
+  private VerticalScoringLane verticalRequest;
+  public Place(ColorSensors sensors,HorizontalScoringLane horizontalRequest, VerticalScoringLane verticalRequest) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.horizontalRequest = horizontalRequest;
     this.verticalRequest = verticalRequest;
@@ -36,35 +29,35 @@ public class Place extends CommandBase {
   
   private void Cone(boolean needsFlip) {
     switch (horizontalRequest){
-      case left:
-      //drive train move left 14.876 rotations left JASON!!
-      case right: 
-      //drive train move left 14.876 rotations right
+      case Left:
+      //drive train move Left 14.876 rotations Left JASON!!
+      case Right: 
+      //drive train move Left 14.876 rotations Right
     }
     //TODO depending on how arm clears, we may want to stall this until the above is finished
     switch (verticalRequest) {
-      case top: 
-      //arm move out to desired points (top) JASON!!
-      case middle:
-      //arm move out to desired points (middle) JASON!!
+      case Top: 
+      //arm move out to desired points (Top) JASON!!
+      case Middle:
+      //arm move out to desired points (Middle) JASON!!
     }
   }
   private void Cube() {
     switch (verticalRequest){
-      case top: 
-      //arm move out to desired points (top center) JASON!!
-      case middle:
-      //arm move out to desired points (middle center) JASON!!
+      case Top: 
+      //arm move out to desired points (Top Center) JASON!!
+      case Middle:
+      //arm move out to desired points (Middle Center) JASON!!
     }
   }
   private void Bottom() {
-    //TODO place bottom. Flip 180?
+    //TODO place Bottom. Flip 180?
     switch (horizontalRequest) {
-      case left:
+      case Left:
 
-      case center:
+      case Center:
 
-      case right:
+      case Right:
 
     }
   }
@@ -74,18 +67,18 @@ public class Place extends CommandBase {
     //Next move robot to placement position based on cube/isLeft
     //placeholder: Check which color/orentation of peice
     GamePiece piece = sensors.getCurrentGamePiece();
-    if (verticalRequest == Vertical.bottom) {
-
-    }
-    switch (piece) {
-      case Cube:
-        Cube();
-      case ConeFacingBack:
-        Cone(false); //TODO: CHECK assumption
-      case ConeFacingFront:
-        Cone(true); //TODO: Check assumption
-      case None:
-        
+    if (verticalRequest == VerticalScoringLane.Bottom) {
+      Bottom();
+    } else {
+      switch (piece) {
+        case Cube:
+          Cube();
+        case ConeFacingBack:
+          Cone(false); //TODO: CHECK assumption
+        case ConeFacingFront:
+          Cone(true); //TODO: Check assumption
+        case None:
+      }
     }
 
     //Move arns/ elbow out to position, pull from constants
