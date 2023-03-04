@@ -471,4 +471,25 @@ public final class Constants {
       this.value = value;
     }
   }
+  //Enums for placement
+  public enum HorizontalScoringLane {
+    Left,
+    Right,
+    Center
+  }
+  public enum VerticalScoringLane{
+    Middle,
+    Top,
+    Bottom
+  }
+  public enum ScoringBlock {
+    Left(0), Center(1), Right(2);
+
+    public final int value;
+
+    ScoringBlock(int value) {
+      this.value = value;
+    }
+  }    
 }
+

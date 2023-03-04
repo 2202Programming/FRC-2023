@@ -21,27 +21,18 @@ import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.util.PoseMath;
+import frc.robot.Constants.ScoringBlock;
 
 public class goToScoringPosition extends CommandBase {
   /** Creates a new goToScoringPosition. */
 
-  ScoringTrio scoringPosition;
+  ScoringBlock scoringPosition;
   PathConstraints constraints;
   SwerveDrivetrain sdt;
   PPSwerveControllerCommand pathCommand;
 
-  public enum ScoringTrio {
-    Left(0), Center(1), Right(2);
-
-    public final int value;
-
-    ScoringTrio(int value) {
-      this.value = value;
-    }
-  }
-
   //pick correct scoring pose based on alliance
-  public goToScoringPosition(PathConstraints constraints, ScoringTrio scoringPosition) {
+  public goToScoringPosition(PathConstraints constraints, ScoringBlock scoringPosition) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.scoringPosition = scoringPosition;
     this.constraints = constraints;
@@ -52,7 +43,7 @@ public class goToScoringPosition extends CommandBase {
   @Override
   public void initialize() {
     int scoringBlock; 
-    int scoringTrioAdjusted;
+    int scoringAdjusted;
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
       //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
@@ -63,17 +54,17 @@ public class goToScoringPosition extends CommandBase {
       //FOR BLUE: left is largest index of scoring trio
       switch(scoringPosition){
         case Left:
-          scoringTrioAdjusted = 2;
+          scoringAdjusted = 2;
           break;
         case Center:
-          scoringTrioAdjusted = 1;
+          scoringAdjusted = 1;
           break;
         default:
         case Right:
-          scoringTrioAdjusted = 0;
+          scoringAdjusted = 0;
           break;      
       }
-      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.blueScorePoses[scoringBlock][scoringTrioAdjusted]);
+      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted]);
     }
     else { //RED ALLIANCE
       //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
@@ -84,17 +75,17 @@ public class goToScoringPosition extends CommandBase {
       //FOR RED: left is smallest index of scoring trio
       switch(scoringPosition){
         case Left:
-          scoringTrioAdjusted = 0;
+          scoringAdjusted = 0;
           break;
         case Center:
-          scoringTrioAdjusted = 1;
+          scoringAdjusted = 1;
           break;
         default:
         case Right:
-          scoringTrioAdjusted = 2;
+          scoringAdjusted = 2;
           break;      
       }
-      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.redScorePoses[scoringBlock][scoringTrioAdjusted]);
+      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.redScorePoses[scoringBlock][scoringAdjusted]);
     }
     pathCommand.schedule();
   }

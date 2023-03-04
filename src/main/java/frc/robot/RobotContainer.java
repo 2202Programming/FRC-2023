@@ -37,8 +37,9 @@ import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
 import frc.robot.commands.Arm.Place;
-import frc.robot.commands.Arm.Place.Horizontal;
-import frc.robot.commands.Arm.Place.Vertical;
+import frc.robot.Constants.HorizontalScoringLane;
+import frc.robot.Constants.VerticalScoringLane;
+import frc.robot.Constants.ScoringBlock;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
@@ -251,9 +252,9 @@ public class RobotContainer {
         dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); //disable vision rot
 
-        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), goToScoringPosition.ScoringTrio.Left));
-        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Center));
-        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), goToScoringPosition.ScoringTrio.Right));
+        dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), ScoringBlock.Left));
+        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Center));
+        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), ScoringBlock.Right));
         break;
 
       case Competition:
@@ -288,10 +289,10 @@ public class RobotContainer {
 
         // PLACEMENT
         if (dc.Driver().rightTrigger().getAsBoolean()) {
-          dc.Operator().leftBumper().onTrue(new Place(colorSensors, Horizontal.left, Vertical.top));
-          dc.Operator().rightBumper().onTrue(new Place(colorSensors, Horizontal.right, Vertical.top));
-          dc.Operator().leftTrigger().onTrue(new Place(colorSensors, Horizontal.left, Vertical.middle));
-          dc.Operator().rightTrigger().onTrue(new Place(colorSensors, Horizontal.right, Vertical.middle));
+          dc.Operator().leftBumper().onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top));
+          dc.Operator().rightBumper().onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top));
+          dc.Operator().leftTrigger().onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle));
+          dc.Operator().rightTrigger().onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle));
         }
 
         
