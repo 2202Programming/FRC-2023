@@ -11,9 +11,7 @@ import frc.robot.RobotContainer;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.commands.auto.goToScoringPosition;
-import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.subsystems.ColorSensors;
-import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 public class Place extends CommandBase {
@@ -24,18 +22,19 @@ public class Place extends CommandBase {
   private goToScoringPosition position;
   private HorizontalScoringLane horizontalRequest;
   private VerticalScoringLane verticalRequest;
+
   public Place(ColorSensors sensors,HorizontalScoringLane horizontalRequest, VerticalScoringLane verticalRequest) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.horizontalRequest = horizontalRequest;
     this.verticalRequest = verticalRequest;
     this.sensors = sensors;
-
-    until(dc.Driver().leftStick().or(dc.Driver().rightStick()));
   }
+
   private void move() {
     position = new goToScoringPosition(new PathConstraints(2,3), horizontalRequest); 
     position.schedule();
   }
+
   private void Cone(boolean needsFlip) {
     move();
       //drive train move Left 14.876 rotations Right
@@ -51,6 +50,7 @@ public class Place extends CommandBase {
         break;
     }
   }
+
   private void Cube() {
     move();    
     switch (verticalRequest){
@@ -64,6 +64,7 @@ public class Place extends CommandBase {
         break;
     }
   }
+
   private void Bottom() {
     move();
     //TODO place Bottom. Flip 180?
@@ -106,12 +107,15 @@ public class Place extends CommandBase {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    position.cancel();
+  }
   // Returns true when the command should end.
   //after that all finishes, stow the arm wrist and elbow, pull from constants. 
   //TODO put into command scheduler
   @Override
   public boolean isFinished() {
-    return false;
+    //end command if driver moves either stick more than threshold
+    return (dc.Driver().getLeftX() > 0.1 || dc.Driver().getLeftY() > 0.1 || dc.Driver().getRightX() > 0.1 || dc.Driver().getRightY() > 0.1);
   }
 }
