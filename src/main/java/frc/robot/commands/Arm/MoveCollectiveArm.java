@@ -11,16 +11,26 @@ import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Elbow;
 
 public class MoveCollectiveArm extends CommandBase {
+  //hardware
   ArmSS arm = RobotContainer.RC().armSS;
   Elbow elbow = RobotContainer.RC().elbow;
   Claw_Substyem claw = RobotContainer.RC().claw;
-  enum clawGoal{frontSide, backSide};
-  clawGoal initialClawSide;
+  
+  /*
+   * claw level tracking options
+   * 
+   */
+  enum clawGoal{frontSide, backSide};   //tbd delivery
+  
+  /*
+   * Safe to flip zone for elbow angle
+   */
   final double minFlip = 70.0;
   final double maxFlip = 120.0;
 
-  double elbow_maxVel = 60.0;
-
+/**
+ * State of colective, either start or target.
+ */
   class Positions{
     double armPos;
     double elbowPos;
@@ -37,20 +47,29 @@ public class MoveCollectiveArm extends CommandBase {
     }
   }
 
-  // {arm, elbow, clawOffsetTrack}, wrist tracks elbow for now [cm, deg, deg]
+  // filled in at init based on where we are
+  Positions start;
+  Positions target;
 
-   final Positions travel  = new Positions (0.0, 10.0, -90.0, 0.0, clawGoal.frontSide); // wrist/track need to be done
-   final Positions mid = new Positions (20.0, 90.0, 90.0, 0.0, clawGoal.frontSide); // wrist/track need to be done
-   final Positions high = new Positions (35.0, 120.0, 90.0,0.0, clawGoal.frontSide); // wrist/track need to be done
-   final Positions travelMid = new Positions(10.0, 50.0, 90.0,0.0, clawGoal.frontSide); // wrist/track need to be done
-
-   final Positions positions[] = {travel, mid, high, travelMid};
-
-  final Positions target;
- public enum CollectiveMode {
+  /*
+   * CollectiveMode names the target
+   */
+  public enum CollectiveMode {
+    power_on,
     travel, mid, high, travelMid
   };
 
+  // {arm, elbow, clawOffsetTrack}, wrist tracks elbow for now [cm, deg, deg]
+  
+  Positions power_on = new Positions (0.0, 10.0, -90.0, 0.0, clawGoal.frontSide); 
+  Positions travel  = new Positions (0.0, 10.0, -90.0, 0.0, clawGoal.frontSide); // wrist/track need to be done
+  Positions mid = new Positions (20.0, 90.0, 90.0, 0.0, clawGoal.frontSide); // wrist/track need to be done
+  Positions high = new Positions (35.0, 120.0, 90.0,0.0, clawGoal.frontSide); // wrist/track need to be done
+  Positions travelMid = new Positions(10.0, 50.0, 90.0,0.0, clawGoal.frontSide); // wrist/track need to be done
+
+  Positions positions[] = {travel, mid, high, travelMid};
+
+ 
   /** Creates a new MoveCollectiveArm. */
   public MoveCollectiveArm(CollectiveMode where) {
     target = positions[where.ordinal()];
@@ -60,19 +79,22 @@ public class MoveCollectiveArm extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    
+    //capture where we are
+    start = getStart();
+    
+    //move towards our target
     arm.setSetpoint(target.armPos);
     elbow.setSetpoint(target.elbowPos);
-    elbow.setMaxVel(elbow_maxVel);
-    claw.setElbowDoubleSupplier(elbow::getPosition);
-    claw.setTrackElbow(true); 
-    initialClawSide = claw.getElbowOffset() > 0.0 ? clawGoal.frontSide : clawGoal.backSide;
+    
+    //wrist will be done in exec to make sure we are safe
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     //Safe to transition sides?
-    if(target.side == initialClawSide) return;
+    if (target.side == start.side) return;
     
     
 
@@ -82,6 +104,20 @@ public class MoveCollectiveArm extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {}
+
+  /*
+   * getStart() captures where we are now, ignoring velocities 
+   */
+  Positions getStart() {
+    return new Positions(
+      arm.getPosition(), 
+      elbow.getPosition(),
+      claw.getElbowOffset(),
+      claw.getWristAngle(),
+      claw.getElbowOffset() > 0.0 ? clawGoal.frontSide : clawGoal.backSide);
+  }
+
+
 
   // Returns true when the command should end.
   @Override

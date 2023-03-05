@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.PowerOnPos;
 import frc.robot.util.NeoServo;
 import frc.robot.util.PIDFController;
 import frc.robot.util.VelocityControlled;
@@ -49,7 +50,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
         .burnFlash();
     elbow_servo.setBrakeMode(IdleMode.kCoast);// TEMP FOR TESTING
     // Starting point
-    elbow_servo.setPosition(0.0);
+    elbow_servo.setPosition(PowerOnPos.elbow);
 
   }
 

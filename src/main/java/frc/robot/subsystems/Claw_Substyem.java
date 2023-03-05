@@ -16,8 +16,10 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
+import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.utility.WatcherCmd;
 import frc.robot.util.NeoServo;
 import frc.robot.util.PIDFController;
@@ -109,14 +111,13 @@ public class Claw_Substyem extends SubsystemBase {
         .burnFlash();
 
     // make sure we are at a good staring point (folded inside)
-    wrist_servo.setSetpoint(WristPowerOn);
-    wrist_servo.setPosition(WristPowerOn);
+    wrist_servo.setSetpoint(PowerOnPos.wrist);
+    wrist_servo.setPosition(PowerOnPos.wrist);
+    rotate_servo.setSetpoint(PowerOnPos.rotate);
+    rotate_servo.setPosition(PowerOnPos.rotate);
 
-    rotate_servo.setSetpoint(0.0);
-    rotate_servo.setPosition(0.0);
-
-    // default elbow angle supplier in case we are testing
-    elbowAngle = this::zero;
+    // Use elbow if we have one, otherwise zero
+    elbowAngle = (RobotContainer.RC().elbow != null) ? RobotContainer.RC().elbow::getPosition : this::zero;
 
     piece_held = GamePieceHeld.Cube;
   }

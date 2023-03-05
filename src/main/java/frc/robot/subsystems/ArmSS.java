@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.utility.WatcherCmd;
 import frc.robot.util.NeoServo;
 import frc.robot.util.PIDFController;
@@ -77,7 +78,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         configure(leftArm);
 
         // zero our encoders at power up
-        setPosition(0.0);
+        setPosition(PowerOnPos.arm);
     }
 
     // finish the arm servo configurations
