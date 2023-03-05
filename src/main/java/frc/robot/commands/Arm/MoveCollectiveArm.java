@@ -4,6 +4,7 @@
 
 package frc.robot.commands.Arm;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.PowerOnPos;
@@ -25,23 +26,23 @@ import frc.robot.util.NeoServo;
  */
 
 public class MoveCollectiveArm extends CommandBase {
-  
+
   // hardware commanded
   ArmSS arm = RobotContainer.RC().armSS;
   Elbow elbow = RobotContainer.RC().elbow;
   Claw_Substyem claw = RobotContainer.RC().claw;
 
-
   // filled in at init based on where we are
-  Positions start;  //filled in init
-  Positions target; //taken from CollectiveMode provided in command (constant positions)
+  Positions start; // filled in init
+  Positions target; // taken from CollectiveMode provided in command (constant positions)
 
-  // elbow safe angle, flip be done by here going in, or starts here 
+  // elbow safe angle, flip be done by here going in, or starts here
   // when elbow is heading out
-  double SafeFlipPoint = 70.0; 
-   
-  // flip controls  - filled in in init()
-  final NeoServo wrist; 
+  double SafeFlipPoint = 60.0;
+  double SafeMinArm = 20.0; // safe to flip any elbow extended more than here
+
+  // flip controls - filled in in init()
+  final NeoServo wrist;
   double flip_point; // where to flip when we get there
   boolean heading_out; // moving arm away
   double T_flip; // time it takes to flip claw
@@ -50,8 +51,11 @@ public class MoveCollectiveArm extends CommandBase {
   double start_flip_pos;
   boolean flip_requested;
   boolean flip_possible;
+  boolean arm_flip_possible;
   boolean flip_started;
+  Timer fliptimer = new Timer();
 
+  boolean heading_out_arm;
 
   /**
    * State of colective Positions, either start or target.
@@ -62,14 +66,13 @@ public class MoveCollectiveArm extends CommandBase {
     double wristPos;
     ClawTrackMode mode;
 
-    Positions(double arm, double elbow, double wrist, ClawTrackMode mode){
+    Positions(double arm, double elbow, double wrist, ClawTrackMode mode) {
       armPos = arm;
       elbowPos = elbow;
-      wristPos = wrist;  //doesn't matter unless mode == free
+      wristPos = wrist; // doesn't matter unless mode == free
       this.mode = mode;
     }
   }
-
 
   /*
    * CollectiveMode names the target for the arm group
@@ -78,21 +81,20 @@ public class MoveCollectiveArm extends CommandBase {
    */
   public enum CollectiveMode {
     power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide),
-    travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide), 
-    midFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide), 
-    midBS(20.0, 90.0, 0.0, ClawTrackMode.frontSide), 
-    highFS(35.0, 10.0, 0.0, ClawTrackMode.frontSide), 
+    travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide),
+    midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),
+    midBS(20.0, 0.0, 0.0, ClawTrackMode.backSide),
+    highFS(35.0, 90.0, 0.0, ClawTrackMode.frontSide),
     travelMidFS(0.0, -10.0, 0.0, ClawTrackMode.frontSide),
     travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
 
-    //posistions and modes for target positions
+    // posistions and modes for target positions
     Positions pos_info;
 
     CollectiveMode(double arm, double elbow, double wrist, ClawTrackMode mode) {
       pos_info = new Positions(arm, elbow, wrist, mode);
     }
   };
-
 
   /** Creates a new MoveCollectiveArm. */
   public MoveCollectiveArm(CollectiveMode where_to) {
@@ -106,7 +108,8 @@ public class MoveCollectiveArm extends CommandBase {
   @Override
   public void initialize() {
     old_elbow_max_vel = elbow.getMaxVel();
-    
+    fliptimer.reset();
+
     // capture where we are
     start = getStart();
 
@@ -115,10 +118,11 @@ public class MoveCollectiveArm extends CommandBase {
     flip_point = 10000.0; // never going to get here
     flip_requested = (start.mode != target.mode);
     flip_possible = false; // until proven otherwise
+    arm_flip_possible = false;
 
     // which way are we moving, in or out
-    double delta_elbow = target.elbowPos - start.elbowPos;
-    heading_out = (delta_elbow >= 0.0) ? true : false;
+    heading_out = (target.elbowPos - start.elbowPos) > 0.0;
+    heading_out_arm = (target.armPos - start.armPos) > 0.0;
 
     // guess time to flip based on 180 and wrist max speed
     T_flip = (wrist.getMaxVel() > 1.0) ? 180.0 / wrist.getMaxVel() : 5000.0; // [sec]
@@ -126,7 +130,7 @@ public class MoveCollectiveArm extends CommandBase {
     if (heading_out) {
       flip_point = Math.max(SafeFlipPoint, start.elbowPos);
       flip_possible = true;
-    } else { 
+    } else {
       // moving in, either there is time to flip or not
       double dist_to_safe = start.elbowPos - SafeFlipPoint; // [deg]
       // see if we can even flip, are we outside the flip point to start
@@ -136,45 +140,67 @@ public class MoveCollectiveArm extends CommandBase {
 
         // calculate a new elbow speed that would give us time to flip
         new_elbow_max_vel = dist_to_safe / T_flip; // [deg/s]
-        // keep slowest elbow speed
+
+        // keep slowest elbow speed, giving time to flip.
         new_elbow_max_vel = Math.min(new_elbow_max_vel, old_elbow_max_vel);
-        elbow.setMaxVel(new_elbow_max_vel); // slow the elbow down
+
       } else {
         // not possible to flip given where we started
         flip_possible = false;
-        if (flip_requested)
+        if (flip_requested) {
           System.out.println("Flip requsested but not possible, heading in with start < safe angle");
+        }
       }
-
     }
 
-    // move towards our target
+    // check ending arm for being in safe zone, independent of elbow
+    if (target.armPos >= SafeMinArm) {
+      arm_flip_possible = true;
+      flip_possible = true;
+    }
+    
+    if (flip_requested && flip_possible && !heading_out)
+        elbow.setMaxVel(new_elbow_max_vel); // slow the elbow down
+
+    // move towards our target, wrist done in exec
     arm.setSetpoint(target.armPos);
     elbow.setSetpoint(target.elbowPos);
-
-    // wrist flip will be done in exec to make sure we are safe
   }
 
   @Override
   public void execute() {
+    // look for flip complete so we can speed up elbow again
+    if (flip_started && fliptimer.hasElapsed(T_flip)) {
+      // done flipping, restore elbow vel
+      elbow.setMaxVel(old_elbow_max_vel);
+    }
+    
+    if (flip_started) return;
+
     // Safe to transition sides?
     if (!(flip_requested && flip_possible))
       return;
 
     // watch for the flip point
-    if (!flip_started &&
-      (heading_out && elbow.getPosition() >= flip_point) ||
-      (!heading_out && elbow.getPosition() <= flip_point) )
-    {
-       claw.setTrackElbowMode(target.mode);
-       flip_started = true;
-       return;
+    if (flip_possible &&
+        (heading_out && elbow.getPosition() >= flip_point) ||
+        (!heading_out && elbow.getPosition() <= flip_point)) {
+      claw.setTrackElbowMode(target.mode);
+      flip_started = true;
+      System.out.println("Flip started......");
+      fliptimer.start();
+      return;
     }
-    // look for flip complete so we can speed up elbow again
-    if (flip_started && wrist.atSetpoint()) {
-      // done flipping, restore elbow vel
-      elbow.setMaxVel(old_elbow_max_vel);
+
+
+    if (arm_flip_possible && arm.getPosition() >= SafeMinArm) {
+      claw.setTrackElbowMode(target.mode);
+      flip_started = true;
+      System.out.println("Arm limit Flip started......");
+      fliptimer.start();
+      return;
     }
+   
   }
 
   // Called once the command ends or is interrupted.
@@ -191,13 +217,15 @@ public class MoveCollectiveArm extends CommandBase {
         arm.getPosition(),
         elbow.getPosition(),
         claw.getWristAngle(),
-        claw.getTrackElbowMode() );
+        claw.getTrackElbowMode());
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return (arm.atSetpoint() && elbow.atSetpoint());
+    return (arm.atSetpoint() &&
+        elbow.atSetpoint() &&
+        (wrist.atSetpoint() || !flip_possible));
   }
 
 }

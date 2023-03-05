@@ -33,7 +33,6 @@ public class Claw_Substyem extends SubsystemBase {
 
   /*
    * claw level tracking options
-   * 
    */
   public enum ClawTrackMode {
     frontSide(90.0),
@@ -55,8 +54,6 @@ public class Claw_Substyem extends SubsystemBase {
   // solnoid constants
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
-
-  final double WristPowerOn = -58.5;
 
   // Wrist constants & constraints - all TODO
   final int WRIST_STALL_CURRENT = 20;
@@ -84,7 +81,7 @@ public class Claw_Substyem extends SubsystemBase {
   // Hardware
   final DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PCM1.CLAW_FWD, PCM1.CLAW_REV);
   final NeoServo wrist_servo;
-  final NeoServo rotate_servo;
+ // final NeoServo rotate_servo;
 
   // PIDS for NeoServos - first pass on wrist tuning
   // Testing showed 200 [deg/sec] was good to go! Still lots of overshoot on vel
@@ -109,11 +106,11 @@ public class Claw_Substyem extends SubsystemBase {
   private boolean is_open;
   private GamePieceHeld piece_held;
   ClawTrackMode trackElbowMode = ClawTrackMode.backSide;
-  double elbowOffset = trackElbowMode.angle();
+  double elbowOffset = 0.0;
 
   public Claw_Substyem() {
     wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, true);
-    rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, rotate_hwVelPID, false);
+   // rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, rotate_hwVelPID, false);
 
     wrist_servo.setName(getName() + "/wrist")
         .setConversionFactor(wrist_conversionFactor)
@@ -123,7 +120,7 @@ public class Claw_Substyem extends SubsystemBase {
         .setMaxVelocity(wrist_maxVel)
         .setBrakeMode(IdleMode.kCoast)
         .burnFlash();
-
+/*/
     rotate_servo.setName(getName() + "/rotator")
         .setConversionFactor(rotate_conversionFactor)
         .setSmartCurrentLimit(ROTATE_STALL_CURRENT, ROTATE_FREE_CURRENT)
@@ -131,15 +128,17 @@ public class Claw_Substyem extends SubsystemBase {
         .setTolerance(rotate_posTol, rotate_velTol)
         .setMaxVelocity(rotate_maxVel)
         .burnFlash();
-
+*/
     // make sure we are at a good staring point (folded inside)
     wrist_servo.setSetpoint(PowerOnPos.wrist);
     wrist_servo.setPosition(PowerOnPos.wrist);
-    rotate_servo.setSetpoint(PowerOnPos.rotate);
-    rotate_servo.setPosition(PowerOnPos.rotate);
+  //  rotate_servo.setSetpoint(PowerOnPos.rotate);
+  //  rotate_servo.setPosition(PowerOnPos.rotate);
 
     // Use elbow if we have one, otherwise zero
     elbowAngle = (RobotContainer.RC().elbow != null) ? RobotContainer.RC().elbow::getPosition : this::zero;
+
+    this.setTrackElbowMode(ClawTrackMode.backSide);
 
     piece_held = GamePieceHeld.Cube;
   }
@@ -154,10 +153,7 @@ public class Claw_Substyem extends SubsystemBase {
     return wrist_servo;
   }
 
-  public NeoServo getRotator() {
-    return rotate_servo;
-  }
-
+ 
   public void setElbowDoubleSupplier(DoubleSupplier func) {
     elbowAngle = func;
   }
@@ -166,12 +162,8 @@ public class Claw_Substyem extends SubsystemBase {
   public double getWristAngle() {
     return wrist_servo.getPosition();
   }
-
-  // getting the angles current position
-  public double getRotatetAngle() {
-    return rotate_servo.getPosition();
-  }
-
+ 
+ 
   public boolean wristAtSetpoint() {
     return wrist_servo.atSetpoint();
   }
@@ -180,10 +172,20 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo.setSetpoint(degrees);
     trackElbowMode = ClawTrackMode.free;
   }
+ /*
+ public NeoServo getRotator() {
+    return rotate_servo;
+  }
+
+  // getting the angles current position
+  public double getRotatetAngle() {
+    return rotate_servo.getPosition();
+  }
 
   public boolean rotateAtSetpoint() {
     return rotate_servo.atSetpoint();
   }
+*/
 
   @Override
   public void periodic() {
@@ -197,13 +199,13 @@ public class Claw_Substyem extends SubsystemBase {
     
     //run the servo calcs
     wrist_servo.periodic();
-    rotate_servo.periodic();
+    //rotate_servo.periodic();
 
     // clawStatus();
     // check any lightgates
   }
 
-  public void setElbowOffset(double deg) {
+   void setxxxElbowOffset(double deg) {
     //manually setting an offset, must be in free mode
     this.elbowOffset = deg;
     trackElbowMode = ClawTrackMode.free;
@@ -252,7 +254,7 @@ public class Claw_Substyem extends SubsystemBase {
 
   public Command getWatcher() {
     wrist_servo.getWatcher();
-    rotate_servo.getWatcher();
+    //rotate_servo.getWatcher();
     return new ClawWatcher();
   }
 
@@ -263,7 +265,7 @@ public class Claw_Substyem extends SubsystemBase {
     NetworkTableEntry nt_isOpen;
     NetworkTableEntry nt_gamePieceHeld;
     NetworkTableEntry nt_maxArbFF;
-
+    NetworkTableEntry nt_trackMode;
     @Override
     public String getTableName() {
       return Claw_Substyem.this.getName();
@@ -274,6 +276,7 @@ public class Claw_Substyem extends SubsystemBase {
       nt_isOpen = table.getEntry("Open");
       nt_gamePieceHeld = table.getEntry("Game Piece");
       nt_maxArbFF = table.getEntry("/wrist/maxArbFF");
+      nt_trackMode = table.getEntry("trackMode");
 
       // default value for mutables
       nt_maxArbFF.setDouble(maxArbFF);
@@ -282,8 +285,11 @@ public class Claw_Substyem extends SubsystemBase {
     public void ntupdate() {
       nt_isOpen.setBoolean(is_open);
       nt_gamePieceHeld.setString(piece_held.toString());
+      nt_trackMode.setString(trackElbowMode.toString());
+
       // get mutable values
       maxArbFF = nt_maxArbFF.getDouble(maxArbFF);
+      
     }
   }
 

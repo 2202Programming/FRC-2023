@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
+import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
@@ -215,17 +216,17 @@ public class RobotContainer {
         dc.Driver().rightBumper().whileTrue(new GenericZeroPos(elbow));
         dc.Driver().a().whileTrue(new GenericPositionTest(elbow, 45.0, 90.0, 30.0));
         dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 90.0, 1.50, 1.0));
-
-        dc.Driver().povUp().whileTrue(new GenericMoveAtSpeed(elbow, 10.0, false));
-        dc.Driver().povDown().whileTrue(new GenericMoveAtSpeed(elbow, -5.0, false));
-        */
+      */
+        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
+        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
+        
         //dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
         //dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
 
-        dc.Driver().x().whileTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
-        dc.Driver().a().whileTrue(new MoveCollectiveArm(CollectiveMode.midFS));
-        dc.Driver().b().whileTrue(new MoveCollectiveArm(CollectiveMode.highFS));
-        dc.Driver().y().whileTrue(new MoveCollectiveArm(CollectiveMode.power_on));
+        dc.Driver().x().onTrue(new MoveCollectiveArm(CollectiveMode.highFS));
+        dc.Driver().a().onTrue(new MoveCollectiveArm(CollectiveMode.midBS));
+        dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
+        dc.Driver().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
         //armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
       case balance_test:

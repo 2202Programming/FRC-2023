@@ -200,6 +200,7 @@ public class NeoServo implements VelocityControlled {
 
         // velocity_mode, update position setpoint so we don't jump back on mode switch
         if (velocity_mode) {
+            positionPID.reset();
             positionPID.setSetpoint(currentPos);
         }
 
