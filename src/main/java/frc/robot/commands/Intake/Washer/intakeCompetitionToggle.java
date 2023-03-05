@@ -14,7 +14,7 @@ import frc.robot.subsystems.Intake;
 public class intakeCompetitionToggle extends CommandBase implements BlinkyLightUser {
   /** Creates a new intakeCompetitionToggle. */
   Intake intake;
-  Boolean isFinished;
+  Boolean isFinished = false;
   JoystickRumbleEndless rumbleCommand;
   Color8Bit myColor = new Color8Bit(255, 255, 0);
 
@@ -65,11 +65,13 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
     } else {
       intake.intakeOff();
     }
+
+    isFinished = false;
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return isFinished();
+    return isFinished;
   }
 }

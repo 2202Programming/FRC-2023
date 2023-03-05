@@ -163,7 +163,7 @@ public class Intake extends SubsystemBase {
    }
 
    private void periodicLightgate() {
-    if (lightgate.get()) framesOn++;
+    if (!lightgate.get()) framesOn++;
     else framesOn = 0;
    }
 
