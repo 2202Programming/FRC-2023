@@ -222,10 +222,10 @@ public class RobotContainer {
         //dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
         //dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
 
-        dc.Driver().x().whileTrue(new MoveCollectiveArm(CollectiveMode.travel));
-        dc.Driver().a().whileTrue(new MoveCollectiveArm(CollectiveMode.mid));
-        dc.Driver().b().whileTrue(new MoveCollectiveArm(CollectiveMode.high));
-        dc.Driver().y().whileTrue(new MoveCollectiveArm(CollectiveMode.travelMid));
+        dc.Driver().x().whileTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
+        dc.Driver().a().whileTrue(new MoveCollectiveArm(CollectiveMode.midFS));
+        dc.Driver().b().whileTrue(new MoveCollectiveArm(CollectiveMode.highFS));
+        dc.Driver().y().whileTrue(new MoveCollectiveArm(CollectiveMode.power_on));
         //armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
       case balance_test:

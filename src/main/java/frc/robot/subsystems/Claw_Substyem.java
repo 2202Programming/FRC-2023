@@ -31,11 +31,32 @@ public class Claw_Substyem extends SubsystemBase {
     Cube, Cone, Empty
   }
 
+  /*
+   * claw level tracking options
+   * 
+   */
+  public enum ClawTrackMode {
+    frontSide(90.0),
+    backSide(-90.0),
+    grabPiece(-57.0), //todo fix##
+    free(0.0);   //any angle,
+
+    double angle;
+
+    ClawTrackMode(double angle) {
+      this.angle = angle;
+    }
+
+    double angle() {
+      return this.angle;
+    }
+  };
+
   // solnoid constants
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
 
-  final double WristPowerOn = -58.5; 
+  final double WristPowerOn = -58.5;
 
   // Wrist constants & constraints - all TODO
   final int WRIST_STALL_CURRENT = 20;
@@ -66,7 +87,8 @@ public class Claw_Substyem extends SubsystemBase {
   final NeoServo rotate_servo;
 
   // PIDS for NeoServos - first pass on wrist tuning
-  // Testing showed 200 [deg/sec] was good to go! Still lots of overshoot on vel step response. 25% 3/4/23
+  // Testing showed 200 [deg/sec] was good to go! Still lots of overshoot on vel
+  // step response. 25% 3/4/23
   PIDController wrist_positionPID = new PIDController(8.0, 0.005, 0.05);
   PIDFController wrist_hwVelPID = new PIDFController(0.0005, 0.0000064, 0.01, 0.0018);
 
@@ -80,14 +102,14 @@ public class Claw_Substyem extends SubsystemBase {
   public enum WristTrackMode {
     backside_level,
     frontside_level,
-    
+
   }
 
   // state vars
   private boolean is_open;
   private GamePieceHeld piece_held;
-  boolean trackElbow = true;
-  double elbowOffset = 90.0;
+  ClawTrackMode trackElbowMode = ClawTrackMode.backSide;
+  double elbowOffset = trackElbowMode.angle();
 
   public Claw_Substyem() {
     wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, true);
@@ -156,7 +178,7 @@ public class Claw_Substyem extends SubsystemBase {
 
   public void setWristAngle(double degrees) {
     wrist_servo.setSetpoint(degrees);
-    trackElbow = false;
+    trackElbowMode = ClawTrackMode.free;
   }
 
   public boolean rotateAtSetpoint() {
@@ -170,13 +192,10 @@ public class Claw_Substyem extends SubsystemBase {
         Math.toRadians(elbowAngle.getAsDouble() + wrist_servo.getSetpoint()));
     wrist_servo.setArbFeedforward(arbff);
 
-    // elbow > 50 TrackFrontSide
-    // elbow < TrackBackside 
-    elbowOffset = (elbowAngle.getAsDouble() > 50.0) ? 90.0 : -90.0;
-    if(trackElbow) {
-      wrist_servo.setSetpoint(elbowOffset - elbowAngle.getAsDouble());
-    }
-
+    //either mode.angle() or elbowOffset will be set
+    wrist_servo.setSetpoint(trackElbowMode.angle() + elbowOffset - elbowAngle.getAsDouble());
+    
+    //run the servo calcs
     wrist_servo.periodic();
     rotate_servo.periodic();
 
@@ -184,20 +203,28 @@ public class Claw_Substyem extends SubsystemBase {
     // check any lightgates
   }
 
-  public void setElbowOffset(double deg)
-  {
+  public void setElbowOffset(double deg) {
+    //manually setting an offset, must be in free mode
     this.elbowOffset = deg;
+    trackElbowMode = ClawTrackMode.free;
   }
-  public double getElbowOffset(){
+
+  public double getElbowOffset() {
     return elbowOffset;
   }
 
-  public void setTrackElbow(boolean enable) {
-    this.trackElbow = enable;
+  public void setTrackElbowMode(ClawTrackMode mode) {
+    //tracking mode, zero the manual offset
+    trackElbowMode = mode;
+    elbowOffset = 0.0;
   }
 
+  public ClawTrackMode getTrackElbowMode(){
+    return trackElbowMode;
+  }
   public boolean isTrackingElbow() {
-    return trackElbow;
+    // we are tracking elbow if not in free mode
+    return (trackElbowMode != ClawTrackMode.free);
   }
 
   public void open() {
