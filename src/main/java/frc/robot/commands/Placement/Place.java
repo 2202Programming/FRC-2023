@@ -68,10 +68,10 @@ public class Place extends CommandBase {
   public void initialize() {
     //Next move robot to placement position based on cube/isLeft
     //placeholder: Check which color/orentation of peice
-    GamePiece piece = sensors.getCurrentGamePiece();
+    //GamePiece piece = sensors.getCurrentGamePiece();
     if (verticalRequest == VerticalScoringLane.Bottom) {
       Bottom();
-    } else {
+    } /*else {
       switch (piece) {
         case Cube:
           Cube();
@@ -86,7 +86,7 @@ public class Place extends CommandBase {
 
           break;
       }
-    }
+    }*/
 
     //Move arns/ elbow out to position, pull from constants
     //Flip flipper if needsFlip is true
