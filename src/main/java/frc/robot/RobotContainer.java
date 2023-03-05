@@ -30,6 +30,8 @@ import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.Placement.Place;
+import frc.robot.commands.auto.autoCommand;
+import frc.robot.commands.auto.auto_cmd;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
@@ -188,12 +190,9 @@ public class RobotContainer {
           true, // correct path for mirrored depending on alliance color.
           drivetrain);
           
-      // myauto = autoBuilder.fullAuto(PathPlanner.loadPath("derek_testing",
-      //       new PathConstraints(1, 1)));
-
-          // new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
-      myauto = autoBuilder.fullAuto(PathPlanner.loadPath("visiontest1",
-      new PathConstraints(1, 1)));
+      // myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A4 Pass Fetch Place",
+      //     new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
+      myauto = new autoCommand();
     }
 
     initEvents();
