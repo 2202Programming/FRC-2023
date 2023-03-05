@@ -11,7 +11,6 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -20,10 +19,12 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 //import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.Arm.ArmMoveAtSpeed;
+import frc.robot.Constants.HorizontalScoringLane;
+import frc.robot.Constants.VerticalScoringLane;
+import frc.robot.commands.Arm.MoveCollectiveArm;
+import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
-import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.Intake.Washer.CarwashForward;
 import frc.robot.commands.Intake.Washer.CarwashReverse;
 import frc.robot.commands.Intake.Washer.IntakeForward;
@@ -36,13 +37,6 @@ import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
-import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
-import frc.robot.commands.test.GenericMoveAtSpeed;
-import frc.robot.commands.test.GenericPositionTest;
-import frc.robot.commands.test.GenericVelocityTest;
-import frc.robot.Constants.HorizontalScoringLane;
-import frc.robot.Constants.VerticalScoringLane;
-import frc.robot.commands.test.GenericZeroPos;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
@@ -162,7 +156,7 @@ public class RobotContainer {
         intake = null;
         armSS = new ArmSS();
         elbow = new Elbow();
-        claw = new Claw_Substyem();// null;
+        claw = new Claw_Substyem();
         colorSensors = null;
         break;
     }
@@ -200,7 +194,7 @@ public class RobotContainer {
     initEvents();
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.vision_test);
+    configureBindings(Bindings.arm_test);
 
 
 
@@ -217,19 +211,21 @@ public class RobotContainer {
         claw.getWatcher();
         elbow.getWatcher();
         claw.setElbowDoubleSupplier(elbow::getPosition);
-        
+        /******
         dc.Driver().rightBumper().whileTrue(new GenericZeroPos(elbow));
         dc.Driver().a().whileTrue(new GenericPositionTest(elbow, 45.0, 90.0, 30.0));
         dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 90.0, 1.50, 1.0));
 
         dc.Driver().povUp().whileTrue(new GenericMoveAtSpeed(elbow, 10.0, false));
         dc.Driver().povDown().whileTrue(new GenericMoveAtSpeed(elbow, -5.0, false));
-
+        */
         //dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
         //dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
 
-        dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
-
+        dc.Driver().x().whileTrue(new MoveCollectiveArm(CollectiveMode.travel));
+        dc.Driver().a().whileTrue(new MoveCollectiveArm(CollectiveMode.mid));
+        dc.Driver().b().whileTrue(new MoveCollectiveArm(CollectiveMode.high));
+        dc.Driver().y().whileTrue(new MoveCollectiveArm(CollectiveMode.travelMid));
         //armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
       case balance_test:

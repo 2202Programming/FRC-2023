@@ -33,6 +33,8 @@ public class Claw_Substyem extends SubsystemBase {
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
 
+  final double WristPowerOn = -58.5; 
+
   // Wrist constants & constraints - all TODO
   final int WRIST_STALL_CURRENT = 20;
   final int WRIST_FREE_CURRENT = 10;
@@ -70,7 +72,14 @@ public class Claw_Substyem extends SubsystemBase {
   PIDController rotate_positionPID = new PIDController(5.0, 0.150, 0.250);
   PIDFController rotate_hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
 
+  // reads the elbow angle for tracking
   DoubleSupplier elbowAngle;
+
+  public enum WristTrackMode {
+    backside_level,
+    frontside_level,
+    
+  }
 
   // state vars
   private boolean is_open;
@@ -98,8 +107,11 @@ public class Claw_Substyem extends SubsystemBase {
         .setTolerance(rotate_posTol, rotate_velTol)
         .setMaxVelocity(rotate_maxVel)
         .burnFlash();
-    wrist_servo.setSetpoint(0.0);
-    wrist_servo.setPosition(0.0);
+
+    // make sure we are at a good staring point (folded inside)
+    wrist_servo.setSetpoint(WristPowerOn);
+    wrist_servo.setPosition(WristPowerOn);
+
     rotate_servo.setSetpoint(0.0);
     rotate_servo.setPosition(0.0);
 
@@ -157,6 +169,9 @@ public class Claw_Substyem extends SubsystemBase {
         Math.toRadians(elbowAngle.getAsDouble() + wrist_servo.getSetpoint()));
     wrist_servo.setArbFeedforward(arbff);
 
+    // elbow > 50 TrackFrontSide
+    // elbow < TrackBackside 
+    elbowOffset = (elbowAngle.getAsDouble() > 50.0) ? 90.0 : -90.0;
     if(trackElbow) {
       wrist_servo.setSetpoint(elbowOffset - elbowAngle.getAsDouble());
     }
@@ -172,8 +187,11 @@ public class Claw_Substyem extends SubsystemBase {
   {
     this.elbowOffset = deg;
   }
+  public double getElbowOffset(){
+    return elbowOffset;
+  }
 
-  public void trackElbow(boolean enable) {
+  public void setTrackElbow(boolean enable) {
     this.trackElbow = enable;
   }
 

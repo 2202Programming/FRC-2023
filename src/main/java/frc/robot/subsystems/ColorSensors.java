@@ -136,6 +136,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
 
     // Current and previous frame game piece
     private GamePiece currentGamePiece = GamePiece.None;
+    GamePiece prevFrameGamePiece = currentGamePiece;
 
     // Color matching state vars
     ColorMatch colorMatcher = new ColorMatch();
@@ -172,39 +173,27 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
     @Override
     public void periodic() {
         // if the lightgate turns on add a frame that it thinks there's an object
-        if (lightGate.get()) framesObject++;
-        else framesObject = 0;
+        if (lightGate.get())
+            framesObject++;
+        else
+            framesObject = 0;
 
         prevFrameGamePiece = currentGamePiece;
         currentGamePiece = getGamePiece();
 
         if (currentGamePiece != prevFrameGamePiece) {
-            // do stuff here upon game piece change
-            switch (currentGamePiece) {
-                case Cube:
-
-                    break;
-                case ConeFacingFront:
-
-                    break;
-                case ConeFacingBack:
-
-                    break;
-                case None:
-
-                    break;
-                default:
-
-                    break;
-        // if and only if (so algo only runs once per object) an object is detected for an entire sec find out what it is, then do something based on what it is
-        if (framesObject == 20) {
-            GamePiece lastGamePiece = currentGamePiece;
-            GamePiece detectedGamePiece = getGamePiece();
-            //Could present condition where we dont detect that a piece has moved inside the robot. In that case should use a flag.
-            if (lastGamePiece == GamePiece.None) {
-                if (detectedGamePiece != GamePiece.None) {
-                    currentGamePiece = detectedGamePiece;
-                } 
+            // if and only if (so algo only runs once per object) an object is detected for
+            // an entire sec find out what it is, then do something based on what it is
+            if (framesObject == 20) {
+                GamePiece lastGamePiece = currentGamePiece;
+                GamePiece detectedGamePiece = getGamePiece();
+                // Could present condition where we dont detect that a piece has moved inside
+                // the robot. In that case should use a flag.
+                if (lastGamePiece == GamePiece.None) {
+                    if (detectedGamePiece != GamePiece.None) {
+                        currentGamePiece = detectedGamePiece;
+                    }
+                }
             }
         }
     }
@@ -218,7 +207,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
         return currentGamePiece;
     }
 
-    //Every time we place or eject a game peice, Call this method. This will clear lines 172-179, and allow us to detect peices again
+    // Every time we place or eject a game peice, Call this method. This will clear
+    // lines 172-179, and allow us to detect peices again
     public void clearCurrentGamePiece() {
         currentGamePiece = GamePiece.None;
     }
@@ -240,22 +230,30 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
         numYellow = 0;
         // Counts matches to each color
         for (int i = 0; i < numSensors; i++) {
-            if (colorSensorData[i].distance < 7.0) results[i] = null;
-            if (results[i] == null) continue;
-            if (results[i].color.equals(CUBE_PURPLE)) numPurple++;
-            else if (results[i].color.equals(CONE_YELLOW)) numYellow++;
+            if (colorSensorData[i].distance < 7.0)
+                results[i] = null;
+            if (results[i] == null)
+                continue;
+            if (results[i].color.equals(CUBE_PURPLE))
+                numPurple++;
+            else if (results[i].color.equals(CONE_YELLOW))
+                numYellow++;
         }
-        
+
         /**
          * If all 3 are purple it's probably a cube
          * If all 3 are yellow it's probably a cone facing backwards
          * If 1 or 2 are yellow it's probably a cone facing backwords
-         * Otherwise it's probably nothing 
+         * Otherwise it's probably nothing
          */
-        if (numPurple == 3) return GamePiece.Cube;
-        else if (numYellow == 3) return GamePiece.ConeFacingBack;
-        else if (numYellow >= 1) return GamePiece.ConeFacingFront;
-        else return GamePiece.None;
+        if (numPurple == 3)
+            return GamePiece.Cube;
+        else if (numYellow == 3)
+            return GamePiece.ConeFacingBack;
+        else if (numYellow >= 1)
+            return GamePiece.ConeFacingFront;
+        else
+            return GamePiece.None;
     }
 
     /**
@@ -324,7 +322,6 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
         IntegerPublisher nt_numPurple;
         StringPublisher nt_objectDetected;
 
-        
         public String getTableName() {
             return ColorSensors.this.getName();
         }
