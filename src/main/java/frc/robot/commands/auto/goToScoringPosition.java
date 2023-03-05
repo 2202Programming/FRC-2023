@@ -95,6 +95,7 @@ public class goToScoringPosition extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    pathCommand.cancel();
     sdt.stop();
   }
 
