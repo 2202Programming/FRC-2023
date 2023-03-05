@@ -7,15 +7,19 @@ package frc.robot.commands.Placement;
 import com.pathplanner.lib.PathConstraints;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.commands.auto.goToScoringPosition;
+import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.ColorSensors.GamePiece;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 public class Place extends CommandBase {
 
   public ColorSensors sensors;
+  private HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
   /** Creates a new Place. */
   private goToScoringPosition position;
   private HorizontalScoringLane horizontalRequest;
@@ -25,6 +29,8 @@ public class Place extends CommandBase {
     this.horizontalRequest = horizontalRequest;
     this.verticalRequest = verticalRequest;
     this.sensors = sensors;
+
+    until(dc.Driver().leftStick().or(dc.Driver().rightStick()));
   }
   private void move() {
     position = new goToScoringPosition(new PathConstraints(2,3), horizontalRequest); 

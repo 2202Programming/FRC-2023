@@ -295,22 +295,17 @@ public class RobotContainer {
         //dc.Operator().povDown().whileTrue(new CarwashReverse());
 
         // PLACEMENT
-        Place placeCommand; // Save placeCommand to for cancelling later
         Trigger placeTrigger = dc.Driver().povLeft(); // save right tigger for concinseness in the next new commands
         // Top Place
-        placeTrigger.and(dc.Operator().leftBumper()).onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top));
-        placeTrigger.and(dc.Operator().rightBumper()).onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top));
+        placeTrigger.and(dc.Operator().leftBumper()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top));
+        placeTrigger.and(dc.Operator().rightBumper()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top));
         // Middle Place
-        placeTrigger.and(dc.Operator().leftTrigger()).onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle));
-        placeTrigger.and(dc.Operator().rightTrigger()).onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle));
+        placeTrigger.and(dc.Operator().leftTrigger()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle));
+        placeTrigger.and(dc.Operator().rightTrigger()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle));
         // Bottom Place
-        placeTrigger.and(dc.Operator().povLeft()).onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
-        placeTrigger.and(dc.Operator().povDown()).onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Center, VerticalScoringLane.Bottom));
-        placeTrigger.and(dc.Operator().povRight()).onTrue(placeCommand = new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
-        
-        // create trigger for either of the sicks being touched
-        Trigger sticksTouched  = dc.Driver().leftStick().or(dc.Driver().rightStick());
-        placeCommand.until(sticksTouched); // modify the command to interrupt the command when the sicks are touched
+        placeTrigger.and(dc.Operator().povLeft()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
+        placeTrigger.and(dc.Operator().povDown()).onTrue(new Place(colorSensors, HorizontalScoringLane.Center, VerticalScoringLane.Bottom));
+        placeTrigger.and(dc.Operator().povRight()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
