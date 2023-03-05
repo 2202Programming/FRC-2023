@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -54,6 +55,7 @@ public class Intake extends SubsystemBase {
     motor_config(r_carwash_mtr, false);
 
     ntconfig();
+    constructLightgate();
   }
 
   void motor_config(CANSparkMax mtr, boolean inverted) {
@@ -65,6 +67,7 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     ntupdates();
+    periodicLightgate();
   }
 
   //Turn Intake Motor On by sending a double value
@@ -146,5 +149,31 @@ public class Intake extends SubsystemBase {
     // if (nt_intakeSpeed.getDouble(0.0) != IntakeMotorStrength) setIntakeSpeed(nt_intakeSpeed.getDouble(0.0));
     // if (nt_carwashSpeed.getDouble(0.0) != CarwashMotorStrength) setIntakeSpeed(nt_carwashSpeed.getDouble(0.0));
   }
+
+  /**
+   * Temporary lightgate stuff that should eventually be moved out of this / integrated with ColorSensors subsystem
+   * The following should probably be deleted sometime before or right after St. Louis
+   */
+
+   private int framesOn = 0;
+   private DigitalInput lightgate = new DigitalInput(0);
+
+   private void constructLightgate() {
+    // don't need to do anything here
+   }
+
+   private void periodicLightgate() {
+    if (lightgate.get()) framesOn++;
+    else framesOn = 0;
+   }
+
+   public boolean objectDetected() {
+    if (framesOn > 10) return true; // TODO is 10 a good number?
+    return false;
+   }
+
+   public void setHoldSpeed() {
+    setIntakeSpeed(0.1); // just enough to hold the piece w/o further intaking it, TODO tune
+   }
 
 }
