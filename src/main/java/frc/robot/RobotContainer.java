@@ -297,15 +297,20 @@ public class RobotContainer {
         // PLACEMENT
         Trigger placeTrigger = dc.Driver().povLeft(); // save right tigger for concinseness in the next new commands
         // Top Place
-        placeTrigger.and(dc.Operator().leftBumper()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top));
-        placeTrigger.and(dc.Operator().rightBumper()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top));
+        //placeTrigger.and(dc.Operator().leftBumper()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top));
+        //placeTrigger.and(dc.Operator().rightBumper()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top));
         // Middle Place
-        placeTrigger.and(dc.Operator().leftTrigger()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle));
-        placeTrigger.and(dc.Operator().rightTrigger()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle));
+        //placeTrigger.and(dc.Operator().leftTrigger()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle));
+        //placeTrigger.and(dc.Operator().rightTrigger()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle));
         // Bottom Place
-        placeTrigger.and(dc.Operator().povLeft()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
-        placeTrigger.and(dc.Operator().povDown()).onTrue(new Place(colorSensors, HorizontalScoringLane.Center, VerticalScoringLane.Bottom));
-        placeTrigger.and(dc.Operator().povRight()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
+        //placeTrigger.and(dc.Operator().povDown()).onTrue(new Place(colorSensors, HorizontalScoringLane.Center, VerticalScoringLane.Bottom));
+        //placeTrigger.and(dc.Operator().povLeft()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
+        //placeTrigger.and(dc.Operator().povRight()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
+
+        placeTrigger.and(dc.Operator().povLeft()).onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Left));
+        placeTrigger.and(dc.Operator().povDown()).onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
+        placeTrigger.and(dc.Operator().povRight()).onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Right));
+
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
