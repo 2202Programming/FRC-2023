@@ -106,12 +106,14 @@ public class Place extends CommandBase {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    position.cancel();
+  }
   // Returns true when the command should end.
   //after that all finishes, stow the arm wrist and elbow, pull from constants. 
   //TODO put into command scheduler
   @Override
   public boolean isFinished() {
-    return false;
+    return (dc.Driver().leftStick().or(dc.Driver().rightStick()).getAsBoolean());
   }
 }

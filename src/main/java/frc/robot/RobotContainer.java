@@ -267,7 +267,7 @@ public class RobotContainer {
           break;
         // DRIVER
         dc.Driver().x().whileTrue(new ChargeStationBalance(false));
-        dc.Driver().y().onTrue(new AllianceAwareGyroReset(false));
+        dc.Driver().y().onTrue(new AllianceAwareGyroReset(false)); // gyro reset w/o disabling rotation
         dc.Driver().leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
 
         //dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
