@@ -20,6 +20,7 @@ public class Place extends CommandBase {
 
   public ColorSensors sensors;
   private HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
+  private double deadzone = 0; // [percent]
   /** Creates a new Place. */
   private goToScoringPosition position;
   private HorizontalScoringLane horizontalRequest;
@@ -114,6 +115,8 @@ public class Place extends CommandBase {
   //TODO put into command scheduler
   @Override
   public boolean isFinished() {
-    return (dc.Driver().leftStick().or(dc.Driver().rightStick()).getAsBoolean());
+    boolean leftStickStill = Math.sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > deadzone;
+    boolean rightStickStill = Math.sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > deadzone;
+    return (leftStickStill && rightStickStill);
   }
 }
