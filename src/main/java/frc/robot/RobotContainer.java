@@ -13,12 +13,14 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
@@ -41,6 +43,7 @@ import frc.robot.commands.test.GenericPositionTest;
 import frc.robot.commands.test.GenericVelocityTest;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
+import frc.robot.Constants.DriverControls.Id;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
@@ -196,7 +199,7 @@ public class RobotContainer {
     initEvents();
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.vision_test);
 
 
 
@@ -250,6 +253,7 @@ public class RobotContainer {
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); //disable vision rot
+        dc.Driver().leftTrigger().whileTrue(new JoystickRumbleEndless(Id.Driver));
 
         dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
         //up and down for center trio request per Alek

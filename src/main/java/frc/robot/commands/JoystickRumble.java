@@ -24,20 +24,18 @@ public class JoystickRumble extends CommandBase {
   double silent_duration = 0.2;
   boolean finished = false;
   boolean silent_segment = false;
-  RumbleType type;
 
   //rumble the joystick given by id, duration in sec
   public JoystickRumble(Id id, double duration) {
-    this(id, duration, 1, RumbleType.kBothRumble);
+    this(id, duration, 1);
   }
 
   //divide duration up into equal SEGMENTS with a fixed length silent gap between.  Segments are the # of rumble segments.
-  public JoystickRumble(Id id, double duration, int segments, RumbleType type) {
+  public JoystickRumble(Id id, double duration, int segments) {
     dc = RobotContainer.RC().dc;
     this.id = id;
     this.duration = duration;
     this.segments = segments;
-    this.type = type;
     if (segments<1){
       segments = 1; // need at least one segment, prevent divide by zero
     }
@@ -51,7 +49,7 @@ public class JoystickRumble extends CommandBase {
     timer.start();
     current_segment = 1;
     segment_duration = (duration - ((segments-1) * silent_duration))/segments;
-    //RobotContainer.RC().dc.turnOnRumble(id, type);
+    RobotContainer.RC().dc.turnOnRumble(id, RumbleType.kBothRumble);
     silent_segment = false;
   }
 
@@ -63,7 +61,7 @@ public class JoystickRumble extends CommandBase {
         silent_segment = false;
         timer.reset();
         timer.start();
-        //RobotContainer.RC().dc.turnOnRumble(id, type);
+        RobotContainer.RC().dc.turnOnRumble(id, RumbleType.kBothRumble);
       }
     }
     else if (timer.hasElapsed(segment_duration)){ 
@@ -73,7 +71,7 @@ public class JoystickRumble extends CommandBase {
       }
       else { //more segments to go, start a silent segment (these don't count against total segment count)
         silent_segment = true;
-        //RobotContainer.RC().dc.turnOffRumble(id, type);
+        RobotContainer.RC().dc.turnOffRumble(id, RumbleType.kBothRumble);
         timer.reset();
         timer.start();
       }
@@ -83,7 +81,7 @@ public class JoystickRumble extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    //RobotContainer.RC().dc.turnOffRumble(id, type);
+    RobotContainer.RC().dc.turnOffRumble(id, RumbleType.kBothRumble);
     timer.stop();
   }
 

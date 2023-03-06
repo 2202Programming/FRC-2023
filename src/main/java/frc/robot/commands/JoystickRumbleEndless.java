@@ -15,18 +15,16 @@ public class JoystickRumbleEndless extends CommandBase {
 
   HID_Xbox_Subsystem dc;
   Id id;
-  RumbleType type;
 
-  public JoystickRumbleEndless(Id id, RumbleType type) {
+  public JoystickRumbleEndless(Id id) {
     dc = RobotContainer.RC().dc;
     this.id = id;
-
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //RobotContainer.RC().dc.turnOnRumble(id, type);
+    RobotContainer.RC().dc.turnOnRumble(id, RumbleType.kBothRumble);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -36,7 +34,7 @@ public class JoystickRumbleEndless extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    //RobotContainer.RC().dc.turnOffRumble(id, type);
+    RobotContainer.RC().dc.turnOffRumble(id, RumbleType.kBothRumble);
   }
 
   // Returns true when the command should end.

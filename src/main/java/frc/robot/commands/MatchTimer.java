@@ -25,27 +25,9 @@ public class MatchTimer extends CommandBase {
   public void execute() {
     int timeLeft = (int)DriverStation.getMatchTime();  //drop fraction of seconds
     switch(timeLeft){
-      case(120):
-        if(!buzzing){
-          new JoystickRumble(Id.Driver, 1, 1, RumbleType.kLeftRumble).schedule();
-          buzzing = true;
-        }
-        break;
-      case(118):
-        buzzing = false;
-        break;
-      case(60):
-        if(!buzzing){
-          new JoystickRumble(Id.Driver, 1, 2, RumbleType.kLeftRumble).schedule();
-          buzzing = true;
-        }
-        break;
-      case(58):
-        buzzing = false;
-        break;
       case(30):
         if(!buzzing){
-          new JoystickRumble(Id.Driver, 1, 3, RumbleType.kLeftRumble).schedule();
+          new JoystickRumble(Id.Operator, 1, 3).schedule();
           buzzing = true;
         }
         break;
@@ -54,7 +36,7 @@ public class MatchTimer extends CommandBase {
         break;
       case(10):
         if(!buzzing){
-          new JoystickRumble(Id.Driver, 10, 10, RumbleType.kLeftRumble).schedule();
+          new JoystickRumble(Id.Operator, 10, 10).schedule();
           buzzing = true;
         }
         break;
