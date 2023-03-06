@@ -289,15 +289,27 @@ public final class Constants {
     public final static Pose2d blueScorePose8 = new Pose2d(new Translation2d(2.0,4.40), Rotation2d.fromDegrees(180));
     public final static Pose2d blueScorePose9 = new Pose2d(new Translation2d(2.0,5.00), Rotation2d.fromDegrees(180)); //highest scoring position in Y
 
-    public final static Pose2d redScorePose1 = new Pose2d(new Translation2d(7.0,0.50), Rotation2d.fromDegrees(0)); //lowest scoring position in Y.  FIX X
-    public final static Pose2d redScorePose2 = new Pose2d(new Translation2d(7.0,1.05), Rotation2d.fromDegrees(0));
-    public final static Pose2d redScorePose3 = new Pose2d(new Translation2d(7.0,1.60), Rotation2d.fromDegrees(0));
-    public final static Pose2d redScorePose4 = new Pose2d(new Translation2d(7.0,2.15), Rotation2d.fromDegrees(0));
-    public final static Pose2d redScorePose5 = new Pose2d(new Translation2d(7.0,2.70), Rotation2d.fromDegrees(0));
-    public final static Pose2d redScorePose6 = new Pose2d(new Translation2d(7.0,3.30), Rotation2d.fromDegrees(0));
-    public final static Pose2d redScorePose7 = new Pose2d(new Translation2d(7.0,3.80), Rotation2d.fromDegrees(0));
-    public final static Pose2d redScorePose8 = new Pose2d(new Translation2d(7.0,4.40), Rotation2d.fromDegrees(0));
-    public final static Pose2d redScorePose9 = new Pose2d(new Translation2d(7.0,5.00), Rotation2d.fromDegrees(0)); //highest scoring position in Y
+    //These are fake red scoring positions for testing in black box
+    // public final static Pose2d redScorePose1 = new Pose2d(new Translation2d(7.0,0.50), Rotation2d.fromDegrees(0)); //lowest scoring position in Y.  
+    // public final static Pose2d redScorePose2 = new Pose2d(new Translation2d(7.0,1.05), Rotation2d.fromDegrees(0));
+    // public final static Pose2d redScorePose3 = new Pose2d(new Translation2d(7.0,1.60), Rotation2d.fromDegrees(0));
+    // public final static Pose2d redScorePose4 = new Pose2d(new Translation2d(7.0,2.15), Rotation2d.fromDegrees(0));
+    // public final static Pose2d redScorePose5 = new Pose2d(new Translation2d(7.0,2.70), Rotation2d.fromDegrees(0));
+    // public final static Pose2d redScorePose6 = new Pose2d(new Translation2d(7.0,3.30), Rotation2d.fromDegrees(0));
+    // public final static Pose2d redScorePose7 = new Pose2d(new Translation2d(7.0,3.80), Rotation2d.fromDegrees(0));
+    // public final static Pose2d redScorePose8 = new Pose2d(new Translation2d(7.0,4.40), Rotation2d.fromDegrees(0));
+    // public final static Pose2d redScorePose9 = new Pose2d(new Translation2d(7.0,5.00), Rotation2d.fromDegrees(0)); //highest scoring position in Y
+
+    //JR estimate of real red scoring positions
+    public final static Pose2d redScorePose1 = new Pose2d(new Translation2d(14.7,0.50), Rotation2d.fromDegrees(0)); //lowest scoring position in Y.  
+    public final static Pose2d redScorePose2 = new Pose2d(new Translation2d(14.7,1.05), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose3 = new Pose2d(new Translation2d(14.7,1.60), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose4 = new Pose2d(new Translation2d(14.7,2.15), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose5 = new Pose2d(new Translation2d(14.7,2.70), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose6 = new Pose2d(new Translation2d(14.7,3.30), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose7 = new Pose2d(new Translation2d(14.7,3.80), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose8 = new Pose2d(new Translation2d(14.7,4.40), Rotation2d.fromDegrees(0));
+    public final static Pose2d redScorePose9 = new Pose2d(new Translation2d(14.7,5.00), Rotation2d.fromDegrees(0)); //highest scoring position in Y
   
     public final static Pose2d[][] blueScorePoses =  {{blueScorePose1,blueScorePose2,blueScorePose3},
                                                     {blueScorePose4,blueScorePose5,blueScorePose6},
