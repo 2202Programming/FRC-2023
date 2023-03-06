@@ -30,8 +30,6 @@ public class Place extends CommandBase {
     this.horizontalRequest = horizontalRequest;
     this.verticalRequest = verticalRequest;
     this.sensors = sensors;
-
-    until(dc.Driver().leftStick().or(dc.Driver().rightStick()));
   }
   private void move() {
     position = new goToScoringPosition(new PathConstraints(2,3), horizontalRequest); 

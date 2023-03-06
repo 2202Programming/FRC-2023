@@ -24,7 +24,7 @@ public class autoSTL extends CommandBase {
     double macAccel = 3.0;
 
     // Path info
-    String pathName;
+    String pathName = "stl";
     SequentialCommandGroup cmd;
     List<PathPlannerTrajectory> pathGroup;
 
@@ -35,9 +35,9 @@ public class autoSTL extends CommandBase {
     @Override
     public void initialize() {
         // get location
-        if (dc.readSideboard(SBButton.Sw11)) pathName = "edge";
-        else if (dc.readSideboard(SBButton.Sw12)) pathName = "mid";
-        else if (dc.readSideboard(SBButton.Sw13)) pathName = "far";
+        if (dc.readSideboard(SBButton.Sw11)) pathName = "Edge";
+        else if (dc.readSideboard(SBButton.Sw12)) pathName = "Mid";
+        else if (dc.readSideboard(SBButton.Sw13)) pathName = "Far";
 
         // if it's hail mary
         if (dc.readSideboard(SBButton.Sw15)) pathName += "HailMary";
