@@ -1,0 +1,79 @@
+package frc.robot.commands.auto;
+
+import java.util.List;
+
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.RobotContainer;
+import frc.robot.commands.swerve.ChargeStationBalance;
+import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
+import frc.robot.subsystems.hid.SwitchboardController.SBButton;
+
+public class autoSTL extends CommandBase {
+    // Subsystems
+    SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
+    HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
+
+    // Constraints
+    double maxVel = 3.3;
+    double macAccel = 3.0;
+
+    // Path info
+    String pathName;
+    SequentialCommandGroup cmd;
+    List<PathPlannerTrajectory> pathGroup;
+
+    public autoSTL() {
+        addRequirements(sdt, dc);
+    }
+
+    @Override
+    public void initialize() {
+        // get location
+        if (dc.readSideboard(SBButton.Sw11)) pathName = "edge";
+        else if (dc.readSideboard(SBButton.Sw12)) pathName = "mid";
+        else if (dc.readSideboard(SBButton.Sw13)) pathName = "far";
+
+        // if it's hail mary
+        if (dc.readSideboard(SBButton.Sw15)) pathName += "HailMary";
+
+        // load the path group
+        pathGroup = PathPlanner.loadPathGroup(pathName, new PathConstraints(maxVel, macAccel));
+
+        if (pathName.contains("mid")) {
+            if (dc.readSideboard(SBButton.Sw22)) pathGroup.remove(1); // assume index 1 is right pickup
+            else pathGroup.remove(2); // assume index 2 is left pickup
+        }
+
+        if (!dc.readSideboard(SBButton.Sw21)) { 
+            pathGroup.remove(pathGroup.size() - 1);
+            cmd = new SequentialCommandGroup(RobotContainer.RC().autoBuilder.fullAuto(pathGroup));
+        } else {
+            cmd = new SequentialCommandGroup(RobotContainer.RC().autoBuilder.fullAuto(pathGroup));
+            cmd.addCommands(new ChargeStationBalance(false));
+        }
+        
+        cmd.schedule();
+    }
+
+    @Override
+    public void execute() {
+        // do nothing
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        cmd.cancel();
+        sdt.stop();
+    }
+
+    @Override
+    public boolean isFinished() {
+        return true;
+    }
+}
