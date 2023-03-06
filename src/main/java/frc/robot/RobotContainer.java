@@ -30,6 +30,7 @@ import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.Placement.Place;
+import frc.robot.commands.auto.autoSTL;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
@@ -99,8 +100,6 @@ public class RobotContainer {
 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
-
-  Command myauto; // fix names later
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -192,8 +191,6 @@ public class RobotContainer {
       //       new PathConstraints(1, 1)));
 
           // new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
-      myauto = autoBuilder.fullAuto(PathPlanner.loadPath("visiontest1",
-      new PathConstraints(1, 1)));
     }
 
     initEvents();
@@ -337,7 +334,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return myauto;
+    return new autoSTL();
   }
 
   /**
