@@ -30,6 +30,7 @@ public class NeoServo implements VelocityControlled {
     double arbFeedforward = 0.0; // for specialized control cases
     double external_vel_cmd = 0.0; // for velocity_mode == true
     boolean velocity_mode = false;
+    double trim = 0.0;  // offset from the commanded position (not seen in measured)
 
     // measured values
     double currentPos;
@@ -143,7 +144,7 @@ public class NeoServo implements VelocityControlled {
     public void setPosition(double pos) {
         encoder.setPosition(pos); // tell our encoder we are at pos
         positionPID.reset(); // clear any history in the pid
-        positionPID.calculate(pos, pos); // tell our pid we want that position; measured, setpoint same
+        positionPID.calculate(pos - trim, pos ); // tell our pid we want that position; measured, setpoint same
     }
 
     public double getPosition() {
@@ -180,6 +181,14 @@ public class NeoServo implements VelocityControlled {
             arbFeedforward = aff;
     }
 
+    public void setTrim(double trim) {
+        this.trim = trim;
+    }
+
+    public double getTrim() {
+        return trim;
+    }
+
     public void hold() {
         external_vel_cmd = 0.0;
         currentPos = encoder.getPosition();
@@ -195,7 +204,7 @@ public class NeoServo implements VelocityControlled {
 
     public void periodic(double compAdjustment) {
         // measure -read encoder for current position and velocity
-        currentPos = encoder.getPosition();
+        currentPos = encoder.getPosition() - trim;
         currentVel = encoder.getVelocity();
 
         // velocity_mode, update position setpoint so we don't jump back on mode switch
@@ -228,7 +237,7 @@ public class NeoServo implements VelocityControlled {
         NetworkTableEntry nt_desiredPos;
         NetworkTableEntry nt_desiredVel;
         NetworkTableEntry nt_currentVel;
-
+        NetworkTableEntry nt_trim;
         @Override
         public String getTableName() {
             return name; // from NeoServo
@@ -242,6 +251,7 @@ public class NeoServo implements VelocityControlled {
             nt_currentVel = table.getEntry("Velocity");
             nt_desiredPos = table.getEntry("PositionCmd");
             nt_desiredVel = table.getEntry("VelocityCmd");
+            nt_trim = table.getEntry("Trim");
 
             // put the a copy on dashboard to edit
             SmartDashboard.putData(name + "/hwVelPIDcfg", prevVelPIDcfg);
@@ -253,8 +263,8 @@ public class NeoServo implements VelocityControlled {
             nt_currentPos.setDouble(getPosition());
             nt_currentVel.setDouble(getVelocity());
             nt_desiredPos.setDouble(getSetpoint());
-
             nt_desiredVel.setDouble(getVelocityCmd());
+            nt_trim.setDouble(trim);
 
             // look for PIDF config changes
             hwVelPIDcfg.copyChangesTo(pid, hwVelSlot, prevVelPIDcfg);
