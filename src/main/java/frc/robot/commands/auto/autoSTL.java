@@ -9,7 +9,6 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
-import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.subsystems.hid.SwitchboardController.SBButton;
@@ -35,9 +34,9 @@ public class autoSTL extends CommandBase {
     @Override
     public void initialize() {
         // get location
-        if (dc.readSideboard(SBButton.Sw11)) pathName = "Edge";
-        else if (dc.readSideboard(SBButton.Sw12)) pathName = "Mid";
-        else if (dc.readSideboard(SBButton.Sw13)) pathName = "Far";
+        if (dc.readSideboard(SBButton.Sw11)) pathName += "Edge";
+        else if (dc.readSideboard(SBButton.Sw12)) pathName += "Mid";
+        else if (dc.readSideboard(SBButton.Sw13)) pathName += "Far";
 
         // if it's hail mary
         if (dc.readSideboard(SBButton.Sw15)) pathName += "HailMary";
@@ -50,13 +49,9 @@ public class autoSTL extends CommandBase {
             else pathGroup.remove(2); // assume index 2 is left pickup
         }
 
-        if (!dc.readSideboard(SBButton.Sw21)) { 
+        if (!dc.readSideboard(SBButton.Sw21))
             pathGroup.remove(pathGroup.size() - 1);
-            cmd = new SequentialCommandGroup(RobotContainer.RC().autoBuilder.fullAuto(pathGroup));
-        } else {
-            cmd = new SequentialCommandGroup(RobotContainer.RC().autoBuilder.fullAuto(pathGroup));
-            cmd.addCommands(new ChargeStationBalance(false));
-        }
+        cmd = new SequentialCommandGroup(RobotContainer.RC().autoBuilder.fullAuto(pathGroup));
         
         cmd.schedule();
     }
@@ -68,8 +63,7 @@ public class autoSTL extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        cmd.cancel();
-        sdt.stop();
+        // do nothing
     }
 
     @Override
