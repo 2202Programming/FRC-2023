@@ -14,13 +14,17 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.JoystickRumbleEndless;
+import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
 import frc.robot.util.PoseMath;
 
 public class goToScoringPosition extends CommandBase {
@@ -91,6 +95,7 @@ public class goToScoringPosition extends CommandBase {
     //sdt.disableVisionPose();
     rumbleCmd = new JoystickRumbleEndless(Id.Operator);
     rumbleCmd.schedule();
+    RobotContainer.RC().lights.setBlinking(BlinkyLights.GREEN);
     pathCommand.schedule();
   }
 
@@ -105,6 +110,8 @@ public class goToScoringPosition extends CommandBase {
     sdt.stop();
     sdt.enableVisionPose();
     rumbleCmd.cancel();
+    RobotContainer.RC().lights.stopBlinking();
+    RobotContainer.RC().lights.setAllianceColors();
     System.out.println("final End Point:" + sdt.getPose().getTranslation() + ", rot:" + sdt.getPose().getRotation().getDegrees());
 
   }

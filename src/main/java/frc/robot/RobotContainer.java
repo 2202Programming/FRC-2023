@@ -308,9 +308,9 @@ public class RobotContainer {
         //placeTrigger.and(dc.Operator().povLeft()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
         //placeTrigger.and(dc.Operator().povRight()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
 
-        placeTrigger.and(dc.Operator().povLeft()).onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Left));
-        placeTrigger.and(dc.Operator().povDown()).onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
-        placeTrigger.and(dc.Operator().povRight()).onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Right));
+        placeTrigger.and(dc.Operator().povLeft()).onTrue(new goToScoringPosition(new PathConstraints(3,4), HorizontalScoringLane.Left));
+        placeTrigger.and(dc.Operator().povDown()).onTrue(new goToScoringPosition(new PathConstraints(3,4), HorizontalScoringLane.Center));
+        placeTrigger.and(dc.Operator().povRight()).onTrue(new goToScoringPosition(new PathConstraints(3,4), HorizontalScoringLane.Right));
 
 
         /******************************************************
