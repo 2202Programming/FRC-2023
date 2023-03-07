@@ -95,7 +95,7 @@ public class BlinkyLights {
         }
     }
 
-    void setAllianceColors() {
+    public void setAllianceColors() {
         Alliance alliance = DriverStation.getAlliance();
         //System.out.println("***** Robot Alliance: " + DriverStation.getAlliance().name());
         switch (alliance) {
