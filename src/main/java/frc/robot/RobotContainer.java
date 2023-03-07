@@ -177,6 +177,8 @@ public class RobotContainer {
     }
     // set default commands, if sub-system exists
     if (drivetrain != null) {
+      initEvents();
+
       drivetrain.setDefaultCommand(new FieldCentricDrive(drivetrain));
 
       autoBuilder = new SwerveAutoBuilder(
@@ -195,8 +197,6 @@ public class RobotContainer {
 
           // new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
     }
-
-    initEvents();
 
     // Edit the binding confiuration for testing
     configureBindings(Bindings.Competition);
