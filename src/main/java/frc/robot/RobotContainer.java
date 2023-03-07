@@ -199,7 +199,7 @@ public class RobotContainer {
     initEvents();
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.vision_test);
+    configureBindings(Bindings.Competition);
 
 
 

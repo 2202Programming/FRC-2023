@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Constants.HorizontalScoringLane;
+import frc.robot.Constants.DriverControls.Id;
+import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.util.PoseMath;
@@ -28,6 +30,7 @@ public class goToScoringPosition extends CommandBase {
   PathConstraints constraints;
   SwerveDrivetrain sdt;
   PPSwerveControllerCommand pathCommand;
+  JoystickRumbleEndless rumbleCmd;
 
   //pick correct scoring pose based on alliance
   public goToScoringPosition(PathConstraints constraints, HorizontalScoringLane horizontalScoringLane) {
@@ -85,6 +88,9 @@ public class goToScoringPosition extends CommandBase {
       }
       pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.redScorePoses[scoringBlock][scoringAdjusted]);
     }
+    //sdt.disableVisionPose();
+    rumbleCmd = new JoystickRumbleEndless(Id.Operator);
+    rumbleCmd.schedule();
     pathCommand.schedule();
   }
 
@@ -97,6 +103,10 @@ public class goToScoringPosition extends CommandBase {
   public void end(boolean interrupted) {
     pathCommand.cancel();
     sdt.stop();
+    sdt.enableVisionPose();
+    rumbleCmd.cancel();
+    System.out.println("final End Point:" + sdt.getPose().getTranslation() + ", rot:" + sdt.getPose().getRotation().getDegrees());
+
   }
 
   // Returns true when the command should end.
@@ -112,9 +122,13 @@ public class goToScoringPosition extends CommandBase {
     //using bearing as your exit and entry angle
     PathPoint startPoint = new PathPoint(sdt.getPose().getTranslation(), bearing, sdt.getPose().getRotation());
     PathPoint endPoint = new PathPoint(finalPose.getTranslation(), bearing, finalPose.getRotation());
-    System.out.println("From Point:" + sdt.getPose().getTranslation());
-    System.out.println("End Point:" + finalPose.getTranslation());
-
+    System.out.println("From Point:" + sdt.getPose().getTranslation() + ", rot:" + sdt.getPose().getRotation().getDegrees());
+    System.out.println("Expected End Point:" + finalPose.getTranslation()  + ", rot:" + finalPose.getRotation().getDegrees());
+    
+    PIDController anglePid = new PIDController(6.0, 0, 0);
+    anglePid.setTolerance(Math.PI * 0.02);
+    anglePid.enableContinuousInput(-Math.PI, Math.PI);
+    
     //create a path from current position to finalPoint
     PathPlannerTrajectory newPath = PathPlanner.generatePath(constraints, startPoint, endPoint);
     System.out.println("Path time: " + newPath.getTotalTimeSeconds());
@@ -125,7 +139,7 @@ public class goToScoringPosition extends CommandBase {
       sdt.getKinematics(), // SwerveDriveKinematics
       new PIDController(4.0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
       new PIDController(4.0, 0, 0), // Y controller (usually the same values as X controller)
-      new PIDController(2.0, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+      anglePid, // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
       sdt::drive, // Module states consumer
       false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
       sdt // Requires this drive subsystem

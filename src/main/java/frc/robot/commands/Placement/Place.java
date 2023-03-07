@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
+import frc.robot.commands.Intake.Washer.IntakeForward;
+import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.subsystems.ColorSensors;
@@ -65,6 +67,7 @@ public class Place extends CommandBase {
   }
   private void Bottom() {
     move();
+    new outtakeCompetitionToggle().withTimeout(5.0).schedule();
     //TODO place Bottom. Flip 180?
   }
 
@@ -74,9 +77,13 @@ public class Place extends CommandBase {
     //Next move robot to placement position based on cube/isLeft
     //placeholder: Check which color/orentation of peice
     //GamePiece piece = sensors.getCurrentGamePiece();
+    Bottom();
+    return;
+ 
+    /*
     if (verticalRequest == VerticalScoringLane.Bottom) {
       Bottom();
-    } /*else {
+    } else {
       switch (piece) {
         case Cube:
           Cube();
