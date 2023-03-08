@@ -27,10 +27,12 @@ import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CenterTapeYawSkew;
 import frc.robot.commands.Intake.Washer.CarwashForward;
 import frc.robot.commands.Intake.Washer.CarwashReverse;
+import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeForward;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.Intake.Washer.toggleIntake;
 import frc.robot.commands.Placement.Place;
 import frc.robot.commands.auto.autoSTL;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -399,5 +401,11 @@ public class RobotContainer {
     eventMap.put("intake_off",
         new SequentialCommandGroup(
             new PrintCommand("***Intake Off")));
+
+    eventMap.put("deploy_intake",
+        new SequentialCommandGroup(
+          new PrintCommand("***Deploying intake"),
+          new DeployIntake()
+        ));
   }
 }
