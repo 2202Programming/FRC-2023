@@ -374,15 +374,16 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new PrintCommand("***Eject Start"),
             new InstantCommand(drivetrain::printPose),
-            new outtakeCompetitionToggle().withTimeout(1.0)));
+            new outtakeCompetitionToggle().withTimeout(0.75)));
 
     if (intake != null)
-    eventMap.put("eject",
+    eventMap.put("eject_piece",
         new SequentialCommandGroup(
             new PrintCommand("***Eject2"),
             new InstantCommand(drivetrain::printPose),
-            new outtakeCompetitionToggle().withTimeout(2.0),
-            new WaitCommand(1.5)));
+            new outtakeCompetitionToggle().withTimeout(0.75)
+            //,new WaitCommand(1.5)
+            ));
 
     eventMap.put("balance",
         new SequentialCommandGroup(
@@ -390,16 +391,13 @@ public class RobotContainer {
             new InstantCommand(drivetrain::printPose),
             new ChargeStationBalance(false)));
 
-    if (intake != null)
     eventMap.put("intake_on",
         new SequentialCommandGroup(
             new PrintCommand("***Intake On"),
-            new intakeCompetitionToggle().withTimeout(2.0)));
+            new intakeCompetitionToggle().withTimeout(1.0)));
 
-    if (intake != null)
     eventMap.put("intake_off",
         new SequentialCommandGroup(
             new PrintCommand("***Intake Off")));
   }
-
 }

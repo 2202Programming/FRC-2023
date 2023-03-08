@@ -19,8 +19,8 @@ public class autoSTL extends CommandBase {
     HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
 
     // Constraints
-    double maxVel = 3.3;
-    double macAccel = 3.0;
+    double maxVel = 5.0;
+    double macAccel = 4.5;
 
     // Path info
     String pathName = "stl";
