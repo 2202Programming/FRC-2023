@@ -118,12 +118,10 @@
       "isLocked": true,
       "isStopPoint": true,
       "stopEvent": {
-        "names": [
-          "eject_piece"
-        ],
+        "names": [],
         "executionBehavior": "sequential",
-        "waitBehavior": "none",
-        "waitTime": 2.0
+        "waitBehavior": "before",
+        "waitTime": 1.0
       }
     },
     {
@@ -245,12 +243,10 @@
       "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
-        "names": [
-          "eject_piece"
-        ],
+        "names": [],
         "executionBehavior": "sequential",
-        "waitBehavior": "none",
-        "waitTime": 2.0
+        "waitBehavior": "before",
+        "waitTime": 1.0
       }
     },
     {
@@ -279,7 +275,7 @@
     }
   ],
   "maxVelocity": 5.5,
-  "maxAcceleration": 5.5,
+  "maxAcceleration": 4.5,
   "isReversed": null,
   "markers": [
     {
@@ -304,6 +300,18 @@
       "position": 8.5,
       "names": [
         "deploy_intake"
+      ]
+    },
+    {
+      "position": 3.95,
+      "names": [
+        "eject_piece"
+      ]
+    },
+    {
+      "position": 8.95,
+      "names": [
+        "eject_piece"
       ]
     }
   ]

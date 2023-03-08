@@ -383,7 +383,7 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new PrintCommand("***Eject2"),
             new InstantCommand(drivetrain::printPose),
-            new outtakeCompetitionToggle().withTimeout(0.75)
+            new outtakeCompetitionToggle().withTimeout(2.00)
             //,new WaitCommand(1.5)
             ));
 
