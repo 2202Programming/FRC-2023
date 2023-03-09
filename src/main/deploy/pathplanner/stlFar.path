@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "eject_start"
+          "eject_no_deploy"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "before",
@@ -128,24 +128,22 @@
     },
     {
       "anchorPoint": {
-        "x": 3.9446947314947263,
-        "y": 3.146642959952587
+        "x": 3.94,
+        "y": 3.15
       },
       "prevControl": {
-        "x": 2.7176648364186025,
-        "y": 3.248895451208931
+        "x": 2.0486146719780036,
+        "y": 3.307494394319525
       },
       "nextControl": null,
-      "holonomicAngle": -179.52649194126508,
+      "holonomicAngle": -179.53,
       "isReversal": false,
       "velOverride": null,
-      "isLocked": true,
+      "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [
-          "balance"
-        ],
-        "executionBehavior": "sequential",
+        "names": [],
+        "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
       }

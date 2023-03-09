@@ -379,6 +379,13 @@ public class RobotContainer {
             new outtakeCompetitionToggle().withTimeout(0.75)));
 
     if (intake != null)
+    eventMap.put("eject_no_deploy",
+        new SequentialCommandGroup(
+            new PrintCommand("***Eject No Deploy Start"),
+            new InstantCommand(drivetrain::printPose),
+            new IntakeReverse().withTimeout(0.5)));
+
+    if (intake != null)
     eventMap.put("eject_piece",
         new SequentialCommandGroup(
             new PrintCommand("***Eject2"),
