@@ -179,7 +179,7 @@ public final class Constants {
 
   // Driver Preferences
   public static final class DriverPrefs {
-    public static final double VelExpo = 0.3; // non-dim [0.0 - 1.0]
+    public static final double VelExpo = 0.7; // non-dim [0.0 - 1.0]
     public static final double RotationExpo = 0.9; // non-dim [0.0 - 1.0]
     public static final double StickDeadzone = 0.05; // non-dim [0.0 - 1.0]
   }
@@ -229,7 +229,7 @@ public final class Constants {
     public static final double motorMaxRPM = 5600; // motor limit
 
     // Constraints on speeds enforeced in DriveTrain
-    public static final double kMaxSpeed = 12.0 * MperFT; // [m/s]
+    public static final double kMaxSpeed = 20.0 * MperFT; // [m/s]
     public static final double kMaxAngularSpeed = 2 * Math.PI; // [rad/s]
 
     /****
