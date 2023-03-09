@@ -14,7 +14,7 @@ public class IntakeReverse extends CommandBase {
     
     @Override
     public void initialize() {
-        intake.intakeOnReverse();
+        intake.setIntakeSpeed(-0.25);
     }
 
     @Override
