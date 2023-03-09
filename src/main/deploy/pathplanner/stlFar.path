@@ -20,7 +20,7 @@
           "eject_no_deploy"
         ],
         "executionBehavior": "sequential",
-        "waitBehavior": "before",
+        "waitBehavior": "none",
         "waitTime": 1.0
       }
     },

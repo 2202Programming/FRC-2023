@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
@@ -340,6 +341,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    //return autoBuilder.fullAuto(PathPlanner.loadPath("stlNoDeployTest", new PathConstraints(3.0, 4.0)));
     return new autoSTL();
   }
 
@@ -403,7 +405,7 @@ public class RobotContainer {
     eventMap.put("intake_on",
         new SequentialCommandGroup(
             new PrintCommand("***Intake On"),
-            new intakeCompetitionToggle().withTimeout(1.0)));
+            new intakeCompetitionToggle().withTimeout(3.0)));
 
     eventMap.put("intake_off",
         new SequentialCommandGroup(
