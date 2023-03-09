@@ -197,7 +197,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "end"
+          "balance"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
