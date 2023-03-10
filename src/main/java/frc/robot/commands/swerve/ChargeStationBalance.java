@@ -50,7 +50,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     final double vmax = 0.9; // [m/s] fastest speed we allow
 
     // non-linear
-    static final double VMIN_CLIMB_DEFAULT = 0.35; // [m/s] small stiction speed if there is tilt, sign corrected
+    static final double VMIN_CLIMB_DEFAULT = 0.55; // [m/s] small stiction speed if there is tilt, sign corrected
     final double PITCHRATE_DETECTED = 10.0; // [deg/s] - we are moving
     final double MIN_PITCH = 5.0; // [deg] min angle to know we are on the charge station (ramp)
     
