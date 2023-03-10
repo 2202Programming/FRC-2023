@@ -47,7 +47,7 @@ public class autoSTL extends CommandBase {
         // load the path group
         pathGroup = PathPlanner.loadPathGroup(pathName, new PathConstraints(maxVel, macAccel));
 
-        if (pathName.contains("mid")) {
+        if (pathName.contains("Mid")) {
             if (dc.readSideboard(SBButton.Sw22)) {
                 pathGroup.remove(1);
                 pathGroup.remove(1); // assume index 1 is right pickup

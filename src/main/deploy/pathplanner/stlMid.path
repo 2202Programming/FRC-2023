@@ -44,7 +44,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "midpoint",
+          "middle",
           "intake_down"
         ],
         "executionBehavior": "parallel",
@@ -96,7 +96,9 @@
       "isLocked": true,
       "isStopPoint": true,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "middle"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
@@ -122,7 +124,8 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "intake_down"
+          "intake_down",
+          "middle"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -148,7 +151,9 @@
       "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "middle"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
@@ -206,13 +211,13 @@
   ],
   "markers": [
     {
-      "position": 2.0,
+      "position": 2.3,
       "names": [
         "intake_down"
       ]
     },
     {
-      "position": 4.95,
+      "position": 4.3,
       "names": [
         "intake_down"
       ]
