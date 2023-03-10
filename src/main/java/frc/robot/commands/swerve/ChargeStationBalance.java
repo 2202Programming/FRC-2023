@@ -50,8 +50,8 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     final double vmax = 0.9; // [m/s] fastest speed we allow
 
     // non-linear
-    static final double VMIN_CLIMB_DEFAULT = 0.55; // [m/s] small stiction speed if there is tilt, sign corrected
-    final double PITCHRATE_DETECTED = 20.0; // [deg/s] - we are moving
+    static final double VMIN_CLIMB_DEFAULT = 0.45; // [m/s] small stiction speed if there is tilt, sign corrected
+    final double PITCHRATE_DETECTED = 25.0; // [deg/s] - we are moving
     final double MIN_PITCH = 5.0; // [deg] min angle to know we are on the charge station (ramp)
     
     //allow the command to have different vmin_climb
@@ -139,7 +139,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
 
     @Override
     public Color8Bit colorProvider() {
-        if (vmin <= 0.0) return BlinkyLights.WHITE;
+        if (vmin == 0.0) return BlinkyLights.WHITE;
         return BlinkyLights.GREEN;
     }
 
