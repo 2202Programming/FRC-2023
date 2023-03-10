@@ -41,6 +41,9 @@ public class autoSTL extends CommandBase {
         // if it's hail mary
         if (dc.readSideboard(SBButton.Sw15)) pathName += "HailMary";
 
+        // if it's no balance
+        if (!dc.readSideboard(SBButton.Sw21)) pathName += "NoBalance";
+
         // load the path group
         pathGroup = PathPlanner.loadPathGroup(pathName, new PathConstraints(maxVel, macAccel));
 
@@ -55,8 +58,6 @@ public class autoSTL extends CommandBase {
             }
         }
 
-        if (!dc.readSideboard(SBButton.Sw21))
-            pathGroup.remove(pathGroup.size() - 1);
         cmd = new SequentialCommandGroup(RobotContainer.RC().autoBuilder.fullAuto(pathGroup));
         
         cmd.schedule();
