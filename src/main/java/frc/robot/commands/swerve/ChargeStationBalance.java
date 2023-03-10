@@ -51,7 +51,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
 
     // non-linear
     static final double VMIN_CLIMB_DEFAULT = 0.55; // [m/s] small stiction speed if there is tilt, sign corrected
-    final double PITCHRATE_DETECTED = 10.0; // [deg/s] - we are moving
+    final double PITCHRATE_DETECTED = 20.0; // [deg/s] - we are moving
     final double MIN_PITCH = 5.0; // [deg] min angle to know we are on the charge station (ramp)
     
     //allow the command to have different vmin_climb
@@ -80,7 +80,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
     double vmin;
     
     // kp [m/s per deg] kd .003 or less for TIM, kp > 0.018 is unstable
-    PIDController csBalancePID = new PIDController(0.015, 0.0, 0.000);                                                                   
+    PIDController csBalancePID = new PIDController(0.018, 0.0, 0.000);                                                                   
 
     //tunable constants
     double kpPR = -0.0055; // [m/s/deg/s] vel compensation based on direct pitchRate
@@ -139,6 +139,7 @@ public class ChargeStationBalance extends CommandBase implements BlinkyLightUser
 
     @Override
     public Color8Bit colorProvider() {
+        if (vmin <= 0.0) return BlinkyLights.WHITE;
         return BlinkyLights.GREEN;
     }
 
