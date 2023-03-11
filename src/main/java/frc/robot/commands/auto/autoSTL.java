@@ -19,8 +19,8 @@ public class autoSTL extends CommandBase {
     HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
 
     // Constraints
-    double maxVel = 4.5;
-    double macAccel = 4.0;
+    double maxVel = 3.0; // for mid going over charge station (STL elims) prev 4.5
+    double macAccel = 3.0; // for mid going over charge station (STL elims) pre 4.0
 
     // Path info
     String pathName = "stl";
@@ -47,16 +47,17 @@ public class autoSTL extends CommandBase {
         // load the path group
         pathGroup = PathPlanner.loadPathGroup(pathName, new PathConstraints(maxVel, macAccel));
 
-        if (pathName.contains("Mid")) {
-            if (dc.readSideboard(SBButton.Sw22)) {
-                pathGroup.remove(1);
-                pathGroup.remove(1); // assume index 1 is right pickup
-            }
-            else {
-                pathGroup.remove(2); // assume index 2 is left pickup
-                pathGroup.remove(2);
-            }
-        }
+        // STL elims we're not that fancy
+        // if (pathName.contains("Mid")) {
+        //     if (dc.readSideboard(SBButton.Sw22)) {
+        //         pathGroup.remove(1);
+        //         pathGroup.remove(1); // assume index 1 is right pickup
+        //     }
+        //     else {
+        //         pathGroup.remove(2); // assume index 2 is left pickup
+        //         pathGroup.remove(2);
+        //     }
+        // }
 
         cmd = new SequentialCommandGroup(RobotContainer.RC().autoBuilder.fullAuto(pathGroup));
         
