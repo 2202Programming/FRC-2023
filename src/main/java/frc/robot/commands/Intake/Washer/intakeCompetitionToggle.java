@@ -46,22 +46,14 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    isFinished = intake.objectDetected();
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     intake.carwashOff();
-    intake.retract(); // TODO do we want to move retract into the only if interrupted loop? So if
-                      // object detected intake remains deployed?
+    intake.retract();
     // rumbleCommand.cancel();
-
-    if (interrupted == false) { // this means isFinished() returns true, which means an object was detected
-      intake.setHoldSpeed();
-    } else {
-      intake.intakeOff();
-    }
   }
 
   // Returns true when the command should end.
