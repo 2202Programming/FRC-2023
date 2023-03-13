@@ -20,6 +20,8 @@ import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
+import frc.robot.commands.Arm.MoveCollectiveArm;
+import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Intake.Washer.DeployIntake;
@@ -155,7 +157,7 @@ public class RobotContainer {
         intake = null;
         armSS = new ArmSS();
         elbow = new Elbow();
-        claw = new Claw_Substyem();// null;
+        claw = new Claw_Substyem();
         colorSensors = null;
         break;
     }
@@ -204,22 +206,26 @@ public class RobotContainer {
     // add bindings based on current user mode
     switch (bindings) {
       case arm_test:
-        armSS.setMaxVel(8.0);
-
-        // turn on some networking watch/updates fod debugging
-        var wrist = claw.getWrist();
+        // turn on some networking watch/updates for debugging
         armSS.getWatcher();
         claw.getWatcher();
         elbow.getWatcher();
-
-        dc.Driver().a().whileTrue(new GenericPositionTest(wrist, -120.0, 120.0, 120.0));
-        dc.Driver().b().whileTrue(new GenericVelocityTest(wrist, 30.0, 3.0, 2.0));
-
+        claw.setElbowDoubleSupplier(elbow::getPosition);
+        /******
+        dc.Driver().rightBumper().whileTrue(new GenericZeroPos(elbow));
+        dc.Driver().a().whileTrue(new GenericPositionTest(elbow, 45.0, 90.0, 30.0));
+        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 90.0, 1.50, 1.0));
+      */
         dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
+        
+        //dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
+        //dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
 
-        dc.Driver().x().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0).WithLockout(5.0));
-
+        dc.Driver().x().onTrue(new MoveCollectiveArm(CollectiveMode.highFS));
+        dc.Driver().a().onTrue(new MoveCollectiveArm(CollectiveMode.midBS));
+        dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
+        dc.Driver().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
         //armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
       case balance_test:
@@ -323,6 +329,10 @@ public class RobotContainer {
         break;
 
     }
+  }
+
+  public void testPeriodic() {
+    elbow.periodic();
   }
 
   /**

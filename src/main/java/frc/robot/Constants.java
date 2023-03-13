@@ -80,6 +80,13 @@ public final class Constants {
     public static final Pose2d testStartPose = new Pose2d(5, 5, new Rotation2d(-180));
   }
 
+  public static class PowerOnPos {
+    public static final double arm = 0.0;     //[cm]
+    public static final double elbow = 0.0;   //[deg]
+    public static final double wrist = -60.0; //[deg]
+    public static final double rotate = 0.0;   //[deg]
+  }
+
   /**
    * CAN bus IDs
    * 

@@ -7,20 +7,19 @@ package frc.robot.util;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.commands.utility.WatcherCmd;
 
 public class NeoServo implements VelocityControlled {
     String name = "no-name";
@@ -31,13 +30,14 @@ public class NeoServo implements VelocityControlled {
     double arbFeedforward = 0.0; // for specialized control cases
     double external_vel_cmd = 0.0; // for velocity_mode == true
     boolean velocity_mode = false;
+    double trim = 0.0;  // offset from the commanded position (not seen in measured)
 
     // measured values
     double currentPos;
     double currentVel;
 
     // state vars
-    final public PIDController positionPID;
+    final PIDController positionPID;
     final public PIDFController hwVelPIDcfg; // matches hardware setting
     final PIDFController prevVelPIDcfg; // soft copy to edit /w NT and compare with hwVelPIDcfg
     final int hwVelSlot;
@@ -128,6 +128,10 @@ public class NeoServo implements VelocityControlled {
         external_vel_cmd = 0.0;
     }
 
+    public boolean isVelocityMode() {
+        return velocity_mode;
+    }
+    
     public double getSetpoint() {
         return positionPID.getSetpoint();
     }
@@ -140,7 +144,7 @@ public class NeoServo implements VelocityControlled {
     public void setPosition(double pos) {
         encoder.setPosition(pos); // tell our encoder we are at pos
         positionPID.reset(); // clear any history in the pid
-        positionPID.calculate(pos, pos); // tell our pid we want that position; measured, setpoint same
+        positionPID.calculate(pos - trim, pos ); // tell our pid we want that position; measured, setpoint same
     }
 
     public double getPosition() {
@@ -169,12 +173,20 @@ public class NeoServo implements VelocityControlled {
     }
 
     public void setArbFeedforward(double aff) {
-        //uses percent power, on range of -1. to 1.0
+        // uses percent power, on range of -1. to 1.0
         if (Math.abs(aff) > 1.0) {
             DriverStation.reportError("|ArbFF| > 1, check your math. Using ZERO.", true);
             arbFeedforward = 0.0;
         } else
             arbFeedforward = aff;
+    }
+
+    public void setTrim(double trim) {
+        this.trim = trim;
+    }
+
+    public double getTrim() {
+        return trim;
     }
 
     public void hold() {
@@ -192,11 +204,12 @@ public class NeoServo implements VelocityControlled {
 
     public void periodic(double compAdjustment) {
         // measure -read encoder for current position and velocity
-        currentPos = encoder.getPosition();
+        currentPos = encoder.getPosition() - trim;
         currentVel = encoder.getVelocity();
 
         // velocity_mode, update position setpoint so we don't jump back on mode switch
         if (velocity_mode) {
+            positionPID.reset();
             positionPID.setSetpoint(currentPos);
         }
 
@@ -215,63 +228,46 @@ public class NeoServo implements VelocityControlled {
     }
 
     public Command getWatcher() {
-        var cmd = new NeoWatcher();
-        cmd.schedule();
-        return cmd;
+        return new NeoWatcher();
     }
 
-    class NeoWatcher extends CommandBase {
-        NetworkTable table;
+    class NeoWatcher extends WatcherCmd {
         NetworkTableEntry nt_arbFF;
         NetworkTableEntry nt_currentPos;
         NetworkTableEntry nt_desiredPos;
         NetworkTableEntry nt_desiredVel;
         NetworkTableEntry nt_currentVel;
-
-        NeoWatcher() {
-            table = NetworkTableInstance.getDefault().getTable(name);
-            // keep updates even when disabled, self-decoration
-            this.runsWhenDisabled();
-            ntcreate();
-        }
-
-        // Called every time the scheduler runs while the command is scheduled.
+        NetworkTableEntry nt_trim;
         @Override
-        public void execute() {
-            ntupdates();
+        public String getTableName() {
+            return name; // from NeoServo
         }
 
+        @Override
         public void ntcreate() {
+            NetworkTable table = getTable();
             nt_arbFF = table.getEntry("ArbFF");
             nt_currentPos = table.getEntry("Position");
             nt_currentVel = table.getEntry("Velocity");
             nt_desiredPos = table.getEntry("PositionCmd");
             nt_desiredVel = table.getEntry("VelocityCmd");
+            nt_trim = table.getEntry("Trim");
 
             // put the a copy on dashboard to edit
             SmartDashboard.putData(name + "/hwVelPIDcfg", prevVelPIDcfg);
         }
 
-        public void ntupdates() {
+        @Override
+        public void ntupdate() {
             nt_arbFF.setDouble(arbFeedforward);
             nt_currentPos.setDouble(getPosition());
             nt_currentVel.setDouble(getVelocity());
             nt_desiredPos.setDouble(getSetpoint());
             nt_desiredVel.setDouble(getVelocityCmd());
+            nt_trim.setDouble(trim);
 
             // look for PIDF config changes
             hwVelPIDcfg.copyChangesTo(pid, hwVelSlot, prevVelPIDcfg);
-        }
-
-        // Returns true when the command should end.
-        @Override
-        public boolean isFinished() {
-            return false;
-        }
-
-        @Override
-        public boolean runsWhenDisabled() {
-            return true;
         }
     }
 

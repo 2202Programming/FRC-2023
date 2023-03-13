@@ -8,7 +8,7 @@ public class GenericPositionTest extends CommandBase implements Lockout {
 
     final VelocityControlled device;
     boolean setpointAtZero;
-    final int WaitCount = 100;   // frames to wait until position command changes, 2 seconds
+    final int WaitCount = 50;   // frames to wait until position command changes, 2 seconds
     int count = 0;
 
     // Test constraints

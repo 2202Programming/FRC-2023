@@ -21,12 +21,13 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.commands.utility.WatcherCmd;
 import frc.robot.util.Mux;
-import frc.robot.util.NetworkTableUtil;
 
-public class ColorSensors extends SubsystemBase implements AutoCloseable, NetworkTableUtil {
+public class ColorSensors extends SubsystemBase implements AutoCloseable {
 
     // a "struct"
     private class SensorData {
@@ -36,7 +37,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
     }
 
     // sensor infos
-    private final int[] sensorMuxPorts = {0, 1, 2};
+    private final int[] sensorMuxPorts = { 0, 1, 2 };
     private final List<ColorSensorV3> colorSensors = new ArrayList<>();
     private final int numSensors = 3;
     private final DigitalInput lightGate = new DigitalInput(0); // move ID to constants
@@ -64,25 +65,30 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
         colorSensorData[1] = new SensorData();
         colorSensorData[2] = new SensorData();
 
-        for (int id : sensorMuxPorts) assert id < mux.availableBuses();
+        for (int id : sensorMuxPorts)
+            assert id < mux.availableBuses();
 
         for (int i = 0; i < sensorMuxPorts.length; i++) {
             mux.setEnabledBuses(sensorMuxPorts[i]);
             ColorSensorV3 sensor = new ColorSensorV3(Port.kOnboard);
-            
+
             // Config 8 bit for least amount of load on can bus
             // 12ms so we get assuredely one measurement every frame (20ms)
-            sensor.configureProximitySensor(ProximitySensorResolution.kProxRes8bit, ProximitySensorMeasurementRate.kProxRate12ms);
+            sensor.configureProximitySensor(ProximitySensorResolution.kProxRes8bit,
+                    ProximitySensorMeasurementRate.kProxRate12ms);
 
-            // 13bit is the lowest res possible, again less load on CAN bus. We're only measuring purple and yellow, we should be ok
+            // 13bit is the lowest res possible, again less load on CAN bus. We're only
+            // measuring purple and yellow, we should be ok
             // 25ms is the shortest, not quite once every frame, but close
             // gain of 9x appears to be the default, that's what we'll go with
-            sensor.configureColorSensor(ColorSensorResolution.kColorSensorRes13bit, ColorSensorMeasurementRate.kColorRate25ms, GainFactor.kGain9x);
+            sensor.configureColorSensor(ColorSensorResolution.kColorSensorRes13bit,
+                    ColorSensorMeasurementRate.kColorRate25ms, GainFactor.kGain9x);
 
             colorSensors.add(sensor);
         }
 
-        // Recommended to run this in a thread due to multiple posts on ChiefDelphi on how the onboard I2C port can be shady and can be expensive
+        // Recommended to run this in a thread due to multiple posts on ChiefDelphi on
+        // how the onboard I2C port can be shady and can be expensive
         notifier = new Notifier(() -> {
             for (int i = 0; i < colorSensorData.length; i++) {
                 mux.setEnabledBuses(sensorMuxPorts[i]);
@@ -93,9 +99,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
             }
         });
 
-        notifier.startPeriodic(Constants.DT); 
-
-        ntconstructor();
+        notifier.startPeriodic(Constants.DT);
     }
 
     /**
@@ -132,6 +136,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
 
     // Current and previous frame game piece
     private GamePiece currentGamePiece = GamePiece.None;
+    GamePiece prevFrameGamePiece = currentGamePiece;
 
     // Color matching state vars
     ColorMatch colorMatcher = new ColorMatch();
@@ -140,9 +145,11 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
     public static Color CONE_YELLOW = new Color(0.35, 0.55, 0.0); // TODO change to better values
     public static Color CUBE_PURPLE = new Color(0.3, 0.2, 0.5);
 
-    /* Confidence threshold, which is the Euclidean vector distance between the actual color vector and the expected color vector, 
+    /*
+     * Confidence threshold, which is the Euclidean vector distance between the
+     * actual color vector and the expected color vector,
      * which is 1 - (euclidean distance between actual, matched color)
-    */
+     */
     final double CONFIDENCE_THRESHOLD = 0.85; // TODO change to better values
 
     // enum of possible game piece orientations to return
@@ -166,22 +173,29 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
     @Override
     public void periodic() {
         // if the lightgate turns on add a frame that it thinks there's an object
-        if (lightGate.get()) framesObject++;
-        else framesObject = 0;
+        if (lightGate.get())
+            framesObject++;
+        else
+            framesObject = 0;
 
-        // if and only if (so algo only runs once per object) an object is detected for an entire sec find out what it is, then do something based on what it is
-        if (framesObject == 20) {
-            GamePiece lastGamePiece = currentGamePiece;
-            GamePiece detectedGamePiece = getGamePiece();
-            //Could present condition where we dont detect that a piece has moved inside the robot. In that case should use a flag.
-            if (lastGamePiece == GamePiece.None) {
-                if (detectedGamePiece != GamePiece.None) {
-                    currentGamePiece = detectedGamePiece;
-                } 
+        prevFrameGamePiece = currentGamePiece;
+        currentGamePiece = getGamePiece();
+
+        if (currentGamePiece != prevFrameGamePiece) {
+            // if and only if (so algo only runs once per object) an object is detected for
+            // an entire sec find out what it is, then do something based on what it is
+            if (framesObject == 20) {
+                GamePiece lastGamePiece = currentGamePiece;
+                GamePiece detectedGamePiece = getGamePiece();
+                // Could present condition where we dont detect that a piece has moved inside
+                // the robot. In that case should use a flag.
+                if (lastGamePiece == GamePiece.None) {
+                    if (detectedGamePiece != GamePiece.None) {
+                        currentGamePiece = detectedGamePiece;
+                    }
+                }
             }
         }
-        
-        ntperiod();
     }
 
     /**
@@ -193,7 +207,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
         return currentGamePiece;
     }
 
-    //Every time we place or eject a game peice, Call this method. This will clear lines 172-179, and allow us to detect peices again
+    // Every time we place or eject a game peice, Call this method. This will clear
+    // lines 172-179, and allow us to detect peices again
     public void clearCurrentGamePiece() {
         currentGamePiece = GamePiece.None;
     }
@@ -215,95 +230,168 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
         numYellow = 0;
         // Counts matches to each color
         for (int i = 0; i < numSensors; i++) {
-            if (colorSensorData[i].distance < 7.0) results[i] = null;
-            if (results[i] == null) continue;
-            if (results[i].color.equals(CUBE_PURPLE)) numPurple++;
-            else if (results[i].color.equals(CONE_YELLOW)) numYellow++;
+            if (colorSensorData[i].distance < 7.0)
+                results[i] = null;
+            if (results[i] == null)
+                continue;
+            if (results[i].color.equals(CUBE_PURPLE))
+                numPurple++;
+            else if (results[i].color.equals(CONE_YELLOW))
+                numYellow++;
         }
-        
+
         /**
          * If all 3 are purple it's probably a cube
          * If all 3 are yellow it's probably a cone facing backwards
          * If 1 or 2 are yellow it's probably a cone facing backwords
-         * Otherwise it's probably nothing 
+         * Otherwise it's probably nothing
          */
-        if (numPurple == 3) return GamePiece.Cube;
-        else if (numYellow == 3) return GamePiece.ConeFacingBack;
-        else if (numYellow >= 1) return GamePiece.ConeFacingFront;
-        else return GamePiece.None;
+        if (numPurple == 3)
+            return GamePiece.Cube;
+        else if (numYellow == 3)
+            return GamePiece.ConeFacingBack;
+        else if (numYellow >= 1)
+            return GamePiece.ConeFacingFront;
+        else
+            return GamePiece.None;
+    }
+
+    /**
+     * Gets the orientation of the cone based on the end color sensors, in the
+     * following order:
+     * (a) if a matching color is found; (b) the sign of the difference in proximity
+     * between the two
+     * 
+     * @return the orientation of the cone as a GamePiece enum. Will only ever
+     *         return GamePiece.ConeFacingFront or GamePiece.ConeFacingBack
+     */
+    public GamePiece getConeOrientation() {
+        // if no color is detected from the front color sensor then skinny end probably
+        // facing front
+        if (results[0] == null)
+            return GamePiece.ConeFacingFront;
+        // if no color is detected from the back color sensor then skinny end probably
+        // facinb back
+        else if (results[2] == null)
+            return GamePiece.ConeFacingBack;
+
+        // if the distance from sensor to object is greater in the front sensor than the
+        // second skinny end probably facing front, else facing back
+        return ((colorSensorData[0].distance - colorSensorData[2].distance) > 0) ? GamePiece.ConeFacingFront
+                : GamePiece.ConeFacingBack;
+    }
+
+    Command getWatcher() {
+        return new MyWatcher();
     }
 
     /**
      * NetworkTables
      */
+    class MyWatcher extends WatcherCmd {
 
-     // NT itself
-     NetworkTable nt = NetworkTableInstance.getDefault().getTable("Color Sensors");
+        // NT itself
+        NetworkTable nt = NetworkTableInstance.getDefault().getTable("Color Sensors");
 
-     // Sensor 0 (closest to intake -- front)
-     DoublePublisher nt_sensor0_r = nt.getDoubleTopic("Sensor 0 Red").publish();
-     DoublePublisher nt_sensor0_g = nt.getDoubleTopic("Sensor 0 Green").publish();
-     DoublePublisher nt_sensor0_b = nt.getDoubleTopic("Sensor 0 Blue").publish();
-     DoublePublisher nt_sensor0_ir = nt.getDoubleTopic("Sensor 0 IR").publish();
-     DoublePublisher nt_sensor0_prox = nt.getDoubleTopic("Sensor 0 Proximity").publish();
-     StringPublisher nt_sensor0_object = nt.getStringTopic("Sensor 0 Object Detected").publish();
-
-     // Sensor 1 (middle)
-     DoublePublisher nt_sensor1_r = nt.getDoubleTopic("Sensor 1 Red").publish();
-     DoublePublisher nt_sensor1_g = nt.getDoubleTopic("Sensor 1 Green").publish();
-     DoublePublisher nt_sensor1_b = nt.getDoubleTopic("Sensor 1 Blue").publish();
-     DoublePublisher nt_sensor1_ir = nt.getDoubleTopic("Sensor 1 IR").publish();
-     DoublePublisher nt_sensor1_prox = nt.getDoubleTopic("Sensor 1 Proximity").publish();
-     StringPublisher nt_sensor1_object = nt.getStringTopic("Sensor 1 Object Detected").publish();
-
-     // Sensor 2 (closest to car wash -- back)
-     DoublePublisher nt_sensor2_r = nt.getDoubleTopic("Sensor 2 Red").publish();
-     DoublePublisher nt_sensor2_g = nt.getDoubleTopic("Sensor 2 Green").publish();
-     DoublePublisher nt_sensor2_b = nt.getDoubleTopic("Sensor 2 Blue").publish();
-     DoublePublisher nt_sensor2_ir = nt.getDoubleTopic("Sensor 2 IR").publish();
-     DoublePublisher nt_sensor2_prox = nt.getDoubleTopic("Sensor 2 Proximity").publish();
-     StringPublisher nt_sensor2_object = nt.getStringTopic("Sensor 2 Object Detected?").publish();
-
-     // Overall numbers
-     IntegerPublisher nt_numYellow = nt.getIntegerTopic("Number of sensors yellow").publish();
-     IntegerPublisher nt_numPurple = nt.getIntegerTopic("Number of sensors purple").publish();
-     StringPublisher nt_objectDetected = nt.getStringTopic("Object detected").publish();
-
-    @Override
-    public void ntcreate() {
-        // don't need to do anything here
-    }
-
-    @Override
-    public void ntupdate() {
         // Sensor 0 (closest to intake -- front)
-        nt_sensor0_r.set(colorSensorData[0].color.red);
-        nt_sensor0_g.set(colorSensorData[0].color.green);
-        nt_sensor0_b.set(colorSensorData[0].color.blue);
-        nt_sensor0_ir.set(colorSensorData[0].ir);
-        nt_sensor0_prox.set(colorSensorData[0].distance);
-        nt_sensor0_object.set((results[0] == null) ? "Nothing" : (results[0].color.equals(CONE_YELLOW)) ? "Cone" : "Cube");
+        DoublePublisher nt_sensor0_r;
+        DoublePublisher nt_sensor0_g;
+        DoublePublisher nt_sensor0_b;
+        DoublePublisher nt_sensor0_ir;
+        DoublePublisher nt_sensor0_prox;
+        StringPublisher nt_sensor0_object;
 
         // Sensor 1 (middle)
-        nt_sensor1_r.set(colorSensorData[1].color.red);
-        nt_sensor1_g.set(colorSensorData[1].color.green);
-        nt_sensor1_b.set(colorSensorData[1].color.blue);
-        nt_sensor1_ir.set(colorSensorData[1].ir);
-        nt_sensor1_prox.set(colorSensorData[1].distance);
-        nt_sensor1_object.set((results[1] == null) ? "Nothing" : (results[1].color.equals(CONE_YELLOW)) ? "Cone" : "Cube");
+        DoublePublisher nt_sensor1_r;
+        DoublePublisher nt_sensor1_g;
+        DoublePublisher nt_sensor1_b;
+        DoublePublisher nt_sensor1_ir;
+        DoublePublisher nt_sensor1_prox;
+        StringPublisher nt_sensor1_object;
 
         // Sensor 2 (closest to car wash -- back)
-        nt_sensor2_r.set(colorSensorData[2].color.red);
-        nt_sensor2_g.set(colorSensorData[2].color.green);
-        nt_sensor2_b.set(colorSensorData[2].color.blue);
-        nt_sensor2_ir.set(colorSensorData[2].ir);
-        nt_sensor2_prox.set(colorSensorData[2].distance);
-        nt_sensor2_object.set((results[2] == null) ? "Nothing" : (results[2].color.equals(CONE_YELLOW)) ? "Cone" : "Cube");
+        DoublePublisher nt_sensor2_r;
+        DoublePublisher nt_sensor2_g;
+        DoublePublisher nt_sensor2_b;
+        DoublePublisher nt_sensor2_ir;
+        DoublePublisher nt_sensor2_prox;
+        StringPublisher nt_sensor2_object;
 
         // Overall numbers
-        nt_numYellow.set(numYellow);
-        nt_numPurple.set(numPurple);
-        nt_objectDetected.set(currentGamePiece.toString());
-    }
+        IntegerPublisher nt_numYellow;
+        IntegerPublisher nt_numPurple;
+        StringPublisher nt_objectDetected;
 
+        public String getTableName() {
+            return ColorSensors.this.getName();
+        }
+
+        @Override
+        public void ntcreate() {
+            NetworkTable nt = getTable();
+            // Sensor 0 (closest to intake -- front)
+            nt_sensor0_r = nt.getDoubleTopic("Sensor 0 Red").publish();
+            nt_sensor0_g = nt.getDoubleTopic("Sensor 0 Green").publish();
+            nt_sensor0_b = nt.getDoubleTopic("Sensor 0 Blue").publish();
+            nt_sensor0_ir = nt.getDoubleTopic("Sensor 0 IR").publish();
+            nt_sensor0_prox = nt.getDoubleTopic("Sensor 0 Proximity").publish();
+            nt_sensor0_object = nt.getStringTopic("Sensor 0 Object Detected").publish();
+
+            // Sensor 1 (middle)
+            nt_sensor1_r = nt.getDoubleTopic("Sensor 1 Red").publish();
+            nt_sensor1_g = nt.getDoubleTopic("Sensor 1 Green").publish();
+            nt_sensor1_b = nt.getDoubleTopic("Sensor 1 Blue").publish();
+            nt_sensor1_ir = nt.getDoubleTopic("Sensor 1 IR").publish();
+            nt_sensor1_prox = nt.getDoubleTopic("Sensor 1 Proximity").publish();
+            nt_sensor1_object = nt.getStringTopic("Sensor 1 Object Detected").publish();
+
+            // Sensor 2 (closest to car wash -- back)
+            nt_sensor2_r = nt.getDoubleTopic("Sensor 2 Red").publish();
+            nt_sensor2_g = nt.getDoubleTopic("Sensor 2 Green").publish();
+            nt_sensor2_b = nt.getDoubleTopic("Sensor 2 Blue").publish();
+            nt_sensor2_ir = nt.getDoubleTopic("Sensor 2 IR").publish();
+            nt_sensor2_prox = nt.getDoubleTopic("Sensor 2 Proximity").publish();
+            nt_sensor2_object = nt.getStringTopic("Sensor 2 Object Detected?").publish();
+
+            // Overall numbers
+            nt_numYellow = nt.getIntegerTopic("Number of sensors yellow").publish();
+            nt_numPurple = nt.getIntegerTopic("Number of sensors purple").publish();
+            nt_objectDetected = nt.getStringTopic("Object detected").publish();
+        }
+
+        @Override
+        public void ntupdate() {
+            // Sensor 0 (closest to intake -- front)
+            nt_sensor0_r.set(colorSensorData[0].color.red);
+            nt_sensor0_g.set(colorSensorData[0].color.green);
+            nt_sensor0_b.set(colorSensorData[0].color.blue);
+            nt_sensor0_ir.set(colorSensorData[0].ir);
+            nt_sensor0_prox.set(colorSensorData[0].distance);
+            nt_sensor0_object
+                    .set((results[0] == null) ? "Nothing" : (results[0].color.equals(CONE_YELLOW)) ? "Cone" : "Cube");
+
+            // Sensor 1 (middle)
+            nt_sensor1_r.set(colorSensorData[1].color.red);
+            nt_sensor1_g.set(colorSensorData[1].color.green);
+            nt_sensor1_b.set(colorSensorData[1].color.blue);
+            nt_sensor1_ir.set(colorSensorData[1].ir);
+            nt_sensor1_prox.set(colorSensorData[1].distance);
+            nt_sensor1_object
+                    .set((results[1] == null) ? "Nothing" : (results[1].color.equals(CONE_YELLOW)) ? "Cone" : "Cube");
+
+            // Sensor 2 (closest to car wash -- back)
+            nt_sensor2_r.set(colorSensorData[2].color.red);
+            nt_sensor2_g.set(colorSensorData[2].color.green);
+            nt_sensor2_b.set(colorSensorData[2].color.blue);
+            nt_sensor2_ir.set(colorSensorData[2].ir);
+            nt_sensor2_prox.set(colorSensorData[2].distance);
+            nt_sensor2_object
+                    .set((results[2] == null) ? "Nothing" : (results[2].color.equals(CONE_YELLOW)) ? "Cone" : "Cube");
+
+            // Overall numbers
+            nt_numYellow.set(numYellow);
+            nt_numPurple.set(numPurple);
+            nt_objectDetected.set(currentGamePiece.toString());
+        }
+    }
 }

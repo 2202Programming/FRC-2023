@@ -9,18 +9,19 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.commands.utility.Lockout;
 import frc.robot.util.VelocityControlled;
 
-public class GenericVelocityTest extends CommandBase implements Lockout{
+public class GenericVelocityTest extends CommandBase implements Lockout {
 
   Timer stopwatch = new Timer();
 
   final VelocityControlled device;
   final double vel, runTime, pauseTime;
   double old_max_speed;
-
+  double activeRuntime; // gets doubled have 1st pass to move about zero
   // states
   double cmdVel;
   double time;
   boolean running;
+  int pass = 0;
 
   /**
    * Creates a new deviceVelocityTest.
@@ -28,14 +29,15 @@ public class GenericVelocityTest extends CommandBase implements Lockout{
    * Runs the device at fixed speed for given period,
    * pauses, then runs in reverse for given period.
    * 
-   * Take CAUTION to start in the middle of the devices range, there are no position
+   * Take CAUTION to start in the middle of the devices range, there are no
+   * position
    * checks if the hardware doesn't have them.
    * 
    * Runs until button is released.
    */
 
   public GenericVelocityTest(VelocityControlled device,
-    double vel, double runTime, double pauseTime) {
+      double vel, double runTime, double pauseTime) {
     this.device = device;
     this.vel = vel;
     this.runTime = runTime;
@@ -47,9 +49,11 @@ public class GenericVelocityTest extends CommandBase implements Lockout{
   public void initialize() {
     old_max_speed = device.getMaxVel();
     device.setMaxVel(vel);
+    activeRuntime = runTime;
     running = true;
     cmdVel = vel;
-    stopwatch.start();
+    pass = 0;
+    stopwatch.restart();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -57,10 +61,16 @@ public class GenericVelocityTest extends CommandBase implements Lockout{
   public void execute() {
     if (running) {
       // moving the device
-      if (stopwatch.hasElapsed(runTime)) {
+      if (stopwatch.hasElapsed(activeRuntime)) {
         running = false;
+        ++pass;
         cmdVel = cmdVel * -1.0; // flip the direction
         stopwatch.reset();
+        // double the runTime so we swing on both sides of zero.
+        // did i forget to mention that this command assumes you start at zero.
+        if (pass == 1) {
+          activeRuntime = runTime;
+        }
         device.setVelocityCmd(0.0);
       } else
         device.setVelocityCmd(cmdVel);
@@ -75,7 +85,6 @@ public class GenericVelocityTest extends CommandBase implements Lockout{
       device.setVelocityCmd(cmdVel);
     }
   }
-
 
   // Called once the command ends or is interrupted.
   @Override
