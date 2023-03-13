@@ -7,10 +7,9 @@ package frc.robot.commands.Placement;
 import com.pathplanner.lib.PathConstraints;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
-import frc.robot.commands.Intake.Washer.IntakeForward;
+import frc.robot.RobotContainer;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.subsystems.ColorSensors;
@@ -123,13 +122,10 @@ public class Place extends CommandBase {
   //TODO put into command scheduler
   @Override
   public boolean isFinished() {
-<<<<<<< HEAD
+
+    //MrL's comments: 3/13/23, this is pretty complicated, looks like a simple math.abs() would be good enough?
     boolean leftStickStill = Math.sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > deadzone;
     boolean rightStickStill = Math.sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > deadzone;
     return (leftStickStill && rightStickStill);
-=======
-    //end command if driver moves either stick more than threshold
-    return (dc.Driver().getLeftX() > 0.1 || dc.Driver().getLeftY() > 0.1 || dc.Driver().getRightX() > 0.1 || dc.Driver().getRightY() > 0.1);
->>>>>>> StLouis_Competition
   }
 }
