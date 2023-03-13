@@ -14,6 +14,7 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
   /** Creates a new intakeCompetitionToggle. */
   Intake intake;
   Color8Bit myColor = new Color8Bit(255, 255, 0);
+  boolean isFinished = false;
 
   public intakeCompetitionToggle() {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -43,19 +44,23 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    isFinished = intake.objectDetected();
+  }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.intakeOff();
     intake.carwashOff();
     intake.retract();
+    if (interrupted) intake.intakeOff(); // interrupted means button let go
+    else intake.setHoldSpeed(); // naturally finished aka isFinished() returned true
+    isFinished = false;
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return isFinished;
   }
 }

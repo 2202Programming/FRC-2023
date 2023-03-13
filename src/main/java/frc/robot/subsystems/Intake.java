@@ -5,14 +5,17 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
 
@@ -146,5 +149,32 @@ public class Intake extends SubsystemBase {
     // if (nt_intakeSpeed.getDouble(0.0) != IntakeMotorStrength) setIntakeSpeed(nt_intakeSpeed.getDouble(0.0));
     // if (nt_carwashSpeed.getDouble(0.0) != CarwashMotorStrength) setIntakeSpeed(nt_carwashSpeed.getDouble(0.0));
   }
+
+  /**
+   * Temporary lightgate stuff that should eventually be moved out of this / integrated with ColorSensors subsystem
+   * The following should probably be deleted sometime before or right after St. Louis
+   */
+
+   private int framesOn = 0;
+   private DigitalInput lightgate = new DigitalInput(0);
+   private ColorSensors colorSensors = RobotContainer.RC().colorSensors;
+
+   private void constructLightgate() {
+    // don't need to do anything here
+   }
+
+   private void periodicLightgate() {
+    if (!lightgate.get()) framesOn++;
+    else framesOn = 0;
+   }
+
+   public boolean objectDetected() {
+    if ((framesOn > 15) || (colorSensors.results[0] != null)) return true; // TODO is 10 a good number?
+    return false;
+   }
+
+   public void setHoldSpeed() {
+    setIntakeSpeed(0.1); // just enough to hold the piece w/o further intaking it, TODO tune
+   }
 
 }

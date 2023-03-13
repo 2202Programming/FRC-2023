@@ -44,7 +44,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable, Networ
 
     // sensor results
     private volatile SensorData[] colorSensorData = new SensorData[numSensors];
-    private ColorMatchResult[] results;
+    public ColorMatchResult[] results; // TODO switch back to private post-St Louis
     private int numYellow;
     private int numPurple;
 
