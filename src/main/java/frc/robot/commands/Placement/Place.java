@@ -13,9 +13,7 @@ import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.commands.Intake.Washer.IntakeForward;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.goToScoringPosition;
-import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.subsystems.ColorSensors;
-import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 public class Place extends CommandBase {
@@ -27,16 +25,19 @@ public class Place extends CommandBase {
   private goToScoringPosition position;
   private HorizontalScoringLane horizontalRequest;
   private VerticalScoringLane verticalRequest;
+
   public Place(ColorSensors sensors,HorizontalScoringLane horizontalRequest, VerticalScoringLane verticalRequest) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.horizontalRequest = horizontalRequest;
     this.verticalRequest = verticalRequest;
     this.sensors = sensors;
   }
+
   private void move() {
     position = new goToScoringPosition(new PathConstraints(2,3), horizontalRequest); 
     position.schedule();
   }
+
   private void Cone(boolean needsFlip) {
     move();
       //drive train move Left 14.876 rotations Right
@@ -52,6 +53,7 @@ public class Place extends CommandBase {
         break;
     }
   }
+
   private void Cube() {
     move();    
     switch (verticalRequest){
@@ -65,6 +67,7 @@ public class Place extends CommandBase {
         break;
     }
   }
+
   private void Bottom() {
     move();
     new outtakeCompetitionToggle().withTimeout(5.0).schedule();
@@ -120,8 +123,13 @@ public class Place extends CommandBase {
   //TODO put into command scheduler
   @Override
   public boolean isFinished() {
+<<<<<<< HEAD
     boolean leftStickStill = Math.sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > deadzone;
     boolean rightStickStill = Math.sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > deadzone;
     return (leftStickStill && rightStickStill);
+=======
+    //end command if driver moves either stick more than threshold
+    return (dc.Driver().getLeftX() > 0.1 || dc.Driver().getLeftY() > 0.1 || dc.Driver().getRightX() > 0.1 || dc.Driver().getRightY() > 0.1);
+>>>>>>> StLouis_Competition
   }
 }

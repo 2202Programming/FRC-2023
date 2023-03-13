@@ -13,6 +13,8 @@ import frc.robot.subsystems.Intake;
 public class intakeCompetitionToggle extends CommandBase implements BlinkyLightUser {
   /** Creates a new intakeCompetitionToggle. */
   Intake intake;
+  Boolean isFinished = false;
+  JoystickRumbleEndless rumbleCommand;
   Color8Bit myColor = new Color8Bit(255, 255, 0);
   boolean isFinished = false;
 
@@ -45,16 +47,22 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    isFinished = intake.objectDetected();
+    if (intake.objectDetected()) isFinished = true;
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     intake.carwashOff();
-    intake.retract();
-    if (interrupted) intake.intakeOff(); // interrupted means button let go
-    else intake.setHoldSpeed(); // naturally finished aka isFinished() returned true
+    intake.retract(); // TODO do we want to move retract into the only if interrupted loop? So if object detected intake remains deployed?
+    //rumbleCommand.cancel();
+
+    if (interrupted == false) { // this means isFinished() returns true, which means an object was detected
+      intake.setHoldSpeed();
+    } else {
+      intake.intakeOff();
+    }
+
     isFinished = false;
   }
 

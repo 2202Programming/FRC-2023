@@ -57,6 +57,7 @@ public class Intake extends SubsystemBase {
     motor_config(r_carwash_mtr, false);
 
     ntconfig();
+    constructLightgate();
   }
 
   void motor_config(CANSparkMax mtr, boolean inverted) {
@@ -68,6 +69,7 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     ntupdates();
+    periodicLightgate();
   }
 
   //Turn Intake Motor On by sending a double value
@@ -157,7 +159,6 @@ public class Intake extends SubsystemBase {
 
    private int framesOn = 0;
    private DigitalInput lightgate = new DigitalInput(0);
-   private ColorSensors colorSensors = RobotContainer.RC().colorSensors;
 
    private void constructLightgate() {
     // don't need to do anything here
@@ -169,7 +170,7 @@ public class Intake extends SubsystemBase {
    }
 
    public boolean objectDetected() {
-    if ((framesOn > 15) || (colorSensors.results[0] != null)) return true; // TODO is 10 a good number?
+    if (framesOn > 10) return true; // TODO is 10 a good number?
     return false;
    }
 
