@@ -201,8 +201,7 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo.periodic();
     //rotate_servo.periodic();
 
-    // clawStatus();
-    // check any lightgates
+    clawStatus();
   }
 
    void setxxxElbowOffset(double deg) {
@@ -246,10 +245,10 @@ public class Claw_Substyem extends SubsystemBase {
   // getting status of solenoid (open/close)
   // and keep the is_open flag up to date
   // commands can use isOpen()
-  private Value clawStatus() {
-    var value = solenoid.get();
-    is_open = (value == OPEN);
-    return value;
+  private void  clawStatus() {
+    is_open = (solenoid.get() == OPEN);
+
+    //TODO: check lightgates
   }
 
   public Command getWatcher() {

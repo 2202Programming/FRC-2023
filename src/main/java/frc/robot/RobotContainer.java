@@ -29,17 +29,11 @@ import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoSTL;
-//import frc.robot.commands.Placement.Place;
-//import frc.robot.commands.auto.autoCommand;
-//import frc.robot.commands.auto.auto_cmd;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
-import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
-import frc.robot.commands.test.GenericPositionTest;
-import frc.robot.commands.test.GenericVelocityTest;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
@@ -55,12 +49,11 @@ import frc.robot.util.RobotSpecs;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
- * the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
+ * Command-based is a "declarative" paradigm, very little robot logic
+ * should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the
+ * structure of the robot (including subsystems, commands, and trigger
+ * mappings) should be declared here.
  */
 public class RobotContainer {
   static RobotContainer rc;
@@ -117,10 +110,10 @@ public class RobotContainer {
         sensors = new Sensors_Subsystem();
         drivetrain = new SwerveDrivetrain();
         intake = new Intake();
-        armSS = null;// new ArmSS();
-        elbow = null; // new Elbow();
-        claw = null;// new Claw_Substyem();
-        colorSensors = null;
+        armSS = new ArmSS();
+        elbow = new Elbow();
+        claw = new Claw_Substyem();
+        colorSensors = new ColorSensors();
         break;
 
       case SwerveBot:
@@ -187,16 +180,14 @@ public class RobotContainer {
           RobotContainer.RC().eventMap, // events that may be in the path
           true, // correct path for mirrored depending on alliance color.
           drivetrain);
-          
+
       // myauto = autoBuilder.fullAuto(PathPlanner.loadPath("A4 Pass Fetch Place",
-      //     new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
-      //myauto = new autoCommand();
+      // new PathConstraints(2, 3))).andThen(new ChargeStationBalance());
+      // myauto = new autoCommand();
     }
 
     // Edit the binding confiuration for testing
     configureBindings(Bindings.Competition);
-
-
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -212,21 +203,22 @@ public class RobotContainer {
         elbow.getWatcher();
         claw.setElbowDoubleSupplier(elbow::getPosition);
         /******
-        dc.Driver().rightBumper().whileTrue(new GenericZeroPos(elbow));
-        dc.Driver().a().whileTrue(new GenericPositionTest(elbow, 45.0, 90.0, 30.0));
-        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 90.0, 1.50, 1.0));
-      */
+         * dc.Driver().rightBumper().whileTrue(new GenericZeroPos(elbow));
+         * dc.Driver().a().whileTrue(new GenericPositionTest(elbow, 45.0, 90.0, 30.0));
+         * dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 90.0, 1.50, 1.0));
+         */
         dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
-        
-        //dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
-        //dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
+
+        // dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
+        // dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
 
         dc.Driver().x().onTrue(new MoveCollectiveArm(CollectiveMode.highFS));
         dc.Driver().a().onTrue(new MoveCollectiveArm(CollectiveMode.midBS));
         dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
         dc.Driver().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
-        //armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
+        // armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS,
+        // dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
       case balance_test:
         if (drivetrain == null)
@@ -251,14 +243,14 @@ public class RobotContainer {
         dc.Driver().a().whileTrue(new CenterTapeYaw());
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
-        dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); //disable vision rot
+        dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
         dc.Driver().leftTrigger().whileTrue(new JoystickRumbleEndless(Id.Driver));
 
         dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
-        //up and down for center trio request per Alek
-        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
-        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
-        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Right));
+        // up and down for center trio request per Alek
+        dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
+        dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
+        dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Right));
         break;
 
       case Competition:
@@ -267,50 +259,64 @@ public class RobotContainer {
           break;
         // DRIVER
         dc.Driver().x().whileTrue(new ChargeStationBalance(false));
-        dc.Driver().y().onTrue(new AllianceAwareGyroReset(false)); //gyro reset, without disabling vision
+        dc.Driver().y().onTrue(new AllianceAwareGyroReset(false)); // gyro reset, without disabling vision
         dc.Driver().leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
 
-        //dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
-        //up and down for center trio request per Alek
-        //dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
-        //dc.Driver().povDown().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Center));
-        //dc.Driver().povRight().onTrue(new goToScoringPosition(new PathConstraints(2,3), HorizontalScoringLane.Right));
+        // dc.Driver().povLeft().onTrue(new goToScoringPosition(new PathConstraints(2,
+        // 3), HorizontalScoringLane.Left));
+        // up and down for center trio request per Alek
+        // dc.Driver().povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3),
+        // HorizontalScoringLane.Center));
+        // dc.Driver().povDown().onTrue(new goToScoringPosition(new
+        // PathConstraints(2,3), HorizontalScoringLane.Center));
+        // dc.Driver().povRight().onTrue(new goToScoringPosition(new
+        // PathConstraints(2,3), HorizontalScoringLane.Right));
 
         // OPERATOR
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
         dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
-        
+
         // testing deploying / retracting intake on bumpers
-       /* dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
-          intake.deploy();
-        }));
-        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
-          intake.retract();
-        }));
-        */
+        /*
+         * dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
+         * intake.deploy();
+         * }));
+         * dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
+         * intake.retract();
+         * }));
+         */
         // testing on pov
-        //dc.Operator().povLeft().whileTrue(new IntakeForward());
-        //dc.Operator().povRight().whileTrue(new IntakeReverse());
-        //dc.Operator().povUp().whileTrue(new CarwashForward());
-        //dc.Operator().povDown().whileTrue(new CarwashReverse());
+        // dc.Operator().povLeft().whileTrue(new IntakeForward());
+        // dc.Operator().povRight().whileTrue(new IntakeReverse());
+        // dc.Operator().povUp().whileTrue(new CarwashForward());
+        // dc.Operator().povDown().whileTrue(new CarwashReverse());
 
         // PLACEMENT
         Trigger placeTrigger = dc.Driver().povLeft(); // save right tigger for concinseness in the next new commands
         // Top Place
-        //placeTrigger.and(dc.Operator().leftBumper()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Top));
-        //placeTrigger.and(dc.Operator().rightBumper()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Top));
+        // placeTrigger.and(dc.Operator().leftBumper()).onTrue(new Place(colorSensors,
+        // HorizontalScoringLane.Left, VerticalScoringLane.Top));
+        // placeTrigger.and(dc.Operator().rightBumper()).onTrue(new Place(colorSensors,
+        // HorizontalScoringLane.Right, VerticalScoringLane.Top));
         // Middle Place
-        //placeTrigger.and(dc.Operator().leftTrigger()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Middle));
-        //placeTrigger.and(dc.Operator().rightTrigger()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Middle));
+        // placeTrigger.and(dc.Operator().leftTrigger()).onTrue(new Place(colorSensors,
+        // HorizontalScoringLane.Left, VerticalScoringLane.Middle));
+        // placeTrigger.and(dc.Operator().rightTrigger()).onTrue(new Place(colorSensors,
+        // HorizontalScoringLane.Right, VerticalScoringLane.Middle));
         // Bottom Place
-        //placeTrigger.and(dc.Operator().povDown()).onTrue(new Place(colorSensors, HorizontalScoringLane.Center, VerticalScoringLane.Bottom));
-        //placeTrigger.and(dc.Operator().povLeft()).onTrue(new Place(colorSensors, HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
-        //placeTrigger.and(dc.Operator().povRight()).onTrue(new Place(colorSensors, HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
+        // placeTrigger.and(dc.Operator().povDown()).onTrue(new Place(colorSensors,
+        // HorizontalScoringLane.Center, VerticalScoringLane.Bottom));
+        // placeTrigger.and(dc.Operator().povLeft()).onTrue(new Place(colorSensors,
+        // HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
+        // placeTrigger.and(dc.Operator().povRight()).onTrue(new Place(colorSensors,
+        // HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
 
-        placeTrigger.and(dc.Operator().povLeft()).onTrue(new goToScoringPosition(new PathConstraints(3,4), HorizontalScoringLane.Left));
-        placeTrigger.and(dc.Operator().povDown()).onTrue(new goToScoringPosition(new PathConstraints(3,4), HorizontalScoringLane.Center));
-        placeTrigger.and(dc.Operator().povRight()).onTrue(new goToScoringPosition(new PathConstraints(3,4), HorizontalScoringLane.Right));
-
+        placeTrigger.and(dc.Operator().povLeft())
+            .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Left));
+        placeTrigger.and(dc.Operator().povDown())
+            .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Center));
+        placeTrigger.and(dc.Operator().povRight())
+            .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Right));
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
@@ -341,7 +347,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    //return autoBuilder.fullAuto(PathPlanner.loadPath("stlNoDeployTest", new PathConstraints(3.0, 4.0)));
+    // return autoBuilder.fullAuto(PathPlanner.loadPath("stlNoDeployTest", new
+    // PathConstraints(3.0, 4.0)));
     return new autoSTL();
   }
 
@@ -374,27 +381,27 @@ public class RobotContainer {
         new InstantCommand(drivetrain::printPose)));
 
     if (intake != null)
-    eventMap.put("eject_start",
-        new SequentialCommandGroup(
-            new PrintCommand("***Eject Start"),
-            new InstantCommand(drivetrain::printPose),
-            new outtakeCompetitionToggle().withTimeout(0.75)));
+      eventMap.put("eject_start",
+          new SequentialCommandGroup(
+              new PrintCommand("***Eject Start"),
+              new InstantCommand(drivetrain::printPose),
+              new outtakeCompetitionToggle().withTimeout(0.75)));
 
     if (intake != null)
-    eventMap.put("eject_no_deploy",
-        new SequentialCommandGroup(
-            new PrintCommand("***Eject No Deploy Start"),
-            new InstantCommand(drivetrain::printPose),
-            new IntakeReverse().withTimeout(0.5)));
+      eventMap.put("eject_no_deploy",
+          new SequentialCommandGroup(
+              new PrintCommand("***Eject No Deploy Start"),
+              new InstantCommand(drivetrain::printPose),
+              new IntakeReverse().withTimeout(0.5)));
 
     if (intake != null)
-    eventMap.put("eject_piece",
-        new SequentialCommandGroup(
-            new PrintCommand("***Eject2"),
-            new InstantCommand(drivetrain::printPose),
-            new outtakeCompetitionToggle().withTimeout(2.00)
-            //,new WaitCommand(1.5)
-            ));
+      eventMap.put("eject_piece",
+          new SequentialCommandGroup(
+              new PrintCommand("***Eject2"),
+              new InstantCommand(drivetrain::printPose),
+              new outtakeCompetitionToggle().withTimeout(2.00)
+          // ,new WaitCommand(1.5)
+          ));
 
     eventMap.put("balance",
         new SequentialCommandGroup(
@@ -413,8 +420,7 @@ public class RobotContainer {
 
     eventMap.put("deploy_intake",
         new SequentialCommandGroup(
-          new PrintCommand("***Deploying intake"),
-          new DeployIntake()
-        ));
+            new PrintCommand("***Deploying intake"),
+            new DeployIntake()));
   }
 }

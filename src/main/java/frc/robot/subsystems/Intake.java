@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.DigitalIO;
 import frc.robot.Constants.PCM1;
 
 /*
@@ -156,7 +157,7 @@ public class Intake extends SubsystemBase {
    */
 
    private int framesOn = 0;
-   private DigitalInput lightgate = new DigitalInput(0);
+   private DigitalInput lightgate = new DigitalInput(DigitalIO.IntakeLightGate);
 
    private void constructLightgate() {
     // don't need to do anything here

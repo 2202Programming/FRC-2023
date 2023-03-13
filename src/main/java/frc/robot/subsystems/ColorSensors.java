@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.DigitalIO;
 import frc.robot.commands.utility.WatcherCmd;
 import frc.robot.util.Mux;
 
@@ -40,7 +41,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
     private final int[] sensorMuxPorts = { 0, 1, 2 };
     private final List<ColorSensorV3> colorSensors = new ArrayList<>();
     private final int numSensors = 3;
-    private final DigitalInput lightGate = new DigitalInput(0); // move ID to constants
+    private final DigitalInput lightGate = new DigitalInput(DigitalIO.ColorSensorGate); 
     private int framesObject = 0;
 
     // sensor results
