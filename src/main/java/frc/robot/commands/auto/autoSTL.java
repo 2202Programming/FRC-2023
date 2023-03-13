@@ -37,6 +37,7 @@ public class autoSTL extends CommandBase {
         if (dc.readSideboard(SBButton.Sw11)) pathName += "Edge";
         else if (dc.readSideboard(SBButton.Sw12)) pathName += "Mid";
         else if (dc.readSideboard(SBButton.Sw13)) pathName += "Far";
+        else pathName += "Mid";   //added for sim testing where no sideboard exists, npe otherwise.
 
         // if it's hail mary
         if (dc.readSideboard(SBButton.Sw15)) pathName += "HailMary";
