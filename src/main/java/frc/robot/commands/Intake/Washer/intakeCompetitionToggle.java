@@ -9,12 +9,13 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
+import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.Intake;
 
 public class intakeCompetitionToggle extends CommandBase implements BlinkyLightUser {
   /** Creates a new intakeCompetitionToggle. */
   Intake intake;
-  boolean isFinished = false;
+  ColorSensors colorSensors = RobotContainer.RC().colorSensors;
   JoystickRumbleEndless rumbleCommand;
   Color8Bit myColor = new Color8Bit(255, 255, 0);
 
@@ -41,6 +42,14 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
     intake.intakeOn();
     intake.carwashOn();
     enableLights();
+
+    // object detection runs
+    intake.resetRetractTimer();
+    colorSensors.resetObjectTimer();
+    
+    intake.setRetractTimerUpdates(false);
+    colorSensors.setObjectTimerUpdates(true);
+    
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -54,11 +63,9 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
     intake.carwashOff();
     intake.retract();
     // rumbleCommand.cancel();
-  }
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return isFinished;
+    // object detection
+    intake.setRetractTimerUpdates(true);
+    colorSensors.setObjectTimerUpdates(false);
   }
 }

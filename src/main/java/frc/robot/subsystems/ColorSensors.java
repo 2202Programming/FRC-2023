@@ -24,11 +24,14 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.DigitalIO;
 import frc.robot.commands.utility.WatcherCmd;
 import frc.robot.util.Mux;
 
 public class ColorSensors extends SubsystemBase implements AutoCloseable {
+    // SSs
+    private Intake intake = RobotContainer.RC().intake;
 
     // a "struct"
     private class SensorData {
@@ -41,8 +44,11 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
     private final int[] sensorMuxPorts = { 0, 1, 2 };
     private final List<ColorSensorV3> colorSensors = new ArrayList<>();
     private final int numSensors = 3;
-    private final DigitalInput lightGate = new DigitalInput(DigitalIO.ColorSensorGate); 
+    private final DigitalInput lightgate = new DigitalInput(DigitalIO.ColorSensorGate);
+
+    // object detection via lightgate
     private int framesObject = 0;
+    private boolean updateTime = false;
 
     // sensor results
     private volatile SensorData[] colorSensorData = new SensorData[numSensors];
@@ -137,7 +143,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
 
     // Current and previous frame game piece
     private GamePiece currentGamePiece = GamePiece.None;
-    GamePiece prevFrameGamePiece = currentGamePiece;
+    private GamePiece prevFrameGamePiece = currentGamePiece;
+    int sameGamePiece = 0;
 
     // Color matching state vars
     ColorMatch colorMatcher = new ColorMatch();
@@ -151,7 +158,9 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
      * actual color vector and the expected color vector,
      * which is 1 - (euclidean distance between actual, matched color)
      */
-    final double CONFIDENCE_THRESHOLD = 0.85; // TODO change to better values
+    final double CONFIDENCE_THRESHOLD = 0.85;
+    final int FRAMES_OBJECT_THRESHOLD = 5; // [frames]
+    final int RETRACT_TIMER_THRESHOLD = 20; // [frames]
 
     // enum of possible game piece orientations to return
     public enum GamePiece {
@@ -173,39 +182,33 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
 
     @Override
     public void periodic() {
-        // if the lightgate turns on add a frame that it thinks there's an object
-        if (lightGate.get())
-            framesObject++;
-        else
-            framesObject = 0;
+        if (updateTime) {
+            framesObject = (!lightgate.get()) ? framesObject + 1 : 0;
+        }
+        // if the lightgate was broken for at least 1/4sec continuously and intake raised for at least 1sec then see if there's an object
+        if ((framesObject >= FRAMES_OBJECT_THRESHOLD) && (intake.getRetractTimer() >= RETRACT_TIMER_THRESHOLD)) {
+            prevFrameGamePiece = currentGamePiece;
+            currentGamePiece = getCurrentGamePiece();
 
-        prevFrameGamePiece = currentGamePiece;
-        currentGamePiece = getGamePiece();
+            sameGamePiece = (prevFrameGamePiece.equals(currentGamePiece)) ? sameGamePiece + 1 : 0;
 
-        if (currentGamePiece != prevFrameGamePiece) {
-            // if and only if (so algo only runs once per object) an object is detected for
-            // an entire sec find out what it is, then do something based on what it is
-            if (framesObject == 20) {
-                GamePiece lastGamePiece = currentGamePiece;
-                GamePiece detectedGamePiece = getGamePiece();
-                // Could present condition where we dont detect that a piece has moved inside
-                // the robot. In that case should use a flag.
-                if (lastGamePiece == GamePiece.None) {
-                    if (detectedGamePiece != GamePiece.None) {
-                        currentGamePiece = detectedGamePiece;
-                    }
-                }
+            // confidence in current game piece
+            if (sameGamePiece >= 3) {
+                // reset the frames a *new, undetected* object has been detected to 0 now that the just-detected object has been recognized
+                resetObjectTimer();
             }
         }
     }
 
     /**
-     * Returns the current game piece as detected by the color sensor
+     * Returns the current game piece as detected by the color sensors
      * 
      * @return The game piece
      */
     public GamePiece getCurrentGamePiece() {
-        return currentGamePiece;
+        if (sameGamePiece >= 3)
+            return currentGamePiece;
+        return GamePiece.None;
     }
 
     // Every time we place or eject a game peice, Call this method. This will clear
@@ -280,6 +283,31 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
         // second skinny end probably facing front, else facing back
         return ((colorSensorData[0].distance - colorSensorData[2].distance) > 0) ? GamePiece.ConeFacingFront
                 : GamePiece.ConeFacingBack;
+    }
+
+    /**
+     * Resets the object detected timer to 0.
+     */
+    public void resetObjectTimer() {
+        framesObject = 0;
+    }
+
+    /**
+     * Sets whether to update the object detected time counter.
+     * 
+     * @param toUpdate Whether to update the object detected time counter.
+     */
+    public void setObjectTimerUpdates(boolean toUpdate) {
+        updateTime = toUpdate;
+    }
+
+    /**
+     * Gets the frames for which an object has been detected.
+     * 
+     * @return The frames for which an object has been detected.
+     */
+    public int getObjectTimer() {
+        return framesObject;
     }
 
     Command getWatcher() {

@@ -26,8 +26,11 @@ import frc.robot.Constants.PCM1;
 
 public class Intake extends SubsystemBase {
 
-  double IntakeMotorStrength = 0.35; //used for default ON
-  double CarwashMotorStrength = 0.5; // used for default ON TODO move to constatns (same with above)
+  final double IntakeMotorStrength = 0.35; //used for default ON
+  final double CarwashMotorStrength = 0.5; // used for default ON TODO move to constatns (same with above)
+
+  int postRetractTime = 0;
+  boolean updateTime = false;
 
   private double currentIntakeSpeed;
   private double currentCarwashSpeed;
@@ -66,6 +69,7 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (updateTime) postRetractTime++;
     ntupdates();
   }
 
@@ -132,6 +136,31 @@ public class Intake extends SubsystemBase {
   }
 
   /**
+   * Sets whether to update the post-retract time counter.
+   * 
+   * @param timerUpdate Whether to update the post-retract time counter.
+   */
+  public void setRetractTimerUpdates(boolean toUpdate) {
+    updateTime = toUpdate;
+  }
+
+  /**
+   * Resets the post-retract time counter to 0.
+   */
+  public void resetRetractTimer() {
+    postRetractTime = 0;
+  }
+
+  /**
+   * Gets the current frame time post-retraction.
+   * 
+   * @return Frames post-retraction of intake.
+   */
+  public int getRetractTimer() {
+    return postRetractTime;
+  }
+
+  /*
    * NTs
    */
 
