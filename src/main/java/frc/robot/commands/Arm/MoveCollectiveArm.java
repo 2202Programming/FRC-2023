@@ -64,14 +64,19 @@ public class MoveCollectiveArm extends CommandBase {
     double armPos;
     double elbowPos;
     double wristPos;
+    double elbowMaxVel;
     ClawTrackMode mode;
-
     Positions(double arm, double elbow, double wrist, ClawTrackMode mode) {
+      this(arm, elbow, wrist, mode, -1.0);}
+
+    Positions(double arm, double elbow, double wrist, ClawTrackMode mode, double elbowVel) {
       armPos = arm;
       elbowPos = elbow;
       wristPos = wrist; // doesn't matter unless mode == free
       this.mode = mode;
+      elbowMaxVel = elbowVel;
     }
+
   }
 
   /*
@@ -82,15 +87,25 @@ public class MoveCollectiveArm extends CommandBase {
   public enum CollectiveMode {
     power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide),
     travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide),
+    pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
+    placeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
+    pickupShelfFS
+    (15.0, 90.0, 0.0, ClawTrackMode.frontSide),
+    testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, 5.0), 
+    reversePickupShelfFS(15.0, -90.0, 0.0, ClawTrackMode.frontSide),
     midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),
     midBS(20.0, 0.0, 0.0, ClawTrackMode.backSide),
-    highFS(35.0, 90.0, 0.0, ClawTrackMode.frontSide),
-    travelMidFS(0.0, -10.0, 0.0, ClawTrackMode.frontSide),
+    placeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
+    travelMidFS(20.0
+    
+    , -10.0, 0.0, ClawTrackMode.frontSide),
     travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
 
     // posistions and modes for target positions
     Positions pos_info;
 
+    CollectiveMode(double arm, double elbow, double wrist, ClawTrackMode mode, double elbowMaxVel) {
+      pos_info = new Positions(arm, elbow, wrist, mode, elbowMaxVel);}
     CollectiveMode(double arm, double elbow, double wrist, ClawTrackMode mode) {
       pos_info = new Positions(arm, elbow, wrist, mode);
     }
@@ -164,6 +179,9 @@ public class MoveCollectiveArm extends CommandBase {
 
     // move towards our target, wrist done in exec
     arm.setSetpoint(target.armPos);
+    if(target.elbowMaxVel > 0.0){
+      elbow.setMaxVel(target.elbowMaxVel);
+    }
     elbow.setSetpoint(target.elbowPos);
   }
 

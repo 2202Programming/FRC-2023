@@ -18,22 +18,22 @@ import frc.robot.util.VelocityControlled;
 public class Elbow extends SubsystemBase implements VelocityControlled {
   final int STALL_CURRENT = 40;
   final int FREE_CURRENT = 20;
-
+ 
   // mechanical gearing motor rotations to degrees with gear ratio
-  final double conversionFactor = (360.0 / 210.0);  // hardware lies, 210 works 175 no?
+  final double conversionFactor = (360.0 / 350.0); //orig. 20% bump (5:7:10)
 
   // positionPID at position tolerances
   double posTol = 3.0; // [deg]
   double velTol = 2.0; // [deg/s]
 
   // motion speed limits
-  double velLimit = 30.0; // [deg/s]
+  double velLimit = 160.0; // [deg/s]
   double accelLimit = 5.0; // [deg/s^2] - only in future smartmode
 
   // ArbFeedforward to compensate for static torque
   double maxArbFF = 0.09; // [%power] -1.0 to 1.0  Tested with SMax Client %pwr mode
 
-  double Ktrim = 6.0;
+  double Ktrim = 18.0; //6 orig
 
   // NeoServo - TODO (It's what arm values are rn, will need to change)
   final NeoServo elbow_servo;

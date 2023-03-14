@@ -187,7 +187,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.arm_test);
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -213,10 +213,16 @@ public class RobotContainer {
         // dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
         // dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
 
-        dc.Driver().x().onTrue(new MoveCollectiveArm(CollectiveMode.highFS));
-        dc.Driver().a().onTrue(new MoveCollectiveArm(CollectiveMode.midBS));
-        dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
+        dc.Driver().x().onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
+        dc.Driver().a().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
+        dc.Driver().rightTrigger().onTrue(new MoveCollectiveArm(CollectiveMode.reversePickupShelfFS));
+        dc.Driver().leftTrigger().onTrue(new MoveCollectiveArm(CollectiveMode.testShelfTopFS));
+        dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.pickupTransitionFS));
+       // dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
         dc.Driver().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
+        dc.Driver().leftBumper().onTrue(new MoveCollectiveArm(CollectiveMode.placeMidFS));
+        dc.Driver().rightBumper().onTrue(new MoveCollectiveArm(CollectiveMode.placeHighFS));
+
         // armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS,
         // dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
