@@ -4,13 +4,16 @@
 
 package frc.robot.commands.Intake.Washer;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.Intake;
 
 public class outtakeCompetitionToggle extends CommandBase {
   /** Creates a new intakeCompetitionToggle. */
   Intake intake;
+  ColorSensors colorSensors = RobotContainer.RC().colorSensors;
   public outtakeCompetitionToggle() {
     // Use addRequirements() here to declare subsystem dependencies.
     this.intake = RobotContainer.RC().intake;
@@ -23,6 +26,9 @@ public class outtakeCompetitionToggle extends CommandBase {
     intake.deploy();
     intake.intakeOnReverse();
     intake.carwashOnReverse();
+
+    colorSensors.resetOuttakeFrames();
+    colorSensors.updateOuttakeFrames(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -35,11 +41,14 @@ public class outtakeCompetitionToggle extends CommandBase {
     intake.retract();
     intake.intakeOff();
     intake.carwashOff();
+
+    colorSensors.updateOuttakeFrames(false);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    if (DriverStation.isAutonomousEnabled()) return colorSensors.getObjectOuttake();
     return false;
   }
 }

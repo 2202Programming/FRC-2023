@@ -46,10 +46,6 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
     private final int numSensors = 3;
     private final DigitalInput lightgate = new DigitalInput(DigitalIO.ColorSensorGate);
 
-    // object detection via lightgate
-    private int framesObject = 0;
-    private boolean updateTime = false;
-
     // sensor results
     private volatile SensorData[] colorSensorData = new SensorData[numSensors];
     public ColorMatchResult[] results; // TODO switch back to private post-St Louis
@@ -144,7 +140,19 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
     // Current and previous frame game piece
     private GamePiece currentGamePiece = GamePiece.None;
     private GamePiece prevFrameGamePiece = currentGamePiece;
-    int sameGamePiece = 0;
+    private int sameGamePiece = 0;
+
+    // Outtake lightgate tripped
+    private int outtakeLightgateTrippedFrames = 0;
+    private int outtakeLightgateTrueFrames = 0;
+    private boolean updateOuttakeNumbers = false;
+    private final int OUTTAKE_THRESHOLD = 3;
+
+    // object detection via lightgate
+    private int intakeLightgateTrippedFrames = 0;
+    private boolean updateIntakeNumbers = false;
+    final int INTAKE_THRESHOLD = 5; // [frames]
+    final int RETRACT_TIMER_THRESHOLD = 20; // [frames]
 
     // Color matching state vars
     ColorMatch colorMatcher = new ColorMatch();
@@ -159,8 +167,6 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
      * which is 1 - (euclidean distance between actual, matched color)
      */
     final double CONFIDENCE_THRESHOLD = 0.85;
-    final int FRAMES_OBJECT_THRESHOLD = 5; // [frames]
-    final int RETRACT_TIMER_THRESHOLD = 20; // [frames]
 
     // enum of possible game piece orientations to return
     public enum GamePiece {
@@ -182,11 +188,16 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
 
     @Override
     public void periodic() {
-        if (updateTime) {
-            framesObject = (!lightgate.get()) ? framesObject + 1 : 0;
+        if (updateIntakeNumbers) {
+            intakeLightgateTrippedFrames = (!lightgate.get()) ? intakeLightgateTrippedFrames + 1 : 0;
+        }
+
+        if (updateOuttakeNumbers) {
+            outtakeLightgateTrippedFrames = (!lightgate.get()) ? outtakeLightgateTrippedFrames + 1 : 0;
+            outtakeLightgateTrueFrames = ((outtakeLightgateTrippedFrames >= OUTTAKE_THRESHOLD) && (lightgate.get())) ? outtakeLightgateTrueFrames + 1 : 0;
         }
         // if the lightgate was broken for at least 1/4sec continuously and intake raised for at least 1sec then see if there's an object
-        if ((framesObject >= FRAMES_OBJECT_THRESHOLD) && (intake.getRetractTimer() >= RETRACT_TIMER_THRESHOLD)) {
+        if ((intakeLightgateTrippedFrames >= INTAKE_THRESHOLD) && (intake.getRetractTimer() >= RETRACT_TIMER_THRESHOLD)) {
             prevFrameGamePiece = currentGamePiece;
             currentGamePiece = getCurrentGamePiece();
 
@@ -195,7 +206,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
             // confidence in current game piece
             if (sameGamePiece >= 3) {
                 // reset the frames a *new, undetected* object has been detected to 0 now that the just-detected object has been recognized
-                resetObjectTimer();
+                resetIntakeFrames();
             }
         }
     }
@@ -284,12 +295,49 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
         return ((colorSensorData[0].distance - colorSensorData[2].distance) > 0) ? GamePiece.ConeFacingFront
                 : GamePiece.ConeFacingBack;
     }
+    
+    /**
+     * Sets whether to update outtake frame counts.
+     * 
+     * @param toUpdate Whether to update outtake frame counts.
+     */
+    public void updateOuttakeFrames(boolean toUpdate) {
+        updateOuttakeNumbers = toUpdate;
+    }
+
+    /**
+     * Whether the lightgate detects a new object (tripped for the threshold frames)
+     * 
+     * @return Whether the lightgate detectsc a new object.
+     */
+    public boolean intakeObjectDetectedLightgate() {
+        return (intakeLightgateTrippedFrames >= INTAKE_THRESHOLD);
+    }
 
     /**
      * Resets the object detected timer to 0.
      */
-    public void resetObjectTimer() {
-        framesObject = 0;
+    public void resetIntakeFrames() {
+        intakeLightgateTrippedFrames = 0;
+    }
+    
+    /**
+     * Returns whether the number of frames the lightgate is complete meets the threshold.
+     * 
+     * Only checks the outtakeLightgateTrueFrames variable because said variable is only updtaed when outtakeLightgateTrippedFrames meets threshold as well.
+     * 
+     * @return Whether an object has been ejectd.
+     */
+    public boolean getObjectOuttake() {
+        return (outtakeLightgateTrueFrames >= OUTTAKE_THRESHOLD);
+    }
+
+    /**
+     * Resets the frame counts of all outtake variables to 0.
+     */
+    public void resetOuttakeFrames() {
+        outtakeLightgateTrippedFrames = 0;
+        outtakeLightgateTrueFrames = 0;
     }
 
     /**
@@ -297,8 +345,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
      * 
      * @param toUpdate Whether to update the object detected time counter.
      */
-    public void setObjectTimerUpdates(boolean toUpdate) {
-        updateTime = toUpdate;
+    public void setIntakeFramesUpdates(boolean toUpdate) {
+        updateIntakeNumbers = toUpdate;
     }
 
     /**
@@ -306,8 +354,8 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
      * 
      * @return The frames for which an object has been detected.
      */
-    public int getObjectTimer() {
-        return framesObject;
+    public int getIntakeFrames() {
+        return intakeLightgateTrippedFrames;
     }
 
     Command getWatcher() {

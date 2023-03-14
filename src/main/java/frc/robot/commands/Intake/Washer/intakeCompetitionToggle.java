@@ -4,6 +4,7 @@
 
 package frc.robot.commands.Intake.Washer;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
@@ -45,10 +46,10 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
 
     // object detection runs
     intake.resetRetractTimer();
-    colorSensors.resetObjectTimer();
-    
+    colorSensors.resetIntakeFrames();
+
     intake.setRetractTimerUpdates(false);
-    colorSensors.setObjectTimerUpdates(true);
+    colorSensors.setIntakeFramesUpdates(true);
     
   }
 
@@ -66,6 +67,12 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
 
     // object detection
     intake.setRetractTimerUpdates(true);
-    colorSensors.setObjectTimerUpdates(false);
+    colorSensors.setIntakeFramesUpdates(false);
+  }
+
+  @Override
+  public boolean isFinished() {
+    if (DriverStation.isAutonomousEnabled()) return colorSensors.intakeObjectDetectedLightgate();
+    return false;
   }
 }
