@@ -89,16 +89,13 @@ public class MoveCollectiveArm extends CommandBase {
     travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide),
     pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
     placeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
-    pickupShelfFS
-    (15.0, 90.0, 0.0, ClawTrackMode.frontSide),
-    testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, 5.0), 
+    pickupShelfFS (15.0, 90.0, 0.0, ClawTrackMode.frontSide),
+    testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, 40.0), 
     reversePickupShelfFS(15.0, -90.0, 0.0, ClawTrackMode.frontSide),
     midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),
     midBS(20.0, 0.0, 0.0, ClawTrackMode.backSide),
     placeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
-    travelMidFS(20.0
-    
-    , -10.0, 0.0, ClawTrackMode.frontSide),
+    travelMidFS(20.0, -10.0, 0.0, ClawTrackMode.frontSide),
     travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
 
     // posistions and modes for target positions

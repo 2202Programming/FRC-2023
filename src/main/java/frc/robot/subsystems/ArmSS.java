@@ -39,8 +39,8 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     // state vars
     PIDController positionPID_rt = new PIDController(5.0, 0.150, 0.250); // outer position loop
     PIDController positionPID_lt = new PIDController(5.0, 0.150, 0.250); // outer position loop
-    PIDFController hwVelPID_rt = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
-    PIDFController hwVelPID_lt = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
+    PIDFController hwVelPID_rt = new PIDFController(0.002141, 0.000055, 0.15, 0.0503);
+    PIDFController hwVelPID_lt = new PIDFController(0.002141, 0.000055, 0.15, 0.0503);
     final int hwVelSlot = 0;
 
     // positive extension moves arm out
@@ -54,7 +54,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     boolean follow_mode;
 
     // PID and speed constants
-    double maxVel = 20.0; // [cm/s]
+    double maxVel = 21.0; // [cm/s]
     double maxAccel = 20.0; // [cm/s^2] Not enforce until smartmode used
     double posTol = 0.30; // [cm]
     double velTol = 0.25; // [cm/s]

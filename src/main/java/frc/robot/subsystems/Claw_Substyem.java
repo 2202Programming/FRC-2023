@@ -59,7 +59,7 @@ public class Claw_Substyem extends SubsystemBase {
   final int WRIST_STALL_CURRENT = 20;
   final int WRIST_FREE_CURRENT = 10;
   double wrist_maxAccel = 10.0; // only used if in smartmode, a future
-  double wrist_maxVel = 120.0;
+  double wrist_maxVel = 160.0;
   double wrist_posTol = 3.0;
   double wrist_velTol = 2.0;
   final double wrist_conversionFactor = 360.0 / 150.0; // GR=150.0

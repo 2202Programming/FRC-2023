@@ -33,11 +33,11 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   // ArbFeedforward to compensate for static torque
   double maxArbFF = 0.09; // [%power] -1.0 to 1.0  Tested with SMax Client %pwr mode
 
-  double Ktrim = 18.0; //6 orig
+  double Ktrim = 7.0; //6 orig
 
   // NeoServo - TODO (It's what arm values are rn, will need to change)
   final NeoServo elbow_servo;
-  PIDController positionPID = new PIDController(5.0, 0.083, 0.0);  
+  PIDController positionPID = new PIDController(6.0, 0.083, 0.0);  
   PIDFController hwVelPID = new PIDFController(0.0042, 0.0000052, 0.00, .003);
 
   public Elbow() {
