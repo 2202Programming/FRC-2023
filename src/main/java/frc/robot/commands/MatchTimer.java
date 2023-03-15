@@ -35,10 +35,22 @@ public class MatchTimer extends CommandBase {
         break;
       case(10):
         if(!buzzing){
-          new JoystickRumble(Id.Operator, 10, 10).schedule();
+          new JoystickRumble(Id.Operator, 1, 1).schedule();
           buzzing = true;
         }
         break;
+      case(8):
+        buzzing = false;
+        break;
+      case(5):
+        if(!buzzing){
+          new JoystickRumble(Id.Operator, 1, 1).schedule();
+          buzzing = true;
+        }
+        break;
+      case(3):
+        buzzing = false;
+        break;       
       default:
         break;
     }
