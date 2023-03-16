@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.HashMap;
 
 import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
@@ -46,6 +48,7 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
+import frc.robot.util.RobotSpecs.RobotNames;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -187,7 +190,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.vision_test);
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -347,9 +350,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // return autoBuilder.fullAuto(PathPlanner.loadPath("stlNoDeployTest", new
-    // PathConstraints(3.0, 4.0)));
-    return new autoSTL();
+    return autoBuilder.fullAuto(PathPlanner.loadPath("Right 2 Piece Auto", 
+      new PathConstraints(3.5, 3.5)));
+    
+    // return new autoSTL();
   }
 
   /**
@@ -360,67 +364,89 @@ public class RobotContainer {
     if (drivetrain == null)
       return; // guard for bot-on-board
 
-    eventMap.put("start",
-        new SequentialCommandGroup(
-            new PrintCommand("***Path Start"),
-            new InstantCommand(drivetrain::printPose)));
+      eventMap.put("start",
+      new SequentialCommandGroup(
+          new PrintCommand("***Path Start"),
+          new WaitCommand(0.75),
+          new PrintCommand("***Placing Piece"),
+          new InstantCommand(drivetrain::printPose)));
 
-    eventMap.put("middle",
-        new SequentialCommandGroup(
-            new PrintCommand("***Path Middle"),
-            new InstantCommand(drivetrain::printPose)));
-
-    eventMap.put("end",
-        new SequentialCommandGroup(
-            new PrintCommand("***Path End"),
-            new InstantCommand(drivetrain::printPose),
-            new ChargeStationBalance(true)));
-
-    eventMap.put("score", new SequentialCommandGroup(
-        new PrintCommand("***Path score"),
+      eventMap.put("Slow Down",
+      new SequentialCommandGroup(
+        new PrintCommand("***Slow Down"),
+        new WaitCommand(0.25),
         new InstantCommand(drivetrain::printPose)));
 
-    if (intake != null)
-      eventMap.put("eject_start",
-          new SequentialCommandGroup(
-              new PrintCommand("***Eject Start"),
-              new InstantCommand(drivetrain::printPose),
-              new outtakeCompetitionToggle().withTimeout(0.75)));
+      eventMap.put("Speed Up",
+      new SequentialCommandGroup(
+        new PrintCommand("***Speed Up"),
+        new WaitCommand(0.25),
+        new InstantCommand(drivetrain::printPose)));
 
-    if (intake != null)
-      eventMap.put("eject_no_deploy",
-          new SequentialCommandGroup(
-              new PrintCommand("***Eject No Deploy Start"),
-              new InstantCommand(drivetrain::printPose),
-              new IntakeReverse().withTimeout(0.5)));
-
-    if (intake != null)
-      eventMap.put("eject_piece",
-          new SequentialCommandGroup(
-              new PrintCommand("***Eject2"),
-              new InstantCommand(drivetrain::printPose),
-              new outtakeCompetitionToggle().withTimeout(2.00)
-          // ,new WaitCommand(1.5)
-          ));
-
-    eventMap.put("balance",
+      eventMap.put("end",
         new SequentialCommandGroup(
-            new PrintCommand("***Balance"),
-            new InstantCommand(drivetrain::printPose),
-            new ChargeStationBalance(false)));
+        new PrintCommand("***Path End"),
+        new InstantCommand(drivetrain::printPose),
+        new ChargeStationBalance(true)));
 
-    eventMap.put("intake_on",
-        new SequentialCommandGroup(
-            new PrintCommand("***Intake On"),
-            new intakeCompetitionToggle().withTimeout(3.0)));
 
-    eventMap.put("intake_off",
-        new SequentialCommandGroup(
-            new PrintCommand("***Intake Off")));
+    // eventMap.put("start",
+    //     new SequentialCommandGroup(
+    //         new PrintCommand("***Path Start"),
+    //         new InstantCommand(drivetrain::printPose)));
 
-    eventMap.put("deploy_intake",
-        new SequentialCommandGroup(
-            new PrintCommand("***Deploying intake"),
-            new DeployIntake()));
+    // eventMap.put("middle",
+    //     new SequentialCommandGroup(
+    //         new PrintCommand("***Path Middle"),
+    //         new InstantCommand(drivetrain::printPose)));
+
+    // 
+
+    // eventMap.put("score", new SequentialCommandGroup(
+    //     new PrintCommand("***Path score"),
+    //     new InstantCommand(drivetrain::printPose)));
+
+    // if (intake != null)
+    //   eventMap.put("eject_start",
+    //       new SequentialCommandGroup(
+    //           new PrintCommand("***Eject Start"),
+    //           new InstantCommand(drivetrain::printPose),
+    //           new outtakeCompetitionToggle().withTimeout(0.75)));
+
+    // if (intake != null)
+    //   eventMap.put("eject_no_deploy",
+    //       new SequentialCommandGroup(
+    //           new PrintCommand("***Eject No Deploy Start"),
+    //           new InstantCommand(drivetrain::printPose),
+    //           new IntakeReverse().withTimeout(0.5)));
+
+    // if (intake != null)
+    //   eventMap.put("eject_piece",
+    //       new SequentialCommandGroup(
+    //           new PrintCommand("***Eject2"),
+    //           new InstantCommand(drivetrain::printPose),
+    //           new outtakeCompetitionToggle().withTimeout(2.00)
+    //       // ,new WaitCommand(1.5)
+    //       ));
+
+    // eventMap.put("balance",
+    //     new SequentialCommandGroup(
+    //         new PrintCommand("***Balance"),
+    //         new InstantCommand(drivetrain::printPose),
+    //         new ChargeStationBalance(false)));
+
+    // eventMap.put("intake_on",
+    //     new SequentialCommandGroup(
+    //         new PrintCommand("***Intake On"),
+    //         new intakeCompetitionToggle().withTimeout(3.0)));
+
+    // eventMap.put("intake_off",
+    //     new SequentialCommandGroup(
+    //         new PrintCommand("***Intake Off")));
+
+    // eventMap.put("deploy_intake",
+    //     new SequentialCommandGroup(
+    //         new PrintCommand("***Deploying intake"),
+    //         new DeployIntake()));
   }
 }
