@@ -212,17 +212,15 @@ public class RobotContainer {
 
         // dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
         // dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
-
         dc.Driver().x().onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
         dc.Driver().a().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
         dc.Driver().rightTrigger().onTrue(new MoveCollectiveArm(CollectiveMode.reversePickupShelfFS));
         dc.Driver().leftTrigger().onTrue(new MoveCollectiveArm(CollectiveMode.testShelfTopFS));
         dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.pickupTransitionFS));
-       // dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
+        // dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
         dc.Driver().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
         dc.Driver().leftBumper().onTrue(new MoveCollectiveArm(CollectiveMode.placeMidFS));
         dc.Driver().rightBumper().onTrue(new MoveCollectiveArm(CollectiveMode.placeHighFS));
-
         // armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS,
         // dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
         break;
@@ -323,6 +321,14 @@ public class RobotContainer {
             .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Center));
         placeTrigger.and(dc.Operator().povRight())
             .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Right));
+
+        // ELBOW TRIM - Button not finalized
+        dc.Operator().a().and(dc.Operator().povDown()).onTrue(new InstantCommand(() -> {
+          elbow.decrementTrim();
+        }));
+        dc.Operator().a().and(dc.Operator().povUp()).onTrue(new InstantCommand(() -> {
+          elbow.incrementTrim();
+        }));
 
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team

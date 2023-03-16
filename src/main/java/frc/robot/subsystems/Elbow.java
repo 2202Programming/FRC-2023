@@ -33,6 +33,9 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   // ArbFeedforward to compensate for static torque
   double maxArbFF = 0.09; // [%power] -1.0 to 1.0  Tested with SMax Client %pwr mode
 
+  //trim stuff
+  double trim_decrement = 0.5; // degrees
+  double trim_increment = 1.0; // degrees
   double Ktrim = 7.0; //6 orig
 
   // NeoServo - TODO (It's what arm values are rn, will need to change)
@@ -69,6 +72,12 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
     elbow_servo.setArbFeedforward(arbFF);
     elbow_servo.periodic();
+  }
+  public void incrementTrim(){
+    Ktrim += trim_increment;
+  }
+  public void decrementTrim(){
+    Ktrim -= trim_decrement;
   }
 
   public boolean atSetpoint() {
