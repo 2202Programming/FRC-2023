@@ -10,6 +10,7 @@ import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -34,6 +35,7 @@ import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
+import frc.robot.commands.swerve.RotateTo;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
@@ -46,6 +48,7 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
+import frc.robot.util.RobotSpecs.RobotNames;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -187,7 +190,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.vision_test);
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -240,7 +243,8 @@ public class RobotContainer {
 
       case vision_test:
         // X button to change LL pipeline
-        dc.Driver().a().whileTrue(new CenterTapeYaw());
+        // dc.Driver().a().whileTrue(new CenterTapeYaw());
+        dc.Driver().a().onTrue(new RotateTo(Rotation2d.fromDegrees(90)));
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
@@ -359,7 +363,9 @@ public class RobotContainer {
     eventMap = new HashMap<>();
     if (drivetrain == null)
       return; // guard for bot-on-board
-
+    if(robotSpecs.myRobotName == RobotNames.SwerveBot)
+      return;
+      
     eventMap.put("start",
         new SequentialCommandGroup(
             new PrintCommand("***Path Start"),

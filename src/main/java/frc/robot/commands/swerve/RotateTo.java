@@ -15,9 +15,9 @@ import frc.robot.subsystems.SwerveDrivetrain;
 public class RotateTo extends CommandBase {
   SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
   PIDController rotatePid;
-  double rotate_kP = 0.4;
+  double rotate_kP = 4.0;
   double rotate_kI = 0.0;
-  double rotate_kD = 0.0;
+  double rotate_kD = 0.2;
   double rotatePidOutput = 0.0;
 
   Rotation2d currentAngle;
@@ -26,13 +26,14 @@ public class RotateTo extends CommandBase {
   
   final double vel_tol = 0.1; // [radians/s]
   final double pos_tol = 0.01;// in radians
-  final double max_rot_rate = 0.5;  //[radians/s]
+  final double max_rot_rate = 1.0;  //[radians/s]
 
   private Rotation2d targetRotation;
   public RotateTo(Rotation2d targetRotation) {
     addRequirements(sdt);
     rotatePid = new PIDController(rotate_kP, rotate_kI, rotate_kD);
     rotatePid.setTolerance(pos_tol, vel_tol);
+    rotatePid.enableContinuousInput(-Math.PI, Math.PI);
     this.targetRotation = targetRotation;
   }
 
