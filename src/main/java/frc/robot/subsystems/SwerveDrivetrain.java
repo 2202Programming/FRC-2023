@@ -86,6 +86,8 @@ public class SwerveDrivetrain extends SubsystemBase {
   private Pose2d old_pose;
   private Pose2d m_pose_integ; // incorporates vision
 
+  private double maxImagingVelocity = 5.0; //m/s
+
   private SwerveModuleState[] meas_states; // measured wheel speed & angle
   private SwerveModulePosition[] meas_pos = new SwerveModulePosition[] {
       new SwerveModulePosition(),
@@ -557,6 +559,13 @@ public class SwerveDrivetrain extends SubsystemBase {
     if (photonVision != null){
       m_poseEstimator_pv.update(sensors.getRotation2d(), meas_pos); //this should happen every robot cycle, regardless of vision targets.
       pvPoseEstimatorUpdate();
+    }
+
+    //only update pose from imaging if max velocity is low enough, check all 4 modules
+    for(int i=0;i<4;i++) {
+      if(meas_states[i].speedMetersPerSecond > maxImagingVelocity){
+        return; //skip pose updating below if above velocity
+      }
     }
 
     if ((limelight != null) && (llPose != null) && (limelight.getNumApriltags() > 0)) { //just use LL for now
