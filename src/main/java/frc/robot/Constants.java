@@ -453,6 +453,22 @@ public final class Constants {
       return stringLength;
     }
 
+    //Distances we need to extend the left and right motors to place the peices, used in ArmSS
+    //TODO configure
+
+    public static final double cubeMiddle = -10;
+    public static final double cubeTop = -20;
+    public static final double coneTop = -11;
+    public static final double coneMiddle = -21;
+
+    //distances we need to extend the elbow, used in place
+    //TODO configue
+    //no I will not be fixing the spelling on that
+
+    public static final double elbowMiddle = -9;
+    public static final double elbowTop = -8; //May want specification for cone or cube
+    
+
     // constructor
     public ArmGeometry(double xW1, double xW2, double xW3, double xAngle, double xStringLength) {
       w1 = xW1;
