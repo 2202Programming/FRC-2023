@@ -43,7 +43,6 @@ public class Place extends CommandBase {
    * Constructs and schedules a new Place command. Encompasses sdt movement, arm extension / retraction.
    * Assumes piece is already in claw (this should be done upon picking up).
    * 
-   * @param sensors
    * @param horizontalRequest
    * @param verticalRequest
    */
@@ -77,14 +76,6 @@ public class Place extends CommandBase {
       case None:
         break;
       }
-
-      /*
-       * TODO: integrate claw, retracting back in. A few ideas on how to:
-       * (a) a method which adds the open/close claw, retract back to proper position. 
-       *     Should method take position to go to as well, to do all scheduling in that method?
-       *     Then the method would become like Bottom() except be called MidHigh() and take in a CollectiveMode enum and add all necessary cmds there
-       * (b) add within each if
-       */
 
     //MrL's comments: 3/13/23, this is pretty complicated, looks like a simple math.abs() would be good enough?
     // nren 3/16/23: I mean it's just finding the magnitude of the vector of the stick in 2d space, but I think consistency is important so can't just check one axis
@@ -120,7 +111,7 @@ public class Place extends CommandBase {
   private void MidHigh(CollectiveMode armLocation) {
     cmd.addCommands(
       new MoveCollectiveArm(armLocation),
-      // new command: claw open until lightgate breaks, end condition close claw
+      // TODO new command: claw open until lightgate breaks, end condition close claw
       new MoveCollectiveArm(CollectiveMode.travelFS)
     );
   }
