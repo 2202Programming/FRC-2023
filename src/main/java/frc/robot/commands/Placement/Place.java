@@ -4,127 +4,193 @@
 
 package frc.robot.commands.Placement;
 
-import frc.robot.commands.Arm.ArmMoveTo;
-import frc.robot.commands.auto.goToScoringPosition;
-
 import com.pathplanner.lib.PathConstraints;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.ColorSensors;
-import frc.robot.subsystems.ColorSensors.GamePiece;
-import frc.robot.Constants;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
-import frc.robot.commands.EndEffector.MoveWrist;
 import frc.robot.RobotContainer;
+import frc.robot.commands.Arm.MoveCollectiveArm;
+import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.auto.goToScoringPosition;
+import frc.robot.subsystems.ColorSensors;
+import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 
 public class Place extends CommandBase {
 
-  public ColorSensors sensors;
-  /** Creates a new Place. */
+  // SSs
   private HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
-  private double deadzone = 0; // [percent]
-  private goToScoringPosition position;
+  public ColorSensors colorSensors = RobotContainer.RC().colorSensors;
+
+  // deadzone
+  final double DEADZONE = 0; // [percent]
+
+  // state vars
   private HorizontalScoringLane horizontalRequest;
   private VerticalScoringLane verticalRequest;
-  private double armAngle;
-  public Place(ColorSensors sensors,HorizontalScoringLane horizontalRequest, VerticalScoringLane verticalRequest) {
-    // Use addRequirements() here to declare subsystem dependencies.
+  private GamePiece piece;
+
+  // the cmd
+  private SequentialCommandGroup cmd = new SequentialCommandGroup();
+
+  /**
+   * This class acts as a command factory.
+   * 
+   * Constructs and schedules a new Place command. Encompasses sdt movement, arm extension / retraction.
+   * Assumes piece is already in claw (this should be done upon picking up).
+   * 
+   * @param sensors
+   * @param horizontalRequest
+   * @param verticalRequest
+   */
+  public Place(HorizontalScoringLane horizontalRequest, VerticalScoringLane verticalRequest) {
     this.horizontalRequest = horizontalRequest;
     this.verticalRequest = verticalRequest;
-    this.sensors = sensors;
+
+    addRequirements(dc, colorSensors);
   }
-  private void move() {
-    position = new goToScoringPosition(new PathConstraints(2,3), horizontalRequest); 
-    position.schedule();
-  }
-  private void Cone(boolean needsFlip) {
-    move();
-      //drive train move Left 14.876 rotations Right
-    //TODO depending on how arm clears, we may want to stall this until the above is finished
-    switch (verticalRequest) {
-      case Top: 
-        new ArmMoveTo(Constants.ArmGeometry.coneMiddle, Constants.ArmGeometry.elbowMiddle); //TODO set in constants
-        this.armAngle = Constants.ArmGeometry.elbowMiddle;
-        break;
-      case Middle:
-        new ArmMoveTo(Constants.ArmGeometry.coneTop, Constants.ArmGeometry.elbowTop);  //TODO set in constants  
-        this.armAngle = Constants.ArmGeometry.elbowTop;
-        break;    
-      default:
-        System.out.println("Vertical Request has returned neither true or false, something has gone very wrong, please help");
-        break;
-    }
-  }
-  private void Cube() {
-    move();    
-    switch (verticalRequest){
-      case Top: 
-        new ArmMoveTo(Constants.ArmGeometry.cubeMiddle, Constants.ArmGeometry.elbowMiddle); //TODO set in constants
-        this.armAngle = Constants.ArmGeometry.elbowMiddle;
-        break;
-      case Middle:
-        new ArmMoveTo(Constants.ArmGeometry.cubeTop, Constants.ArmGeometry.elbowTop);  //TODO set in constants  
-        this.armAngle = Constants.ArmGeometry.elbowTop;
-        break;
-      default:
-        System.out.println("Vertical Request has returned neither true or false, something has gone very wrong, please help");
-        break;
-    }
-  }
-  private void Bottom() {
-    move();
-    new outtakeCompetitionToggle().withTimeout(5.0).schedule();
-    }
+
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //Next move robot to placement position based on cube/isLeft
-    //placeholder: Check which color/orentation of peice
-    GamePiece piece = sensors.getCurrentGamePiece();
-    if (verticalRequest == VerticalScoringLane.Bottom) {
-      Bottom();
-    } else {
-      switch (piece) {
-        case Cube:
-          Cube();
-        case ConeFacingBack:
-          Cone(false); //TODO: CHECK assumption
-        case ConeFacingFront:
-          Cone(true); //TODO: Check assumption
-        case None:
-      }
-    }
-    new MoveWrist(180-armAngle,3); //Change Max Vel
+    // 1. Move to scoring position
+    move();
 
-    //Move arns/ elbow out to position, pull from constants
-    //Flip flipper if needsFlip is true
-    //Move wrist to 180 - theta, taken care of by armMoveTo
-    //parallel command
+    // 2. Move arm out
+    piece = colorSensors.getCurrentGamePiece();
+
+    switch (piece) {
+      case Cube:
+        Cube();
+        break;
+      case ConeFacingBack:
+        ConeBack();
+        break;
+      case ConeFacingFront:
+        ConeFront();
+        break;
+      case None:
+        break;
+      }
+
+      /*
+       * TODO: integrate claw, retracting back in. A few ideas on how to:
+       * (a) a method which adds the open/close claw, retract back to proper position. 
+       *     Should method take position to go to as well, to do all scheduling in that method?
+       *     Then the method would become like Bottom() except be called MidHigh() and take in a CollectiveMode enum and add all necessary cmds there
+       * (b) add within each if
+       */
+
+    //MrL's comments: 3/13/23, this is pretty complicated, looks like a simple math.abs() would be good enough?
+    // nren 3/16/23: I mean it's just finding the magnitude of the vector of the stick in 2d space, but I think consistency is important so can't just check one axis
+    cmd.until(() -> {
+      boolean xStickStill = (Math.sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE); 
+      boolean yStickStill = (Math.sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE);
+      return (xStickStill && yStickStill);
+    }).schedule();
   }
+
+  /**
+   * Adds sdt movement to target node.
+   */
+  private void move() {
+    // 1. move to general vicinity
+    cmd.addCommands(new goToScoringPosition(new PathConstraints(2,3), horizontalRequest));
+
+    // 2. correct for OTF path generation rotation error
+    // TODO check which alliance is 0/180, pull RotateTo in from other branch
+    //cmd.addCommands(new RotateTo(new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 0 : 180)));
+  }
+
+  /**
+   * Adds command(s) necessary for bottom scoring.
+   */
+  private void Bottom() {
+    cmd.addCommands(new outtakeCompetitionToggle().withTimeout(5.0));
+  }
+
+  /**
+   * Adds commands necessary for mid/high scoring.
+   */
+  private void MidHigh(CollectiveMode armLocation) {
+    cmd.addCommands(
+      new MoveCollectiveArm(armLocation),
+      // new command: claw open until lightgate breaks, end condition close claw
+      new MoveCollectiveArm(CollectiveMode.travelFS)
+    );
+  }
+
+  /**
+   * Constructs placing cmd based on object being a cone facing backwards.
+   */
+  private void ConeBack() {
+    switch (verticalRequest) {
+      case Top: 
+        MidHigh(CollectiveMode.placeHighFS); //TODO cone/cube customization in enum
+        break;
+      case Middle:
+        MidHigh(CollectiveMode.placeMidFS); //TODO cone/cube customization in enum
+        break;    
+      case Bottom:
+        Bottom();
+        break;
+    }
+  }
+
+  /**
+   * Constructs pacing cmd based on object being a cone facing forward.
+   */
+  private void ConeFront() {
+  switch (verticalRequest) {
+    case Top: 
+      MidHigh(CollectiveMode.placeHighFS); //TODO cone/cube customization in enum
+      break;
+    case Middle:
+      MidHigh(CollectiveMode.placeMidFS);  //TODO cone/cube customization in enum
+      break;    
+    case Bottom:
+      Bottom();
+      break;
+  }
+}
+
+  /**
+   * Constructs placing cmd based on object being a cube.
+   */
+  private void Cube() {  
+    switch (verticalRequest) {
+      case Top: 
+        MidHigh(CollectiveMode.placeHighFS); //TODO cone/cube customization in enum
+        break;
+      case Middle:
+        MidHigh(CollectiveMode.placeMidFS);  //TODO cone/cube customization in enum
+        break;    
+      case Bottom:
+        Bottom();
+        break;
+    }
+  }
+  
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
-  // Called once the command ends or is interrupted.
+  public void execute() { 
+    // do nothing
+  }
+  
   @Override
   public void end(boolean interrupted) {
-    position.cancel();
+    // do nothing
   }
-  // Returns true when the command should end.
-  //after that all finishes, stow the arm wrist and elbow, pull from constants. 
-  //TODO put into command scheduler
+  
   @Override
   public boolean isFinished() {
-    //MrL's comments: 3/13/23, this is pretty complicated, looks like a simple math.abs() would be good enough?
-    boolean leftStickStill = Math.sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > deadzone;
-    boolean rightStickStill = Math.sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > deadzone;
-    return (leftStickStill && rightStickStill);
+    // it's movement cmd path factory, should be done after init / upon first time execute is called
+    return true;
   }
 }
