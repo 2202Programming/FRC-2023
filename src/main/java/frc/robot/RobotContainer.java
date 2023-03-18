@@ -27,7 +27,6 @@ import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
-import frc.robot.commands.Automation.SlowDown;
 import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
@@ -352,9 +351,13 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoBuilder.fullAuto(PathPlanner.loadPath("Right 2 Piece Auto", 
+    return autoBuilder.fullAuto(PathPlanner.loadPathGroup("Right 2 Piece Auto", //Add stop point at the position want to change constraints
+      new PathConstraints(2, 2),
+      new PathConstraints(1.25, 1.25),
+      new PathConstraints(2, 2),
+      new PathConstraints(1.25, 1.25),
       new PathConstraints(2, 2)));
-    
+    // return autoBuilder.fullAuto(PathPlanner.loadPath("Right 2 Piece Auto"));
     // return new autoSTL();
   }
 
@@ -376,13 +379,11 @@ public class RobotContainer {
       eventMap.put("Slow Down",
       new SequentialCommandGroup(
         new PrintCommand("***Slow Down"),
-        new SlowDown(),
         new InstantCommand(drivetrain::printPose)));
 
       eventMap.put("Speed Up",
       new SequentialCommandGroup(
         new PrintCommand("***Speed Up"),
-        new WaitCommand(0.25),
         new InstantCommand(drivetrain::printPose)));
 
       eventMap.put("end",
