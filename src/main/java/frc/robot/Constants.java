@@ -135,7 +135,7 @@ public final class Constants {
     public static final int WRIST_Motor = 15;
     
     //Claw
-    public static final int CLAW_LEFT_MOTOR = 16;
+    public static final int CLAW_WHEEL_MOTOR = 16;
     public static final int CLAW_ROTATE_MOTOR = 17;
     
     // IMU
@@ -154,7 +154,7 @@ public final class Constants {
   // Digital IO on the RIO
   public static final class DigitalIO {
     public static final int IntakeLightGate = 0;
-    public static final int ColorSensorGate = 1;
+    public static final int ClawLightgate = 1;
   }
 
   public static final class AnalogIn {
@@ -399,115 +399,7 @@ public final class Constants {
     }
   }
 
-  // class is for us to figure out our position on field when using inclinator
-  // uses geometry to find out our x, y, and z direction in a function in terms of
-  // the angle between the bars
-  public class ArmGeometry {
-    // Passive -> Extend, Active <- Retreat
-    // Length of string -> motion -> position servo + 2 spark max + spring
-    private double w1;
-    private double w2;
-    private double w3;
-    // geometry-derived length in all three directions based on comp bot
-    public static final double geoX = 175.60; // wheel and chassis height in x-direction
-    public static final double geoY = 115.40; // wheel and chassis height in y-direction
-    public static final double geoZ = 162.15; // wheel and chassis height in z-direction
-  
-  //
-
-    // length of string
-    private double stringLength;
-    // angle between the lengths
-    double angle;
-
-    // getters and setters
-    public double getAngle() {
-      return angle;
-    }
-
-    public double getGeoX() {
-      return geoX;
-    }
-
-    public double getGeoY() {
-      return geoY;
-    }
-
-    public double getGeoZ() {
-      return geoZ;
-    }
-
-    public double getWidth1() {
-      return w1;
-    }
-
-    public double getWidth2() {
-      return w2;
-    }
-
-    public double getWidth3() {
-      return w3;
-    }
-
-    public double getStringLength() {
-      return stringLength;
-    }
-
-    //Distances we need to extend the left and right motors to place the peices, used in ArmSS
-    //TODO configure
-
-    public static final double cubeMiddle = -10;
-    public static final double cubeTop = -20;
-    public static final double coneTop = -11;
-    public static final double coneMiddle = -21;
-
-    //distances we need to extend the elbow, used in place
-    //TODO configue
-    //no I will not be fixing the spelling on that
-
-    public static final double elbowMiddle = -9;
-    public static final double elbowTop = -8; //May want specification for cone or cube
-    
-
-    // constructor
-    public ArmGeometry(double xW1, double xW2, double xW3, double xAngle, double xStringLength) {
-      w1 = xW1;
-      w2 = xW2;
-      w3 = xW3;
-      angle = xAngle;
-      stringLength = xStringLength;
-    }
-
-    double width = w1 + w2 + w3;
-    // array to find the 3 lengths
-    double lengthX = width * Math.sin(angle) + stringLength * Math.sin(angle) + geoX;
-    double lengthY = geoY;
-    double armLength = width * Math.cos(angle) + stringLength * Math.cos(angle) + geoZ;
-    double[] lengths = { lengthX, lengthY, armLength };
-
-    public double getLengthX() {
-      return lengthX;
-    }
-
-    public double getLengthY() {
-      return lengthY;
-    }
-
-    public double getLengthZ() {
-      return armLength;
-    }
-  }
-
-  public enum DriverMode {
-    Arcade(0), Tank(1), XYRot(2);
-
-    public final int value;
-
-    DriverMode(int value) {
-      this.value = value;
-    }
-  }
-  //Enums for placement
+  //Enums for placement, used in Place.java command
   public enum HorizontalScoringLane {
     Left,
     Right,
@@ -528,4 +420,3 @@ public final class Constants {
     }
   }    
 }
-

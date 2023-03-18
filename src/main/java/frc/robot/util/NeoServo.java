@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxAlternateEncoder.Type;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
@@ -60,10 +61,28 @@ public class NeoServo implements VelocityControlled {
         ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
         pid = ctrl.getPIDController();
         encoder = ctrl.getEncoder();
+
         this.positionPID = positionPID;
         this.hwVelSlot = hwVelSlot;
         this.hwVelPIDcfg = hwVelPIDcfg;
         this.prevVelPIDcfg = new PIDFController(hwVelPIDcfg);
+    }
+
+    // not really a NEO, but a sparkmax controller on brushed motor and alt encoder
+    public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot,
+            Type  extEncoderType, int kCPR)  {
+            ctrl = new CANSparkMax(canID, MotorType.kBrushed);
+            ctrl.clearFaults();
+            ctrl.restoreFactoryDefaults();
+            ctrl.setInverted(inverted);
+            ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
+            pid = ctrl.getPIDController();   
+            encoder = ctrl.getAlternateEncoder(extEncoderType, kCPR);
+
+            this.positionPID = positionPID;
+            this.hwVelSlot = hwVelSlot;
+            this.hwVelPIDcfg = hwVelPIDcfg;
+            this.prevVelPIDcfg = new PIDFController(hwVelPIDcfg);
     }
 
     public NeoServo setName(String name) {

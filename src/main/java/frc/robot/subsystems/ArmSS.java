@@ -72,8 +72,8 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     public ArmSS() {
         rightArm = new NeoServo(CAN.ARM_RIGHT_Motor, positionPID_rt, hwVelPID_rt, invert_right);
         leftArm = new NeoServo(CAN.ARM_LEFT_Motor, positionPID_lt, hwVelPID_lt, invert_left);
-        rightArm.setName(getName()+"/ArmServo_right");
-        leftArm.setName(getName()+"/ArmServo_left");
+        rightArm.setName(getName() + "/ArmServo_right");
+        leftArm.setName(getName() + "/ArmServo_left");
         configure(rightArm);
         configure(leftArm);
 
@@ -209,9 +209,9 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
             // PIDs
             NetworkTable table = getTable();
             var tname = getTableName();
-            SmartDashboard.putData(tname+"/positionPID_lt", positionPID_lt);
-            SmartDashboard.putData(tname+"/positionPID_rt", positionPID_rt);
-            SmartDashboard.putData(tname+"/syncPID", syncPID);
+            SmartDashboard.putData(tname + "/positionPID_lt", positionPID_lt);
+            SmartDashboard.putData(tname + "/positionPID_rt", positionPID_rt);
+            SmartDashboard.putData(tname + "/syncPID", syncPID);
 
             nt_syncCompensation = table.getEntry("/SyncComp");
 
@@ -221,7 +221,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
             nt_velTol = table.getEntry("Velocity Tolerance");
             nt_error = table.getEntry("Position Error");
 
-            //init with correct values
+            // init with correct values
             nt_maxVel.setDouble(maxVel);
             nt_posTol.setDouble(posTol);
             nt_velTol.setDouble(velTol);
@@ -234,12 +234,12 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
             nt_error.setDouble(pos_error);
             nt_syncCompensation.setDouble(syncCompensation);
 
-            //look for updates from NT for editable values
+            // look for updates from NT for editable values
             maxVel = nt_maxVel.getDouble(maxVel);
             double _posTol = nt_posTol.getDouble(posTol);
             double _velTol = nt_velTol.getDouble(velTol);
 
-            //update with new values
+            // update with new values
             setMaxVel(maxVel);
             positionPID_lt.setTolerance(_posTol, _velTol);
             positionPID_rt.setTolerance(_posTol, _velTol);
@@ -249,4 +249,85 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         }
     }
 
+    /// Moved from constants, not used as of 3/17/23
+    // class is for us to figure out our position on field when using inclinator
+    // uses geometry to find out our x, y, and z direction in a function in terms of
+    // the angle between the bars
+  public class ArmGeometry {
+    // Passive -> Extend, Active <- Retreat
+    // Length of string -> motion -> position servo + 2 spark max + spring
+    private double w1;
+    private double w2;
+    private double w3;
+    // geometry-derived length in all three directions based on comp bot
+    public static final double geoX = 175.60; // wheel and chassis height in x-direction
+    public static final double geoY = 115.40; // wheel and chassis height in y-direction
+    public static final double geoZ = 162.15; // wheel and chassis height in z-direction
+  
+    // length of string
+    private double stringLength;
+    // angle between the lengths
+    double angle;
+
+    // getters and setters
+    public double getAngle() {
+      return angle;
+    }
+
+    public double getGeoX() {
+      return geoX;
+    }
+
+    public double getGeoY() {
+      return geoY;
+    }
+
+    public double getGeoZ() {
+      return geoZ;
+    }
+
+    public double getWidth1() {
+      return w1;
+    }
+
+    public double getWidth2() {
+      return w2;
+    }
+
+    public double getWidth3() {
+      return w3;
+    }
+
+    public double getStringLength() {
+      return stringLength;
+    }
+
+    // constructor
+    ArmGeometry(double xW1, double xW2, double xW3, double xAngle, double xStringLength) {
+        w1 = xW1;
+        w2 = xW2;
+        w3 = xW3;
+        angle = xAngle;
+        stringLength = xStringLength;
+      }
+  
+      double width = w1 + w2 + w3;
+      // array to find the 3 lengths
+      double lengthX = width * Math.sin(angle) + stringLength * Math.sin(angle) + geoX;
+      double lengthY = geoY;
+      double armLength = width * Math.cos(angle) + stringLength * Math.cos(angle) + geoZ;
+      double[] lengths = { lengthX, lengthY, armLength };
+  
+      public double getLengthX() {
+        return lengthX;
+      }
+  
+      public double getLengthY() {
+        return lengthY;
+      }
+  
+      public double getLengthZ() {
+        return armLength;
+      }
+    }
 }

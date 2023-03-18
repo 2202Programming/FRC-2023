@@ -6,23 +6,29 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.DigitalIO;
 import frc.robot.Constants.PCM1;
 import frc.robot.Constants.PowerOnPos;
+import frc.robot.RobotContainer;
 import frc.robot.commands.utility.WatcherCmd;
 import frc.robot.util.NeoServo;
 import frc.robot.util.PIDFController;
+import frc.robot.util.VelocityControlled;
 
 //Eventually will need 2 solenoids 
 public class Claw_Substyem extends SubsystemBase {
@@ -37,9 +43,8 @@ public class Claw_Substyem extends SubsystemBase {
   public enum ClawTrackMode {
     frontSide(90.0),
     backSide(-90.0),
-    grabPiece(-57.0), //todo fix##
-    free(0.0);   //any angle,
-
+    grabPiece(-57.0),  //todo fix##
+    free(0.0);   //any angle
     double angle;
 
     ClawTrackMode(double angle) {
@@ -80,8 +85,12 @@ public class Claw_Substyem extends SubsystemBase {
 
   // Hardware
   final DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PCM1.CLAW_FWD, PCM1.CLAW_REV);
+  final DigitalInput lightgate = new DigitalInput(DigitalIO.ClawLightgate);
   final NeoServo wrist_servo;
- // final NeoServo rotate_servo;
+  final NeoServo rotate_servo;
+
+  final TalonSRX intake_wheels;
+  double wheel_speed = 0.20;
 
   // PIDS for NeoServos - first pass on wrist tuning
   // Testing showed 200 [deg/sec] was good to go! Still lots of overshoot on vel
@@ -96,21 +105,23 @@ public class Claw_Substyem extends SubsystemBase {
   // reads the elbow angle for tracking
   DoubleSupplier elbowAngle;
 
-  public enum WristTrackMode {
-    backside_level,
-    frontside_level,
-
-  }
 
   // state vars
   private boolean is_open;
+  private boolean gate_blocked;
   private GamePieceHeld piece_held;
-  ClawTrackMode trackElbowMode = ClawTrackMode.backSide;
+  ClawTrackMode trackElbowMode = ClawTrackMode.backSide; 
+  
   double elbowOffset = 0.0;
+
 
   public Claw_Substyem() {
     wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, true);
-   // rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, rotate_hwVelPID, false);
+    rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, rotate_hwVelPID, false, 0,
+                       SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
+
+    intake_wheels = new TalonSRX(CAN.CLAW_WHEEL_MOTOR);
+    intake_wheels.setInverted(false);   //flip this is in/out is reversed
 
     wrist_servo.setName(getName() + "/wrist")
         .setConversionFactor(wrist_conversionFactor)
@@ -120,7 +131,7 @@ public class Claw_Substyem extends SubsystemBase {
         .setMaxVelocity(wrist_maxVel)
         .setBrakeMode(IdleMode.kCoast)
         .burnFlash();
-/*/
+
     rotate_servo.setName(getName() + "/rotator")
         .setConversionFactor(rotate_conversionFactor)
         .setSmartCurrentLimit(ROTATE_STALL_CURRENT, ROTATE_FREE_CURRENT)
@@ -128,12 +139,12 @@ public class Claw_Substyem extends SubsystemBase {
         .setTolerance(rotate_posTol, rotate_velTol)
         .setMaxVelocity(rotate_maxVel)
         .burnFlash();
-*/
+
     // make sure we are at a good staring point (folded inside)
     wrist_servo.setSetpoint(PowerOnPos.wrist);
     wrist_servo.setPosition(PowerOnPos.wrist);
-  //  rotate_servo.setSetpoint(PowerOnPos.rotate);
-  //  rotate_servo.setPosition(PowerOnPos.rotate);
+    rotate_servo.setSetpoint(PowerOnPos.rotate);
+    rotate_servo.setPosition(PowerOnPos.rotate);
 
     // Use elbow if we have one, otherwise zero
     elbowAngle = (RobotContainer.RC().elbow != null) ? RobotContainer.RC().elbow::getPosition : this::zero;
@@ -149,7 +160,7 @@ public class Claw_Substyem extends SubsystemBase {
   }
 
   // accessors for servos for testing
-  public NeoServo getWrist() {
+  public VelocityControlled getWrist() {
     return wrist_servo;
   }
 
@@ -172,8 +183,8 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo.setSetpoint(degrees);
     trackElbowMode = ClawTrackMode.free;
   }
- /*
- public NeoServo getRotator() {
+ 
+ public VelocityControlled getRotator() {
     return rotate_servo;
   }
 
@@ -185,7 +196,7 @@ public class Claw_Substyem extends SubsystemBase {
   public boolean rotateAtSetpoint() {
     return rotate_servo.atSetpoint();
   }
-*/
+
 
   @Override
   public void periodic() {
@@ -199,12 +210,12 @@ public class Claw_Substyem extends SubsystemBase {
     
     //run the servo calcs
     wrist_servo.periodic();
-    //rotate_servo.periodic();
+    rotate_servo.periodic();
 
-    clawStatus();
+    gate_blocked = lightgate.get();
   }
 
-   void setxxxElbowOffset(double deg) {
+   void setElbowOffset(double deg) {
     //manually setting an offset, must be in free mode
     this.elbowOffset = deg;
     trackElbowMode = ClawTrackMode.free;
@@ -242,19 +253,28 @@ public class Claw_Substyem extends SubsystemBase {
     return is_open;
   }
 
-  // getting status of solenoid (open/close)
-  // and keep the is_open flag up to date
-  // commands can use isOpen()
-  private void  clawStatus() {
-    is_open = (solenoid.get() == OPEN);
-
-    //TODO: check lightgates
+  public boolean isGateBlocked() {
+    return gate_blocked;
   }
 
   public Command getWatcher() {
     wrist_servo.getWatcher();
-    //rotate_servo.getWatcher();
+    rotate_servo.getWatcher();
     return new ClawWatcher();
+  }
+
+  //Claw intake Wheel control
+  public void setWheelSpeed(double speed) {
+    wheel_speed = Math.abs(speed);
+  }
+  public void wheelsIn(){
+    intake_wheels.set(TalonSRXControlMode.PercentOutput, wheel_speed );
+  }
+  public void wheelsOut() {
+    intake_wheels.set(TalonSRXControlMode.PercentOutput, -wheel_speed );
+  }
+  public void wheelsOff() {
+    intake_wheels.set(TalonSRXControlMode.PercentOutput, 0.0 );
   }
 
   /**

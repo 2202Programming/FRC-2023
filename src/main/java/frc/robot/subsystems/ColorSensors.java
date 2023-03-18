@@ -17,14 +17,12 @@ import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.DigitalIO;
 import frc.robot.commands.utility.WatcherCmd;
 import frc.robot.util.Mux;
 
@@ -41,7 +39,6 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
     private final int[] sensorMuxPorts = { 0, 1, 2 };
     private final List<ColorSensorV3> colorSensors = new ArrayList<>();
     private final int numSensors = 3;
-    private final DigitalInput lightGate = new DigitalInput(DigitalIO.ColorSensorGate); 
     private int framesObject = 0;
 
     // sensor results
@@ -174,7 +171,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
     @Override
     public void periodic() {
         // if the lightgate turns on add a frame that it thinks there's an object
-        if (lightGate.get())
+        if (false )
             framesObject++;
         else
             framesObject = 0;
