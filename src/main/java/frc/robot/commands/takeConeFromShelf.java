@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.ConePickup;
+import frc.robot.Constants.PowerOnPos;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Elbow;
@@ -50,16 +51,25 @@ public class takeConeFromShelf extends CommandBase {
         if (arm.getPosition() != ConePickup.armLength)
         armMove = new ArmMoveTo(ConePickup.armLength, ConePickup.elbowAngle);
         else currentState = commandState.ArmExtended;
+        break;
       case ArmExtended:
         // TODO
-        //check claw to see if light gate tripped or photon vision says we've moved far enough
-        //else move robot forward
+        if (claw.isGateBlocked()) {
+          claw.close();
+          currentState = commandState.HasCone;
+        }
+        break;
       case HasCone:
         // TODO
-        // close claw and retract arm (maybe adjust wrist or elbow so it doesn't drag on shelf)
+        if (arm.getPosition() !=  PowerOnPos.arm) {
+          armMove = new ArmMoveTo(PowerOnPos.arm, PowerOnPos.elbow);
+        } else {
+          currentState = commandState.ArmRetracted;
+        }
+        break;
+        
       case ArmRetracted:
-        // TODO
-        //end
+        break;
       }
  
   }
