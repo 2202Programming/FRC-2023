@@ -561,11 +561,12 @@ public class SwerveDrivetrain extends SubsystemBase {
       pvPoseEstimatorUpdate();
     }
 
-    //only update pose from imaging if max velocity is low enough, check all 4 modules
-    for(int i=0;i<4;i++) {
-      if(meas_states[i].speedMetersPerSecond > maxImagingVelocity){
-        return; //skip pose updating below if above velocity
-      }
+    //only update pose from imaging if max velocity is low enough
+    //get center of robot velocity from sqrt of vX2 + vY2
+    if(Math.sqrt(
+              Math.pow(kinematics.toChassisSpeeds(meas_states).vxMetersPerSecond,2) +
+              Math.pow(kinematics.toChassisSpeeds(meas_states).vyMetersPerSecond,2)) > maxImagingVelocity){
+      return;
     }
 
     if ((limelight != null) && (llPose != null) && (limelight.getNumApriltags() > 0)) { //just use LL for now
