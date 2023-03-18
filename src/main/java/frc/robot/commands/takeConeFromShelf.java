@@ -48,8 +48,8 @@ public class takeConeFromShelf extends CommandBase {
         else currentState = commandState.ClawOpened;
         break;
       case ClawOpened:
-        if (arm.getPosition() != ConePickup.armLength)
-        armMove = new MoveCollectiveArm(ConePickup.armLength, ConePickup.elbowAngle);
+        if (arm.getPosition() != 20)
+        armMove = new MoveCollectiveArm(MoveCollectiveArm.CollectiveMode.pickupShelfFS);
         else currentState = commandState.ArmExtended;
         break;
       case ArmExtended:
@@ -61,8 +61,8 @@ public class takeConeFromShelf extends CommandBase {
         break;
       case HasCone:
         // TODO
-        if (arm.getPosition() !=  PowerOnPos.arm) {
-          armMove = new MoveCollectiveArm(PowerOnPos.arm, PowerOnPos.elbow);
+        if (arm.getPosition() !=  15) {
+          armMove = new MoveCollectiveArm(MoveCollectiveArm.CollectiveMode.reversePickupShelfFS);
         } else {
           currentState = commandState.ArmRetracted;
         }

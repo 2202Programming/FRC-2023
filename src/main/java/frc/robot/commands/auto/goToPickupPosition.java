@@ -30,16 +30,17 @@ import frc.robot.util.PoseMath;
 public class goToPickupPosition extends CommandBase {
   /** Creates a new goToScoringPosition. */
 
-  HorizontalScoringLane horizontalScoringLane;
+  enum MoveDirection {Left, Right};
+  public MoveDirection moveDirection;
   PathConstraints constraints;
   SwerveDrivetrain sdt;
   PPSwerveControllerCommand pathCommand;
   JoystickRumbleEndless rumbleCmd;
 
   //pick correct scoring pose based on alliance
-  public goToPickupPosition(PathConstraints constraints, HorizontalScoringLane horizontalScoringLane) {
+  public goToPickupPosition(PathConstraints constraints, MoveDirection moveDirection) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.horizontalScoringLane = horizontalScoringLane;
+    this.moveDirection = moveDirection;
     this.constraints = constraints;
     sdt = RobotContainer.RC().drivetrain;
   }
@@ -57,19 +58,16 @@ public class goToPickupPosition extends CommandBase {
       else scoringBlock = 1;
 
       //FOR BLUE: left is largest index of scoring trio
-      switch(horizontalScoringLane){
+      switch(moveDirection){
         case Left:
           scoringAdjusted = 2;
-          break;
-        case Center:
-          scoringAdjusted = 1;
           break;
         default:
         case Right:
           scoringAdjusted = 0;
           break;      
       }
-      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted]);
+      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.bluePickupPoseCenter);
     }
     else { //RED ALLIANCE
       //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
@@ -78,24 +76,21 @@ public class goToPickupPosition extends CommandBase {
       else scoringBlock = 1;
 
       //FOR RED: left is smallest index of scoring trio
-      switch(horizontalScoringLane){
+      switch(moveDirection){
         case Left:
           scoringAdjusted = 0;
-          break;
-        case Center:
-          scoringAdjusted = 1;
           break;
         default:
         case Right:
           scoringAdjusted = 2;
-          break;      
+          break;
       }
-      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.redScorePoses[scoringBlock][scoringAdjusted]);
+      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.redPickupPoseCenter);
     }
     //sdt.disableVisionPose();
-    rumbleCmd = new JoystickRumbleEndless(Id.Operator);
-    rumbleCmd.schedule();
-    RobotContainer.RC().lights.setBlinking(BlinkyLights.GREEN);
+    //rumbleCmd = new JoystickRumbleEndless(Id.Operator);
+    //rumbleCmd.schedule();
+    //RobotContainer.RC().lights.setBlinking(BlinkyLights.GREEN);
     pathCommand.schedule();
   }
 

@@ -89,8 +89,8 @@ public final class Constants {
 
   public static class ConePickup {
     public static final double armLength = 20.0; //[cm] not the final number
-    public static final double elbowAngle = 0.0;  //[degrees]
-    public static final double wristAngle = 90.0; //[degrees] not final
+    public static final double elbowAngle = 90.0;  //[degrees]
+    public static final double wristAngle = 0.0; //[degrees] not final
   }
 
   /**
@@ -326,12 +326,22 @@ public final class Constants {
     public final static Pose2d redScorePose9 = new Pose2d(new Translation2d(14.7,5.00), Rotation2d.fromDegrees(0)); //highest scoring position in Y
   
     public final static Pose2d[][] blueScorePoses =  {{blueScorePose1,blueScorePose2,blueScorePose3},
-                                                    {blueScorePose4,blueScorePose5,blueScorePose6},
-                                                    {blueScorePose7,blueScorePose8,blueScorePose9}};
+                                                     {blueScorePose4,blueScorePose5,blueScorePose6},
+                                                     {blueScorePose7,blueScorePose8,blueScorePose9}};
 
     public final static Pose2d[][] redScorePoses =   {{redScorePose1,redScorePose2,redScorePose3},
-                                                    {redScorePose4,redScorePose5,redScorePose6},
-                                                    {redScorePose7,redScorePose8,redScorePose9}};                                                 
+                                                     {redScorePose4,redScorePose5,redScorePose6},
+                                                     {redScorePose7,redScorePose8,redScorePose9}};
+
+    public final static Pose2d bluePickupPoseCenter = new Pose2d(new Translation2d(15.50, 6.75), Rotation2d.fromDegrees(0));
+    public final static Pose2d bluePickupPoseRight = new Pose2d(new Translation2d(15.50, 7.35), Rotation2d.fromDegrees(0));
+    public final static Pose2d bluePickupPoseLeft = new Pose2d(new Translation2d(15.50, 6.00), Rotation2d.fromDegrees(0));
+    public final static Pose2d redPickupPoseCenter = new Pose2d(new Translation2d(1.00, 6.75), Rotation2d.fromDegrees(0));
+    public final static Pose2d redPickupPoseLeft = new Pose2d(new Translation2d(1.00, 7.35), Rotation2d.fromDegrees(0));
+    public final static Pose2d redPickupPoseRight = new Pose2d(new Translation2d(1.00, 6.00), Rotation2d.fromDegrees(0));
+
+    public final static Pose2d[] bluePickupPoses = {bluePickupPoseLeft, bluePickupPoseCenter, bluePickupPoseRight};
+    public final static Pose2d[] redPickupPoses = {redPickupPoseLeft, redPickupPoseCenter, redPickupPoseRight};
 
   }
 
