@@ -206,21 +206,9 @@
       ]
     },
     {
-      "position": 1.95,
-      "names": [
-        "Speed Up"
-      ]
-    },
-    {
       "position": 4.15,
       "names": [
         "Slow Down"
-      ]
-    },
-    {
-      "position": 4.8,
-      "names": [
-        "Speed Up"
       ]
     }
   ]

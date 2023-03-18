@@ -11,6 +11,7 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
+import edu.wpi.first.math.trajectory.constraint.MaxVelocityConstraint;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -26,6 +27,7 @@ import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
+import frc.robot.commands.Automation.SlowDown;
 import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
@@ -351,7 +353,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoBuilder.fullAuto(PathPlanner.loadPath("Right 2 Piece Auto", 
-      new PathConstraints(3.5, 3.5)));
+      new PathConstraints(2, 2)));
     
     // return new autoSTL();
   }
@@ -374,7 +376,7 @@ public class RobotContainer {
       eventMap.put("Slow Down",
       new SequentialCommandGroup(
         new PrintCommand("***Slow Down"),
-        new WaitCommand(0.25),
+        new SlowDown(),
         new InstantCommand(drivetrain::printPose)));
 
       eventMap.put("Speed Up",
