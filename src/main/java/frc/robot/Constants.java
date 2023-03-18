@@ -87,6 +87,12 @@ public final class Constants {
     public static final double rotate = 0.0;   //[deg]
   }
 
+  public static class ConePickup {
+    public static final double armLength = 20.0; //[cm] not the final number
+    public static final double elbowAngle = 0.0;  //[degrees]
+    public static final double wristAngle = 90.0; //[degrees] not final
+  }
+
   /**
    * CAN bus IDs
    * 
