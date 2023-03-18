@@ -172,6 +172,17 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         sync = false;
     }
 
+    public double getTrim() {
+      // avoid the complexity of independent trim if we can.
+      return leftArm.getTrim();
+    }
+  
+    public void setTrim(double trim){
+      leftArm.setTrim(trim);
+      rightArm.setTrim(trim);
+    }
+  
+
     public Command getWatcher() {
         return new ArmSSWatcher();
     }

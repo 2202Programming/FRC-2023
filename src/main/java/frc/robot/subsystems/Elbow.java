@@ -80,6 +80,14 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
     Ktrim -= trim_decrement;
   }
 
+  public double getTrim() {
+    return Ktrim;
+  }
+
+  public void setTrim(double trim){
+    Ktrim = trim;
+  }
+
   public boolean atSetpoint() {
     return elbow_servo.atSetpoint();
   }

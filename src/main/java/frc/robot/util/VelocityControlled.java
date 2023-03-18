@@ -28,8 +28,9 @@ public boolean atSetpoint();
 public void setPosition(double position);  //no motion, just sets encoders
 public double getPosition();
 
-//TODO - Add trim methods here
-
+// Control any needed trim bias off of position
+public void setTrim(double trim);
+public double getTrim();
 
 //velocity methods
 public void setMaxVel(double velocityMax);
