@@ -18,7 +18,7 @@ public class takeConeFromShelf extends CommandBase {
 
   Claw_Substyem claw;
   ArmSS arm;
-  ArmMoveTo armMove;
+  MoveCollectiveArm armMove;
   public enum commandState {
     Init, ClawOpened, ArmExtended, HasCone, ArmRetracted;
       }
@@ -49,7 +49,7 @@ public class takeConeFromShelf extends CommandBase {
         break;
       case ClawOpened:
         if (arm.getPosition() != ConePickup.armLength)
-        armMove = new ArmMoveTo(ConePickup.armLength, ConePickup.elbowAngle);
+        armMove = new MoveCollectiveArm(ConePickup.armLength, ConePickup.elbowAngle);
         else currentState = commandState.ArmExtended;
         break;
       case ArmExtended:
@@ -62,7 +62,7 @@ public class takeConeFromShelf extends CommandBase {
       case HasCone:
         // TODO
         if (arm.getPosition() !=  PowerOnPos.arm) {
-          armMove = new ArmMoveTo(PowerOnPos.arm, PowerOnPos.elbow);
+          armMove = new MoveCollectiveArm(PowerOnPos.arm, PowerOnPos.elbow);
         } else {
           currentState = commandState.ArmRetracted;
         }
