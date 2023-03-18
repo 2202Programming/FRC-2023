@@ -28,6 +28,9 @@ public boolean atSetpoint();
 public void setPosition(double position);  //no motion, just sets encoders
 public double getPosition();
 
+//TODO - Add trim methods here
+
+
 //velocity methods
 public void setMaxVel(double velocityMax);
 public double getMaxVel();

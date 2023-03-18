@@ -16,10 +16,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFactory;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.commands.JoystickRumbleEndless;
-import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
@@ -46,6 +46,7 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
+import frc.robot.util.VelocityControlled;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -202,27 +203,38 @@ public class RobotContainer {
         claw.getWatcher();
         elbow.getWatcher();
         claw.setElbowDoubleSupplier(elbow::getPosition);
-        /******
-         * dc.Driver().rightBumper().whileTrue(new GenericZeroPos(elbow));
-         * dc.Driver().a().whileTrue(new GenericPositionTest(elbow, 45.0, 90.0, 30.0));
-         * dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 90.0, 1.50, 1.0));
-         */
+        VelocityControlled wrist = claw.getWrist();
+
+        //Setup some alignment tooling for the arm's components
+        GenericAlignEelementFactory(armSS,2.0, dc.Driver().a(), dc.Driver().povUp(), dc.Driver().povDown());
+        GenericAlignEelementFactory(elbow,5.0, dc.Driver().a(), dc.Driver().povRight(), dc.Driver().povLeft());
+        GenericAlignEelementFactory(wrist,5.0, dc.Driver().b(), dc.Driver().povRight(), dc.Driver().povLeft());
+        
+        // We need a way to put the arm back to Power-On
+        dc.Driver().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
+        
+        /************pick what you need for testing only **********************
+        dc.Driver().rightBumper().whileTrue(new GenericZeroPos(elbow));
+        dc.Driver().a().whileTrue(new GenericPositionTest(elbow, 45.0, 90.0, 30.0));
+        dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 90.0, 1.50, 1.0));
+         
         dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
         dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
 
-        // dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
-        // dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
+        dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
+        dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
+        
         dc.Driver().x().onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
         dc.Driver().a().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
         dc.Driver().rightTrigger().onTrue(new MoveCollectiveArm(CollectiveMode.reversePickupShelfFS));
         dc.Driver().leftTrigger().onTrue(new MoveCollectiveArm(CollectiveMode.testShelfTopFS));
         dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.pickupTransitionFS));
-        // dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
-        dc.Driver().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
+        
+        dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
         dc.Driver().leftBumper().onTrue(new MoveCollectiveArm(CollectiveMode.placeMidFS));
         dc.Driver().rightBumper().onTrue(new MoveCollectiveArm(CollectiveMode.placeHighFS));
-        // armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS,
-        // dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
+        armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS, dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
+        *******************************************/
         break;
       case balance_test:
         if (drivetrain == null)
