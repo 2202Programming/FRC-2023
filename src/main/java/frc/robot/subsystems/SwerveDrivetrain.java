@@ -48,20 +48,6 @@ import frc.robot.util.ModMath;
 import frc.robot.util.PoseMath;
 
 public class SwerveDrivetrain extends SubsystemBase {
-  /**
-   * Inversions account for rotations of the module relative to left or right side
-   * of robot.
-   * 
-   * CANCoders are setup in Sensors and will have CCW= positve convention. Their
-   * offsets are adjusted by their use in the drive train.
-   */
-  boolean kDriveMotorInvert_Right = true;
-  boolean kAngleMotorInvert_Right = false;
-  boolean kAngleCmdInvert_Right = false;
-  boolean kDriveMotorInvert_Left = false;
-  boolean kAngleMotorInvert_Left = false;
-  boolean kAngleCmdInvert_Left = false;
-
   // cc is the chassis config for all our pathing math
   private final ChassisConfig cc = RobotContainer.RC().robotSpecs.getChassisConfig(); // chassis config
   private final WheelOffsets wc = RobotContainer.RC().robotSpecs.getWheelOffset(); // wc = wheel config
@@ -176,20 +162,20 @@ public class SwerveDrivetrain extends SubsystemBase {
     modules = new SwerveModuleMK3[] {
         // Front Left
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_FL_DRIVE, MT), new CANSparkMax(CAN.DT_FL_ANGLE, MT),
-            wc.CC_FL_OFFSET, sensors.getCANCoder(EncoderID.FrontLeft), kAngleMotorInvert_Left,
-            kAngleCmdInvert_Left, kDriveMotorInvert_Left, "FL"),
+            wc.CC_FL_OFFSET, sensors.getCANCoder(EncoderID.FrontLeft), DriveInfo.kAngleMotorInvert_FL,
+            DriveInfo.kAngleCmdInvert_FL, DriveInfo.kDriveMotorInvert_FL, "FL"),
         // Front Right
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_FR_DRIVE, MT), new CANSparkMax(CAN.DT_FR_ANGLE, MT),
-            wc.CC_FR_OFFSET, sensors.getCANCoder(EncoderID.FrontRight), kAngleMotorInvert_Right,
-            kAngleCmdInvert_Right, kDriveMotorInvert_Right, "FR"),
+            wc.CC_FR_OFFSET, sensors.getCANCoder(EncoderID.FrontRight), DriveInfo.kAngleMotorInvert_FR,
+            DriveInfo.kAngleCmdInvert_FR, DriveInfo.kDriveMotorInvert_FR, "FR"),
         // Back Left
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_BL_DRIVE, MT), new CANSparkMax(CAN.DT_BL_ANGLE, MT),
-            wc.CC_BL_OFFSET, sensors.getCANCoder(EncoderID.BackLeft), kAngleMotorInvert_Left,
-            kAngleCmdInvert_Left, kDriveMotorInvert_Left, "BL"),
+            wc.CC_BL_OFFSET, sensors.getCANCoder(EncoderID.BackLeft), DriveInfo.kAngleMotorInvert_BL,
+            DriveInfo.kAngleCmdInvert_BL, DriveInfo.kDriveMotorInvert_BL, "BL"),
         // Back Right
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT), new CANSparkMax(CAN.DT_BR_ANGLE, MT),
-            wc.CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight), kAngleMotorInvert_Right,
-            kAngleCmdInvert_Right, kDriveMotorInvert_Right, "BR") };
+            wc.CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight), DriveInfo.kAngleMotorInvert_FR,
+            DriveInfo.kAngleCmdInvert_BR, DriveInfo.kDriveMotorInvert_BR, "BR") };
 
     /*
      * Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings.
