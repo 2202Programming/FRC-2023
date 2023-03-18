@@ -164,8 +164,10 @@ public final class Constants {
   // PWM assignments on the Rio
   public static final class PCM1 {
     // Double Solenoid
-    public static final int INTAKE_UP_SOLENOID_PCM = 1; // test value
-    public static final int INTAKE_DOWN_SOLENOID_PCM = 0; // test value
+    public static final int RT_INTAKE_UP_SOLENOID_PCM = 1; 
+    public static final int RT_INTAKE_DOWN_SOLENOID_PCM = 0; 
+    public static final int LT_INTAKE_UP_SOLENOID_PCM = 5; 
+    public static final int LT_INTAKE_DOWN_SOLENOID_PCM = 4; 
 
     // claw double Solenoid
     public static final int CLAW_FWD = 2;

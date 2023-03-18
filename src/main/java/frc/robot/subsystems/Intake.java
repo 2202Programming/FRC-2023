@@ -39,10 +39,17 @@ public class Intake extends SubsystemBase {
   //Instantiations
   final CANSparkMax l_intake_mtr = new CANSparkMax(CAN.INTAKE_LEFT_MTR, CANSparkMax.MotorType.kBrushless);
   final CANSparkMax r_intake_mtr = new CANSparkMax(CAN.INTAKE_RIGHT_MTR, CANSparkMax.MotorType.kBrushless);
-  final DoubleSolenoid intake_solenoid = new DoubleSolenoid(CAN.PCM1,
+  final DoubleSolenoid rt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
               PneumaticsModuleType.REVPH,
-              PCM1.INTAKE_UP_SOLENOID_PCM,
-              PCM1.INTAKE_DOWN_SOLENOID_PCM);
+              PCM1.RT_INTAKE_UP_SOLENOID_PCM,
+              PCM1.RT_INTAKE_DOWN_SOLENOID_PCM);
+
+final DoubleSolenoid lt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
+              PneumaticsModuleType.REVPH,
+              PCM1.LT_INTAKE_UP_SOLENOID_PCM,
+              PCM1.LT_INTAKE_DOWN_SOLENOID_PCM);
+
+
   final CANSparkMax l_carwash_mtr = new CANSparkMax(CAN.CARWASH_LEFT_MTR, CANSparkMax.MotorType.kBrushless);
   final CANSparkMax r_carwash_mtr = new CANSparkMax(CAN.CARWASH_RIGHT_MTR, CANSparkMax.MotorType.kBrushless);
 
@@ -97,17 +104,19 @@ public class Intake extends SubsystemBase {
 
   //Deploy arm mechanism using a Double Solenoids
   public void deploy() {
-    intake_solenoid.set(DEPLOY);
+    rt_intake_solenoid.set(DEPLOY);
+    lt_intake_solenoid.set(DEPLOY);
   }
 
   //Retract arm mechanism using a Double Solenoids
   public void retract() {
-      intake_solenoid.set(RETRACT);
+      rt_intake_solenoid.set(RETRACT);
+      lt_intake_solenoid.set(RETRACT);
   }
   
   //Returns the state of the Intake Arm
   public boolean isDeployed() {
-    return (intake_solenoid.get() == DEPLOY); 
+    return (rt_intake_solenoid.get() == DEPLOY); 
   }
 
   public void setCarwashSpeed(double carwashMotorStrength) {
