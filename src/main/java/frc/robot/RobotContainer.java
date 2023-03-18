@@ -352,11 +352,11 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoBuilder.fullAuto(PathPlanner.loadPathGroup("Right 2 Piece Auto", //Add stop point at the position want to change constraints
-      new PathConstraints(3, 3),
+      new PathConstraints(3.5, 3.5), //2 orig, 3 worked for all speed @3.5
       new PathConstraints(1.75, 2.25),
-      new PathConstraints(3, 3),
-      new PathConstraints(1.25, 1.25),
-      new PathConstraints(3, 3)));
+      new PathConstraints(3.5, 3.5),
+      new PathConstraints(1.75, 2.25),
+      new PathConstraints(3.5, 3.5)));
     // return autoBuilder.fullAuto(PathPlanner.loadPath("Right 2 Piece Auto"));
     // return new autoSTL();
   }
