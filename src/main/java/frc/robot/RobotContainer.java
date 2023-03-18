@@ -205,7 +205,8 @@ public class RobotContainer {
         claw.setElbowDoubleSupplier(elbow::getPosition);
         VelocityControlled wrist = claw.getWrist();
 
-        //Setup some alignment tooling for the arm's components
+        //Setup some alignment tooling for the arm's components 
+        //MAKE SURE THE BUTTONS DON"T COLLIDE WITH OTHER COMMANDS
         GenericAlignEelementFactory(armSS,2.0, dc.Driver().a(), dc.Driver().povUp(), dc.Driver().povDown());
         GenericAlignEelementFactory(elbow,5.0, dc.Driver().a(), dc.Driver().povRight(), dc.Driver().povLeft());
         GenericAlignEelementFactory(wrist,5.0, dc.Driver().b(), dc.Driver().povRight(), dc.Driver().povLeft());
