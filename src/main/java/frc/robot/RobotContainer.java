@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.commands.JoystickRumbleEndless;
+import frc.robot.commands.takeConeFromShelf;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
@@ -30,6 +31,7 @@ import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoSTL;
 import frc.robot.commands.auto.goToScoringPosition;
+import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -71,7 +73,8 @@ public class RobotContainer {
     balance_test,
     arm_test,
     claw_test,
-    simulation
+    simulation,
+    pickup_test
   }
 
   // What robot are we running?
@@ -231,6 +234,13 @@ public class RobotContainer {
         break;
 
       case simulation:
+        break;
+
+      case pickup_test:
+        dc.Driver().povLeft().onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Left));
+        dc.Driver().povRight().onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Right));
+        dc.Driver().leftTrigger().onTrue(new takeConeFromShelf()); //TODO - Need to schedule the Pickup Position for left
+        dc.Driver().rightTrigger().onTrue(new takeConeFromShelf()); //TODO - Need to schedule the Pickup Position for right
         break;
 
       case claw_test:

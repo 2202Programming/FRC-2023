@@ -30,7 +30,7 @@ import frc.robot.util.PoseMath;
 public class goToPickupPosition extends CommandBase {
   /** Creates a new goToScoringPosition. */
 
-  enum MoveDirection {Left, Right};
+  public enum MoveDirection {Left, Right};
   public MoveDirection moveDirection;
   PathConstraints constraints;
   SwerveDrivetrain sdt;
