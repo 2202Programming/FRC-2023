@@ -14,13 +14,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.JoystickRumbleEndless;
-import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.SwerveDrivetrain;
@@ -48,48 +45,20 @@ public class goToPickupPosition extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    int scoringBlock; 
-    int scoringAdjusted;
+    int pickupSide; 
 
-    if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
-      //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
-      if(RobotContainer.RC().dc.Driver().leftBumper().getAsBoolean()) scoringBlock = 2;
-      else if(RobotContainer.RC().dc.Driver().rightBumper().getAsBoolean()) scoringBlock = 0;
-      else scoringBlock = 1;
+    if(this.moveDirection == MoveDirection.Left) pickupSide = 0;
+    else pickupSide = 1;
 
-      //FOR BLUE: left is largest index of scoring trio
-      switch(moveDirection){
-        case Left:
-          scoringAdjusted = 2;
-          break;
-        default:
-        case Right:
-          scoringAdjusted = 0;
-          break;      
-      }
-      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.bluePickupPoseCenter);
+  if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
+      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.bluePickupPoses[pickupSide]);
     }
     else { //RED ALLIANCE
-      //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
-      if(RobotContainer.RC().dc.Driver().leftBumper().getAsBoolean()) scoringBlock = 0;
-      else if(RobotContainer.RC().dc.Driver().rightBumper().getAsBoolean()) scoringBlock = 2;
-      else scoringBlock = 1;
-
-      //FOR RED: left is smallest index of scoring trio
-      switch(moveDirection){
-        case Left:
-          scoringAdjusted = 0;
-          break;
-        default:
-        case Right:
-          scoringAdjusted = 2;
-          break;
-      }
-      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.redPickupPoseCenter);
+      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.redPickupPoses[pickupSide]);
     }
-    //sdt.disableVisionPose();
-    //rumbleCmd = new JoystickRumbleEndless(Id.Operator);
-    //rumbleCmd.schedule();
+    sdt.disableVisionPose();
+    rumbleCmd = new JoystickRumbleEndless(Id.Operator);
+    rumbleCmd.schedule();
     //RobotContainer.RC().lights.setBlinking(BlinkyLights.GREEN);
     pathCommand.schedule();
   }

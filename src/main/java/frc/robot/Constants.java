@@ -333,15 +333,13 @@ public final class Constants {
                                                      {redScorePose4,redScorePose5,redScorePose6},
                                                      {redScorePose7,redScorePose8,redScorePose9}};
 
-    public final static Pose2d bluePickupPoseCenter = new Pose2d(new Translation2d(15.50, 6.75), Rotation2d.fromDegrees(0));
-    public final static Pose2d bluePickupPoseRight = new Pose2d(new Translation2d(15.50, 7.35), Rotation2d.fromDegrees(0));
-    public final static Pose2d bluePickupPoseLeft = new Pose2d(new Translation2d(15.50, 6.00), Rotation2d.fromDegrees(0));
-    public final static Pose2d redPickupPoseCenter = new Pose2d(new Translation2d(1.00, 6.75), Rotation2d.fromDegrees(0));
-    public final static Pose2d redPickupPoseLeft = new Pose2d(new Translation2d(1.00, 7.35), Rotation2d.fromDegrees(0));
-    public final static Pose2d redPickupPoseRight = new Pose2d(new Translation2d(1.00, 6.00), Rotation2d.fromDegrees(0));
+    public final static Pose2d bluePickupPoseLeft = new Pose2d(new Translation2d(15.50, 7.35), Rotation2d.fromDegrees(0));
+    public final static Pose2d bluePickupPoseRight = new Pose2d(new Translation2d(15.50, 6.00), Rotation2d.fromDegrees(0));
+    public final static Pose2d redPickupPoseRight = new Pose2d(new Translation2d(1.00, 7.35), Rotation2d.fromDegrees(0));
+    public final static Pose2d redPickupPoseLeft = new Pose2d(new Translation2d(1.00, 6.00), Rotation2d.fromDegrees(0));
 
-    public final static Pose2d[] bluePickupPoses = {bluePickupPoseLeft, bluePickupPoseCenter, bluePickupPoseRight};
-    public final static Pose2d[] redPickupPoses = {redPickupPoseLeft, redPickupPoseCenter, redPickupPoseRight};
+    public final static Pose2d[] bluePickupPoses = {bluePickupPoseLeft, bluePickupPoseRight};
+    public final static Pose2d[] redPickupPoses = {redPickupPoseLeft, redPickupPoseRight};
 
   }
 
