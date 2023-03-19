@@ -84,13 +84,13 @@ public class Claw_Substyem extends SubsystemBase {
   final double rotate_conversionFactor = 360.0 / 100.0; // GR=100.0
 
   // Hardware
-  final DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PCM1.CLAW_FWD, PCM1.CLAW_REV);
+  final DoubleSolenoid solenoid = new DoubleSolenoid(CAN.PCM1, PneumaticsModuleType.REVPH, PCM1.CLAW_FWD, PCM1.CLAW_REV);
   final DigitalInput lightgate = new DigitalInput(DigitalIO.ClawLightgate);
   final NeoServo wrist_servo;
   final NeoServo rotate_servo;
 
   final TalonSRX intake_wheels;
-  double wheel_speed = 0.20;
+  double wheel_speed = 1.0;
 
   // PIDS for NeoServos - first pass on wrist tuning
   // Testing showed 200 [deg/sec] was good to go! Still lots of overshoot on vel
@@ -112,7 +112,7 @@ public class Claw_Substyem extends SubsystemBase {
   private GamePieceHeld piece_held;
   ClawTrackMode trackElbowMode = ClawTrackMode.backSide; 
   
-  double elbowOffset = 0.0;
+  double elbowOffset = 0.0;   //correction
 
 
   public Claw_Substyem() {
@@ -149,7 +149,7 @@ public class Claw_Substyem extends SubsystemBase {
     // Use elbow if we have one, otherwise zero
     elbowAngle = (RobotContainer.RC().elbow != null) ? RobotContainer.RC().elbow::getPosition : this::zero;
 
-    this.setTrackElbowMode(ClawTrackMode.backSide);
+    this.setTrackElbowMode(ClawTrackMode.free);
 
     piece_held = GamePieceHeld.Cube;
   }
@@ -200,14 +200,18 @@ public class Claw_Substyem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    //measure elbow if we are tracking, otherwise use zero
+    double elbow_meas = (trackElbowMode == ClawTrackMode.free) ? 0.0 : elbowAngle.getAsDouble();
+
     // calculate holding power needed from angle and maxArbFF term
-    double arbff = maxArbFF * Math.sin(
-        Math.toRadians(elbowAngle.getAsDouble() + wrist_servo.getSetpoint()));
+    double arbff = maxArbFF * Math.sin(Math.toRadians(elbow_meas + wrist_servo.getSetpoint()));
     wrist_servo.setArbFeedforward(arbff);
 
-    //either mode.angle() or elbowOffset will be set
-    wrist_servo.setSetpoint(trackElbowMode.angle() + elbowOffset - elbowAngle.getAsDouble());
-    
+    // in tracking modes, do the elbow math to figure out where to go
+    if (trackElbowMode != ClawTrackMode.free) {
+      wrist_servo.setSetpoint(trackElbowMode.angle() + elbowOffset - elbow_meas);
+    }
+
     //run the servo calcs
     wrist_servo.periodic();
     rotate_servo.periodic();

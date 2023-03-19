@@ -11,16 +11,17 @@ import frc.robot.commands.utility.Lockout;
 import frc.robot.subsystems.ArmSS;
 
 public class ArmMoveAtSpeed_L_R_test extends CommandBase implements Lockout {
-  private final GenericHID m_hid = new GenericHID(0);
+private final GenericHID m_hid;
 
   ArmSS arm;
   boolean zero_position = false;
   double speed; //[cm/s]
   double old_max_speed;
 
-  public ArmMoveAtSpeed_L_R_test(double speed) {
+  public ArmMoveAtSpeed_L_R_test(double speed,int HIDPORT) {
     this.arm = RobotContainer.RC().armSS;
     this.speed = speed;
+    m_hid = new GenericHID(HIDPORT);
 
     addRequirements(arm);
   }
@@ -56,6 +57,7 @@ public class ArmMoveAtSpeed_L_R_test extends CommandBase implements Lockout {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+
     arm.setPosition(0.0);
     arm.hold();
     arm.setMaxVel(old_max_speed);

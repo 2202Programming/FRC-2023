@@ -61,7 +61,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
 
     // sync instance vars
     boolean sync = false; // don't think we need this, +- 3mm without.
-    double syncCompensation; // amount of compensation [m/s]
+    double syncCompensation = 0.0; // amount of compensation [m/s]
 
     // computed values from position pid
     double pos_error;

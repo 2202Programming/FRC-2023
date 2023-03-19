@@ -19,7 +19,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFactory;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
+import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.JoystickRumbleEndless;
+import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
@@ -45,7 +47,6 @@ import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
 import frc.robot.util.VelocityControlled;
@@ -209,7 +210,7 @@ public class RobotContainer {
 
         // Setup some alignment tooling for the arm's components
         // MAKE SURE THE BUTTONS DON"T COLLIDE WITH OTHER COMMANDS
-        claw.setTrackElbowMode(ClawTrackMode.free);
+        claw.setWristAngle(PowerOnPos.wrist);  //use free mode
         GenericAlignEelementFactory(armSS, 1.0, dc.Driver().a(), dc.Driver().povUp(), dc.Driver().povDown());
         GenericAlignEelementFactory(elbow, 2.0, dc.Driver().a(), dc.Driver().povRight(), dc.Driver().povLeft());
         GenericAlignEelementFactory(wrist, 5.0, dc.Driver().b(), dc.Driver().povRight(), dc.Driver().povLeft());
@@ -223,18 +224,17 @@ public class RobotContainer {
         dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
           claw.close();
         }));
-        dc.Operator().leftTrigger().onTrue(new InstantCommand(() -> {
-          claw.wheelsIn();
-        }));
-        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
-          claw.wheelsOut();
-        }));
-        dc.Operator().y().onTrue(new InstantCommand(() -> {
-          claw.wheelsOff();
-        }));
+      
 
-        //USE A and LR POV to align the arm to a NEW ZERO
-        dc.Operator().a().whileTrue(new ArmMoveAtSpeed_L_R_test(1.0).WithLockout(10.0));
+        //USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
+        dc.Operator().a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
+        dc.Operator().b().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0, 1).WithLockout(10.0));
+        dc.Operator().povUp().whileTrue(new ArmMoveAtSpeed(5.0, false));
+        dc.Operator().povDown().whileTrue(new ArmMoveAtSpeed(-2.0, false));
+        dc.Operator().x().whileTrue(new intakeCompetitionToggle());
+        dc.Operator().y
+        
+        ().whileTrue(new outtakeCompetitionToggle());
         
         /************
          * pick what you need for testing only **********************

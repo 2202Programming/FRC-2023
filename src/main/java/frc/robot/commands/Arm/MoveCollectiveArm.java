@@ -38,8 +38,8 @@ public class MoveCollectiveArm extends CommandBase {
 
   // elbow safe angle, flip be done by here going in, or starts here
   // when elbow is heading out
-  double SafeFlipPoint = 60.0;
-  double SafeMinArm = 20.0; // safe to flip any elbow extended more than here
+  double SafeFlipPoint = 55.0;  //elbow at zero arm
+  double SafeMinArm = 20.0; // safe to flip at or above zero elbow
 
   // flip controls - filled in in init()
   final VelocityControlled wrist;
