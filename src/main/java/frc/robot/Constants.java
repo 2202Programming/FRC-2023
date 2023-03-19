@@ -83,7 +83,7 @@ public final class Constants {
   public static class PowerOnPos {
     public static final double arm = 0.0;     //[cm]
     public static final double elbow =  0.0;   //[deg]
-    public static final double wrist = -55.0; //[deg]
+    public static final double wrist = -63.0; //[deg], 55 bfre
     public static final double rotate = 0.0;   //[deg]
   }
 

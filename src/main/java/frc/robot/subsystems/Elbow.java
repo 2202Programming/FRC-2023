@@ -18,6 +18,8 @@ import frc.robot.util.VelocityControlled;
 public class Elbow extends SubsystemBase implements VelocityControlled {
   final int STALL_CURRENT = 40;
   final int FREE_CURRENT = 20;
+  final double ELBOW_MIN_DEG = -120.0;
+  final double ELBOW_MAX_DEG = 180.0;
  
   // mechanical gearing motor rotations to degrees with gear ratio
   final double conversionFactor = (360.0 / 350.0); //orig. 20% bump (5:7:10)
@@ -36,7 +38,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   //trim stuff
   double trim_decrement = 0.5; // degrees
   double trim_increment = 1.0; // degrees
-  double Ktrim = 7.0; //6 orig
+  double Ktrim = 14.0; //6,7 orig
 
   // NeoServo - TODO (It's what arm values are rn, will need to change)
   final NeoServo elbow_servo;
@@ -54,6 +56,8 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
         .setTolerance(posTol, velTol)
         .burnFlash();
     elbow_servo.setBrakeMode(IdleMode.kCoast);// TEMP FOR TESTING
+    elbow_servo.setClamp(ELBOW_MIN_DEG, ELBOW_MAX_DEG);
+
     // Starting point
     elbow_servo.setPosition(PowerOnPos.elbow);
 
@@ -90,6 +94,10 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   public boolean atSetpoint() {
     return elbow_servo.atSetpoint();
+  }
+
+  public void setClamp(double min_pos, double max_pos){
+    elbow_servo.setClamp(min_pos, max_pos);
   }
 
   public void setSetpoint(double degrees) {

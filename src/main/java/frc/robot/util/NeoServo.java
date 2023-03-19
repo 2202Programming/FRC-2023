@@ -32,6 +32,7 @@ public class NeoServo implements VelocityControlled {
     double external_vel_cmd = 0.0; // for velocity_mode == true
     boolean velocity_mode = false;
     double trim = 0.0;  // offset from the commanded position (not seen in measured)
+    double MIN_POS=-500.0, MAX_POS=500.0;     // PLEASE SET YOUR CLAMP VALUES
 
     // measured values
     double currentPos;
@@ -136,15 +137,22 @@ public class NeoServo implements VelocityControlled {
         return this;
     }
 
+
     /*
      * VelocityControlled API
      * 
      */
     // Servo's position setpoint
     public void setSetpoint(double pos) {
+        pos = MathUtil.clamp(pos, MIN_POS, MAX_POS);
         positionPID.setSetpoint(pos);
         velocity_mode = false;
         external_vel_cmd = 0.0;
+    }
+
+    public void setClamp(double min_pos, double max_pos){
+        MIN_POS = min_pos;
+        MAX_POS = max_pos;
     }
 
     public boolean isVelocityMode() {

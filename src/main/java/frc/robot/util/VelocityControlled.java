@@ -23,6 +23,7 @@ public interface VelocityControlled extends Subsystem {
 public double getSetpoint();
 public void setSetpoint(double position);
 public boolean atSetpoint();
+public void setClamp(double min_pos, double max_pos);
 
 //position methods
 public void setPosition(double position);  //no motion, just sets encoders

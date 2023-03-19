@@ -122,10 +122,10 @@ public class Place extends CommandBase {
   private void ConeBack() {
     switch (verticalRequest) {
       case Top: 
-        MidHigh(CollectiveMode.placeHighFS); //TODO cone/cube customization in enum
+        MidHigh(CollectiveMode.placeConeHighFS); //TODO cone/cube customization in enum
         break;
       case Middle:
-        MidHigh(CollectiveMode.placeMidFS); //TODO cone/cube customization in enum
+        MidHigh(CollectiveMode.placeConeMidFS); //TODO cone/cube customization in enum
         break;    
       case Bottom:
         Bottom();
@@ -139,10 +139,10 @@ public class Place extends CommandBase {
   private void ConeFront() {
   switch (verticalRequest) {
     case Top: 
-      MidHigh(CollectiveMode.placeHighFS); //TODO cone/cube customization in enum
+      MidHigh(CollectiveMode.placeConeHighFS); //TODO cone/cube customization in enum
       break;
     case Middle:
-      MidHigh(CollectiveMode.placeMidFS);  //TODO cone/cube customization in enum
+      MidHigh(CollectiveMode.placeConeMidFS);  //TODO cone/cube customization in enum
       break;    
     case Bottom:
       Bottom();
@@ -156,10 +156,10 @@ public class Place extends CommandBase {
   private void Cube() {  
     switch (verticalRequest) {
       case Top: 
-        MidHigh(CollectiveMode.placeHighFS); //TODO cone/cube customization in enum
+        MidHigh(CollectiveMode.placeCubeHighFS); //TODO cone/cube customization in enum
         break;
       case Middle:
-        MidHigh(CollectiveMode.placeMidFS);  //TODO cone/cube customization in enum
+        MidHigh(CollectiveMode.placeCubeMidFS);  //TODO cone/cube customization in enum
         break;    
       case Bottom:
         Bottom();

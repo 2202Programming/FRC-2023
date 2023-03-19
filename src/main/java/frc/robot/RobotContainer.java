@@ -205,12 +205,13 @@ public class RobotContainer {
         armSS.getWatcher();
         claw.getWatcher();
         elbow.getWatcher();
-        claw.setElbowDoubleSupplier(elbow::getPosition);
+        //claw.setElbowDoubleSupplier(elbow::getPosition);
         VelocityControlled wrist = claw.getWrist();
 
         // Setup some alignment tooling for the arm's components
         // MAKE SURE THE BUTTONS DON"T COLLIDE WITH OTHER COMMANDS
-        claw.setWristAngle(PowerOnPos.wrist);  //use free mode
+       // claw.setWristAngle(PowerOnPos.wrist);
+        
         GenericAlignEelementFactory(armSS, 1.0, dc.Driver().a(), dc.Driver().povUp(), dc.Driver().povDown());
         GenericAlignEelementFactory(elbow, 2.0, dc.Driver().a(), dc.Driver().povRight(), dc.Driver().povLeft());
         GenericAlignEelementFactory(wrist, 5.0, dc.Driver().b(), dc.Driver().povRight(), dc.Driver().povLeft());
@@ -218,12 +219,18 @@ public class RobotContainer {
         // We need a way to put the arm back to Power-On
         dc.Driver().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
 
-        dc.Operator().rightTrigger().onTrue(new InstantCommand(() -> {
-          claw.open();
-        }));
-        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
-          claw.close();
-        }));
+        dc.Driver().leftBumper().and(dc.Driver().a()).onTrue(new MoveCollectiveArm(CollectiveMode.placeConeMidFS));
+        dc.Driver().leftBumper().and(dc.Driver().b()).onTrue(new MoveCollectiveArm(CollectiveMode.placeConeHighFS));
+        dc.Driver().leftBumper().and(dc.Driver().y()).onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeHighFS));
+        dc.Driver().leftBumper().and(dc.Driver().x()).onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeMidFS));
+        dc.Driver().leftBumper().and(dc.Driver().leftTrigger()).onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
+        dc.Driver().leftBumper().and(dc.Driver().rightTrigger()).onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
+        // dc.Operator().rightTrigger().onTrue(new InstantCommand(() -> {
+        //   claw.open();
+        // }));
+        // dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
+        //   claw.close();
+        // }));
       
 
         //USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)

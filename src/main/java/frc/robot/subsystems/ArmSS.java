@@ -31,6 +31,8 @@ import frc.robot.util.VelocityControlled;
 public class ArmSS extends SubsystemBase implements VelocityControlled {
     final int STALL_CURRENT = 50;
     final int FREE_CURRENT = 20;
+    final double ARM_MIN_EXT = 0.0;
+    final double ARM_MAX_EXT = 38.0;
 
     final double gearRadius = 2.63398 * 2 * Math.PI; // 2.633[cm] is drive gear radius
     final double gearRatio = (1.0 / 75.0);
@@ -77,6 +79,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         configure(rightArm);
         configure(leftArm);
 
+        setClamp(ARM_MIN_EXT, ARM_MAX_EXT);
         // zero our encoders at power up
         setPosition(PowerOnPos.arm);
     }
@@ -127,6 +130,11 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         sync = true;
     }
 
+    public void setClamp(double min_pos, double max_pos){
+      leftArm.setClamp(min_pos, max_pos);
+      rightArm.setClamp(min_pos, max_pos);
+    }
+
     public double getSetpoint() {
         // arms track, so just use right one
         return rightArm.getSetpoint();
@@ -136,7 +144,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         return (leftArm.getPosition() + rightArm.getPosition()) / 2.0;
     }
 
-    // initializes position, doesn't move anything. Defines zero or whereever you.
+    // initializes position, doesn't move anything. Defines zero or wherever you.
     public void setPosition(double extension) {
         leftArm.setPosition(extension);
         rightArm.setPosition(extension);
