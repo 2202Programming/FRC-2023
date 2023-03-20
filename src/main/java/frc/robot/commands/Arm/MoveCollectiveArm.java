@@ -92,16 +92,17 @@ public class MoveCollectiveArm extends CommandBase {
    * Put any needed positions in this enum
    */
   public enum CollectiveMode {
-    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 5.0, -1.0),
+    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 10.0, -1.0),
+    
+    //TODO ORGANIZE OR MOVE THIS
     travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide), 
+    
+    
     placeConeMidFS(25.0, 90.0, 0.0, ClawTrackMode.frontSide),
     placeCubeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
-    pickupShelfFS(15.0, 90.0, 0.0, ClawTrackMode.frontSide),
     placeConeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
-    placeCubeHighFS(33.0, 105.0, 0.0, ClawTrackMode.frontSide);
-   // pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
-    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide),
-    travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide),
+    placeCubeHighFS(33.0, 105.0, 0.0, ClawTrackMode.frontSide),
+   
     pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
     placeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
     pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, ConePickup.wristAngle, ClawTrackMode.frontSide),
@@ -112,14 +113,6 @@ public class MoveCollectiveArm extends CommandBase {
     placeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
     travelMidFS(20.0, -10.0, 0.0, ClawTrackMode.frontSide),
     travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
-
-    //travelMidFS(20.0, -10.0, 0.0, ClawTrackMode.frontSide);
-   // testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, -1.0, 40.0),
-   // reversePickupShelfFS(15.0, -90.0, 0.0, ClawTrackMode.frontSide),
-  //  midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),
-   // midBS(20.0, 0.0, 0.0, ClawTrackMode.backSide),
-
-//    travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
 
     // posistions and modes for target positions
     Positions pos_info;

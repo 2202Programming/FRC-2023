@@ -17,11 +17,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriverControls.Id;
-import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.BlinkyLights;
+import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
 import frc.robot.util.PoseMath;
 
 public class goToPickupPosition extends CommandBase {

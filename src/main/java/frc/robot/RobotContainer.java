@@ -203,7 +203,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.vision_test);
+    configureBindings(Bindings.Competition);
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -237,58 +237,12 @@ public class RobotContainer {
         dc.Driver().leftBumper().and(dc.Driver().x()).onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeMidFS));
         dc.Driver().leftBumper().and(dc.Driver().leftTrigger()).onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
         dc.Driver().leftBumper().and(dc.Driver().rightTrigger()).onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
-        // dc.Operator().rightTrigger().onTrue(new InstantCommand(() -> {
-        //   claw.open();
-        // }));
-        // dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
-        //   claw.close();
-        // }));
-      
 
         //USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
         dc.Operator().a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
-        dc.Operator().b().whileTrue(new ArmMoveAtSpeed_L_R_test(-1.0, 1).WithLockout(10.0));
+        dc.Operator().b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
         dc.Operator().povUp().whileTrue(new ArmMoveAtSpeed(5.0, false));
         dc.Operator().povDown().whileTrue(new ArmMoveAtSpeed(-2.0, false));
-        dc.Operator().x().whileTrue(new intakeCompetitionToggle());
-        dc.Operator().y
-        
-        ().whileTrue(new outtakeCompetitionToggle());
-        
-        /************
-         * pick what you need for testing only **********************
-         * dc.Driver().rightBumper().whileTrue(new GenericZeroPos(elbow));
-         * dc.Driver().a().whileTrue(new GenericPositionTest(elbow, 45.0, 90.0, 30.0));
-         * dc.Driver().b().whileTrue(new GenericVelocityTest(elbow, 90.0, 1.50, 1.0));
-         * 
-         * dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
-         * dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
-         * 
-         * dc.Driver().povUp().whileTrue(new ArmMoveAtSpeed(10.0, false));
-         * dc.Driver().povDown().whileTrue(new ArmMoveAtSpeed(-5.0, false));
-         * 
-         * dc.Driver().x().onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
-         * dc.Driver().a().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
-         * dc.Driver().rightTrigger().onTrue(new
-         * MoveCollectiveArm(CollectiveMode.reversePickupShelfFS));
-         * dc.Driver().leftTrigger().onTrue(new
-         * MoveCollectiveArm(CollectiveMode.testShelfTopFS));
-         * dc.Driver().b().onTrue(new
-         * MoveCollectiveArm(CollectiveMode.pickupTransitionFS));
-         * 
-         * dc.Driver().b().onTrue(new MoveCollectiveArm(CollectiveMode.midFS));
-         * dc.Driver().leftBumper().onTrue(new
-         * MoveCollectiveArm(CollectiveMode.placeMidFS));
-         * dc.Driver().rightBumper().onTrue(new
-         * MoveCollectiveArm(CollectiveMode.placeHighFS));
-         * armSS.setDefaultCommand(new GenericJoystickPositionTest(armSS,
-         * dc.Driver()::getLeftY, 0.0, 20.0, 5.0));
-         *******************************************/
-        break;
-      case balance_test:
-        if (drivetrain == null)
-          break;
-        dc.Driver().rightBumper().whileTrue(new ChargeStationBalance(false));
         break;
 
       case simulation:
@@ -301,15 +255,6 @@ public class RobotContainer {
         dc.Driver().b().onTrue(new takeConeFromShelf()); 
         dc.Driver().leftBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Left)); 
         dc.Driver().rightBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Right));
-        break;
-
-      case claw_test:
-        dc.Driver().rightTrigger().onTrue(new InstantCommand(() -> {
-          claw.open();
-        }));
-        dc.Driver().leftTrigger().onTrue(new InstantCommand(() -> {
-          claw.close();
-        }));
         break;
 
       case vision_test:
@@ -332,6 +277,10 @@ public class RobotContainer {
       default:
         if (drivetrain == null)
           break;
+
+          armSS.getWatcher();
+          claw.getWatcher();
+          elbow.getWatcher();
         // DRIVER
         dc.Driver().x().whileTrue(new ChargeStationBalance(false));
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(false)); // gyro reset, without disabling vision
@@ -453,19 +402,7 @@ public class RobotContainer {
       eventMap.put("start",
       new SequentialCommandGroup(
           new PrintCommand("***Path Start"),
-          new WaitCommand(0.75),
-          new PrintCommand("***Placing Piece"),
           new InstantCommand(drivetrain::printPose)));
-
-      eventMap.put("Slow Down",
-      new SequentialCommandGroup(
-        new PrintCommand("***Slow Down"),
-        new InstantCommand(drivetrain::printPose)));
-
-      eventMap.put("Speed Up",
-      new SequentialCommandGroup(
-        new PrintCommand("***Speed Up"),
-        new InstantCommand(drivetrain::printPose)));
 
       eventMap.put("end",
         new SequentialCommandGroup(
@@ -473,64 +410,51 @@ public class RobotContainer {
         new InstantCommand(drivetrain::printPose),
         new ChargeStationBalance(true)));
 
+    eventMap.put("score", new SequentialCommandGroup(
+        new PrintCommand("***Path score"),
+        new InstantCommand(drivetrain::printPose)));
 
-    // eventMap.put("start",
-    //     new SequentialCommandGroup(
-    //         new PrintCommand("***Path Start"),
-    //         new InstantCommand(drivetrain::printPose)));
+    eventMap.put("intake_on",
+        new SequentialCommandGroup(
+            new PrintCommand("***Intake On"),
+            new intakeCompetitionToggle().withTimeout(3.0)));
 
-    // eventMap.put("middle",
-    //     new SequentialCommandGroup(
-    //         new PrintCommand("***Path Middle"),
-    //         new InstantCommand(drivetrain::printPose)));
+    eventMap.put("intake_off",
+        new SequentialCommandGroup(
+            new PrintCommand("***Intake Off")));
 
-    // 
+    eventMap.put("deploy_intake",
+        new SequentialCommandGroup(
+            new PrintCommand("***Deploying intake"),
+            new DeployIntake()));
+    
+    if (intake != null)
+      eventMap.put("eject_start",
+          new SequentialCommandGroup(
+              new PrintCommand("***Eject Start"),
+              new InstantCommand(drivetrain::printPose),
+              new outtakeCompetitionToggle().withTimeout(0.75)));
 
-    // eventMap.put("score", new SequentialCommandGroup(
-    //     new PrintCommand("***Path score"),
-    //     new InstantCommand(drivetrain::printPose)));
+    if (intake != null)
+      eventMap.put("eject_no_deploy",
+          new SequentialCommandGroup(
+              new PrintCommand("***Eject No Deploy Start"),
+              new InstantCommand(drivetrain::printPose),
+              new IntakeReverse().withTimeout(0.5)));
 
-    // if (intake != null)
-    //   eventMap.put("eject_start",
-    //       new SequentialCommandGroup(
-    //           new PrintCommand("***Eject Start"),
-    //           new InstantCommand(drivetrain::printPose),
-    //           new outtakeCompetitionToggle().withTimeout(0.75)));
+    if (intake != null)
+      eventMap.put("eject_piece",
+          new SequentialCommandGroup(
+              new PrintCommand("***Eject2"),
+              new InstantCommand(drivetrain::printPose),
+              new outtakeCompetitionToggle().withTimeout(2.00)
+          // ,new WaitCommand(1.5)
+          ));
 
-    // if (intake != null)
-    //   eventMap.put("eject_no_deploy",
-    //       new SequentialCommandGroup(
-    //           new PrintCommand("***Eject No Deploy Start"),
-    //           new InstantCommand(drivetrain::printPose),
-    //           new IntakeReverse().withTimeout(0.5)));
-
-    // if (intake != null)
-    //   eventMap.put("eject_piece",
-    //       new SequentialCommandGroup(
-    //           new PrintCommand("***Eject2"),
-    //           new InstantCommand(drivetrain::printPose),
-    //           new outtakeCompetitionToggle().withTimeout(2.00)
-    //       // ,new WaitCommand(1.5)
-    //       ));
-
-    // eventMap.put("balance",
-    //     new SequentialCommandGroup(
-    //         new PrintCommand("***Balance"),
-    //         new InstantCommand(drivetrain::printPose),
-    //         new ChargeStationBalance(false)));
-
-    // eventMap.put("intake_on",
-    //     new SequentialCommandGroup(
-    //         new PrintCommand("***Intake On"),
-    //         new intakeCompetitionToggle().withTimeout(3.0)));
-
-    // eventMap.put("intake_off",
-    //     new SequentialCommandGroup(
-    //         new PrintCommand("***Intake Off")));
-
-    // eventMap.put("deploy_intake",
-    //     new SequentialCommandGroup(
-    //         new PrintCommand("***Deploying intake"),
-    //         new DeployIntake()));
+    eventMap.put("balance",
+        new SequentialCommandGroup(
+            new PrintCommand("***Balance"),
+            new InstantCommand(drivetrain::printPose),
+            new ChargeStationBalance(false)));
   }
 }
