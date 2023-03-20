@@ -32,6 +32,7 @@ import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoSTL;
+import frc.robot.commands.auto.autoTest;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
@@ -351,14 +352,16 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoBuilder.fullAuto(PathPlanner.loadPathGroup("Right 2 Piece Auto", //Add stop point at the position want to change constraints
-      new PathConstraints(4, 4), //2 orig, 3 worked for all speed @3.5
-      new PathConstraints(2, 2), // worked @1.75/2.25 respectively
-      new PathConstraints(4, 4),
-      new PathConstraints(2, 2),
-      new PathConstraints(4, 4)));
-    // return autoBuilder.fullAuto(PathPlanner.loadPath("Right 2 Piece Auto"));
-    // return new autoSTL();
+    // return autoBuilder.fullAuto(PathPlanner.loadPathGroup("MKE-EdgeNoBalance", //Add stop point at the position want to change constraints
+    //   new PathConstraints(4, 4), //2 orig, 3 worked for all speed @3.5
+    //   new PathConstraints(2, 2), // worked @1.75/2.25 respectively
+    //   new PathConstraints(4, 4),
+    //   new PathConstraints(2, 2),
+    //   new PathConstraints(4, 4)));
+
+    // return autoBuilder.fullAuto(PathPlanner.loadPath("MKE-FarHailMaryNoBalance", new PathConstraints(4, 4)));
+    
+    return new autoTest();
   }
 
   /**
