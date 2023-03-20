@@ -12,7 +12,7 @@ import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
-import frc.robot.util.NeoServo;
+import frc.robot.util.VelocityControlled;
 
 /*
  *   MoveCollectiveArm - moves the whole system to a desired location
@@ -38,15 +38,17 @@ public class MoveCollectiveArm extends CommandBase {
 
   // elbow safe angle, flip be done by here going in, or starts here
   // when elbow is heading out
-  double SafeFlipPoint = 60.0;
-  double SafeMinArm = 20.0; // safe to flip any elbow extended more than here
+  double SafeFlipPoint = 55.0;  //elbow at zero arm
+  double SafeMinArm = 20.0; // safe to flip at or above zero elbow
 
   // flip controls - filled in in init()
-  final NeoServo wrist;
+  final VelocityControlled wrist;
+
   double flip_point; // where to flip when we get there
   boolean heading_out; // moving arm away
   double T_flip; // time it takes to flip claw
   double old_elbow_max_vel; // elbow speed
+  double old_arm_max_vel;
   double new_elbow_max_vel; // elbow speed giving time to flip (heading in)
   double start_flip_pos;
   boolean flip_requested;
@@ -60,18 +62,27 @@ public class MoveCollectiveArm extends CommandBase {
   /**
    * State of colective Positions, either start or target.
    */
-  static class Positions {
+  public static class Positions {
     double armPos;
     double elbowPos;
     double wristPos;
+    double armMaxVel; // <0.0 means use existing maxvel
+    double elbowMaxVel; // <0.0 means use existing maxvel
     ClawTrackMode mode;
 
-    Positions(double arm, double elbow, double wrist, ClawTrackMode mode) {
+    public Positions(double arm, double elbow, double wrist, ClawTrackMode mode) {
+      this(arm, elbow, wrist, mode, -1.0, -1.0);
+    }
+
+    public Positions(double arm, double elbow, double wrist, ClawTrackMode mode, double armVel, double elbowVel) {
       armPos = arm;
       elbowPos = elbow;
       wristPos = wrist; // doesn't matter unless mode == free
       this.mode = mode;
+      armMaxVel = armVel;
+      elbowMaxVel = elbowVel;
     }
+
   }
 
   /*
@@ -80,16 +91,29 @@ public class MoveCollectiveArm extends CommandBase {
    * Put any needed positions in this enum
    */
   public enum CollectiveMode {
-    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide),
-    travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide),
-    midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),
-    midBS(20.0, 0.0, 0.0, ClawTrackMode.backSide),
-    highFS(35.0, 90.0, 0.0, ClawTrackMode.frontSide),
-    travelMidFS(0.0, -10.0, 0.0, ClawTrackMode.frontSide),
-    travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
+    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 5.0, -1.0),
+    travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide), 
+    placeConeMidFS(25.0, 90.0, 0.0, ClawTrackMode.frontSide),
+    placeCubeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
+    pickupShelfFS(15.0, 90.0, 0.0, ClawTrackMode.frontSide),
+    placeConeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
+    placeCubeHighFS(33.0, 105.0, 0.0, ClawTrackMode.frontSide);
+   // pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
+
+    //travelMidFS(20.0, -10.0, 0.0, ClawTrackMode.frontSide);
+   // testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, -1.0, 40.0),
+   // reversePickupShelfFS(15.0, -90.0, 0.0, ClawTrackMode.frontSide),
+  //  midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),
+   // midBS(20.0, 0.0, 0.0, ClawTrackMode.backSide),
+
+//    travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
 
     // posistions and modes for target positions
     Positions pos_info;
+
+    CollectiveMode(double arm, double elbow, double wrist, ClawTrackMode mode, double armMaxVel, double elbowMaxVel) {
+      pos_info = new Positions(arm, elbow, wrist, mode, armMaxVel, elbowMaxVel);
+    }
 
     CollectiveMode(double arm, double elbow, double wrist, ClawTrackMode mode) {
       pos_info = new Positions(arm, elbow, wrist, mode);
@@ -98,7 +122,12 @@ public class MoveCollectiveArm extends CommandBase {
 
   /** Creates a new MoveCollectiveArm. */
   public MoveCollectiveArm(CollectiveMode where_to) {
-    target = where_to.pos_info;
+    this(where_to.pos_info);
+  }
+
+  /** Creates a new MoveCollectiveArm. */
+  public MoveCollectiveArm(Positions pos_info) {
+    target = pos_info;
     wrist = claw.getWrist();
     addRequirements(arm, elbow, claw);
   }
@@ -108,6 +137,11 @@ public class MoveCollectiveArm extends CommandBase {
   @Override
   public void initialize() {
     old_elbow_max_vel = elbow.getMaxVel();
+    old_arm_max_vel = arm.getMaxVel();
+
+    if (target.armMaxVel > 0.0) arm.setMaxVel(target.armMaxVel);
+    if (target.elbowMaxVel > 0.0) elbow.setMaxVel(target.elbowMaxVel);
+
     fliptimer.reset();
 
     // capture where we are
@@ -158,9 +192,9 @@ public class MoveCollectiveArm extends CommandBase {
       arm_flip_possible = true;
       flip_possible = true;
     }
-    
+
     if (flip_requested && flip_possible && !heading_out)
-        elbow.setMaxVel(new_elbow_max_vel); // slow the elbow down
+      elbow.setMaxVel(new_elbow_max_vel); // slow the elbow down
 
     // move towards our target, wrist done in exec
     arm.setSetpoint(target.armPos);
@@ -174,8 +208,9 @@ public class MoveCollectiveArm extends CommandBase {
       // done flipping, restore elbow vel
       elbow.setMaxVel(old_elbow_max_vel);
     }
-    
-    if (flip_started) return;
+
+    if (flip_started)
+      return;
 
     // Safe to transition sides?
     if (!(flip_requested && flip_possible))
@@ -192,7 +227,6 @@ public class MoveCollectiveArm extends CommandBase {
       return;
     }
 
-
     if (arm_flip_possible && arm.getPosition() >= SafeMinArm) {
       claw.setTrackElbowMode(target.mode);
       flip_started = true;
@@ -200,13 +234,14 @@ public class MoveCollectiveArm extends CommandBase {
       fliptimer.start();
       return;
     }
-   
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     elbow.setMaxVel(old_elbow_max_vel);
+    arm.setMaxVel(old_arm_max_vel);
   }
 
   /*

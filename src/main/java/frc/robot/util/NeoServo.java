@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxAlternateEncoder.Type;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
@@ -31,6 +32,7 @@ public class NeoServo implements VelocityControlled {
     double external_vel_cmd = 0.0; // for velocity_mode == true
     boolean velocity_mode = false;
     double trim = 0.0;  // offset from the commanded position (not seen in measured)
+    double MIN_POS=-500.0, MAX_POS=500.0;     // PLEASE SET YOUR CLAMP VALUES
 
     // measured values
     double currentPos;
@@ -60,10 +62,28 @@ public class NeoServo implements VelocityControlled {
         ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
         pid = ctrl.getPIDController();
         encoder = ctrl.getEncoder();
+
         this.positionPID = positionPID;
         this.hwVelSlot = hwVelSlot;
         this.hwVelPIDcfg = hwVelPIDcfg;
         this.prevVelPIDcfg = new PIDFController(hwVelPIDcfg);
+    }
+
+    // not really a NEO, but a sparkmax controller on brushed motor and alt encoder
+    public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot,
+            Type  extEncoderType, int kCPR)  {
+            ctrl = new CANSparkMax(canID, MotorType.kBrushed);
+            ctrl.clearFaults();
+            ctrl.restoreFactoryDefaults();
+            ctrl.setInverted(inverted);
+            ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
+            pid = ctrl.getPIDController();   
+            encoder = ctrl.getAlternateEncoder(extEncoderType, kCPR);
+
+            this.positionPID = positionPID;
+            this.hwVelSlot = hwVelSlot;
+            this.hwVelPIDcfg = hwVelPIDcfg;
+            this.prevVelPIDcfg = new PIDFController(hwVelPIDcfg);
     }
 
     public NeoServo setName(String name) {
@@ -117,15 +137,22 @@ public class NeoServo implements VelocityControlled {
         return this;
     }
 
+
     /*
      * VelocityControlled API
      * 
      */
     // Servo's position setpoint
     public void setSetpoint(double pos) {
+        pos = MathUtil.clamp(pos, MIN_POS, MAX_POS);
         positionPID.setSetpoint(pos);
         velocity_mode = false;
         external_vel_cmd = 0.0;
+    }
+
+    public void setClamp(double min_pos, double max_pos){
+        MIN_POS = min_pos;
+        MAX_POS = max_pos;
     }
 
     public boolean isVelocityMode() {

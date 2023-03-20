@@ -23,10 +23,15 @@ public interface VelocityControlled extends Subsystem {
 public double getSetpoint();
 public void setSetpoint(double position);
 public boolean atSetpoint();
+public void setClamp(double min_pos, double max_pos);
 
 //position methods
 public void setPosition(double position);  //no motion, just sets encoders
 public double getPosition();
+
+// Control any needed trim bias off of position
+public void setTrim(double trim);
+public double getTrim();
 
 //velocity methods
 public void setMaxVel(double velocityMax);

@@ -18,26 +18,31 @@ import frc.robot.util.VelocityControlled;
 public class Elbow extends SubsystemBase implements VelocityControlled {
   final int STALL_CURRENT = 40;
   final int FREE_CURRENT = 20;
-
+  final double ELBOW_MIN_DEG = -120.0;
+  final double ELBOW_MAX_DEG = 180.0;
+ 
   // mechanical gearing motor rotations to degrees with gear ratio
-  final double conversionFactor = (360.0 / 210.0);  // hardware lies, 210 works 175 no?
+  final double conversionFactor = (360.0 / 350.0); //orig. 20% bump (5:7:10)
 
   // positionPID at position tolerances
   double posTol = 3.0; // [deg]
   double velTol = 2.0; // [deg/s]
 
   // motion speed limits
-  double velLimit = 30.0; // [deg/s]
+  double velLimit = 160.0; // [deg/s]
   double accelLimit = 5.0; // [deg/s^2] - only in future smartmode
 
   // ArbFeedforward to compensate for static torque
   double maxArbFF = 0.09; // [%power] -1.0 to 1.0  Tested with SMax Client %pwr mode
 
-  double Ktrim = 6.0;
+  //trim stuff
+  double trim_decrement = 0.5; // degrees
+  double trim_increment = 1.0; // degrees
+  double Ktrim = 14.0; //6,7 orig
 
   // NeoServo - TODO (It's what arm values are rn, will need to change)
   final NeoServo elbow_servo;
-  PIDController positionPID = new PIDController(5.0, 0.083, 0.0);  
+  PIDController positionPID = new PIDController(6.0, 0.083, 0.0);  
   PIDFController hwVelPID = new PIDFController(0.0042, 0.0000052, 0.00, .003);
 
   public Elbow() {
@@ -51,6 +56,8 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
         .setTolerance(posTol, velTol)
         .burnFlash();
     elbow_servo.setBrakeMode(IdleMode.kCoast);// TEMP FOR TESTING
+    elbow_servo.setClamp(ELBOW_MIN_DEG, ELBOW_MAX_DEG);
+
     // Starting point
     elbow_servo.setPosition(PowerOnPos.elbow);
 
@@ -70,9 +77,27 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
     elbow_servo.setArbFeedforward(arbFF);
     elbow_servo.periodic();
   }
+  public void incrementTrim(){
+    Ktrim += trim_increment;
+  }
+  public void decrementTrim(){
+    Ktrim -= trim_decrement;
+  }
+
+  public double getTrim() {
+    return Ktrim;
+  }
+
+  public void setTrim(double trim){
+    Ktrim = trim;
+  }
 
   public boolean atSetpoint() {
     return elbow_servo.atSetpoint();
+  }
+
+  public void setClamp(double min_pos, double max_pos){
+    elbow_servo.setClamp(min_pos, max_pos);
   }
 
   public void setSetpoint(double degrees) {
