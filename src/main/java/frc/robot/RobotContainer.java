@@ -11,6 +11,7 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.constraint.MaxVelocityConstraint;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -43,6 +44,7 @@ import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
+import frc.robot.commands.swerve.RotateTo;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
@@ -56,6 +58,7 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
+import frc.robot.util.RobotSpecs.RobotNames;
 import frc.robot.util.RobotSpecs.RobotNames;
 import frc.robot.util.VelocityControlled;
 
@@ -311,7 +314,8 @@ public class RobotContainer {
 
       case vision_test:
         // X button to change LL pipeline
-        dc.Driver().a().whileTrue(new CenterTapeYaw());
+        // dc.Driver().a().whileTrue(new CenterTapeYaw());
+        dc.Driver().a().onTrue(new RotateTo(Rotation2d.fromDegrees(90)));
         dc.Driver().b().whileTrue(new CenterTapeSkew());
         dc.Driver().x().onTrue(new AllianceAwareGyroReset(false));
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
