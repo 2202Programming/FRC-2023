@@ -200,7 +200,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.pickup_test);
+    configureBindings(Bindings.vision_test);
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
