@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.commands.JoystickRumbleEndless;
+import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
@@ -190,7 +191,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.arm_test);
+    configureBindings(Bindings.pickup_test);
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -239,8 +240,10 @@ public class RobotContainer {
       case pickup_test:
         dc.Driver().povLeft().onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Left));
         dc.Driver().povRight().onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Right));
-        dc.Driver().leftTrigger().onTrue(new takeConeFromShelf()); //TODO - Need to schedule the Pickup Position for left
-        dc.Driver().rightTrigger().onTrue(new takeConeFromShelf()); //TODO - Need to schedule the Pickup Position for right
+        dc.Driver().x().onTrue(new takeConeFromShelf()); 
+        dc.Driver().b().onTrue(new takeConeFromShelf()); 
+        dc.Driver().leftBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Left)); 
+        dc.Driver().rightBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Right));
         break;
 
       case claw_test:

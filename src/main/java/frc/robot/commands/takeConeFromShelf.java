@@ -6,13 +6,9 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
-import frc.robot.Constants.ConePickup;
-import frc.robot.Constants.PowerOnPos;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
-import frc.robot.subsystems.Elbow;
 import frc.robot.commands.Arm.*;
-import frc.robot.Constants;
 
 public class takeConeFromShelf extends CommandBase {
 
@@ -48,19 +44,22 @@ public class takeConeFromShelf extends CommandBase {
         else currentState = commandState.ClawOpened;
         break;
       case ClawOpened:
+        //TODO: Remove magic numbers and use the Position object attributes
         if (arm.getPosition() != 20)
         armMove = new MoveCollectiveArm(MoveCollectiveArm.CollectiveMode.pickupShelfFS);
         else currentState = commandState.ArmExtended;
         break;
       case ArmExtended:
-        // TODO
+        // TODO: Figure out the else part of this which would be to move the drivetrain slowly forward
         if (claw.isGateBlocked()) {
           claw.close();
           currentState = commandState.HasCone;
         }
         break;
       case HasCone:
-        // TODO
+        //TODO: Remove magic numbers and use the Position object attributes
+        // Perhaps we want to move the bot back its starting position if we're moving the drivetrain forward until the gate breaks
+        // and then retract the arm
         if (arm.getPosition() !=  15) {
           armMove = new MoveCollectiveArm(MoveCollectiveArm.CollectiveMode.reversePickupShelfFS);
         } else {
@@ -81,6 +80,6 @@ public class takeConeFromShelf extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return currentState == commandState.ArmRetracted;
   }
 }
