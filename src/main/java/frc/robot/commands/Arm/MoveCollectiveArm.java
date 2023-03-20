@@ -7,6 +7,7 @@ package frc.robot.commands.Arm;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.ConePickup;
 import frc.robot.Constants.PowerOnPos;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
@@ -99,6 +100,18 @@ public class MoveCollectiveArm extends CommandBase {
     placeConeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
     placeCubeHighFS(33.0, 105.0, 0.0, ClawTrackMode.frontSide);
    // pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
+    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide),
+    travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide),
+    pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
+    placeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
+    pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, ConePickup.wristAngle, ClawTrackMode.frontSide),
+    testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, -1.0, 40.0),
+    reversePickupShelfFS(15.0, -90.0, 0.0, ClawTrackMode.frontSide),
+    midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),
+    midBS(20.0, 0.0, 0.0, ClawTrackMode.backSide),
+    placeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
+    travelMidFS(20.0, -10.0, 0.0, ClawTrackMode.frontSide),
+    travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
 
     //travelMidFS(20.0, -10.0, 0.0, ClawTrackMode.frontSide);
    // testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, -1.0, 40.0),

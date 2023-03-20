@@ -24,6 +24,8 @@ import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.JoystickRumbleEndless;
+import frc.robot.commands.PickFromShelf;
+import frc.robot.commands.takeConeFromShelf;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
@@ -36,6 +38,7 @@ import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoSTL;
 import frc.robot.commands.auto.autoTest;
 import frc.robot.commands.auto.goToScoringPosition;
+import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -80,7 +83,8 @@ public class RobotContainer {
     balance_test,
     arm_test,
     claw_test,
-    simulation
+    simulation,
+    pickup_test
   }
 
   // What robot are we running?
@@ -196,7 +200,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.vision_test);
+    configureBindings(Bindings.pickup_test);
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -285,6 +289,15 @@ public class RobotContainer {
         break;
 
       case simulation:
+        break;
+
+      case pickup_test:
+        dc.Driver().povLeft().onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Left));
+        dc.Driver().povRight().onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Right));
+        dc.Driver().x().onTrue(new takeConeFromShelf()); 
+        dc.Driver().b().onTrue(new takeConeFromShelf()); 
+        dc.Driver().leftBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Left)); 
+        dc.Driver().rightBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Right));
         break;
 
       case claw_test:

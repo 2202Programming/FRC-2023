@@ -52,7 +52,7 @@ public class Claw_Substyem extends SubsystemBase {
     }
   };
 
-  // solnoid constants
+  // solenoid constants
   static final Value OPEN = Value.kForward;
   static final Value CLOSE = Value.kReverse;
 
