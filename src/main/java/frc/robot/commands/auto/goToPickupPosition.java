@@ -19,21 +19,21 @@ import frc.robot.Constants;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.RobotContainer;
 import frc.robot.commands.JoystickRumbleEndless;
+import frc.robot.commands.Placement.Pickup.Substation;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.util.PoseMath;
 
 public class goToPickupPosition extends CommandBase {
   /** Creates a new goToScoringPosition. */
 
-  public enum MoveDirection {Left, Right};
-  public MoveDirection moveDirection;
+  public Substation moveDirection;
   PathConstraints constraints;
   SwerveDrivetrain sdt;
   PPSwerveControllerCommand pathCommand;
   JoystickRumbleEndless rumbleCmd;
 
   //pick correct scoring pose based on alliance
-  public goToPickupPosition(PathConstraints constraints, MoveDirection moveDirection) {
+  public goToPickupPosition(PathConstraints constraints, Substation moveDirection) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.moveDirection = moveDirection;
     this.constraints = constraints;

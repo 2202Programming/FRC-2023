@@ -17,10 +17,9 @@ public class PickupDrive extends CommandBase {
     final GamePiece pieceType;
     int timeBroken = 0;
 
-
     // Constants
     final double SPEED = 0.5; // [m/s] speed of driving
-    final int FRAMES_BREAK = 5;
+    final int FRAMES_BREAK = 5; // [count] num frames needed to affirm an object in claw
 
     /**
      * Constructs a new PickupDrive, meant for picking up from double substation

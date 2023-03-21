@@ -89,7 +89,7 @@ public class Place extends CommandBase {
     cmd.until(() -> {
       boolean xStickStill = (Math.sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE); 
       boolean yStickStill = (Math.sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE);
-      return (xStickStill && yStickStill);
+      return !(xStickStill && yStickStill);
     }).schedule();
   }
 

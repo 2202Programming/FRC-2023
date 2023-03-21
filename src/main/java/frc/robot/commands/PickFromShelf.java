@@ -9,8 +9,8 @@ import com.pathplanner.lib.PathConstraints;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
+import frc.robot.commands.Placement.Pickup.Substation;
 import frc.robot.commands.auto.goToPickupPosition;
-import frc.robot.commands.auto.goToPickupPosition.MoveDirection;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
@@ -25,7 +25,7 @@ public class PickFromShelf extends CommandBase {
   final double DEADZONE = 0; // [percent]
 
   // state vars
-  private MoveDirection moveDirection;
+  private Substation moveDirection;
   
   // the cmd
   private SequentialCommandGroup cmd = new SequentialCommandGroup();
@@ -38,7 +38,7 @@ public class PickFromShelf extends CommandBase {
    * 
    * @param moveDirection
    */
-  public PickFromShelf(MoveDirection moveDirection) {
+  public PickFromShelf(Substation moveDirection) {
     this.moveDirection = moveDirection;
 
     addRequirements(dc, colorSensors);

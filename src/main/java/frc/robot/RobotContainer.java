@@ -36,6 +36,7 @@ import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.Placement.Pickup.Substation;
 import frc.robot.commands.auto.autoTest;
 import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -248,13 +249,13 @@ public class RobotContainer {
 
       case pickup_test:
         dc.Driver().povLeft()
-            .onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Left));
+            .onTrue(new goToPickupPosition(new PathConstraints(2, 3), Substation.Left));
         dc.Driver().povRight()
-            .onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Right));
+            .onTrue(new goToPickupPosition(new PathConstraints(2, 3), Substation.Right));
         dc.Driver().x().onTrue(new takeConeFromShelf());
         dc.Driver().b().onTrue(new takeConeFromShelf());
-        dc.Driver().leftBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Left));
-        dc.Driver().rightBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Right));
+        dc.Driver().leftBumper().onTrue(new PickFromShelf(Substation.Left));
+        dc.Driver().rightBumper().onTrue(new PickFromShelf(Substation.Right));
         break;
 
       case vision_test:
