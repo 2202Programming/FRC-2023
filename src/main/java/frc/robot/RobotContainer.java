@@ -321,7 +321,7 @@ public class RobotContainer {
 
         //MONDAY TESTING 3/20/23  TODO REMOVE BEFORE COMP
         dc.Operator().povUp().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
-        dc.Operator().povDown().onTrue(new MoveCollectiveArm(CollectiveMode.placeConeMidFS));
+        dc.Operator().povDown().onTrue(new MoveCollectiveArm(CollectiveMode.placeConeHighFS));
         dc.Operator().povLeft().onTrue(new SequentialCommandGroup(
             new MoveCollectiveArm(CollectiveMode.travelFS),       //trackFS
             new MoveCollectiveArm(CollectiveMode.travelLockFS))); //free mode to lock

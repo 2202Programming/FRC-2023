@@ -102,10 +102,10 @@ public class MoveCollectiveArm extends CommandBase {
     pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),
     haveConeAtShelf(ConePickup.armLength, ConePickup.elbowAngle, 35.0, ClawTrackMode.free),   //assumes wrist near zero
     
-    placeConeMidFS(12.0, 125.0, -51.0, ClawTrackMode.frontSide),
-    placeCubeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
-    placeConeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
-    placeCubeHighFS(33.0, 105.0, 0.0, ClawTrackMode.frontSide),
+    placeConeMidFS(12.0, 130.0, -51.0, ClawTrackMode.frontSide),
+    placeCubeMidFS(12.0, 120.0, -45.0, ClawTrackMode.frontSide),
+    placeConeHighFS(37.0, 135.0, -40.0, ClawTrackMode.frontSide),
+    placeCubeHighFS(37.0, 105.0, -60.0, ClawTrackMode.frontSide),
    
     pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
     placeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
