@@ -325,8 +325,8 @@ public class RobotContainer {
         dc.Operator().povUp().onTrue(new ParallelCommandGroup(
             new MoveCollectiveArm(CollectiveMode.pickupShelfFS),
             new CloseClawWithGate()));
-
         dc.Operator().povDown().onTrue(new MoveCollectiveArm(CollectiveMode.placeConeHighFS));
+        dc.Operator().povRight().onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeHighFS));
         dc.Operator().povLeft().onTrue(new SequentialCommandGroup(
             new MoveCollectiveArm(CollectiveMode.travelFS),       //trackFS
             new MoveCollectiveArm(CollectiveMode.travelLockFS))); //free mode to lock
