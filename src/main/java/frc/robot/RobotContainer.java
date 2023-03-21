@@ -350,6 +350,10 @@ public class RobotContainer {
           elbow.incrementTrim();
         }));
 
+        // arm testing temp
+        dc.Operator().x().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
+        dc.Operator().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
+
         /******************************************************
          * WIP - Commands are needed, names will change, confirm with Drive team
          * dc.Driver().leftTrigger().whileTrue(new RobotOrFieldCentric());

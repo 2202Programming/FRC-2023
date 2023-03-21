@@ -92,7 +92,7 @@ public class MoveCollectiveArm extends CommandBase {
    * Put any needed positions in this enum
    */
   public enum CollectiveMode {
-    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 10.0, -1.0),
+    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist - 3.0, ClawTrackMode.backSide, 10.0, -1.0), // TODO proper travel mode not "-3.0"
     
     //TODO ORGANIZE OR MOVE THIS
     travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide), 
