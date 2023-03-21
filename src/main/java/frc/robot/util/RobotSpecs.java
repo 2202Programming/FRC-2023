@@ -34,6 +34,7 @@ public class RobotSpecs {
     private WheelOffsets myWheelOffsets;
     private ChassisConfig myChassisConfig;
     private SubsystemConfig mySubsystemConfig;
+    private ChassisInversionSpecs myChassisInversionSpecs;
 
     public RobotSpecs() {
         this(System.getenv("serialnum"));
@@ -52,18 +53,21 @@ public class RobotSpecs {
                 myWheelOffsets = Constants.DriveTrain.swerveBotOffsets;
                 myChassisConfig = Constants.DriveTrain.swerveBotChassisConfig;
                 mySubsystemConfig = Constants.swerveBotSubsystemConfig;
+                myChassisInversionSpecs = Constants.swerveBotChassisInversionSpecs;
                 break;
 
             case CompetitionBot2023:
                 myWheelOffsets = Constants.DriveTrain.compBotOffsets;
                 myChassisConfig = Constants.DriveTrain.compBotChassisConfig;
                 mySubsystemConfig = Constants.compBotSubsystemConfig;
+                myChassisInversionSpecs = Constants.compBotChassisInversionSpecs;
                 break;
 
             case ChadBot:
                 myWheelOffsets = Constants.DriveTrain.chadBotOffsets;
                 myChassisConfig = Constants.DriveTrain.chadBotChassisConfig;
                 mySubsystemConfig = Constants.chadBotSubsystemConfig;
+                myChassisInversionSpecs = Constants.chadBotChassisInversionSpecs;
                 break;
 
             default:
@@ -72,6 +76,7 @@ public class RobotSpecs {
                 myWheelOffsets = Constants.DriveTrain.swerveBotOffsets;
                 myChassisConfig = Constants.DriveTrain.swerveBotChassisConfig;
                 mySubsystemConfig = Constants.swerveBotSubsystemConfig;
+                myChassisInversionSpecs = Constants.swerveBotChassisInversionSpecs;
                 System.out.println("***Non-driving robot,don't expect too much***");
                 break;
         }
@@ -105,6 +110,10 @@ public class RobotSpecs {
 
     public SubsystemConfig getSubsystemConfig() {
         return mySubsystemConfig;
+    }
+
+    public ChassisInversionSpecs getChassisInversionSpecs(){
+        return myChassisInversionSpecs;
     }
 
     // takes the roborio serial # and returns the robot name
