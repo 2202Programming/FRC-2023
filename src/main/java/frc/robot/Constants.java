@@ -191,6 +191,8 @@ public final class Constants {
     // PID values to get copied to the hardware
     public static PIDFController r_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
     public static PIDFController l_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
+    public static double IntakeMotorStrength = 0.35; //used for default ON
+    public static double CarwashMotorStrength = 0.5; // used for default ON
   }
 
   // Driver Preferences

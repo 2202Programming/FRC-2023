@@ -40,7 +40,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   double trim_increment = 1.0; // degrees
   double Ktrim = 14.0; //6,7 orig
 
-  // NeoServo - TODO (It's what arm values are rn, will need to change)
+  // NeoServo - TODO (It's what arm values are rn, will need to change) - verify fix is complete
   final NeoServo elbow_servo;
   PIDController positionPID = new PIDController(6.0, 0.083, 0.0);  
   PIDFController hwVelPID = new PIDFController(0.0042, 0.0000052, 0.00, .003);
