@@ -295,24 +295,7 @@ public class RobotContainer {
         // OPERATOR
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
         dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
-        //Testing Claw
-        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> { claw.open();  }));
-        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {claw.close(); }));
 
-        // testing deploying / retracting intake on bumpers
-        /*
-         * dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
-         * intake.deploy();
-         * }));
-         * dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
-         * intake.retract();
-         * }));
-         */
-        // testing on pov
-        // dc.Operator().povLeft().whileTrue(new IntakeForward());
-        // dc.Operator().povRight().whileTrue(new IntakeReverse());
-        // dc.Operator().povUp().whileTrue(new CarwashForward());
-        // dc.Operator().povDown().whileTrue(new CarwashReverse());
 
         // PLACEMENT
         Trigger placeTrigger = dc.Driver().povLeft(); // save right tigger for concinseness in the next new commands
@@ -334,6 +317,17 @@ public class RobotContainer {
         // placeTrigger.and(dc.Operator().povRight()).onTrue(new Place(colorSensors,
         // HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
 
+        //MONDAY TESTING 3/20/23  TODO REMOVE BEFORE COMP
+        dc.Operator().povUp().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
+        dc.Operator().povDown().onTrue(new MoveCollectiveArm(CollectiveMode.placeConeMidFS));
+        dc.Operator().povLeft().onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
+        
+         //Testing Claw  TODO MONDAY NIGHT REMOVE BEFORE COMP
+        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> { claw.open();  }));
+        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {claw.close(); }));
+ 
+
+        //TODO confirm they work with drive team
         placeTrigger.and(dc.Operator().povLeft())
             .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Left));
         placeTrigger.and(dc.Operator().povDown())
@@ -341,7 +335,7 @@ public class RobotContainer {
         placeTrigger.and(dc.Operator().povRight())
             .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Right));
 
-        // ELBOW TRIM - Button not finalized
+        // ELBOW TRIM - Button not finalized TODO- FIX BUTTONS
         dc.Operator().a().and(dc.Operator().povDown()).onTrue(new InstantCommand(() -> {
           elbow.decrementTrim();
         }));
