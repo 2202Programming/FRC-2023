@@ -28,6 +28,8 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
+import frc.robot.commands.EndEffector.WheelsIn;
+import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
@@ -323,6 +325,8 @@ public class RobotContainer {
         dc.Operator().povLeft().onTrue(new SequentialCommandGroup(
             new MoveCollectiveArm(CollectiveMode.travelFS),       //trackFS
             new MoveCollectiveArm(CollectiveMode.travelLockFS))); //free mode to lock
+        dc.Operator().leftTrigger().whileTrue(new WheelsIn());
+        dc.Operator().rightTrigger().whileTrue(new WheelsOut());
         
          //Testing Claw  TODO MONDAY NIGHT REMOVE BEFORE COMP
         dc.Operator().leftBumper().onTrue(new InstantCommand(() -> { claw.open();  }));
