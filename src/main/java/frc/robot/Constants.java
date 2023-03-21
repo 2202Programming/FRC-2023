@@ -10,7 +10,6 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.util.ChassisInversionSpecs;
 import frc.robot.util.PIDFController;
 import frc.robot.util.ModuleInversionSpecs;
 
@@ -48,6 +47,20 @@ public final class Constants {
       this.HAS_POSITIONER = HAS_POSITIONER;
       this.HAS_DRIVETRAIN = HAS_DRIVETRAIN;
       this.HAS_LIMELIGHT = HAS_LIMELIGHT;
+    }
+  }
+
+  public static final class ChassisInversionSpecs{
+    public ModuleInversionSpecs FR;
+    public ModuleInversionSpecs FL;
+    public ModuleInversionSpecs BR;
+    public ModuleInversionSpecs BL;
+  
+    public ChassisInversionSpecs(ModuleInversionSpecs FR, ModuleInversionSpecs FL, ModuleInversionSpecs BR, ModuleInversionSpecs BL){
+        this.FR = FR;
+        this.FL = FL;
+        this.BR = BR;
+        this.BL = BL;
     }
   }
 

@@ -10,6 +10,8 @@ package frc.robot.util;
    * 
    * CANCoders are setup in Sensors and will have CCW= positve convention. Their
    * offsets are adjusted by their use in the drive train.
+   * 
+   * angleCmdInvert will invert the absolute degrees of the angle encoder at startup
    */
 
 public class ModuleInversionSpecs{
@@ -17,6 +19,14 @@ public class ModuleInversionSpecs{
     public boolean kAngleMotorInvert;
     public boolean kAngleCmdInvert;
 
+
+   /**
+   * Constructs a ModuleInversionSpecs
+   *
+   * @param kDriveMotorInvert drive motor invert boolean flag
+   * @param kAngleMotorInvert angle motor invert boolean flag
+   * @param kAngleCmdInvert invert angle encoder
+   */
     public ModuleInversionSpecs(boolean kDriveMotorInvert, boolean kAngleMotorInvert, boolean kAngleCmdInvert){
         this.kAngleMotorInvert = kDriveMotorInvert;
         this.kAngleMotorInvert = kAngleMotorInvert;

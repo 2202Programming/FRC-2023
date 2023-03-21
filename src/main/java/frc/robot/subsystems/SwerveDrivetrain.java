@@ -44,9 +44,9 @@ import frc.robot.Constants.NTStrings;
 import frc.robot.Constants.WheelOffsets;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
-import frc.robot.util.ChassisInversionSpecs;
 import frc.robot.util.ModMath;
 import frc.robot.util.PoseMath;
+import frc.robot.Constants.ChassisInversionSpecs;
 
 public class SwerveDrivetrain extends SubsystemBase {
 
