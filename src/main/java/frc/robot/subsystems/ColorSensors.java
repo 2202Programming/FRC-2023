@@ -43,7 +43,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
 
     // sensor results
     private volatile SensorData[] colorSensorData = new SensorData[numSensors];
-    public ColorMatchResult[] results; // TODO switch back to private post-St Louis
+    private ColorMatchResult[] results; //switched to private 3/20/23
     private int numYellow;
     private int numPurple;
 

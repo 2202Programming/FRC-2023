@@ -325,10 +325,11 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     updateOdometry(); // upates old_pose and m_pose
 
-    // from -PI to +PI
-    double temp = Math.atan2(m_pose.getY() - old_pose.getY(), m_pose.getX() - old_pose.getX());
-    // TODO: is != really the right test?
-    if (temp != 0) { // remove singularity when moving too slow - otherwise lots of jitter
+    double tol = Math.toRadians(0.5);
+    // from -PI to +PI (radians)
+    double temp = Math.atan2(m_pose.getY() - old_pose.getY(), m_pose.getX() - old_pose.getX()); 
+    // Changed from !=0 to include tol variable
+    if (Math.abs(temp) < tol) { // remove singularity when moving too slow - otherwise lots of jitter
       currentBearing = temp;
       // convert this to degrees in the range -180 to 180
       currentBearing = Math.toDegrees(currentBearing);

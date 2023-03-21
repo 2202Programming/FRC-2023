@@ -4,26 +4,23 @@
 
 package frc.robot;
 
+import static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFactory;
+
 import java.util.HashMap;
 
 import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.constraint.MaxVelocityConstraint;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFactory;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
-import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
@@ -31,15 +28,13 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
-import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
-import frc.robot.commands.auto.autoSTL;
 import frc.robot.commands.auto.autoTest;
-import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.auto.goToPickupPosition;
+import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -58,8 +53,6 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
-import frc.robot.util.RobotSpecs.RobotNames;
-import frc.robot.util.RobotSpecs.RobotNames;
 import frc.robot.util.VelocityControlled;
 
 /**
@@ -217,13 +210,13 @@ public class RobotContainer {
         armSS.getWatcher();
         claw.getWatcher();
         elbow.getWatcher();
-        //claw.setElbowDoubleSupplier(elbow::getPosition);
+        // claw.setElbowDoubleSupplier(elbow::getPosition);
         VelocityControlled wrist = claw.getWrist();
 
         // Setup some alignment tooling for the arm's components
         // MAKE SURE THE BUTTONS DON"T COLLIDE WITH OTHER COMMANDS
-       // claw.setWristAngle(PowerOnPos.wrist);
-        
+        // claw.setWristAngle(PowerOnPos.wrist);
+
         GenericAlignEelementFactory(armSS, 1.0, dc.Driver().a(), dc.Driver().povUp(), dc.Driver().povDown());
         GenericAlignEelementFactory(elbow, 2.0, dc.Driver().a(), dc.Driver().povRight(), dc.Driver().povLeft());
         GenericAlignEelementFactory(wrist, 5.0, dc.Driver().b(), dc.Driver().povRight(), dc.Driver().povLeft());
@@ -235,10 +228,11 @@ public class RobotContainer {
         dc.Driver().leftBumper().and(dc.Driver().b()).onTrue(new MoveCollectiveArm(CollectiveMode.placeConeHighFS));
         dc.Driver().leftBumper().and(dc.Driver().y()).onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeHighFS));
         dc.Driver().leftBumper().and(dc.Driver().x()).onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeMidFS));
-        dc.Driver().leftBumper().and(dc.Driver().leftTrigger()).onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
+        dc.Driver().leftBumper().and(dc.Driver().leftTrigger())
+            .onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
         dc.Driver().leftBumper().and(dc.Driver().rightTrigger()).onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
 
-        //USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
+        // USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
         dc.Operator().a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
         dc.Operator().b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
         dc.Operator().povUp().whileTrue(new ArmMoveAtSpeed(5.0, false));
@@ -249,11 +243,13 @@ public class RobotContainer {
         break;
 
       case pickup_test:
-        dc.Driver().povLeft().onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Left));
-        dc.Driver().povRight().onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Right));
-        dc.Driver().x().onTrue(new takeConeFromShelf()); 
-        dc.Driver().b().onTrue(new takeConeFromShelf()); 
-        dc.Driver().leftBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Left)); 
+        dc.Driver().povLeft()
+            .onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Left));
+        dc.Driver().povRight()
+            .onTrue(new goToPickupPosition(new PathConstraints(2, 3), goToPickupPosition.MoveDirection.Right));
+        dc.Driver().x().onTrue(new takeConeFromShelf());
+        dc.Driver().b().onTrue(new takeConeFromShelf());
+        dc.Driver().leftBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Left));
         dc.Driver().rightBumper().onTrue(new PickFromShelf(goToPickupPosition.MoveDirection.Right));
         break;
 
@@ -278,9 +274,9 @@ public class RobotContainer {
         if (drivetrain == null)
           break;
 
-          armSS.getWatcher();
-          claw.getWatcher();
-          elbow.getWatcher();
+        armSS.getWatcher();
+        claw.getWatcher();
+        elbow.getWatcher();
         // DRIVER
         dc.Driver().x().whileTrue(new ChargeStationBalance(false));
         dc.Driver().y().onTrue(new AllianceAwareGyroReset(false)); // gyro reset, without disabling vision
@@ -300,20 +296,6 @@ public class RobotContainer {
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
         dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
 
-        // testing deploying / retracting intake on bumpers
-        /*
-         * dc.Operator().leftBumper().onTrue(new InstantCommand(() -> {
-         * intake.deploy();
-         * }));
-         * dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {
-         * intake.retract();
-         * }));
-         */
-        // testing on pov
-        // dc.Operator().povLeft().whileTrue(new IntakeForward());
-        // dc.Operator().povRight().whileTrue(new IntakeReverse());
-        // dc.Operator().povUp().whileTrue(new CarwashForward());
-        // dc.Operator().povDown().whileTrue(new CarwashReverse());
 
         // PLACEMENT
         Trigger placeTrigger = dc.Driver().povLeft(); // save right tigger for concinseness in the next new commands
@@ -335,6 +317,17 @@ public class RobotContainer {
         // placeTrigger.and(dc.Operator().povRight()).onTrue(new Place(colorSensors,
         // HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
 
+        //MONDAY TESTING 3/20/23  TODO REMOVE BEFORE COMP
+        dc.Operator().povUp().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
+        dc.Operator().povDown().onTrue(new MoveCollectiveArm(CollectiveMode.placeConeMidFS));
+        dc.Operator().povLeft().onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
+        
+         //Testing Claw  TODO MONDAY NIGHT REMOVE BEFORE COMP
+        dc.Operator().leftBumper().onTrue(new InstantCommand(() -> { claw.open();  }));
+        dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {claw.close(); }));
+ 
+
+        //TODO confirm they work with drive team
         placeTrigger.and(dc.Operator().povLeft())
             .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Left));
         placeTrigger.and(dc.Operator().povDown())
@@ -342,7 +335,7 @@ public class RobotContainer {
         placeTrigger.and(dc.Operator().povRight())
             .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Right));
 
-        // ELBOW TRIM - Button not finalized
+        // ELBOW TRIM - Button not finalized TODO- FIX BUTTONS
         dc.Operator().a().and(dc.Operator().povDown()).onTrue(new InstantCommand(() -> {
           elbow.decrementTrim();
         }));
@@ -379,15 +372,17 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // return autoBuilder.fullAuto(PathPlanner.loadPathGroup("MKE-EdgeNoBalance", //Add stop point at the position want to change constraints
-    //   new PathConstraints(4, 4), //2 orig, 3 worked for all speed @3.5
-    //   new PathConstraints(2, 2), // worked @1.75/2.25 respectively
-    //   new PathConstraints(4, 4),
-    //   new PathConstraints(2, 2),
-    //   new PathConstraints(4, 4)));
+    // return autoBuilder.fullAuto(PathPlanner.loadPathGroup("MKE-EdgeNoBalance",
+    // //Add stop point at the position want to change constraints
+    // new PathConstraints(4, 4), //2 orig, 3 worked for all speed @3.5
+    // new PathConstraints(2, 2), // worked @1.75/2.25 respectively
+    // new PathConstraints(4, 4),
+    // new PathConstraints(2, 2),
+    // new PathConstraints(4, 4)));
 
-    // return autoBuilder.fullAuto(PathPlanner.loadPath("MKE-FarHailMaryNoBalance", new PathConstraints(4, 4)));
-    
+    // return autoBuilder.fullAuto(PathPlanner.loadPath("MKE-FarHailMaryNoBalance",
+    // new PathConstraints(4, 4)));
+
     return new autoTest();
   }
 
@@ -399,16 +394,16 @@ public class RobotContainer {
     if (drivetrain == null)
       return; // guard for bot-on-board
 
-      eventMap.put("start",
-      new SequentialCommandGroup(
-          new PrintCommand("***Path Start"),
-          new InstantCommand(drivetrain::printPose)));
-
-      eventMap.put("end",
+    eventMap.put("start",
         new SequentialCommandGroup(
-        new PrintCommand("***Path End"),
-        new InstantCommand(drivetrain::printPose),
-        new ChargeStationBalance(true)));
+            new PrintCommand("***Path Start"),
+            new InstantCommand(drivetrain::printPose)));
+
+    eventMap.put("end",
+        new SequentialCommandGroup(
+            new PrintCommand("***Path End"),
+            new InstantCommand(drivetrain::printPose),
+            new ChargeStationBalance(true)));
 
     eventMap.put("score", new SequentialCommandGroup(
         new PrintCommand("***Path score"),
@@ -427,7 +422,7 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new PrintCommand("***Deploying intake"),
             new DeployIntake()));
-    
+
     if (intake != null)
       eventMap.put("eject_start",
           new SequentialCommandGroup(

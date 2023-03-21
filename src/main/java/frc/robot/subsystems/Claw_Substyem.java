@@ -39,15 +39,14 @@ public class Claw_Substyem extends SubsystemBase {
   public enum ClawTrackMode {
     frontSide(94.0),
     backSide(-109.0),
-    grabPiece(-57.0),  //todo fix##
-    free(0.0);   //any angle
+    free(0.0);   //any angle, use setWristAngle()
     double angle;
 
     ClawTrackMode(double angle) {
       this.angle = angle;
     }
 
-    double angle() {
+    public double angle() {
       return this.angle;
     }
   };

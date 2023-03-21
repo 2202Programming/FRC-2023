@@ -52,6 +52,7 @@ public class MoveCollectiveArm extends CommandBase {
   double old_arm_max_vel;
   double new_elbow_max_vel; // elbow speed giving time to flip (heading in)
   double start_flip_pos;
+  double flip_dist;  //degrees (targ - start)
   boolean flip_requested;
   boolean flip_possible;
   boolean arm_flip_possible;
@@ -80,6 +81,7 @@ public class MoveCollectiveArm extends CommandBase {
       elbowPos = elbow;
       wristPos = wrist; // doesn't matter unless mode == free
       this.mode = mode;
+      wristPos = (mode != ClawTrackMode.free) ? wrist : mode.angle();
       armMaxVel = armVel;
       elbowMaxVel = elbowVel;
     }
@@ -92,13 +94,13 @@ public class MoveCollectiveArm extends CommandBase {
    * Put any needed positions in this enum
    */
   public enum CollectiveMode {
-    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 10.0, -1.0),
+    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist - 3.0, ClawTrackMode.backSide, 10.0, -1.0), // TODO proper travel mode not "-3.0"
     
     //TODO ORGANIZE OR MOVE THIS
-    travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide), 
+    travelFS(0.0, -15.0, 80.0, ClawTrackMode.free), 
     
     
-    placeConeMidFS(25.0, 90.0, 0.0, ClawTrackMode.frontSide),
+    placeConeMidFS(12.0, 125.0, -51.0, ClawTrackMode.frontSide),
     placeCubeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
     placeConeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
     placeCubeHighFS(33.0, 105.0, 0.0, ClawTrackMode.frontSide),
@@ -156,7 +158,11 @@ public class MoveCollectiveArm extends CommandBase {
     // figure out if and how filpping
     flip_started = false;
     flip_point = 10000.0; // never going to get here
-    flip_requested = (start.mode != target.mode);
+    
+    flip_dist = target.wristPos - start.wristPos;
+    
+    //crude - todo make this better
+    flip_requested = Math.abs(start.wristPos - target.wristPos) > 90.0;
     flip_possible = false; // until proven otherwise
     arm_flip_possible = false;
 
@@ -205,6 +211,11 @@ public class MoveCollectiveArm extends CommandBase {
     // move towards our target, wrist done in exec
     arm.setSetpoint(target.armPos);
     elbow.setSetpoint(target.elbowPos);
+
+    //move wrist if free mode and no flip
+    if (target.mode == ClawTrackMode.free && flip_requested == false) {
+      claw.setWristAngle(target.wristPos);
+    }
   }
 
   @Override
@@ -226,7 +237,12 @@ public class MoveCollectiveArm extends CommandBase {
     if (flip_possible &&
         (heading_out && elbow.getPosition() >= flip_point) ||
         (!heading_out && elbow.getPosition() <= flip_point)) {
-      claw.setTrackElbowMode(target.mode);
+      //safe to move the wrist/claw
+      if (target.mode == ClawTrackMode.free) {
+        claw.setWristAngle(target.wristPos);  //will set to free
+      } else 
+        claw.setTrackElbowMode(target.mode);
+
       flip_started = true;
       System.out.println("Flip started......");
       fliptimer.start();
