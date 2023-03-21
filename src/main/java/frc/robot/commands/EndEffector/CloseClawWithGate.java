@@ -12,7 +12,7 @@ import frc.robot.subsystems.Claw_Substyem;
 public class CloseClawWithGate extends CommandBase {
   final Claw_Substyem claw = RobotContainer.RC().claw;
   Timer closeTimer = new Timer();
-  double waitPeriod = 0.3;
+  double waitPeriod = 5.3;
   boolean done;
   
   /** Creates a new CloseClawWithGate. */
@@ -23,8 +23,8 @@ public class CloseClawWithGate extends CommandBase {
   @Override
   public void initialize() {
     claw.open();
-    done = false;
-    closeTimer.reset();
+    closeTimer.stop();
+    System.out.printf("Claw auto open Started");
 
   }
 
@@ -34,15 +34,15 @@ public class CloseClawWithGate extends CommandBase {
     if (claw.isGateBlocked()) {
       claw.close();
       closeTimer.start();
+      System.out.printf("ClawTimer Started");
     }
-
 
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println("ClawClose by light gate");
+    System.out.println("Claw Close by light gate finished");
   }
 
   // Returns true when the command should end.
