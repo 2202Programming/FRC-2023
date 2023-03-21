@@ -4,26 +4,23 @@
 
 package frc.robot;
 
+import static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFactory;
+
 import java.util.HashMap;
 
 import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.constraint.MaxVelocityConstraint;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFactory;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
-import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
@@ -31,15 +28,13 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
-import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
-import frc.robot.commands.auto.autoSTL;
 import frc.robot.commands.auto.autoTest;
-import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.auto.goToPickupPosition;
+import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -58,8 +53,6 @@ import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
-import frc.robot.util.RobotSpecs.RobotNames;
-import frc.robot.util.RobotSpecs.RobotNames;
 import frc.robot.util.VelocityControlled;
 
 /**
