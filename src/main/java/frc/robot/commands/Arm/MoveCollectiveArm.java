@@ -76,16 +76,15 @@ public class MoveCollectiveArm extends CommandBase {
       this(arm, elbow, wrist, mode, -1.0, -1.0);
     }
 
-    public Positions(double arm, double elbow, double wrist, ClawTrackMode mode, double armVel, double elbowVel) {
+    public Positions(double arm, double elbow, double wrist, ClawTrackMode trackmode, double armVel, double elbowVel) {
       armPos = arm;
       elbowPos = elbow;
-      wristPos = wrist; // doesn't matter unless mode == free
-      this.mode = mode;
-      wristPos = (mode != ClawTrackMode.free) ? wrist : mode.angle();
+      mode = trackmode;
+      //use given angle for freemode, else use mode's value
+      wristPos = (mode == ClawTrackMode.free) ? wrist : mode.angle();
       armMaxVel = armVel;
       elbowMaxVel = elbowVel;
     }
-
   }
 
   /*
@@ -99,6 +98,8 @@ public class MoveCollectiveArm extends CommandBase {
     //TODO ORGANIZE OR MOVE THIS
     travelFS(0.0, -15.0, 80.0, ClawTrackMode.free), 
     
+    pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),
+    haveConeAtShelf(ConePickup.armLength, ConePickup.elbowAngle, 35.0, ClawTrackMode.free),   //assumes wrist near zero
     
     placeConeMidFS(12.0, 125.0, -51.0, ClawTrackMode.frontSide),
     placeCubeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
@@ -107,7 +108,7 @@ public class MoveCollectiveArm extends CommandBase {
    
     pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
     placeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
-    pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, ConePickup.wristAngle, ClawTrackMode.frontSide),
+    
     testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, -1.0, 40.0),
     reversePickupShelfFS(15.0, -90.0, 0.0, ClawTrackMode.frontSide),
     midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),

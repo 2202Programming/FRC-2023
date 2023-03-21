@@ -23,8 +23,6 @@ public class MoveWrist extends CommandBase {
     this.claw = RobotContainer.RC().claw;
     this.angle = angle;
     this.maxVel = (maxVel < 0.0) ? claw.getWrist().getMaxVel() : maxVel;
-
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.

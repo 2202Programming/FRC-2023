@@ -4,13 +4,17 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.RobotContainer;
+import frc.robot.commands.Arm.MoveCollectiveArm;
+import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
-import frc.robot.commands.Arm.*;
 
-public class takeConeFromShelf extends CommandBase {
+public class takeConeFromShelf extends SequentialCommandGroup {
 
   Claw_Substyem claw;
   ArmSS arm;
@@ -26,17 +30,27 @@ public class takeConeFromShelf extends CommandBase {
     // Use addRequirements() here to declare subsystem dependencies.
     this.claw = RobotContainer.RC().claw;
     this.arm = RobotContainer.RC().armSS;
-  }
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-    currentState = commandState.Init; 
-  }
+    // move collective arm to shelf pickup
+    // start watch on claw lightgate 
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
+    // on lightgate end cmd and schedule rotate wrist 
+    addCommands(
+      new ParallelCommandGroup(
+            new MoveCollectiveArm(CollectiveMode.pickupShelfFS)
+            //new WatchClawGate()
+      ),
+      new WaitCommand(0.1),   // did we really get it?
+      new ConditionalCommand(
+        new MoveCollectiveArm(CollectiveMode.haveConeAtShelf) , //true
+        new MoveCollectiveArm(CollectiveMode.pickupShelfFS),    //false
+        claw::isGateBlocked)
+    
+    );
+    }
+}
+  
+/**
     switch(currentState) {
       case Init:
         if (!claw.isOpen())
@@ -73,13 +87,5 @@ public class takeConeFromShelf extends CommandBase {
  
   }
 
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
+  */
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return currentState == commandState.ArmRetracted;
-  }
-}
