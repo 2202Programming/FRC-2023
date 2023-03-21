@@ -205,7 +205,7 @@ public class Claw_Substyem extends SubsystemBase {
     wrist_servo.periodic();
     rotate_servo.periodic();
 
-    gate_blocked = lightgate.get();
+    gate_blocked = !lightgate.get();
   }
 
    
