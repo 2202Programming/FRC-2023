@@ -17,8 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "eject_start",
-          "start"
+          "eject_start"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -120,8 +119,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "eject_piece",
-          "middle"
+          "eject_piece"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -249,7 +247,7 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false,
+      "isStopPoint": true,
       "stopEvent": {
         "names": [
           "eject_piece"
@@ -275,12 +273,39 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "balance"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
       }
     }
   ],
-  "markers": []
+  "markers": [
+    {
+      "position": 2.0,
+      "names": [
+        "intake_on"
+      ]
+    },
+    {
+      "position": 2.8,
+      "names": [
+        "intake_off"
+      ]
+    },
+    {
+      "position": 6.2,
+      "names": [
+        "intake_on"
+      ]
+    },
+    {
+      "position": 7.2,
+      "names": [
+        "intake_off"
+      ]
+    }
+  ]
 }
