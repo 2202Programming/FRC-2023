@@ -6,7 +6,11 @@ package frc.robot.commands.Placement;
 
 import com.pathplanner.lib.PathConstraints;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
@@ -15,6 +19,8 @@ import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.goToScoringPosition;
+import frc.robot.commands.swerve.RotateTo;
+import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -33,6 +39,7 @@ public class Place extends CommandBase {
   private HorizontalScoringLane horizontalRequest;
   private VerticalScoringLane verticalRequest;
   private GamePiece piece;
+  private Claw_Substyem claw;
 
   // the cmd
   private SequentialCommandGroup cmd = new SequentialCommandGroup();
@@ -94,8 +101,8 @@ public class Place extends CommandBase {
     cmd.addCommands(new goToScoringPosition(new PathConstraints(2,3), horizontalRequest));
 
     // 2. correct for OTF path generation rotation error
-    // TODO check which alliance is 0/180, pull RotateTo in from other branch
-    //cmd.addCommands(new RotateTo(new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 0 : 180)));
+    // untested below
+    cmd.addCommands(new RotateTo(new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 0 : 180)));
   }
 
   /**
@@ -111,7 +118,10 @@ public class Place extends CommandBase {
   private void MidHigh(CollectiveMode armLocation) {
     cmd.addCommands(
       new MoveCollectiveArm(armLocation),
-      // TODO new command: claw open until lightgate breaks, end condition close claw
+      // need to test close
+      new InstantCommand(() -> {
+        claw.close();
+      }),
       new MoveCollectiveArm(CollectiveMode.travelFS)
     );
   }
