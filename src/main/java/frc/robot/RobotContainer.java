@@ -351,7 +351,8 @@ public class RobotContainer {
         }));
 
         // arm testing temp
-        dc.Operator().x().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
+        dc.Operator().povUp().onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
+        dc.Operator().povDown().onTrue(new MoveCollectiveArm(CollectiveMode.placeConeMidFS));
         dc.Operator().y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
 
         /******************************************************

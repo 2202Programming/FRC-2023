@@ -98,7 +98,7 @@ public class MoveCollectiveArm extends CommandBase {
     travelFS(0.0, 10.0, 0.0, ClawTrackMode.frontSide), 
     
     
-    placeConeMidFS(25.0, 90.0, 0.0, ClawTrackMode.frontSide),
+    placeConeMidFS(12.0, 125.0, -51.0, ClawTrackMode.frontSide),
     placeCubeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
     placeConeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
     placeCubeHighFS(33.0, 105.0, 0.0, ClawTrackMode.frontSide),
