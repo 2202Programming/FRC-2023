@@ -45,7 +45,7 @@ public class goToPickupPosition extends CommandBase {
   public void initialize() {
     int pickupSide; 
 
-    if(this.moveDirection == MoveDirection.Left) pickupSide = 0;
+    if(this.moveDirection == Substation.Left) pickupSide = 0;
     else pickupSide = 1;
 
   if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
