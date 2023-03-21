@@ -218,6 +218,10 @@ public class MoveCollectiveArm extends CommandBase {
     if (target.mode == ClawTrackMode.free && flip_requested == false) {
       claw.setWristAngle(target.wristPos);
     }
+    else if (!flip_requested){
+      //no flip, just take the track mode
+      claw.setTrackElbowMode(target.mode);
+    }
   }
 
   @Override
