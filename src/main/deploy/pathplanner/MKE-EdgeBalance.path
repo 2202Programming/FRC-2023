@@ -16,24 +16,26 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
+        "names": [
+          "eject_start"
+        ],
+        "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
       }
     },
     {
       "anchorPoint": {
-        "x": 3.435593650848319,
-        "y": 0.4868630076243203
+        "x": 3.3770214207095086,
+        "y": 0.48637710608754553
       },
       "prevControl": {
-        "x": 2.4356779714353434,
-        "y": 0.49984892553877386
+        "x": 2.377105741296533,
+        "y": 0.4993630240019991
       },
       "nextControl": {
-        "x": 4.307418106361636,
-        "y": 0.47554061209817394
+        "x": 4.248845876222825,
+        "y": 0.4750547105613992
       },
       "holonomicAngle": 180.0,
       "isReversal": false,
@@ -124,15 +126,15 @@
     },
     {
       "anchorPoint": {
-        "x": 4.4432868526754,
+        "x": 4.48,
         "y": 1.0
       },
       "prevControl": {
-        "x": 4.59215799100603,
+        "x": 4.628871138330631,
         "y": 0.9861097630332408
       },
       "nextControl": {
-        "x": 4.239483733204755,
+        "x": 4.276196880529355,
         "y": 1.0190155973532282
       },
       "holonomicAngle": -180.0,
@@ -189,10 +191,12 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false,
+      "isStopPoint": true,
       "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
+        "names": [
+          "eject_piece"
+        ],
+        "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
       }
@@ -214,7 +218,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "chargeStationBalance"
+          "balance"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -222,5 +226,18 @@
       }
     }
   ],
-  "markers": []
+  "markers": [
+    {
+      "position": 3.75,
+      "names": [
+        "intake_on"
+      ]
+    },
+    {
+      "position": 4.3,
+      "names": [
+        "intake_off"
+      ]
+    }
+  ]
 }
