@@ -310,12 +310,12 @@ public class RobotContainer {
         oper.a().whileTrue(new intakeCompetitionToggle());
         oper.b().whileTrue(new outtakeCompetitionToggle());
 
-        oper.y().onTrue(
-          new SequentialCommandGroup(
-            new MoveCollectiveArm(CollectivePositions.power_on), // no piece, backside
-            new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS)) ); // free
+        oper.y().onTrue(new MoveCollectiveArm(CollectivePositions.power_on)); // no piece, backside
+        oper.povUp().onTrue( new ArmLockForDriving() );
+        
+        
+              // PLACEMENT
 
-        // PLACEMENT
         Trigger placeTrigger = driver.povLeft(); // save right tigger for concinseness in the next new commands
         // Top Place
         // placeTrigger.and(oper.leftBumper()).onTrue(new Place(colorSensors,
@@ -336,7 +336,7 @@ public class RobotContainer {
         // HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
 
         // MONDAY TESTING 3/20/23 TODO REMOVE BEFORE COMP
-        oper.povUp().onTrue( new ArmLockForDriving() );
+    
 
         // THIS IS FANCY COMPLEX ONE for picking up from sehlf may f up
         driver.rightTrigger().and(oper.povUp()).onTrue(
