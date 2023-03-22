@@ -204,7 +204,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.arm_test);
+    configureBindings(Bindings.Competition);
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -330,11 +330,20 @@ public class RobotContainer {
 
         //MONDAY TESTING 3/20/23  TODO REMOVE BEFORE COMP
         dc.Operator().povUp().onTrue(
-             new InstantCommand(() -> {claw.setNearestClawTrackMode();} )
-              .andThen(new WaitCommand(5.0))
-              .andThen(new ParallelCommandGroup(           
-                new MoveCollectiveArm(CollectiveMode.pickupShelfFS),
-                new CloseClawWithGate())));
+          new SequentialCommandGroup(
+            new PrintCommand("############# help me I am trapped in robot hell"),
+            new InstantCommand(() -> {
+            //  claw.setNearestClawTrackMode();
+            } ),
+            new PrintCommand("claw up********************************"),
+            new WaitCommand(5.0),
+            new PrintCommand("wait done"),
+            new ParallelCommandGroup(    
+                new PrintCommand("in parallel"),       
+                new MoveCollectiveArm(CollectiveMode.power_on),  //pickupShelfFS),
+                new CloseClawWithGate())
+            )
+        );
         
             // THIS IS FANCY COMPLEX ONE for picking up from sehlf may f up
         dc.Driver().rightTrigger().and(dc.Operator().povUp().onTrue(new ParallelCommandGroup(
