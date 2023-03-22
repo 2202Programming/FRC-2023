@@ -13,13 +13,14 @@ import frc.robot.Constants.ConePickup;;
 public enum CollectivePositions {
     power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 10.0, -1.0), 
     travelLockNoPieceBS(0.0, PowerOnPos.elbow, PowerOnPos.wrist -5.0 , ClawTrackMode.free, -1.0, 60.0), 
-
+    safeToFlip(0.0, 70.0, 0.0, ClawTrackMode.free, -1.0, 60),
+    
     //TODO ORGANIZE OR MOVE THIS
     travelFS(0.0, -28.0, 93.0, ClawTrackMode.frontSide, -1.0, 60.0),
     travelLockFS(0.0, -28.0, 93.0, ClawTrackMode.free, -1.0, 60.0), 
    
-    
-    
+   
+
     pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),
     haveConeAtShelf(ConePickup.armLength, ConePickup.elbowAngle, 35.0, ClawTrackMode.free),   //assumes wrist near zero
     

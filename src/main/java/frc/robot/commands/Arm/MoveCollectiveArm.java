@@ -37,7 +37,7 @@ public class MoveCollectiveArm extends CommandBase {
 
   // elbow safe angle, flip be done by here going in, or starts here
   // when elbow is heading out
-  double SafeFlipPoint = 55.0;  //elbow at zero arm
+  double SafeFlipPoint = 55.0; // elbow at zero arm
   double SafeMinArm = 20.0; // safe to flip at or above zero elbow
 
   // flip controls - filled in in init()
@@ -50,7 +50,7 @@ public class MoveCollectiveArm extends CommandBase {
   double old_arm_max_vel;
   double new_elbow_max_vel; // elbow speed giving time to flip (heading in)
   double start_flip_pos;
-  double flip_dist;  //degrees (targ - start)
+  double flip_dist; // degrees (targ - start)
   boolean flip_requested;
   boolean flip_possible;
   boolean arm_flip_possible;
@@ -70,27 +70,30 @@ public class MoveCollectiveArm extends CommandBase {
     double elbowMaxVel; // <0.0 means use existing maxvel
     ClawTrackMode mode;
 
-    public Positions(double arm, double elbow, double wrist, ClawTrackMode mode) {
-      this(arm, elbow, wrist, mode, -1.0, -1.0);
+    public Positions(double armPos, double elbowPos, double wristPos, ClawTrackMode mode) {
+      this(armPos, elbowPos, wristPos, mode, -1.0, -1.0);
     }
 
-    public Positions(double arm, double elbow, double wrist, ClawTrackMode trackmode, double armVel, double elbowVel) {
-      armPos = arm;
-      elbowPos = elbow;
-      mode = trackmode;
-      //use given angle for freemode, else use mode's value
-      wristPos = (mode == ClawTrackMode.free) ? wrist : mode.angle();
-      armMaxVel = armVel;
-      elbowMaxVel = elbowVel;
+    public Positions(double armPos, double elbowPos, double wristPos, ClawTrackMode trackmode, double armVel,
+        double elbowVel) {
+      this.armPos = armPos;
+      this.elbowPos = elbowPos;
+      this.mode = trackmode;
+      // use given angle for freemode, else use mode's value
+      this.wristPos = (mode == ClawTrackMode.free) ? wristPos : mode.angle();
+      this.armMaxVel = armVel;
+      this.elbowMaxVel = elbowVel;
+    }
+
+    // some copy constructors to make it easy to change fixed values
+    public Positions(Positions src) {
+      this(src.armPos, src.elbowPos, src.wristPos, src.mode, src.armMaxVel, src.elbowMaxVel);
+    }
+
+    public Positions(CollectivePositions src) {
+      this(src.pos_info);
     }
   }
-
-  /*
-   * CollectiveMode names the target for the arm group
-   * 
-   * Put any needed positions in this enum
-   */
- 
 
   /** Creates a new MoveCollectiveArm. */
   public MoveCollectiveArm(CollectivePositions where_to) {
@@ -111,8 +114,10 @@ public class MoveCollectiveArm extends CommandBase {
     old_elbow_max_vel = elbow.getMaxVel();
     old_arm_max_vel = arm.getMaxVel();
 
-    if (target.armMaxVel > 0.0) arm.setMaxVel(target.armMaxVel);
-    if (target.elbowMaxVel > 0.0) elbow.setMaxVel(target.elbowMaxVel);
+    if (target.armMaxVel > 0.0)
+      arm.setMaxVel(target.armMaxVel);
+    if (target.elbowMaxVel > 0.0)
+      elbow.setMaxVel(target.elbowMaxVel);
 
     fliptimer.reset();
 
@@ -122,10 +127,10 @@ public class MoveCollectiveArm extends CommandBase {
     // figure out if and how filpping
     flip_started = false;
     flip_point = 10000.0; // never going to get here
-    
+
     flip_dist = target.wristPos - start.wristPos;
-    
-    //crude - todo make this better
+
+    // crude - todo make this better
     flip_requested = Math.abs(start.wristPos - target.wristPos) > 90.0;
     flip_possible = false; // until proven otherwise
     arm_flip_possible = false;
@@ -176,12 +181,11 @@ public class MoveCollectiveArm extends CommandBase {
     arm.setSetpoint(target.armPos);
     elbow.setSetpoint(target.elbowPos);
 
-    //move wrist if free mode and no flip
+    // move wrist if free mode and no flip
     if (target.mode == ClawTrackMode.free && flip_requested == false) {
       claw.setWristAngle(target.wristPos);
-    }
-    else if (!flip_requested){
-      //no flip, just take the track mode
+    } else if (!flip_requested) {
+      // no flip, just take the track mode
       claw.setTrackElbowMode(target.mode);
     }
   }
@@ -205,10 +209,10 @@ public class MoveCollectiveArm extends CommandBase {
     if (flip_possible &&
         (heading_out && elbow.getPosition() >= flip_point) ||
         (!heading_out && elbow.getPosition() <= flip_point)) {
-      //safe to move the wrist/claw
+      // safe to move the wrist/claw
       if (target.mode == ClawTrackMode.free) {
-        claw.setWristAngle(target.wristPos);  //will set to free
-      } else 
+        claw.setWristAngle(target.wristPos); // will set to free
+      } else
         claw.setTrackElbowMode(target.mode);
 
       flip_started = true;
