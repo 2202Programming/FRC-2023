@@ -203,7 +203,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.arm_test);
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -242,8 +242,8 @@ public class RobotContainer {
         // USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
         dc.Operator().a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
         dc.Operator().b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
-        dc.Operator().povUp().whileTrue(new ArmMoveAtSpeed(5.0, false));
-        dc.Operator().povDown().whileTrue(new ArmMoveAtSpeed(-2.0, false));
+        dc.Operator().povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));
+        dc.Operator().povDown().whileTrue(new ArmMoveAtSpeed(-2.0, true));
         break;
 
       case simulation:
@@ -347,8 +347,7 @@ public class RobotContainer {
          //Testing Claw  TODO MONDAY NIGHT REMOVE BEFORE COMP
         dc.Operator().leftBumper().onTrue(new InstantCommand(() -> { claw.open();  }));
         dc.Operator().rightBumper().onTrue(new InstantCommand(() -> {claw.close(); }));
- 
-
+         
         //TODO confirm they work with drive team
         placeTrigger.and(dc.Operator().povLeft())
             .onTrue(new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Left));

@@ -98,6 +98,8 @@ public class MoveCollectiveArm extends CommandBase {
     //TODO ORGANIZE OR MOVE THIS
     travelFS(0.0, -28.0, 93.0, ClawTrackMode.frontSide, -1.0, 60.0),
     travelLockFS(0.0, -28.0, 93.0, ClawTrackMode.free, -1.0, 60.0), 
+    travelLockNoPieceFS(0.0, -28.0, 93.0, ClawTrackMode.free, -1.0, 60.0), 
+    
     
     pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),
     haveConeAtShelf(ConePickup.armLength, ConePickup.elbowAngle, 35.0, ClawTrackMode.free),   //assumes wrist near zero
