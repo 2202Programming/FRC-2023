@@ -1,12 +1,11 @@
 package frc.robot.commands.Automation;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Claw_Substyem;
-import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.ColorSensors.GamePiece;
+import frc.robot.subsystems.SwerveDrivetrain;
 
 public class PickupDrive extends CommandBase {
     // Subsystems
@@ -18,7 +17,7 @@ public class PickupDrive extends CommandBase {
     int timeBroken = 0;
 
     // Constants
-    final double SPEED = 0.5; // [m/s] speed of driving
+    final double SPEED; // [m/s] speed of driving
     final int FRAMES_BREAK = 5; // [count] num frames needed to affirm an object in claw
 
     /**
@@ -26,18 +25,16 @@ public class PickupDrive extends CommandBase {
      * 
      * @param pieceType Which piece will be picked up
      */
-    public PickupDrive(GamePiece pieceType) {
+    public PickupDrive(double speed, GamePiece pieceType) {
         this.pieceType = pieceType;
+        this.SPEED = speed;
+        addRequirements(sdt);
     }
 
     @Override
     public void initialize() {
-        SwerveModuleState[] states = new SwerveModuleState[] {
-            new SwerveModuleState(SPEED, new Rotation2d()),
-            new SwerveModuleState(SPEED, new Rotation2d()),
-            new SwerveModuleState(SPEED, new Rotation2d()),
-            new SwerveModuleState(SPEED, new Rotation2d())
-        };
+
+        var states = sdt.getKinematics().toSwerveModuleStates(new ChassisSpeeds(SPEED, 0.0, 0.0));
 
         // slowly drive forward, open claw
         sdt.drive(states);
@@ -66,7 +63,7 @@ public class PickupDrive extends CommandBase {
     public void end(boolean interrupted) {
         // stop moving, shut claw
         sdt.stop();
-        
+
         switch (pieceType) {
             case Cube:
                 claw.wheelsOff();

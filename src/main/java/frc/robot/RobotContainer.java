@@ -29,6 +29,7 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
 import frc.robot.commands.Automation.CenterTapeSkew;
+import frc.robot.commands.Automation.Pickup;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
 import frc.robot.commands.EndEffector.WheelsIn;
 import frc.robot.commands.EndEffector.WheelsOut;
@@ -36,7 +37,7 @@ import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
-import frc.robot.commands.Placement.Pickup.Substation;
+import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.auto.autoTest;
 import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -56,6 +57,7 @@ import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
 import frc.robot.util.VelocityControlled;
@@ -326,11 +328,19 @@ public class RobotContainer {
         dc.Operator().povUp().onTrue(new ParallelCommandGroup(
             new MoveCollectiveArm(CollectiveMode.pickupShelfFS),
             new CloseClawWithGate()));
+        
+            // THIS IS FANCY COMPLEX ONE for picking up from sehlf may f up
+        dc.Driver().rightTrigger().and(dc.Operator().povUp().onTrue(new ParallelCommandGroup(
+            new Pickup(Substation.Left, GamePiece.ConeFacingFront)
+        )));
+
         dc.Operator().povDown().onTrue(new MoveCollectiveArm(CollectiveMode.placeConeHighFS));
         dc.Operator().povRight().onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeHighFS));
+
         dc.Operator().povLeft().onTrue(new SequentialCommandGroup(
             new MoveCollectiveArm(CollectiveMode.travelFS),       //trackFS
             new MoveCollectiveArm(CollectiveMode.travelLockFS))); //free mode to lock
+        
         dc.Operator().leftTrigger().whileTrue(new WheelsIn());
         dc.Operator().rightTrigger().whileTrue(new WheelsOut());
         

@@ -19,7 +19,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.RobotContainer;
 import frc.robot.commands.JoystickRumbleEndless;
-import frc.robot.commands.Placement.Pickup.Substation;
+import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.util.PoseMath;
 

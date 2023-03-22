@@ -2,12 +2,11 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.Placement;
+package frc.robot.commands.Automation;
 
 import com.pathplanner.lib.PathConstraints;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,26 +18,24 @@ import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
-import frc.robot.commands.EndEffector.WheelsIn;
-import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.RotateTo;
+import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
-import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
-public class Place extends CommandBase {
+public class PlaceMidHigh extends CommandBase {
 
   // SSs
   private HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
   public ColorSensors colorSensors = RobotContainer.RC().colorSensors;
-  private SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
   private Claw_Substyem claw = RobotContainer.RC().claw;
 
   // constants
-  final double DEADZONE = 0; // [percent]
+  final double DEADZONE2 = 0.025; // [percent^2] this number is squared!!
   final double SPEED_MOVE = 0.5; // [m/s] speed moving to / from target
   final double TIME_MOVE = 1.0; // [s] time to move to / from target
   final double TIME_DROP = 0.5; // [s] time to wait after claw opens / wheels spin out before going back
@@ -62,25 +59,25 @@ public class Place extends CommandBase {
    * @param horizontalRequest
    * @param verticalRequest
    */
-  public Place(HorizontalScoringLane horizontalRequest, VerticalScoringLane verticalRequest, GamePiece piece) {
+  public PlaceMidHigh(HorizontalScoringLane horizontalRequest, VerticalScoringLane verticalRequest, GamePiece piece) {
     this.horizontalRequest = horizontalRequest;
     this.verticalRequest = verticalRequest;
     this.piece = piece;
-
-    addRequirements(dc);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    // 1. Move to scoring position
+    cmd = new SequentialCommandGroup();
+
+    // 1. Move to safe location for arm extension 
     move();
 
     // 2. Move arm out
     switch (piece) {
       case Cube:
-        Cube();
-        dropCmd = new WheelsIn().withTimeout(TIME_DROP);
+        Cube();   //moves arm to delivery point
+        dropCmd = new WheelsOut().withTimeout(TIME_DROP);
         break;
       case ConeFacingBack:
         ConeBack();
@@ -99,7 +96,8 @@ public class Place extends CommandBase {
     }
 
     // 3. Move above target, place, moves back
-    MovePlace();
+    // NOTE: THIS COULD TRACK LimeLight via reflective tape, center and dist estimate
+    MovePlace(); // <-- this uses odometry to move forward to "right" openloop position
 
     // 4. Go to travel position
     Retract();
@@ -110,10 +108,8 @@ public class Place extends CommandBase {
     // stick in 2d space, but I think consistency is important so can't just check
     // one axis
     cmd.until(() -> {
-      boolean xStickStill = (Math
-          .sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE);
-      boolean yStickStill = (Math
-          .sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE);
+      boolean xStickStill = (Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE2;
+      boolean yStickStill = (Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE2;
       return !(xStickStill && yStickStill);
     }).schedule();
   }
@@ -131,38 +127,17 @@ public class Place extends CommandBase {
   }
 
   /**
-   * Adds command(s) necessary for bottom scoring.
-   */
-  private void Bottom() {
-    cmd.addCommands(new outtakeCompetitionToggle().withTimeout(5.0));
-  }
-
-  /**
-   * Adds commands necessary for mid/high scoring.
-   */
-  private void MidHigh(CollectiveMode armLocation) {
-    cmd.addCommands(
-        new MoveCollectiveArm(armLocation),
-        // need to test close
-        new InstantCommand(() -> {
-          claw.close();
-        }),
-        new MoveCollectiveArm(CollectiveMode.travelFS));
-  }
-
-  /**
    * Constructs placing cmd based on object being a cone facing backwards.
    */
   private void ConeBack() {
     switch (verticalRequest) {
       case Top:
-        MidHigh(CollectiveMode.placeConeHighFS); // TODO cone/cube customization in enum
+        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeConeHighFS)); // TODO add back track constants
         break;
       case Middle:
-        MidHigh(CollectiveMode.placeConeMidFS); // TODO cone/cube customization in enum
+        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeConeMidFS)); // TODO add back track constants
         break;
-      case Bottom:
-        Bottom();
+      default:
         break;
     }
   }
@@ -173,30 +148,29 @@ public class Place extends CommandBase {
   private void ConeFront() {
     switch (verticalRequest) {
       case Top:
-        MidHigh(CollectiveMode.placeConeHighFS); // TODO cone/cube customization in enum
+        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeConeHighFS));
         break;
       case Middle:
-        MidHigh(CollectiveMode.placeConeMidFS); // TODO cone/cube customization in enum
+        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeConeMidFS));
         break;
-      case Bottom:
-        Bottom();
+      default:
         break;
     }
   }
 
   /**
    * Constructs placing cmd based on object being a cube.
+   * Coming out of travel position.
    */
   private void Cube() {
     switch (verticalRequest) {
       case Top:
-        MidHigh(CollectiveMode.placeCubeHighFS); // TODO cone/cube customization in enum
+        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeCubeHighFS));
         break;
       case Middle:
-        MidHigh(CollectiveMode.placeCubeMidFS); // TODO cone/cube customization in enum
+        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeCubeMidFS));
         break;
-      case Bottom:
-        Bottom();
+      default:
         break;
     }
   }
@@ -207,35 +181,21 @@ public class Place extends CommandBase {
    */
   private void MovePlace() {
     cmd.addCommands(
-      // 1. Move to
-        new InstantCommand(() -> {
-          sdt.drive(new SwerveModuleState[] {
-              new SwerveModuleState(SPEED_MOVE, new Rotation2d()),
-              new SwerveModuleState(SPEED_MOVE, new Rotation2d()),
-              new SwerveModuleState(SPEED_MOVE, new Rotation2d()),
-              new SwerveModuleState(SPEED_MOVE, new Rotation2d())
-          });
-        }).withTimeout(TIME_MOVE),
-
+      // 1. Move to       
+      new VelocityMove(-SPEED_MOVE, 0.0, TIME_MOVE),
       // 2. Drop piece
         dropCmd,
-        
       // 3. Move back
-        new InstantCommand(() -> {
-          sdt.drive(new SwerveModuleState[] {
-              new SwerveModuleState(-SPEED_MOVE, new Rotation2d()),
-              new SwerveModuleState(-SPEED_MOVE, new Rotation2d()),
-              new SwerveModuleState(-SPEED_MOVE, new Rotation2d()),
-              new SwerveModuleState(-SPEED_MOVE, new Rotation2d())
-          });
-        }).withTimeout(TIME_MOVE));
-  }
+      new VelocityMove(SPEED_MOVE, 0.0, TIME_MOVE));      
+    }
 
   /**
    * Retracts piece
    */
   private void Retract() {
-    cmd.addCommands(new MoveCollectiveArm(CollectiveMode.travelFS), new MoveCollectiveArm(CollectiveMode.travelLockFS));
+    cmd.addCommands(
+      new MoveCollectiveArm(CollectiveMode.travelFS), 
+      new MoveCollectiveArm(CollectiveMode.travelLockFS));
   }
 
   // Called every time the scheduler runs while the command is scheduled.

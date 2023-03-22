@@ -1,22 +1,17 @@
-package frc.robot.commands.Placement;
-
-import com.pathplanner.lib.PathConstraints;
+package frc.robot.commands.Automation;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
-import frc.robot.commands.Automation.PickupDrive;
-import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.swerve.RotateTo;
-import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.ColorSensors.GamePiece;
+import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 public class Pickup extends CommandBase {
@@ -27,17 +22,18 @@ public class Pickup extends CommandBase {
 
     // dc and related vars
     HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
-    final double DEADZONE = 0.0;
+    final double DEADZONE2 = (0.025);  //put sq here
 
     // sdt and related vars
     SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
-    final double SPEED = 1.0; // [m/s] backup speed
+    //BACKUP_SPEED is relative to the arm, which is on the -X direction
+    final double BACKUP_SPEED = 0.5; // [m/s] backup speed + should move opp the arm
     final double BACKUP_TIME = 1.0; // [s] time to backup for
 
     // state vars
     final Substation substation;
     final GamePiece gamePiece;
-    SequentialCommandGroup cmd = new SequentialCommandGroup();
+    SequentialCommandGroup cmd;
 
     public Pickup(Substation substation, GamePiece gamePiece) {
         this.substation = substation;
@@ -46,13 +42,17 @@ public class Pickup extends CommandBase {
 
     @Override
     public void initialize() {
-        move();
-        extend();
+        cmd = new SequentialCommandGroup();
+        move();      // must move to close, but clear spot for arm extend
+        extend();  
         getPiece();
+        backup();
+        retract();
 
+        // bail when the driver says so
         cmd.until(() -> {
-            boolean xStickStill = (Math.sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE); 
-            boolean yStickStill = (Math.sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE);
+            boolean xStickStill = (Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE2; 
+            boolean yStickStill = (Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE2;
             return !(xStickStill && yStickStill);
           }).schedule();
     }
@@ -63,8 +63,8 @@ public class Pickup extends CommandBase {
      */
     public void move() {
         cmd.addCommands(
-                new goToPickupPosition(new PathConstraints(3.0, 3.0), substation),
-                new RotateTo(new Rotation2d(DriverStation.getAlliance().equals(Alliance.Blue) ? 180 : 0)));
+               // WIP ---> new goToPickupPosition(new PathConstraints(3.0, 3.0), substation),
+                new RotateTo(new Rotation2d(DriverStation.getAlliance().equals(Alliance.Blue) ? 0 : 180)));
     }
 
     /**
@@ -76,23 +76,19 @@ public class Pickup extends CommandBase {
 
     /**
      * Picks up piece w/ claw
+     * Slowly drives in arm-dir to get piece.  Will get a lightgate break or driver will 
+     * have to interrupt the sequence.
      */
     public void getPiece() {
-        cmd.addCommands(new PickupDrive(gamePiece));
+        cmd.addCommands(new PickupDrive(0.5 , gamePiece));  
     }
 
     /**
      * Backs up to safe distance to retract arm
      */
     public void backup() {
-        cmd.addCommands(new InstantCommand(() -> {
-            sdt.drive(new SwerveModuleState[] {
-                    new SwerveModuleState(SPEED, new Rotation2d()),
-                    new SwerveModuleState(SPEED, new Rotation2d()),
-                    new SwerveModuleState(SPEED, new Rotation2d()),
-                    new SwerveModuleState(SPEED, new Rotation2d())
-            });
-        }).withTimeout(1.0));
+        cmd.addCommands(new VelocityMove(BACKUP_SPEED, 0.0, BACKUP_TIME));
+    
     }
 
     /**
@@ -103,4 +99,8 @@ public class Pickup extends CommandBase {
                         new MoveCollectiveArm(CollectiveMode.travelLockFS));
     }
 
+    @Override
+    public boolean isFinished() {
+        return true;
+    }
 }

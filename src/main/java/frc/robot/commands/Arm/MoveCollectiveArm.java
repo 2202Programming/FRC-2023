@@ -96,8 +96,8 @@ public class MoveCollectiveArm extends CommandBase {
     power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist - 3.0, ClawTrackMode.backSide, 10.0, -1.0), // TODO proper travel mode not "-3.0"
     
     //TODO ORGANIZE OR MOVE THIS
-    travelFS(0.0, -28.0, 93.0, ClawTrackMode.frontSide),
-    travelLockFS(0.0, -28.0, 93.0, ClawTrackMode.free), 
+    travelFS(0.0, -28.0, 93.0, ClawTrackMode.frontSide, -1.0, 60.0),
+    travelLockFS(0.0, -28.0, 93.0, ClawTrackMode.free, -1.0, 60.0), 
     
     pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),
     haveConeAtShelf(ConePickup.armLength, ConePickup.elbowAngle, 35.0, ClawTrackMode.free),   //assumes wrist near zero
@@ -110,7 +110,7 @@ public class MoveCollectiveArm extends CommandBase {
     pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
     placeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
     
-    testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, -1.0, 40.0),
+    testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, -1.0, 70.0),
     reversePickupShelfFS(15.0, -90.0, 0.0, ClawTrackMode.frontSide),
     midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),
     midBS(20.0, 0.0, 0.0, ClawTrackMode.backSide),

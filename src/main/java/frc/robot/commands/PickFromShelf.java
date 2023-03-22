@@ -9,7 +9,7 @@ import com.pathplanner.lib.PathConstraints;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
-import frc.robot.commands.Placement.Pickup.Substation;
+import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;

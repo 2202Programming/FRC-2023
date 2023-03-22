@@ -140,6 +140,8 @@ public class Claw_Substyem extends SubsystemBase {
     elbowAngle = (RobotContainer.RC().elbow != null) ? RobotContainer.RC().elbow::getPosition : this::zero;
 
     this.setTrackElbowMode(ClawTrackMode.backSide);
+    open(); // claw should be open at power up
+    wheelsOff(); // wheels should not be spinning at power up
   }
 
   // some of my most complex code
@@ -204,7 +206,7 @@ public class Claw_Substyem extends SubsystemBase {
     //run the servo calcs
     wrist_servo.periodic();
     rotate_servo.periodic();
-
+    // read gate, yes it needs to be negated.
     gate_blocked = !lightgate.get();
   }
 
