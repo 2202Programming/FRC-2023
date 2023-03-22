@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
-import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
+import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.swerve.RotateTo;
 import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.ColorSensors.GamePiece;
@@ -71,7 +71,7 @@ public class Pickup extends CommandBase {
      * Extends arm out to pickup position
      */
     public void extend() {
-        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
+        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
     }
 
     /**
@@ -95,8 +95,8 @@ public class Pickup extends CommandBase {
      * Retracts arm
      */
     public void retract() {
-        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.travelFS),
-                        new MoveCollectiveArm(CollectiveMode.travelLockFS));
+        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.travelFS),
+                        new MoveCollectiveArm(CollectivePositions.travelLockFS));
     }
 
     @Override

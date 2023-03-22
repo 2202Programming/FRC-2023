@@ -17,7 +17,7 @@ import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
-import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
+import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.RotateTo;
@@ -132,10 +132,10 @@ public class PlaceMidHigh extends CommandBase {
   private void ConeBack() {
     switch (verticalRequest) {
       case Top:
-        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeConeHighFS)); // TODO add back track constants
+        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS)); // TODO add back track constants
         break;
       case Middle:
-        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeConeMidFS)); // TODO add back track constants
+        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS)); // TODO add back track constants
         break;
       default:
         break;
@@ -148,10 +148,10 @@ public class PlaceMidHigh extends CommandBase {
   private void ConeFront() {
     switch (verticalRequest) {
       case Top:
-        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeConeHighFS));
+        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
         break;
       case Middle:
-        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeConeMidFS));
+        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
         break;
       default:
         break;
@@ -165,10 +165,10 @@ public class PlaceMidHigh extends CommandBase {
   private void Cube() {
     switch (verticalRequest) {
       case Top:
-        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeCubeHighFS));
+        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
         break;
       case Middle:
-        cmd.addCommands(new MoveCollectiveArm(CollectiveMode.placeCubeMidFS));
+        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
         break;
       default:
         break;
@@ -194,8 +194,8 @@ public class PlaceMidHigh extends CommandBase {
    */
   private void Retract() {
     cmd.addCommands(
-      new MoveCollectiveArm(CollectiveMode.travelFS), 
-      new MoveCollectiveArm(CollectiveMode.travelLockFS));
+      new MoveCollectiveArm(CollectivePositions.travelFS), 
+      new MoveCollectiveArm(CollectivePositions.travelLockFS));
   }
 
   // Called every time the scheduler runs while the command is scheduled.

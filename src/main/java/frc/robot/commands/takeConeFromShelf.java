@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
-import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
+import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
 
@@ -37,13 +37,13 @@ public class takeConeFromShelf extends SequentialCommandGroup {
     // on lightgate end cmd and schedule rotate wrist 
     addCommands(
       new ParallelCommandGroup(
-            new MoveCollectiveArm(CollectiveMode.pickupShelfFS)
+            new MoveCollectiveArm(CollectivePositions.pickupShelfFS)
             //new WatchClawGate()
       ),
       new WaitCommand(0.1),   // did we really get it?
       new ConditionalCommand(
-        new MoveCollectiveArm(CollectiveMode.haveConeAtShelf) , //true
-        new MoveCollectiveArm(CollectiveMode.pickupShelfFS),    //false
+        new MoveCollectiveArm(CollectivePositions.haveConeAtShelf) , //true
+        new MoveCollectiveArm(CollectivePositions.pickupShelfFS),    //false
         claw::isGateBlocked)
     
     );

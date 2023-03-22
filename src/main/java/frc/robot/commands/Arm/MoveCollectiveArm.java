@@ -7,12 +7,10 @@ package frc.robot.commands.Arm;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
-import frc.robot.Constants.ConePickup;
-import frc.robot.Constants.PowerOnPos;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
-import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
+import frc.robot.subsystems.Elbow;
 import frc.robot.util.VelocityControlled;
 
 /*
@@ -92,49 +90,10 @@ public class MoveCollectiveArm extends CommandBase {
    * 
    * Put any needed positions in this enum
    */
-  public enum CollectiveMode {
-    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 10.0, -1.0), 
-    travelLockNoPieceBS(0.0, PowerOnPos.elbow, PowerOnPos.wrist -5.0 , ClawTrackMode.free, -1.0, 60.0), 
-
-    //TODO ORGANIZE OR MOVE THIS
-    travelFS(0.0, -28.0, 93.0, ClawTrackMode.frontSide, -1.0, 60.0),
-    travelLockFS(0.0, -28.0, 93.0, ClawTrackMode.free, -1.0, 60.0), 
-   
-    
-    
-    pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),
-    haveConeAtShelf(ConePickup.armLength, ConePickup.elbowAngle, 35.0, ClawTrackMode.free),   //assumes wrist near zero
-    
-    placeConeMidFS(12.0, 130.0, -51.0, ClawTrackMode.frontSide),
-    placeCubeMidFS(12.0, 125.0, -51.0, ClawTrackMode.frontSide),
-    placeConeHighFS(37.0, 135.0, -40.0, ClawTrackMode.frontSide),
-    placeCubeHighFS(37.0, 105.0, -50.0, ClawTrackMode.frontSide),
-   
-    pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
-    placeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
-    
-    testShelfTopFS(38.0, 165.0, 0.0, ClawTrackMode.frontSide, -1.0, 70.0),
-    reversePickupShelfFS(15.0, -90.0, 0.0, ClawTrackMode.frontSide),
-    midFS(20.0, 0.0, 0.0, ClawTrackMode.frontSide),
-    midBS(20.0, 0.0, 0.0, ClawTrackMode.backSide),
-    placeHighFS(38.0, 105.0, 0.0, ClawTrackMode.frontSide),
-    travelMidFS(20.0, -10.0, 0.0, ClawTrackMode.frontSide),
-    travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
-
-    // posistions and modes for target positions
-    Positions pos_info;
-
-    CollectiveMode(double arm, double elbow, double wrist, ClawTrackMode mode, double armMaxVel, double elbowMaxVel) {
-      pos_info = new Positions(arm, elbow, wrist, mode, armMaxVel, elbowMaxVel);
-    }
-
-    CollectiveMode(double arm, double elbow, double wrist, ClawTrackMode mode) {
-      pos_info = new Positions(arm, elbow, wrist, mode);
-    }
-  };
+ 
 
   /** Creates a new MoveCollectiveArm. */
-  public MoveCollectiveArm(CollectiveMode where_to) {
+  public MoveCollectiveArm(CollectivePositions where_to) {
     this(where_to.pos_info);
   }
 

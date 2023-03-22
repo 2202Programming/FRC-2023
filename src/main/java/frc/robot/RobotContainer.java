@@ -28,7 +28,7 @@ import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
-import frc.robot.commands.Arm.MoveCollectiveArm.CollectiveMode;
+import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.Pickup;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
@@ -235,15 +235,15 @@ public class RobotContainer {
         GenericAlignEelementFactory(wrist, 5.0, driver.b(), driver.povRight(), driver.povLeft());
 
         // We need a way to put the arm back to Power-On
-        driver.y().onTrue(new MoveCollectiveArm(CollectiveMode.power_on));
+        driver.y().onTrue(new MoveCollectiveArm(CollectivePositions.power_on));
 
-        driver.leftBumper().and(driver.a()).onTrue(new MoveCollectiveArm(CollectiveMode.placeConeMidFS));
-        driver.leftBumper().and(driver.b()).onTrue(new MoveCollectiveArm(CollectiveMode.placeConeHighFS));
-        driver.leftBumper().and(driver.y()).onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeHighFS));
-        driver.leftBumper().and(driver.x()).onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeMidFS));
+        driver.leftBumper().and(driver.a()).onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+        driver.leftBumper().and(driver.b()).onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+        driver.leftBumper().and(driver.y()).onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
+        driver.leftBumper().and(driver.x()).onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
         driver.leftBumper().and(driver.leftTrigger())
-            .onTrue(new MoveCollectiveArm(CollectiveMode.pickupShelfFS));
-        driver.leftBumper().and(driver.rightTrigger()).onTrue(new MoveCollectiveArm(CollectiveMode.travelFS));
+            .onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
+        driver.leftBumper().and(driver.rightTrigger()).onTrue(new MoveCollectiveArm(CollectivePositions.travelFS));
 
         // USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
         oper.a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
@@ -311,8 +311,8 @@ public class RobotContainer {
 
         oper.y().onTrue(
           new SequentialCommandGroup(
-            new MoveCollectiveArm(CollectiveMode.power_on), // no piece, backside
-            new MoveCollectiveArm(CollectiveMode.travelLockNoPieceBS)) ); // free
+            new MoveCollectiveArm(CollectivePositions.power_on), // no piece, backside
+            new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS)) ); // free
 
         // PLACEMENT
         Trigger placeTrigger = driver.povLeft(); // save right tigger for concinseness in the next new commands
@@ -344,7 +344,7 @@ public class RobotContainer {
                 new PrintCommand("claw up********************************"),
                 new WaitCommand(2.0),
                 new PrintCommand("wait done"),
-                new MoveCollectiveArm(CollectiveMode.pickupShelfFS),
+                new MoveCollectiveArm(CollectivePositions.pickupShelfFS),
                 new PrintCommand("arm move done"),
                 new CloseClawWithGate(),
                 new PrintCommand("close done")));
@@ -354,13 +354,13 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 new Pickup(Substation.Left, GamePiece.ConeFacingFront)));
 
-        oper.povDown().onTrue(new MoveCollectiveArm(CollectiveMode.placeConeHighFS));
-        oper.povRight().onTrue(new MoveCollectiveArm(CollectiveMode.placeCubeHighFS));
+        oper.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+        oper.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
 
         oper.povLeft().onTrue(
             new SequentialCommandGroup(
-                new MoveCollectiveArm(CollectiveMode.travelFS), // trackFS
-                new MoveCollectiveArm(CollectiveMode.travelLockFS))); // free mode to lock
+                new MoveCollectiveArm(CollectivePositions.travelFS), // trackFS
+                new MoveCollectiveArm(CollectivePositions.travelLockFS))); // free mode to lock
 
         oper.leftTrigger().whileTrue(new WheelsIn());
         oper.rightTrigger().whileTrue(new WheelsOut());
