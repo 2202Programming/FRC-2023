@@ -20,18 +20,21 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
+import frc.robot.commands.Arm.ArmLockForDriving;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.Pickup;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
+import frc.robot.commands.EndEffector.ToggleClaw;
 import frc.robot.commands.EndEffector.WheelsIn;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.Intake.Washer.DeployIntake;
@@ -392,6 +395,68 @@ public class RobotContainer {
 
     }
   }
+
+  private void driverIndividualBindings() {
+    CommandXboxController driver = dc.Driver();
+
+    // Triggers / shoulder Buttons
+    driver.leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
+    
+    // xyab
+    driver.x().whileTrue(new ChargeStationBalance(false));
+    driver.y().onTrue(new AllianceAwareGyroReset(false));
+
+    // dpad
+  }
+
+  private void operatorIndividualBindings() {
+    CommandXboxController operator = dc.Operator();
+
+    /**
+     * =======================
+     * SINGLE-BUTTON BIDNINGS
+     * =======================
+     */
+
+    // Triggers + shoulder buttons
+    operator.leftTrigger().whileTrue(new WheelsIn());
+    operator.rightTrigger().whileTrue(new WheelsOut());
+
+    // xyab
+    operator.x().onTrue(new ToggleClaw());
+    operator.y().onTrue(new ArmLockForDriving()); // TODO add arm return home cmd
+    operator.a().whileTrue(new intakeCompetitionToggle());
+    operator.b().whileTrue(new outtakeCompetitionToggle());
+
+    // dpad TODO use any new cmds to make sure chain doesn't snapy snap
+    operator.povUp().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+    operator.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+    operator.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
+    operator.povLeft().onTrue(new SequentialCommandGroup(new MoveCollectiveArm(CollectivePositions.travelFS), new MoveCollectiveArm(CollectivePositions.travelLockFS)));
+
+    // WI only manual scoring TODO remove
+        // pickup
+    operator.povDown().and(operator.x())
+      .onTrue(new Pickup(Substation.Left, GamePiece.Cube)); // substation doesn't matter
+    
+    operator.povDown().and(operator.leftTrigger())
+      .onTrue(new Pickup(Substation.Left, GamePiece.ConeFacingFront)); // which cone doesn't matter
+
+        // score
+      operator.povUp().and(operator.x())
+        .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
+      
+      operator.povUp().and(operator.rightTrigger())
+        .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+
+      operator.povRight().and(operator.x())
+        .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
+
+      operator.povRight().and(operator.rightTrigger())
+        .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+  }
+
+
 
   public void testPeriodic() {
     elbow.periodic();
