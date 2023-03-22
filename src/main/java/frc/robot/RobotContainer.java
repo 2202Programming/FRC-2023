@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
@@ -305,7 +306,7 @@ public class RobotContainer {
 
         dc.Operator().y().onTrue(new SequentialCommandGroup(
           new MoveCollectiveArm(CollectiveMode.power_on),       //no piece, backside
-          new MoveCollectiveArm(CollectiveMode.travelLockNoPieceBS))); //backside
+          new MoveCollectiveArm(CollectiveMode.travelLockNoPieceBS))); //free
 
         // PLACEMENT
         Trigger placeTrigger = dc.Driver().povLeft(); // save right tigger for concinseness in the next new commands
@@ -328,9 +329,12 @@ public class RobotContainer {
         // HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
 
         //MONDAY TESTING 3/20/23  TODO REMOVE BEFORE COMP
-        dc.Operator().povUp().onTrue(new ParallelCommandGroup(
-            new MoveCollectiveArm(CollectiveMode.pickupShelfFS),
-            new CloseClawWithGate()));
+        dc.Operator().povUp().onTrue(
+             new InstantCommand(() -> {claw.setNearestClawTrackMode();} )
+              .andThen(new WaitCommand(5.0))
+              .andThen(new ParallelCommandGroup(           
+                new MoveCollectiveArm(CollectiveMode.pickupShelfFS),
+                new CloseClawWithGate())));
         
             // THIS IS FANCY COMPLEX ONE for picking up from sehlf may f up
         dc.Driver().rightTrigger().and(dc.Operator().povUp().onTrue(new ParallelCommandGroup(
