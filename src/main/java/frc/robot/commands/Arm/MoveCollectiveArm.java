@@ -93,12 +93,13 @@ public class MoveCollectiveArm extends CommandBase {
    * Put any needed positions in this enum
    */
   public enum CollectiveMode {
-    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist - 3.0, ClawTrackMode.backSide, 10.0, -1.0), // TODO proper travel mode not "-3.0"
-    
+    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 10.0, -1.0), 
+    travelLockNoPieceBS(0.0, PowerOnPos.elbow, PowerOnPos.wrist -5.0 , ClawTrackMode.free, -1.0, 60.0), 
+
     //TODO ORGANIZE OR MOVE THIS
     travelFS(0.0, -28.0, 93.0, ClawTrackMode.frontSide, -1.0, 60.0),
     travelLockFS(0.0, -28.0, 93.0, ClawTrackMode.free, -1.0, 60.0), 
-    travelLockNoPieceFS(0.0, -28.0, 93.0, ClawTrackMode.free, -1.0, 60.0), 
+   
     
     
     pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),

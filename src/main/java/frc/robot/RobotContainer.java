@@ -303,6 +303,9 @@ public class RobotContainer {
         dc.Operator().a().whileTrue(new intakeCompetitionToggle());
         dc.Operator().b().whileTrue(new outtakeCompetitionToggle());
 
+        dc.Operator().y().onTrue(new SequentialCommandGroup(
+          new MoveCollectiveArm(CollectiveMode.power_on),       //no piece, backside
+          new MoveCollectiveArm(CollectiveMode.travelLockNoPieceBS))); //backside
 
         // PLACEMENT
         Trigger placeTrigger = dc.Driver().povLeft(); // save right tigger for concinseness in the next new commands
@@ -364,20 +367,6 @@ public class RobotContainer {
           elbow.incrementTrim();
         }));
 
-        /******************************************************
-         * WIP - Commands are needed, names will change, confirm with Drive team
-         * dc.Driver().leftTrigger().whileTrue(new RobotOrFieldCentric());
-         * dc.Driver().rightTrigger().whileTrue(new ActivatePlacer());
-         * 
-         * dc.Operator().leftTrigger().whileTrue(new leftColumn());
-         * dc.Operator().rightTrigger().whileTrue(new rightColumn());
-         * dc.Operator().leftBumper().whileTrue(new toggleIntake());
-         * dc.Operator().rightBumper().whileTrue(new operatorPlaceConfirm());
-         * dc.Operator().a().whileTrue(new activateIntake());
-         * dc.Operator().b().whileTrue(new intakeOrOrientatorRunBack());
-         * dc.Operator().x().whileTrue(new bottomRow());
-         * dc.Operator().y().whileTrue(new topRow());
-         ********************************************************/
         break;
 
     }
