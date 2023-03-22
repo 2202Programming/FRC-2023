@@ -212,9 +212,13 @@ public class Claw_Substyem extends SubsystemBase {
 
   //enter the track mode based on our current angle
   public ClawTrackMode  setNearestClawTrackMode() {
-    var mode =  getWristAngle() > 0.0 ? ClawTrackMode.frontSide : ClawTrackMode.backSide;
-    setTrackElbowMode(mode);
-    return mode;
+    //looks at claw + elbow angles to pick which side we should be on coming from free mode.
+    if (trackElbowMode == ClawTrackMode.free) {
+      var mode =  getWristAngle() + elbowAngle.getAsDouble() > 0.0 ? ClawTrackMode.frontSide : ClawTrackMode.backSide;
+      setTrackElbowMode(mode);
+    }
+    //otherwise just keep what we have
+    return getTrackElbowMode();
   } 
 
   public void setTrackElbowMode(ClawTrackMode mode) {

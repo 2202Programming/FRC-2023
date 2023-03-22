@@ -170,11 +170,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
 
     @Override
     public void periodic() {
-        // if the lightgate turns on add a frame that it thinks there's an object
-        if (false )
-            framesObject++;
-        else
-            framesObject = 0;
+        //TODO - replace lightgate logic
 
         prevFrameGamePiece = currentGamePiece;
         currentGamePiece = getGamePiece();
