@@ -627,18 +627,22 @@ public class SwerveDrivetrain extends SubsystemBase {
 
 public void disableVisionPoseRotation() {
   visionPoseUsingRotation = false;
+  System.out.println("*** Vision pose updating rotation disabled***");
 }
 
 public void enableVisionPoseRotation() {
   visionPoseUsingRotation = true;
+  System.out.println("*** Vision pose updating rotation enabled***");
 }
 
 public void enableVisionPose() {
   visionPoseEnabled = true;
+  System.out.println("*** Vision updating pose enabled***");
 }
 
 public void disableVisionPose(){
   visionPoseEnabled = false;
+  System.out.println("*** Vision updating pose disabled***");
 }
 
 }
