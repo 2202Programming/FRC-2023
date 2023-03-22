@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
@@ -29,11 +28,11 @@ import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
 import frc.robot.commands.Arm.ArmLockForDriving;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
-import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.CollectivePositions;
+import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.Pickup;
-import frc.robot.commands.EndEffector.CloseClawWithGate;
+import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.EndEffector.ToggleClaw;
 import frc.robot.commands.EndEffector.WheelsIn;
 import frc.robot.commands.EndEffector.WheelsOut;
@@ -41,7 +40,6 @@ import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
-import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.auto.autoTest;
 import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -55,13 +53,13 @@ import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
+import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
 import frc.robot.util.VelocityControlled;
@@ -338,19 +336,7 @@ public class RobotContainer {
         // HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
 
         // MONDAY TESTING 3/20/23 TODO REMOVE BEFORE COMP
-        oper.povUp().onTrue(
-            new SequentialCommandGroup(
-                new PrintCommand("############# help me I am trapped in robot hell"),
-                new InstantCommand(() -> {
-                  claw.setNearestClawTrackMode();
-                }),
-                new PrintCommand("claw up********************************"),
-                new WaitCommand(2.0),
-                new PrintCommand("wait done"),
-                new MoveCollectiveArm(CollectivePositions.pickupShelfFS),
-                new PrintCommand("arm move done"),
-                new CloseClawWithGate(),
-                new PrintCommand("close done")));
+        oper.povUp().onTrue( new ArmLockForDriving() );
 
         // THIS IS FANCY COMPLEX ONE for picking up from sehlf may f up
         driver.rightTrigger().and(oper.povUp()).onTrue(

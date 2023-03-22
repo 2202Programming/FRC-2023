@@ -52,19 +52,27 @@ public class ArmLockForDriving extends CommandBase {
         // backside tracking already enabled
         new MoveCollectiveArm(move_slow_power_on),
         new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS));
+    on_backside.setName("already_on_bs");
 
     // on front-side need to flip safely and fold up
     on_frontside = new SequentialCommandGroup(
         // front tracking already enabled
         new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.backSide); }),
-        new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),        
-        on_backside);
+        new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),
+        new MoveCollectiveArm(move_slow_power_on),
+        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS));                
+    on_frontside.setName("safe_flip_before_move");
 
     // on front-side but outside flip, move elbow out flip, move back
     on_frontside_mv2flip = new SequentialCommandGroup(
         //need to move to a flip point with elbow
         new MoveElbow(safe.elbowPos, safe.elbowMaxVel),
-        on_frontside);        
+        new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.backSide); }),
+        new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),
+        new MoveCollectiveArm(move_slow_power_on),
+        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS));          
+        
+    on_frontside_mv2flip.setName("move_out_to_flip_first");        
   }
 
   private Command PrintCommand(String string) {
