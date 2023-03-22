@@ -210,7 +210,13 @@ public class Claw_Substyem extends SubsystemBase {
     gate_blocked = !lightgate.get();
   }
 
-   
+  //enter the track mode based on our current angle
+  public ClawTrackMode  setNearestClawTrackMode() {
+    var mode =  getWristAngle() > 0.0 ? ClawTrackMode.frontSide : ClawTrackMode.backSide;
+    setTrackElbowMode(mode);
+    return mode;
+  } 
+
   public void setTrackElbowMode(ClawTrackMode mode) {
     //tracking mode, zero the manual offset
     trackElbowMode = mode;
