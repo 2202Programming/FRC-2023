@@ -28,7 +28,7 @@ public class ModuleInversionSpecs{
    * @param kAngleCmdInvert invert angle encoder
    */
     public ModuleInversionSpecs(boolean kDriveMotorInvert, boolean kAngleMotorInvert, boolean kAngleCmdInvert){
-        this.kAngleMotorInvert = kDriveMotorInvert;
+        this.kDriveMotorInvert = kDriveMotorInvert;
         this.kAngleMotorInvert = kAngleMotorInvert;
         this.kAngleCmdInvert = kAngleCmdInvert;
     }
