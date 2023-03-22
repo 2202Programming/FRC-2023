@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.util.PIDFController;
+import frc.robot.util.ModuleInversionSpecs;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -49,6 +50,20 @@ public final class Constants {
     }
   }
 
+  public static final class ChassisInversionSpecs{
+    public ModuleInversionSpecs FR;
+    public ModuleInversionSpecs FL;
+    public ModuleInversionSpecs BR;
+    public ModuleInversionSpecs BL;
+  
+    public ChassisInversionSpecs(ModuleInversionSpecs FR, ModuleInversionSpecs FL, ModuleInversionSpecs BR, ModuleInversionSpecs BL){
+        this.FR = FR;
+        this.FL = FL;
+        this.BR = BR;
+        this.BL = BL;
+    }
+  }
+
   public static final SubsystemConfig swerveBotSubsystemConfig = new SubsystemConfig(false,false, false, false, false,      false, true, true);
   public static final SubsystemConfig chadBotSubsystemConfig = new SubsystemConfig(true, true, false, true, true, true, true, true);
   //2023 competitionbot
@@ -60,6 +75,24 @@ public final class Constants {
       false,
       true,
       true);
+
+  public static final ChassisInversionSpecs swerveBotChassisInversionSpecs = new ChassisInversionSpecs(
+    new ModuleInversionSpecs(true,false,false), //FR
+    new ModuleInversionSpecs(false,false,false), //FL
+    new ModuleInversionSpecs(true,false,false), //BR
+    new ModuleInversionSpecs(false,false,false)); //BL
+
+  public static final ChassisInversionSpecs chadBotChassisInversionSpecs = new ChassisInversionSpecs(
+    new ModuleInversionSpecs(true,false,false), //FR
+    new ModuleInversionSpecs(false,false,false), //FL
+    new ModuleInversionSpecs(true,false,false), //BR
+    new ModuleInversionSpecs(false,false,false)); //BL
+  
+  public static final ChassisInversionSpecs compBotChassisInversionSpecs = new ChassisInversionSpecs(
+    new ModuleInversionSpecs(true,false,false), //FR
+    new ModuleInversionSpecs(false,false,false), //FL
+    new ModuleInversionSpecs(true,false,false), //BR
+    new ModuleInversionSpecs(false,false,false)); //BL
 
   // Handy feet to meters
   public static final double FTperM = 3.28084;
