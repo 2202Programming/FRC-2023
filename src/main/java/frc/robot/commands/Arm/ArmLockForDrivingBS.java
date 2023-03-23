@@ -17,7 +17,7 @@ import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 import frc.robot.subsystems.Elbow;
 
-public class ArmLockForDriving extends CommandBase {
+public class ArmLockForDrivingBS extends CommandBase {
 
   // hardware commanded
   ArmSS arm = RobotContainer.RC().armSS;
@@ -43,7 +43,7 @@ public class ArmLockForDriving extends CommandBase {
    * 
    * 
    */
-  public ArmLockForDriving() {
+  public ArmLockForDrivingBS() {
 
     Positions move_slow_power_on = new Positions(CollectivePositions.travelNoPieceBS);
     move_slow_power_on.armMaxVel = ARM_RETRACT;

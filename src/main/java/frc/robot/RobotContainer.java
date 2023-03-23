@@ -25,13 +25,15 @@ import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
-import frc.robot.commands.Arm.ArmLockForDriving;
+import frc.robot.commands.Arm.ArmLockForDrivingBS;
+import frc.robot.commands.Arm.ArmLockForDrivingFS;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.MoveToFactory;
 import frc.robot.commands.Automation.Pickup.Substation;
+import frc.robot.commands.EndEffector.TrackThenMove;
 import frc.robot.commands.EndEffector.ToggleClaw;
 import frc.robot.commands.EndEffector.WheelsIn;
 import frc.robot.commands.EndEffector.WheelsOut;
@@ -332,20 +334,19 @@ public class RobotContainer {
 
     // xyab
     operator.x().onTrue(new ToggleClaw());
-    operator.y().onTrue(new ArmLockForDriving());
+    operator.y().onTrue(new ArmLockForDrivingBS());
     operator.a().whileTrue(new intakeCompetitionToggle());
     operator.b().whileTrue(new outtakeCompetitionToggle());
 
     // dpad
     manual.and(operator.povUp())
-          .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+          .onTrue(new TrackThenMove(CollectivePositions.placeConeHighFS));
     manual.and(operator.povRight())
-          .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+          .onTrue(new TrackThenMove(CollectivePositions.placeConeMidFS));
     manual.and(operator.povDown())
-          .onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
+          .onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS));
     manual.and(operator.povLeft())
-          .onTrue(new SequentialCommandGroup(new MoveCollectiveArm(CollectivePositions.travelFS),
-                  new MoveCollectiveArm(CollectivePositions.travelLockFS)));
+          .onTrue(new ArmLockForDrivingFS());
 
     // // WI only manual scoring TODO remove
     // // pickup
