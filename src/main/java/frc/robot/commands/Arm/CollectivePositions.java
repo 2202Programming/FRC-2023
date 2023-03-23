@@ -11,21 +11,24 @@ import frc.robot.Constants.ConePickup;;
 
 /** Add your docs here. */
 public enum CollectivePositions {
-    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 10.0, -1.0), 
+    power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 18.0, 60.0),
+    travelNoPieceBS(PowerOnPos.arm, 10.0, PowerOnPos.wrist, ClawTrackMode.backSide, 18.0, -1.0),  
     travelLockNoPieceBS(0.0, PowerOnPos.elbow, PowerOnPos.wrist -5.0 , ClawTrackMode.free, -1.0, 60.0), 
     safeToFlip(0.0, 70.0, 0.0, ClawTrackMode.free, -1.0, 60),
     
     //TODO ORGANIZE OR MOVE THIS
-    travelFS(0.0, -28.0, 93.0, ClawTrackMode.frontSide, -1.0, 60.0),
-    travelLockFS(0.0, -28.0, 93.0, ClawTrackMode.free, -1.0, 60.0), 
+    travelFS(0.0, -28.0, 85.0, ClawTrackMode.frontSide, -1.0, 60.0),
+    travelLockFS(0.0, -28.0, 85.0, ClawTrackMode.free, -1.0, 60.0), 
    
    
 
     pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),
     haveConeAtShelf(ConePickup.armLength, ConePickup.elbowAngle, 35.0, ClawTrackMode.free),   //assumes wrist near zero
     
+    
     placeConeMidFS(12.0, 130.0, -51.0, ClawTrackMode.frontSide),
     placeCubeMidFS(12.0, 125.0, -51.0, ClawTrackMode.frontSide),
+
     placeConeHighFS(37.0, 135.0, -40.0, ClawTrackMode.frontSide),
     placeCubeHighFS(37.0, 105.0, -50.0, ClawTrackMode.frontSide),
    
