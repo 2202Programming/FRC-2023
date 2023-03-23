@@ -2,14 +2,20 @@ package frc.robot.commands.Automation;
 
 import com.pathplanner.lib.PathConstraints;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
+import frc.robot.commands.Arm.CollectivePositions;
+import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.auto.goToScoringPosition;
+import frc.robot.commands.swerve.RotateTo;
 
 public class MoveToFactory extends CommandBase {
     // controlllers
@@ -19,7 +25,8 @@ public class MoveToFactory extends CommandBase {
     // state vars
     HorizontalScoringLane horizLane;
     HorizontalSubstationLane subLane;
-    Command cmd;
+    CollectivePositions armPos;
+    SequentialCommandGroup cmd;
 
     // constants
     private final double DEADZONE2 = 0.025; // [%^2] percent of deadzone squared
@@ -34,6 +41,7 @@ public class MoveToFactory extends CommandBase {
     }
 
     public void initialize() {
+        cmd = new SequentialCommandGroup();
         // Station lane
         if (driver.leftBumper().getAsBoolean()) horizLane = HorizontalScoringLane.Left;
         else if (driver.rightBumper().getAsBoolean()) horizLane = HorizontalScoringLane.Right;
@@ -44,7 +52,16 @@ public class MoveToFactory extends CommandBase {
         else if (operator.rightBumper().getAsBoolean()) subLane = HorizontalSubstationLane.Right;
         else subLane = HorizontalSubstationLane.Center;
 
-        cmd = new goToScoringPosition(new PathConstraints(2.0, 3.0), horizLane, subLane);
+        // Arm mid/high
+        armPos = (operator.povUp().getAsBoolean()) ? CollectivePositions.placeConeHighFS : CollectivePositions.placeConeMidFS;
+
+        Rotation2d scoreRotation = new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 180.0 : 0.0);
+
+        cmd.addCommands(
+            new goToScoringPosition(new PathConstraints(2.0, 3.0), horizLane, subLane),
+            new RotateTo(scoreRotation),
+            new MoveCollectiveArm(armPos)
+        );
         
         // bail when the driver says so
         cmd.until(() -> {

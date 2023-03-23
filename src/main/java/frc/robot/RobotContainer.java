@@ -30,7 +30,6 @@ import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.MoveToFactory;
-import frc.robot.commands.Automation.Pickup;
 import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.EndEffector.ToggleClaw;
 import frc.robot.commands.EndEffector.WheelsIn;
@@ -51,7 +50,6 @@ import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
-import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Limelight_Subsystem;
@@ -289,9 +287,9 @@ public class RobotContainer {
         if (drivetrain == null)
           break;
         // enable any network table watchers we want in competion
-        armSS.getWatcher(); // remove for comp
-        claw.getWatcher(); // ditto
-        elbow.getWatcher(); // ditto
+        // armSS.getWatcher(); // remove for comp
+        // claw.getWatcher(); // ditto
+        // elbow.getWatcher(); // ditto
         
         driverIndividualBindings();
         operatorIndividualBindings();
@@ -376,7 +374,9 @@ public class RobotContainer {
       driver.leftBumper(),
       driver.rightBumper(),
       operator.leftBumper(),
-      operator.rightBumper()
+      operator.rightBumper(),
+      operator.povUp(),
+      operator.povRight()
     ));
   }
 
