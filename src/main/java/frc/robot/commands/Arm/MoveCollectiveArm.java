@@ -242,6 +242,7 @@ public class MoveCollectiveArm extends CommandBase {
   public void end(boolean interrupted) {
     elbow.setMaxVel(old_elbow_max_vel);
     arm.setMaxVel(old_arm_max_vel);
+    System.out.println("MCA done intr=" +interrupted);
   }
 
   /*
