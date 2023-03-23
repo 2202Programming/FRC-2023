@@ -416,12 +416,11 @@ public class RobotContainer {
 
     // xyab
     operator.x().onTrue(new ToggleClaw());
-    operator.y().onTrue(new ArmLockForDriving()); // T
-    // TODO add arm return home cmd
+    operator.y().onTrue(new ArmLockForDriving());
     operator.a().whileTrue(new intakeCompetitionToggle());
     operator.b().whileTrue(new outtakeCompetitionToggle());
 
-    // dpad TODO use any new cmds to make sure chain doesn't snapy snap
+    // dpad
     operator.povUp().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
     operator.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
     operator.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
@@ -449,6 +448,37 @@ public class RobotContainer {
     operator.povRight().and(operator.rightTrigger())
         .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
   }
+
+  /**
+   * Same STL cmds but 0.5m back for WI
+   * 
+   * TODO remove after Wisconsin
+   */
+  public void wisconsinMoveTo() {
+    CommandXboxController driver = dc.Driver();
+    
+    // PLACEMENT
+    Trigger placeTrigger = driver.povLeft(); // save right tigger for concinseness in the next new commands
+    // Top Place
+    placeTrigger.and(oper.leftBumper()).onTrue(new Place(colorSensors,
+    HorizontalScoringLane.Left, VerticalScoringLane.Top));
+    placeTrigger.and(oper.rightBumper()).onTrue(new Place(colorSensors,
+    HorizontalScoringLane.Right, VerticalScoringLane.Top));
+    // Middle Place
+    placeTrigger.and(oper.leftTrigger()).onTrue(new Place(colorSensors,
+    HorizontalScoringLane.Left, VerticalScoringLane.Middle));
+    placeTrigger.and(oper.rightTrigger()).onTrue(new Place(colorSensors,
+    HorizontalScoringLane.Right, VerticalScoringLane.Middle));
+    // Bottom Place
+    placeTrigger.and(oper.povDown()).onTrue(new Place(colorSensors,
+    HorizontalScoringLane.Center, VerticalScoringLane.Bottom));
+    placeTrigger.and(oper.povLeft()).onTrue(new Place(colorSensors,
+    HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
+    placeTrigger.and(oper.povRight()).onTrue(new Place(colorSensors,
+    HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
+  }
+
+
 
   public void testPeriodic() {
     elbow.periodic();
