@@ -132,7 +132,7 @@ public class ArmLockForDriving extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return cmd.isFinished();
+    return true; // cmd.isFinished(); TODO figure out why sequential cmd groups aren't finishing
   }
 
   /*
