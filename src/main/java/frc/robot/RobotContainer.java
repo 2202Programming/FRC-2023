@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
+import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
@@ -207,6 +208,9 @@ public class RobotContainer {
 
     // Edit the binding confiuration for testing
     configureBindings(Bindings.Competition);
+
+    //Keep the wrist down at power up + 5 deg to put some pressure on it
+    claw.setWristAngle(PowerOnPos.wrist +5.0);  
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
