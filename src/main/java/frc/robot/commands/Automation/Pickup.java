@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
@@ -43,12 +44,13 @@ public class Pickup extends CommandBase {
     @Override
     public void initialize() {
         cmd = new SequentialCommandGroup();
+        cmd.addCommands(new PrintCommand("New SCG created"));
         //move();      // must move to close, but clear spot for arm extend
         extend();  
         getPiece();
         //backup();
         //retract();
-
+        cmd.addCommands(new PrintCommand("SCG should be ending"));
         // bail when the driver says so
         cmd.until(() -> {
             boolean xStickStill = (Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE2; 
@@ -71,7 +73,11 @@ public class Pickup extends CommandBase {
      * Extends arm out to pickup position
      */
     public void extend() {
-        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
+        cmd.addCommands(
+            new PrintCommand("Before pickup shelf"),
+            new MoveCollectiveArm(CollectivePositions.pickupShelfFS),
+            new PrintCommand("After pickup shelf")
+        );
     }
 
     /**
@@ -80,7 +86,11 @@ public class Pickup extends CommandBase {
      * have to interrupt the sequence.
      */
     public void getPiece() {
-        cmd.addCommands(new PickupDrive(0.5 , gamePiece));  
+        cmd.addCommands(
+            new PrintCommand("Before PickupDrive"),
+            new PickupDrive(0.5 , gamePiece),
+            new PrintCommand("After PickupDrive")
+            );  
     }
 
     /**
