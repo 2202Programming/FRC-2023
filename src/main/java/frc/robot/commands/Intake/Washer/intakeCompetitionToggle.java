@@ -52,6 +52,7 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
   @Override
   public void end(boolean interrupted) {
     intake.carwashOff();
+    intake.intakeOff();
     intake.retract();
     // rumbleCommand.cancel();
   }

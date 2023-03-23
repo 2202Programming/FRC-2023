@@ -280,6 +280,7 @@ public class Claw_Substyem extends SubsystemBase {
     NetworkTableEntry nt_gamePieceHeld;
     NetworkTableEntry nt_maxArbFF;
     NetworkTableEntry nt_trackMode;
+    NetworkTableEntry nt_lightgate;
     @Override
     public String getTableName() {
       return Claw_Substyem.this.getName();
@@ -290,6 +291,7 @@ public class Claw_Substyem extends SubsystemBase {
       nt_isOpen = table.getEntry("Open");
       nt_maxArbFF = table.getEntry("/wrist/maxArbFF");
       nt_trackMode = table.getEntry("trackMode");
+      nt_lightgate = table.getEntry("lightgate");
 
       // default value for mutables
       nt_maxArbFF.setDouble(maxArbFF);
@@ -298,6 +300,7 @@ public class Claw_Substyem extends SubsystemBase {
     public void ntupdate() {
       nt_isOpen.setBoolean(is_open);
       nt_trackMode.setString(trackElbowMode.toString());
+      nt_lightgate.setBoolean(isGateBlocked());
 
       // get mutable values
       maxArbFF = nt_maxArbFF.getDouble(maxArbFF);
