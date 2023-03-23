@@ -65,7 +65,7 @@ public class MoveToFactory extends CommandBase {
         // Arm mid/high
         armPos = (operator.povUp().getAsBoolean()) ? CollectivePositions.placeConeHighFS : CollectivePositions.placeConeMidFS;
 
-        Rotation2d scoreRotation = new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 180.0 : 0.0);
+        Rotation2d scoreRotation = new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 0.0 : 180.0);
 
         System.out.println("Ready to create SCG, Horizontal Scoring Lane: " + horizLane.toString() + 
                             ", Substation Lane: " + subLane.toString() + ", arm position: " + armPos.toString());
