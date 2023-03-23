@@ -210,7 +210,7 @@ public class RobotContainer {
     configureBindings(Bindings.Competition);
 
     //Keep the wrist down at power up + 5 deg to put some pressure on it
-    claw.setWristAngle(PowerOnPos.wrist +5.0);  
+    claw.setWristAngle(PowerOnPos.wrist + 5.0);  
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
