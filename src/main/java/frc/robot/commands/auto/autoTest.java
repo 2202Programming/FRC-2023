@@ -20,8 +20,8 @@ public class autoTest extends CommandBase {
     HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
 
     // Constraints
-    double maxVel = 3.0; // for mid going over charge station (STL elims) prev 4.5
-    double macAccel = 3.0; // for mid going over charge station (STL elims) pre 4.0
+    double maxVel = 1.5; // for mid going over charge station (STL elims) prev 4.5
+    double macAccel = 1.5; // for mid going over charge station (STL elims) pre 4.0
 
     // Path info
     String pathName = "MKE-";
@@ -52,11 +52,11 @@ public class autoTest extends CommandBase {
 
         if (pathName.contains("Edge")) {
             pathGroup = PathPlanner.loadPathGroup(pathName,
-            new PathConstraints(4, 4), //2 orig, 3 worked for all speed @3.5
-              new PathConstraints(2, 2), // worked @1.75/2.25 respectively
-              new PathConstraints(4, 4),
-              new PathConstraints(2, 2),
-              new PathConstraints(4, 4));
+            new PathConstraints(2,2), //2 orig, 3 worked for all speed @3.5
+              new PathConstraints(1,1), // worked @1.75/2.25 respectively
+              new PathConstraints(2,2),
+              new PathConstraints(1,1),
+              new PathConstraints(2,2));
         }
         else{
             pathGroup = PathPlanner.loadPathGroup(pathName, new PathConstraints(maxVel, macAccel));
