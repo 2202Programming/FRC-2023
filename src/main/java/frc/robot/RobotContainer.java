@@ -367,6 +367,17 @@ public class RobotContainer {
 
     // operator.povRight().and(operator.rightTrigger())
     //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+
+    // ELBOW TRIM - Button not finalized TODO- FIX BUTTONS
+    Trigger manualOn = sb.sw26();
+
+    manualOn.and(operator.povDown()).onTrue(new InstantCommand(() -> {
+      elbow.decrementTrim();
+    }));
+
+    manualOn.and(operator.povUp()).onTrue(new InstantCommand(() -> {
+      elbow.incrementTrim();
+    }));
   }
 
   /**
