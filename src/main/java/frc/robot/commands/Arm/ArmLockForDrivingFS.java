@@ -51,7 +51,8 @@ public class ArmLockForDrivingFS extends CommandBase {
     // on front-side, stay there and fold in.
     on_frontside = new SequentialCommandGroup(
         // front tracking already enabled        
-        new MoveCollectiveArm(move_slow));         
+        new MoveCollectiveArm(move_slow),
+        new MoveCollectiveArm(CollectivePositions.travelLockFS)    );         
     on_frontside.setName("safe fs move");
 
 
@@ -59,7 +60,8 @@ public class ArmLockForDrivingFS extends CommandBase {
         // backside tracking already enabled
         new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.frontSide); }),
         new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),
-        new MoveCollectiveArm(move_slow)    );
+        new MoveCollectiveArm(move_slow),
+        new MoveCollectiveArm(CollectivePositions.travelLockFS)    );
     on_backside_safe.setName("backside safe to flip to fs");
 
     // on front-side but outside flip, move elbow out flip, move back
@@ -68,7 +70,8 @@ public class ArmLockForDrivingFS extends CommandBase {
         new MoveElbow(safe.elbowPos, safe.elbowMaxVel),
         new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.frontSide); }),
         new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),
-        new MoveCollectiveArm(move_slow));        
+        new MoveCollectiveArm(move_slow),
+        new MoveCollectiveArm(CollectivePositions.travelLockFS)    );        
     on_backside_mv2flip.setName("backside move out to flip_first");            
   }
 

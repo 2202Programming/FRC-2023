@@ -12,7 +12,7 @@ import frc.robot.subsystems.Claw_Substyem;
 public class CloseClawWithGate extends CommandBase {
   final Claw_Substyem claw = RobotContainer.RC().claw;
   Timer closeTimer = new Timer();
-  double waitPeriod = 0.25; // [sec]
+  double waitPeriod = 0.35; // [sec]
   int framesBlocked; // [frames]
   boolean done;
   
@@ -40,7 +40,7 @@ public class CloseClawWithGate extends CommandBase {
       closeTimer.reset();
     }
     
-    if (framesBlocked == 10)  {
+    if (framesBlocked == 5)  {
       claw.close();
       closeTimer.start();
       System.out.printf("ClawTimer Started");
