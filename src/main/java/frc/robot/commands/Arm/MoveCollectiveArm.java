@@ -135,6 +135,12 @@ public class MoveCollectiveArm extends CommandBase {
     flip_possible = false; // until proven otherwise
     arm_flip_possible = false;
 
+    if (flip_requested) {
+      //need to be in a tracking mode, Free could be pointing weird
+      //so track nearest frontside/backside angle
+      start.mode = claw.setNearestClawTrackMode();
+    }
+
     // which way are we moving, in or out
     heading_out = (target.elbowPos - start.elbowPos) > 0.0;
     heading_out_arm = (target.armPos - start.armPos) > 0.0;
@@ -254,7 +260,7 @@ public class MoveCollectiveArm extends CommandBase {
   public boolean isFinished() {
     return (arm.atSetpoint() &&
         elbow.atSetpoint() &&
-        (wrist.atSetpoint() || !flip_possible));
+        (wrist.atSetpoint() || !flip_possible || !flip_requested));
   }
 
 }
