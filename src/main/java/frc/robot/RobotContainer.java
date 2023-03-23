@@ -341,26 +341,26 @@ public class RobotContainer {
     operator.povLeft().onTrue(new SequentialCommandGroup(new MoveCollectiveArm(CollectivePositions.travelFS),
         new MoveCollectiveArm(CollectivePositions.travelLockFS)));
 
-    // WI only manual scoring TODO remove
-    // pickup
-    operator.povDown().and(operator.x())
-        .onTrue(new Pickup(Substation.Left, GamePiece.Cube)); // substation doesn't matter
+    // // WI only manual scoring TODO remove
+    // // pickup
+    // operator.povDown().and(operator.x())
+    //     .onTrue(new Pickup(Substation.Left, GamePiece.Cube)); // substation doesn't matter
 
-    operator.povDown().and(operator.leftTrigger())
-        .onTrue(new Pickup(Substation.Left, GamePiece.ConeFacingFront)); // which cone doesn't matter
+    // operator.povDown().and(operator.leftTrigger())
+    //     .onTrue(new Pickup(Substation.Left, GamePiece.ConeFacingFront)); // which cone doesn't matter
 
-    // score
-    operator.povUp().and(operator.x())
-        .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
+    // // score
+    // operator.povUp().and(operator.x())
+    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
 
-    operator.povUp().and(operator.rightTrigger())
-        .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+    // operator.povUp().and(operator.rightTrigger())
+    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
 
-    operator.povRight().and(operator.x())
-        .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
+    // operator.povRight().and(operator.x())
+    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
 
-    operator.povRight().and(operator.rightTrigger())
-        .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+    // operator.povRight().and(operator.rightTrigger())
+    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
   }
 
   /**
