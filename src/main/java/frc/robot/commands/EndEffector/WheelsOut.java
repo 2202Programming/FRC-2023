@@ -13,6 +13,7 @@ public class WheelsOut extends CommandBase {
 
     @Override
     public void initialize() {
+        claw.open();
         claw.wheelsOut();
     }
 

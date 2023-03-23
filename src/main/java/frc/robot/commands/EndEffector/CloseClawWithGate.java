@@ -25,6 +25,7 @@ public class CloseClawWithGate extends CommandBase {
   public void initialize() {
     framesBlocked = 0;
     claw.open();
+    claw.wheelsIn();
     closeTimer.stop();
     System.out.printf("Claw auto open Started");
 
@@ -50,6 +51,7 @@ public class CloseClawWithGate extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    claw.wheelsOff();
     closeTimer.reset();
     System.out.println("Claw Close by light gate finished");
   }
