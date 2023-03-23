@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -57,10 +58,17 @@ public class MoveToFactory extends CommandBase {
 
         Rotation2d scoreRotation = new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 180.0 : 0.0);
 
+        System.out.println("Ready to create SCG, Horizontal Scoring Lane: " + horizLane.toString() + 
+                            ", Substation Lane: " + subLane.toString() + ", arm position: " + armPos.toString());
+
         cmd.addCommands(
+            new PrintCommand("Starting SCG"),
             new goToScoringPosition(new PathConstraints(2.0, 3.0), horizLane, subLane),
+            new PrintCommand("End autopath"),
             new RotateTo(scoreRotation),
-            new MoveCollectiveArm(armPos)
+            new PrintCommand("End rotation"),
+            new MoveCollectiveArm(armPos),
+            new PrintCommand("End SCG")
         );
         
         // bail when the driver says so
@@ -70,5 +78,8 @@ public class MoveToFactory extends CommandBase {
             return !(xStickStill && yStickStill);
           }).schedule();
     }
+
+    @Override
+    public boolean isFinished() {return true;}
     
 }
