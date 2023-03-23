@@ -12,7 +12,8 @@ import frc.robot.subsystems.Claw_Substyem;
 public class CloseClawWithGate extends CommandBase {
   final Claw_Substyem claw = RobotContainer.RC().claw;
   Timer closeTimer = new Timer();
-  double waitPeriod = 5.3;
+  double waitPeriod = 0.25; // [sec]
+  int framesBlocked; // [frames]
   boolean done;
   
   /** Creates a new CloseClawWithGate. */
@@ -22,6 +23,7 @@ public class CloseClawWithGate extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    framesBlocked = 0;
     claw.open();
     closeTimer.stop();
     System.out.printf("Claw auto open Started");
@@ -32,11 +34,16 @@ public class CloseClawWithGate extends CommandBase {
   @Override
   public void execute() {
     if (claw.isGateBlocked()) {
+      framesBlocked++;
+    } else {
+      framesBlocked = 0;
+    }
+    
+    if (framesBlocked == 10)  {
       claw.close();
       closeTimer.start();
       System.out.printf("ClawTimer Started");
     }
-
   }
 
   // Called once the command ends or is interrupted.

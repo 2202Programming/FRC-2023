@@ -34,6 +34,7 @@ import frc.robot.commands.Arm.TrackThenMove;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.MoveToFactory;
 import frc.robot.commands.Automation.Pickup.Substation;
+import frc.robot.commands.EndEffector.CloseClawWithGate;
 import frc.robot.commands.EndEffector.ToggleClaw;
 import frc.robot.commands.EndEffector.WheelsIn;
 import frc.robot.commands.EndEffector.WheelsOut;
@@ -344,7 +345,7 @@ public class RobotContainer {
     manual.and(operator.povRight())
           .onTrue(new TrackThenMove(CollectivePositions.placeConeMidFS));
     manual.and(operator.povDown())
-          .onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS));
+          .onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS).andThen(new CloseClawWithGate()));
     manual.and(operator.povLeft())
           .onTrue(new ArmLockForDrivingFS());
 
