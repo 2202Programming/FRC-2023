@@ -35,6 +35,7 @@ import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.MoveToFactory;
 import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
+import frc.robot.commands.EndEffector.InWheelsWithGate;
 import frc.robot.commands.EndEffector.ToggleClaw;
 import frc.robot.commands.EndEffector.WheelsIn;
 import frc.robot.commands.EndEffector.WheelsOut;
@@ -298,7 +299,7 @@ public class RobotContainer {
         
         driverIndividualBindings();
         operatorIndividualBindings();
-        wisconsinMoveTo();
+        //wisconsinMoveTo();
 
         break;
 
@@ -330,8 +331,8 @@ public class RobotContainer {
      */
 
     // Triggers + shoulder buttons
-    operator.leftTrigger().whileTrue(new WheelsIn());
-    operator.rightTrigger().whileTrue(new WheelsOut());
+    operator.leftBumper().whileTrue(new WheelsIn());
+    operator.rightBumper().whileTrue(new WheelsOut());
 
     // xyab
     operator.x().onTrue(new ToggleClaw());
@@ -344,8 +345,10 @@ public class RobotContainer {
           .onTrue(new TrackThenMove(CollectivePositions.placeConeHighFS));
     manual.and(operator.povRight())
           .onTrue(new TrackThenMove(CollectivePositions.placeConeMidFS));
-    manual.and(operator.povDown())
+    manual.and(operator.povDown()).and(operator.leftTrigger().negate())
           .onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS).andThen(new CloseClawWithGate()));
+    manual.and(operator.povDown()).and(operator.leftTrigger())
+          .onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS).andThen(new InWheelsWithGate()));
     manual.and(operator.povLeft())
           .onTrue(new ArmLockForDrivingFS());
 
