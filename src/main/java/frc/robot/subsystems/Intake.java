@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.PCM1;
+import frc.robot.Constants.Intake_Constants;
 
 /*
  * On the intake: upper and lower motor and pneumatics (double solenoid)
@@ -23,9 +24,6 @@ import frc.robot.Constants.PCM1;
  */
 
 public class Intake extends SubsystemBase {
-
-  double IntakeMotorStrength = 0.35; //used for default ON
-  double CarwashMotorStrength = 0.5; // used for default ON TODO move to constatns (same with above)
 
   private double currentIntakeSpeed;
   private double currentCarwashSpeed;
@@ -50,8 +48,6 @@ final DoubleSolenoid lt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
 
   final CANSparkMax l_carwash_mtr = new CANSparkMax(CAN.CARWASH_LEFT_MTR, CANSparkMax.MotorType.kBrushless);
   final CANSparkMax r_carwash_mtr = new CANSparkMax(CAN.CARWASH_RIGHT_MTR, CANSparkMax.MotorType.kBrushless);
-
-  //TODO: dpl  1/27/23 possible lightgate for triggering - check with mechanical team
   
   /** Creates a new Intake. */
   public Intake() {
@@ -82,11 +78,11 @@ final DoubleSolenoid lt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
   }
 
   public void intakeOn(){    //on() with no-args is default
-    setIntakeSpeed(IntakeMotorStrength);
+    setIntakeSpeed(Intake_Constants.IntakeMotorStrength);
   }
   
   public void intakeOnReverse() {
-    setIntakeSpeed(-IntakeMotorStrength);
+    setIntakeSpeed(-Intake_Constants.IntakeMotorStrength);
   }
 
   public void intakeOff() {
@@ -122,11 +118,11 @@ final DoubleSolenoid lt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
   }
 
   public void carwashOn() {
-    setCarwashSpeed(CarwashMotorStrength);
+    setCarwashSpeed(Intake_Constants.CarwashMotorStrength);
   }
 
   public void carwashOnReverse() {
-    setCarwashSpeed(-CarwashMotorStrength);
+    setCarwashSpeed(-Intake_Constants.CarwashMotorStrength);
   }
 
   public void carwashOff() {

@@ -21,7 +21,6 @@ public class RotateTo extends CommandBase {
   double rotatePidOutput = 0.0;
 
   Rotation2d currentAngle;
-  double min_rot_rate = 6.0;   
   double rot;
   
   final double vel_tol = 0.1; // [radians/s]
@@ -54,12 +53,9 @@ public class RotateTo extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return isReady();
-  }
-
-  public boolean isReady() {
     return rotatePid.atSetpoint();
   }
+
   void calculate(){
     currentAngle = sdt.getPose().getRotation();
     double targetYawError = currentAngle.getRadians();

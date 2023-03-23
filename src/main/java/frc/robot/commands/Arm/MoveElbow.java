@@ -1,35 +1,32 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+package frc.robot.commands.Arm;
 
-package frc.robot.commands.EndEffector;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.Claw_Substyem;
+import frc.robot.subsystems.Elbow;
 
-public class MoveWrist extends CommandBase {
-  final Claw_Substyem claw;
+public class MoveElbow extends CommandBase {
+  final Elbow elbow = RobotContainer.RC().elbow;
   final double angle;
   final double maxVel;
 
   double old_maxVel;
  
   /** Creates a new GamePieceAngle. */
-  public MoveWrist(double angle) {
+  public MoveElbow(double angle) {
     this(angle, -1.0);
   }
-  public MoveWrist(double angle, double maxVel)  {
-    this.claw = RobotContainer.RC().claw;
+  public MoveElbow(double angle, double maxVel)  {
     this.angle = angle;
-    this.maxVel = (maxVel < 0.0) ? claw.getWrist().getMaxVel() : maxVel;
+    this.maxVel = (maxVel < 0.0) ? elbow.getMaxVel() : maxVel;
+    addRequirements(elbow);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    old_maxVel = claw.getWrist().getMaxVel();
-    claw.setWristAngle(angle);
+    old_maxVel = elbow.getMaxVel();
+    elbow.setSetpoint(angle); 
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -41,12 +38,12 @@ public class MoveWrist extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    claw.getWrist().setMaxVel(old_maxVel);
+    elbow.setMaxVel(old_maxVel);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return claw.wristAtSetpoint();
+    return elbow.atSetpoint();
   }
 }

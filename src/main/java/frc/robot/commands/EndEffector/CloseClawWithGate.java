@@ -4,49 +4,50 @@
 
 package frc.robot.commands.EndEffector;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Claw_Substyem;
 
-public class MoveWrist extends CommandBase {
-  final Claw_Substyem claw;
-  final double angle;
-  final double maxVel;
-
-  double old_maxVel;
- 
-  /** Creates a new GamePieceAngle. */
-  public MoveWrist(double angle) {
-    this(angle, -1.0);
-  }
-  public MoveWrist(double angle, double maxVel)  {
-    this.claw = RobotContainer.RC().claw;
-    this.angle = angle;
-    this.maxVel = (maxVel < 0.0) ? claw.getWrist().getMaxVel() : maxVel;
+public class CloseClawWithGate extends CommandBase {
+  final Claw_Substyem claw = RobotContainer.RC().claw;
+  Timer closeTimer = new Timer();
+  double waitPeriod = 5.3;
+  boolean done;
+  
+  /** Creates a new CloseClawWithGate. */
+  public CloseClawWithGate() {
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    old_maxVel = claw.getWrist().getMaxVel();
-    claw.setWristAngle(angle);
+    claw.open();
+    closeTimer.stop();
+    System.out.printf("Claw auto open Started");
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // nothing to do, but wait for the wrist to move
+    if (claw.isGateBlocked()) {
+      claw.close();
+      closeTimer.start();
+      System.out.printf("ClawTimer Started");
+    }
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    claw.getWrist().setMaxVel(old_maxVel);
+    System.out.println("Claw Close by light gate finished");
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return claw.wristAtSetpoint();
+   return closeTimer.hasElapsed(waitPeriod);
   }
 }

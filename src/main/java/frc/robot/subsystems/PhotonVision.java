@@ -127,13 +127,6 @@ public class PhotonVision extends SubsystemBase {
       // Get information from target.
       targetID = bestTarget.getFiducialId();
 
-      /* 
-          TODO: Question prevPoseEstimate would get overwriten with a null pose
-          if we don't get a real estimate, do we keep the updating from the drivetrain
-          or is this a vision only estimate?
-
-          DPL: my guess, estimate with the odometry from sdt.
-      */
 
       // only targets we care about, sometime we see number outside expected range
       if (targetID < 9) {

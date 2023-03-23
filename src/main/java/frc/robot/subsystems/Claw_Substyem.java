@@ -140,6 +140,8 @@ public class Claw_Substyem extends SubsystemBase {
     elbowAngle = (RobotContainer.RC().elbow != null) ? RobotContainer.RC().elbow::getPosition : this::zero;
 
     this.setTrackElbowMode(ClawTrackMode.backSide);
+    open(); // claw should be open at power up
+    wheelsOff(); // wheels should not be spinning at power up
   }
 
   // some of my most complex code
@@ -204,11 +206,21 @@ public class Claw_Substyem extends SubsystemBase {
     //run the servo calcs
     wrist_servo.periodic();
     rotate_servo.periodic();
-
-    gate_blocked = lightgate.get();
+    // read gate, yes it needs to be negated.
+    gate_blocked = !lightgate.get();
   }
 
-   
+  //enter the track mode based on our current angle
+  public ClawTrackMode  setNearestClawTrackMode() {
+    //looks at claw anglesto pick which side we should be on coming from free mode.
+    if (trackElbowMode == ClawTrackMode.free) {
+      var mode =  getWristAngle() >= 0.0 ? ClawTrackMode.frontSide : ClawTrackMode.backSide;
+      setTrackElbowMode(mode);
+    }
+    //otherwise just keep what we have
+    return getTrackElbowMode();
+  } 
+
   public void setTrackElbowMode(ClawTrackMode mode) {
     //tracking mode, zero the manual offset
     trackElbowMode = mode;
