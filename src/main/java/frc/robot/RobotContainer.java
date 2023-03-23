@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.JoystickRumbleEndless;
@@ -56,6 +57,7 @@ import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.hid.CommandSwitchboardController;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
 import frc.robot.util.VelocityControlled;
@@ -315,6 +317,8 @@ public class RobotContainer {
 
   private void operatorIndividualBindings() {
     CommandXboxController operator = dc.Operator();
+    CommandSwitchboardController sb = dc.SwitchBoard();
+    Trigger manual = sb.sw16();
 
     /**
      * =======================
@@ -333,11 +337,15 @@ public class RobotContainer {
     operator.b().whileTrue(new outtakeCompetitionToggle());
 
     // dpad
-    operator.povUp().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
-    operator.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
-    operator.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
-    operator.povLeft().onTrue(new SequentialCommandGroup(new MoveCollectiveArm(CollectivePositions.travelFS),
-        new MoveCollectiveArm(CollectivePositions.travelLockFS)));
+    manual.and(operator.povUp())
+          .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+    manual.and(operator.povRight())
+          .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+    manual.and(operator.povDown())
+          .onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
+    manual.and(operator.povLeft())
+          .onTrue(new SequentialCommandGroup(new MoveCollectiveArm(CollectivePositions.travelFS),
+                  new MoveCollectiveArm(CollectivePositions.travelLockFS)));
 
     // // WI only manual scoring TODO remove
     // // pickup
