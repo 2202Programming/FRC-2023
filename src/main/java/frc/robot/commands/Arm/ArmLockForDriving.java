@@ -53,8 +53,8 @@ public class ArmLockForDriving extends CommandBase {
         new PrintCommand("*********Starting on_backside"),
         // backside tracking already enabled
         new MoveCollectiveArm(move_slow_power_on),
-        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS),
-        new PrintCommand("*********Ending on_backside")
+        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS)
+        //new PrintCommand("*********Ending on_backside")
         
         );
     on_backside.setName("already_on_bs");
@@ -112,16 +112,11 @@ public class ArmLockForDriving extends CommandBase {
         // This is an error we should be on one side or other
         cmd = errorCmd;
         break;
-
     }
     cmd.schedule();
     // cmd.unless(null);
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-  }
 
   // Called once the command ends or is interrupted.
   @Override
@@ -132,7 +127,9 @@ public class ArmLockForDriving extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true; // cmd.isFinished(); TODO figure out why sequential cmd groups aren't finishing
+
+    System.out.println("*********ArmLockForDriving cmd.sched" + cmd.isScheduled() + "  fin="+cmd.isFinished());    
+    return !cmd.isScheduled();
   }
 
   /*
