@@ -13,7 +13,7 @@ import frc.robot.Constants.ConePickup;;
 public enum CollectivePositions {
     power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 18.0, 60.0),
     travelNoPieceBS(PowerOnPos.arm, 10.0, PowerOnPos.wrist, ClawTrackMode.backSide, 18.0, -1.0),  
-    travelLockNoPieceBS(0.0, PowerOnPos.elbow, PowerOnPos.wrist -5.0 , ClawTrackMode.free, -1.0, 60.0), 
+    travelLockNoPieceBS(0.0, PowerOnPos.elbow, PowerOnPos.wrist + 5.0, ClawTrackMode.free, -1.0, 60.0), 
     safeToFlip(0.0, 70.0, 0.0, ClawTrackMode.free, -1.0, 60),
     
     //TODO ORGANIZE OR MOVE THIS
