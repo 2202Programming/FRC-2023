@@ -1,10 +1,9 @@
-package frc.robot.commands.EndEffector;
+package frc.robot.commands.Arm;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.RobotContainer;
-import frc.robot.commands.Arm.CollectivePositions;
-import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.subsystems.Claw_Substyem;
 
 public class TrackThenMove extends SequentialCommandGroup {
@@ -16,6 +15,8 @@ public class TrackThenMove extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     claw.setNearestClawTrackMode();
                 }),
+
+                new WaitCommand(0.3),
 
                 new MoveCollectiveArm(armPos));
     }
