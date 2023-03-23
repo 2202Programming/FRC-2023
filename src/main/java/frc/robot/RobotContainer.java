@@ -345,12 +345,12 @@ public class RobotContainer {
         // MONDAY TESTING 3/20/23 TODO REMOVE BEFORE COMP
 
         // THIS IS FANCY COMPLEX ONE for picking up from sehlf may f up
-        // driver.rightTrigger().and(oper.povUp()).onTrue(
-        //     new ParallelCommandGroup(
-        //         new Pickup(Substation.Left, GamePiece.ConeFacingFront)));
+        driver.rightTrigger().and(oper.x()).onTrue(
+            new ParallelCommandGroup(
+                new Pickup(Substation.Left, GamePiece.ConeFacingFront)));
 
         oper.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
-        oper.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
+        oper.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
 
         oper.povLeft().onTrue(
             new SequentialCommandGroup(
@@ -417,7 +417,8 @@ public class RobotContainer {
 
     // xyab
     operator.x().onTrue(new ToggleClaw());
-    operator.y().onTrue(new ArmLockForDriving()); // TODO add arm return home cmd
+    operator.y().onTrue(new ArmLockForDriving()); // T
+    // TODO add arm return home cmd
     operator.a().whileTrue(new intakeCompetitionToggle());
     operator.b().whileTrue(new outtakeCompetitionToggle());
 

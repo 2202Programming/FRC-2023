@@ -43,11 +43,11 @@ public class Pickup extends CommandBase {
     @Override
     public void initialize() {
         cmd = new SequentialCommandGroup();
-        move();      // must move to close, but clear spot for arm extend
+        //move();      // must move to close, but clear spot for arm extend
         extend();  
         getPiece();
-        backup();
-        retract();
+        //backup();
+        //retract();
 
         // bail when the driver says so
         cmd.until(() -> {

@@ -33,11 +33,11 @@ public class PickupDrive extends CommandBase {
 
     @Override
     public void initialize() {
-
-        var states = sdt.getKinematics().toSwerveModuleStates(new ChassisSpeeds(SPEED, 0.0, 0.0));
+        System.out.println("Starting init");;
+        //var states = sdt.getKinematics().toSwerveModuleStates(new ChassisSpeeds(SPEED, 0.0, 0.0));
 
         // slowly drive forward, open claw
-        sdt.drive(states);
+        //sdt.drive(states);
 
         switch (pieceType) {
             case Cube:
@@ -46,11 +46,13 @@ public class PickupDrive extends CommandBase {
             default:
                 claw.open();
         }
+        System.out.println("finished init");
     }
 
     @Override
     public void execute() {
         timeBroken = (claw.isGateBlocked()) ? timeBroken + 1 : 0;
+        System.out.println("Status: timeBroken is " + timeBroken + ", claw blocked? is " + claw.isGateBlocked());
     }
 
     @Override
@@ -61,6 +63,7 @@ public class PickupDrive extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
+        System.out.println("Finished");
         // stop moving, shut claw
         sdt.stop();
 
