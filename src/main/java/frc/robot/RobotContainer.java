@@ -345,8 +345,7 @@ public class RobotContainer {
 
         // THIS IS FANCY COMPLEX ONE for picking up from sehlf may f up
         driver.rightTrigger().and(oper.x()).onTrue(
-            new ParallelCommandGroup(
-                new Pickup(Substation.Left, GamePiece.ConeFacingFront)));
+                new Pickup(Substation.Left, GamePiece.ConeFacingFront));
 
         oper.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
         oper.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
