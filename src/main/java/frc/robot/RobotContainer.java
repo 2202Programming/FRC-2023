@@ -15,6 +15,7 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -215,7 +216,7 @@ public class RobotContainer {
     // some short hand to simplify bindings
     var driver = dc.Driver();
     var oper = dc.Operator();
-    //var sb = dc.SwitchBoard();
+    // var sb = dc.SwitchBoard();
 
     // add bindings based on current user mode
     switch (bindings) {
@@ -288,9 +289,9 @@ public class RobotContainer {
         if (drivetrain == null)
           break;
         // enable any network table watchers we want in competion
-        armSS.getWatcher();  //remove for comp
-        claw.getWatcher();   //ditto
-        elbow.getWatcher();  //ditto
+        armSS.getWatcher(); // remove for comp
+        claw.getWatcher(); // ditto
+        elbow.getWatcher(); // ditto
         // DRIVER
         driver.x().whileTrue(new ChargeStationBalance(false));
         driver.y().onTrue(new AllianceAwareGyroReset(false)); // gyro reset, without disabling vision
@@ -311,10 +312,12 @@ public class RobotContainer {
         oper.b().whileTrue(new outtakeCompetitionToggle());
 
         oper.y().onTrue(new MoveCollectiveArm(CollectivePositions.power_on)); // no piece, backside
-        oper.povUp().onTrue( new ArmLockForDriving() );
-        
-        
-              // PLACEMENT
+        oper.povUp().onTrue(
+            new SequentialCommandGroup(
+                new PrintCommand("^^^^^^^^^^^^^dpad up detected"),
+                new ArmLockForDriving()).withTimeout(20.0));
+
+        // PLACEMENT
 
         Trigger placeTrigger = driver.povLeft(); // save right tigger for concinseness in the next new commands
         // Top Place
@@ -336,15 +339,14 @@ public class RobotContainer {
         // HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
 
         // MONDAY TESTING 3/20/23 TODO REMOVE BEFORE COMP
-    
 
         // THIS IS FANCY COMPLEX ONE for picking up from sehlf may f up
-        driver.rightTrigger().and(oper.povUp()).onTrue(
-            new ParallelCommandGroup(
-                new Pickup(Substation.Left, GamePiece.ConeFacingFront)));
+        // driver.rightTrigger().and(oper.povUp()).onTrue(
+        //     new ParallelCommandGroup(
+        //         new Pickup(Substation.Left, GamePiece.ConeFacingFront)));
 
-        oper.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
-        oper.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
+        oper.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+        oper.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
 
         oper.povLeft().onTrue(
             new SequentialCommandGroup(
@@ -359,7 +361,8 @@ public class RobotContainer {
           claw.open();
         }));
         oper.rightBumper().onTrue(new InstantCommand(() -> {
-          claw.close(); }));
+          claw.close();
+        }));
 
         // TODO confirm they work with drive team
         placeTrigger.and(oper.povLeft()).onTrue(
@@ -373,9 +376,9 @@ public class RobotContainer {
         oper.a().and(oper.povDown()).onTrue(new InstantCommand(() -> {
           elbow.decrementTrim();
         }));
-        oper.a().and(oper.povUp()).onTrue(new InstantCommand(() -> {
-          elbow.incrementTrim();
-        }));
+        // oper.a().and(oper.povUp()).onTrue(new InstantCommand(() -> {
+        //   elbow.incrementTrim();
+        // }));
 
         break;
 
@@ -387,7 +390,7 @@ public class RobotContainer {
 
     // Triggers / shoulder Buttons
     driver.leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
-    
+
     // xyab
     driver.x().whileTrue(new ChargeStationBalance(false));
     driver.y().onTrue(new AllianceAwareGyroReset(false));
@@ -418,31 +421,30 @@ public class RobotContainer {
     operator.povUp().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
     operator.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
     operator.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
-    operator.povLeft().onTrue(new SequentialCommandGroup(new MoveCollectiveArm(CollectivePositions.travelFS), new MoveCollectiveArm(CollectivePositions.travelLockFS)));
+    operator.povLeft().onTrue(new SequentialCommandGroup(new MoveCollectiveArm(CollectivePositions.travelFS),
+        new MoveCollectiveArm(CollectivePositions.travelLockFS)));
 
     // WI only manual scoring TODO remove
-        // pickup
+    // pickup
     operator.povDown().and(operator.x())
-      .onTrue(new Pickup(Substation.Left, GamePiece.Cube)); // substation doesn't matter
-    
-    operator.povDown().and(operator.leftTrigger())
-      .onTrue(new Pickup(Substation.Left, GamePiece.ConeFacingFront)); // which cone doesn't matter
+        .onTrue(new Pickup(Substation.Left, GamePiece.Cube)); // substation doesn't matter
 
-        // score
-      operator.povUp().and(operator.x())
+    operator.povDown().and(operator.leftTrigger())
+        .onTrue(new Pickup(Substation.Left, GamePiece.ConeFacingFront)); // which cone doesn't matter
+
+    // score
+    operator.povUp().and(operator.x())
         .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
-      
-      operator.povUp().and(operator.rightTrigger())
+
+    operator.povUp().and(operator.rightTrigger())
         .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
 
-      operator.povRight().and(operator.x())
+    operator.povRight().and(operator.x())
         .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
 
-      operator.povRight().and(operator.rightTrigger())
+    operator.povRight().and(operator.rightTrigger())
         .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
   }
-
-
 
   public void testPeriodic() {
     elbow.periodic();

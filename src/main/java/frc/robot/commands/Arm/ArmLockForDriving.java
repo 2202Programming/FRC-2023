@@ -7,6 +7,7 @@ package frc.robot.commands.Arm;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.RobotContainer;
@@ -23,11 +24,11 @@ public class ArmLockForDriving extends CommandBase {
   Elbow elbow = RobotContainer.RC().elbow;
   Claw_Substyem claw = RobotContainer.RC().claw;
 
-  Command errorCmd = PrintCommand("Not sure how to move arm.");
-  Command on_backside;
-  Command on_frontside;
-  Command on_frontside_mv2flip;
-  Command cmd;  //this is what will run
+  SequentialCommandGroup errorCmd = new SequentialCommandGroup(new PrintCommand("Not sure how to move arm."));
+  SequentialCommandGroup on_backside;
+  SequentialCommandGroup on_frontside;
+  SequentialCommandGroup on_frontside_mv2flip;
+  SequentialCommandGroup cmd;  //this is what will run
 
   Positions arm_current;
   double ELBOW_RETRACT = 20.0; // [deg/s] use slower speed
@@ -49,46 +50,53 @@ public class ArmLockForDriving extends CommandBase {
     move_slow_power_on.elbowMaxVel = ELBOW_RETRACT;
 
     on_backside = new SequentialCommandGroup(
+        new PrintCommand("*********Starting on_backside"),
         // backside tracking already enabled
         new MoveCollectiveArm(move_slow_power_on),
-        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS));
+        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS),
+        new PrintCommand("*********Ending on_backside")
+        
+        );
     on_backside.setName("already_on_bs");
 
     // on front-side need to flip safely and fold up
     on_frontside = new SequentialCommandGroup(
+        new PrintCommand("*********Starting on_frontside"),
         // front tracking already enabled
         new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.backSide); }),
         new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),
         new MoveCollectiveArm(move_slow_power_on),
-        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS));                
+        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS),
+        new PrintCommand("*********Ending on_frontside")
+        );                
     on_frontside.setName("safe_flip_before_move");
 
     // on front-side but outside flip, move elbow out flip, move back
     on_frontside_mv2flip = new SequentialCommandGroup(
+        new PrintCommand("*********Starting move to flip"),
         //need to move to a flip point with elbow
         new MoveElbow(safe.elbowPos, safe.elbowMaxVel),
         new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.backSide); }),
         new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),
         new MoveCollectiveArm(move_slow_power_on),
-        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS));          
+        new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS),
+        new PrintCommand("*********Ending move to flip")
+        );          
         
     on_frontside_mv2flip.setName("move_out_to_flip_first");        
-  }
-
-  private Command PrintCommand(String string) {
-    return null;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    System.out.println("******init ArmLockForDriving cmd *****");
     cmd = errorCmd;
     arm_current = getStart();
 
     // this move the claw to the nearest elbow track mode
     // it should always be safe because tracking is clear of the robot frame.
     var mode = claw.setNearestClawTrackMode();
-
+    System.out.println("==========Here's the mode: " + mode.toString());
     switch (mode) {
       case backSide:
         cmd = on_backside;
@@ -117,6 +125,7 @@ public class ArmLockForDriving extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    System.out.println("*********ArmLockForDriving ended, interrupted " + interrupted);
   }
 
   // Returns true when the command should end.
