@@ -24,11 +24,11 @@ public class ArmLockForDriving extends CommandBase {
   Elbow elbow = RobotContainer.RC().elbow;
   Claw_Substyem claw = RobotContainer.RC().claw;
 
-  SequentialCommandGroup errorCmd = new SequentialCommandGroup(new PrintCommand("Not sure how to move arm."));
-  SequentialCommandGroup on_backside;
-  SequentialCommandGroup on_frontside;
-  SequentialCommandGroup on_frontside_mv2flip;
-  SequentialCommandGroup cmd;  //this is what will run
+  Command errorCmd = new PrintCommand("Not sure how to move arm to backside.");
+  Command on_backside;
+  Command on_frontside;
+  Command on_frontside_mv2flip;
+  Command cmd;  //this is what will run
 
   Positions arm_current;
   double ELBOW_RETRACT = 20.0; // [deg/s] use slower speed
@@ -85,6 +85,7 @@ public class ArmLockForDriving extends CommandBase {
         
     on_frontside_mv2flip.setName("move_out_to_flip_first");        
   }
+
 
   // Called when the command is initially scheduled.
   @Override
