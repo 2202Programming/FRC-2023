@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.HorizontalScoringLane;
+import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
@@ -42,6 +43,7 @@ public class PlaceMidHigh extends CommandBase {
 
   // state vars
   private HorizontalScoringLane horizontalRequest;
+  private HorizontalSubstationLane substationRequest;
   private VerticalScoringLane verticalRequest;
   private GamePiece piece;
   private Command dropCmd;
@@ -59,8 +61,12 @@ public class PlaceMidHigh extends CommandBase {
    * @param horizontalRequest
    * @param verticalRequest
    */
-  public PlaceMidHigh(HorizontalScoringLane horizontalRequest, VerticalScoringLane verticalRequest, GamePiece piece) {
+  public PlaceMidHigh(HorizontalScoringLane horizontalRequest, 
+                      HorizontalSubstationLane substationRequest, 
+                      VerticalScoringLane verticalRequest, 
+                      GamePiece piece) {
     this.horizontalRequest = horizontalRequest;
+    this.substationRequest = substationRequest;
     this.verticalRequest = verticalRequest;
     this.piece = piece;
   }
@@ -119,7 +125,7 @@ public class PlaceMidHigh extends CommandBase {
    */
   private void move() {
     // 1. move to general vicinity
-    cmd.addCommands(new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest));
+    cmd.addCommands(new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest));
 
     // 2. correct for OTF path generation rotation error
     // untested below

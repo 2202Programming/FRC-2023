@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.HorizontalScoringLane;
+import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -23,6 +24,7 @@ public class PlaceHybrid extends CommandBase {
   // State vars
   SequentialCommandGroup cmd;
   HorizontalScoringLane horizontalRequest;
+  HorizontalSubstationLane substationRequest;
 
   // Constants
   final double DEADZONE2 = 0.025; // [%^2] squared number
@@ -32,8 +34,9 @@ public class PlaceHybrid extends CommandBase {
 
   
   /** Creates a new PlaceHybrid. */
-  public PlaceHybrid(HorizontalScoringLane horizontalRequest) {
+  public PlaceHybrid(HorizontalScoringLane horizontalRequest, HorizontalSubstationLane substationRequest) {
     this.horizontalRequest = horizontalRequest;
+    this.substationRequest = substationRequest;
   }
 
   // Called when the command is initially scheduled.
@@ -43,7 +46,7 @@ public class PlaceHybrid extends CommandBase {
 
     // 1. Move to place
     cmd.addCommands(
-      new goToScoringPosition(new PathConstraints(2.0, 3.0), horizontalRequest), 
+      new goToScoringPosition(new PathConstraints(2.0, 3.0), horizontalRequest, substationRequest), 
       new RotateTo(new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 180 : 0)),
       new VelocityMove(1.0, 0.0, 0.5) 
       // 0.5 magic number results in an integral of 1/2m because that's how much we're off by 
