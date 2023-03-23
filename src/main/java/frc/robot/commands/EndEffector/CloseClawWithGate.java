@@ -37,6 +37,7 @@ public class CloseClawWithGate extends CommandBase {
       framesBlocked++;
     } else {
       framesBlocked = 0;
+      closeTimer.reset();
     }
     
     if (framesBlocked == 10)  {
