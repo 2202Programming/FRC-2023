@@ -457,6 +457,11 @@ public final class Constants {
     Right,
     Center
   }
+  public enum HorizontalSubstationLane {
+    Left,
+    Right,
+    Center
+  }
   public enum VerticalScoringLane{
     Middle,
     Top,

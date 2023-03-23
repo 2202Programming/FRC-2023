@@ -16,13 +16,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
-import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.PickFromShelf;
@@ -32,6 +29,7 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Automation.CenterTapeSkew;
+import frc.robot.commands.Automation.MoveToFactory;
 import frc.robot.commands.Automation.Pickup;
 import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.EndEffector.ToggleClaw;
@@ -43,7 +41,6 @@ import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoTest;
 import frc.robot.commands.auto.goToPickupPosition;
-import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -280,11 +277,11 @@ public class RobotContainer {
         driver.y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
         driver.leftTrigger().whileTrue(new JoystickRumbleEndless(Id.Driver));
 
-        driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
-        // up and down for center trio request per Alek
-        driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
-        driver.povDown().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
-        driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Right));
+        // driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
+        // // up and down for center trio request per Alek
+        // driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
+        // driver.povDown().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
+        // driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Right));
         break;
 
       case Competition:
@@ -295,93 +292,10 @@ public class RobotContainer {
         armSS.getWatcher(); // remove for comp
         claw.getWatcher(); // ditto
         elbow.getWatcher(); // ditto
-        // DRIVER
-        driver.x().whileTrue(new ChargeStationBalance(false));
-        driver.y().onTrue(new AllianceAwareGyroReset(false)); // gyro reset, without disabling vision
-        driver.leftTrigger().whileTrue(new RobotCentricDrive(drivetrain, dc));
-
-        // driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2,
-        // 3), HorizontalScoringLane.Left));
-        // up and down for center trio request per Alek
-        // driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2,3),
-        // HorizontalScoringLane.Center));
-        // driver.povDown().onTrue(new goToScoringPosition(new
-        // PathConstraints(2,3), HorizontalScoringLane.Center));
-        // driver.povRight().onTrue(new goToScoringPosition(new
-        // PathConstraints(2,3), HorizontalScoringLane.Right));
-
-        // OPERATOR
-        oper.a().whileTrue(new intakeCompetitionToggle());
-        oper.b().whileTrue(new outtakeCompetitionToggle());
-
-        oper.y().onTrue(new MoveCollectiveArm(CollectivePositions.power_on)); // no piece, backside
-        oper.povUp().onTrue(
-            new SequentialCommandGroup(
-                new PrintCommand("^^^^^^^^^^^^^dpad up detected"),
-                new ArmLockForDriving()).withTimeout(20.0));
-
-        // PLACEMENT
-
-        Trigger placeTrigger = driver.povLeft(); // save right tigger for concinseness in the next new commands
-        // Top Place
-        // placeTrigger.and(oper.leftBumper()).onTrue(new Place(colorSensors,
-        // HorizontalScoringLane.Left, VerticalScoringLane.Top));
-        // placeTrigger.and(oper.rightBumper()).onTrue(new Place(colorSensors,
-        // HorizontalScoringLane.Right, VerticalScoringLane.Top));
-        // Middle Place
-        // placeTrigger.and(oper.leftTrigger()).onTrue(new Place(colorSensors,
-        // HorizontalScoringLane.Left, VerticalScoringLane.Middle));
-        // placeTrigger.and(oper.rightTrigger()).onTrue(new Place(colorSensors,
-        // HorizontalScoringLane.Right, VerticalScoringLane.Middle));
-        // Bottom Place
-        // placeTrigger.and(oper.povDown()).onTrue(new Place(colorSensors,
-        // HorizontalScoringLane.Center, VerticalScoringLane.Bottom));
-        // placeTrigger.and(oper.povLeft()).onTrue(new Place(colorSensors,
-        // HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
-        // placeTrigger.and(oper.povRight()).onTrue(new Place(colorSensors,
-        // HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
-
-        // MONDAY TESTING 3/20/23 TODO REMOVE BEFORE COMP
-
-        // THIS IS FANCY COMPLEX ONE for picking up from sehlf may f up
-        driver.rightTrigger().and(oper.x()).onTrue(
-            new ParallelCommandGroup(
-                new Pickup(Substation.Left, GamePiece.ConeFacingFront)));
-
-        oper.povDown().onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
-        oper.povRight().onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
-
-        oper.povLeft().onTrue(
-            new SequentialCommandGroup(
-                new MoveCollectiveArm(CollectivePositions.travelFS), // trackFS
-                new MoveCollectiveArm(CollectivePositions.travelLockFS))); // free mode to lock
-
-        oper.leftTrigger().whileTrue(new WheelsIn());
-        oper.rightTrigger().whileTrue(new WheelsOut());
-
-        // Testing Claw TODO MONDAY NIGHT REMOVE BEFORE COMP
-        oper.leftBumper().onTrue(new InstantCommand(() -> {
-          claw.open();
-        }));
-        oper.rightBumper().onTrue(new InstantCommand(() -> {
-          claw.close();
-        }));
-
-        // TODO confirm they work with drive team
-        placeTrigger.and(oper.povLeft()).onTrue(
-            new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Left));
-        placeTrigger.and(oper.povDown()).onTrue(
-            new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Center));
-        placeTrigger.and(oper.povRight()).onTrue(
-            new goToScoringPosition(new PathConstraints(3, 4), HorizontalScoringLane.Right));
-
-        // ELBOW TRIM - Button not finalized TODO- FIX BUTTONS
-        oper.a().and(oper.povDown()).onTrue(new InstantCommand(() -> {
-          elbow.decrementTrim();
-        }));
-        // oper.a().and(oper.povUp()).onTrue(new InstantCommand(() -> {
-        //   elbow.incrementTrim();
-        // }));
+        
+        driverIndividualBindings();
+        operatorIndividualBindings();
+        wisconsinMoveTo();
 
         break;
 
@@ -456,26 +370,14 @@ public class RobotContainer {
    */
   public void wisconsinMoveTo() {
     CommandXboxController driver = dc.Driver();
-    
-    // PLACEMENT
-    Trigger placeTrigger = driver.povLeft(); // save right tigger for concinseness in the next new commands
-    // Top Place
-    placeTrigger.and(oper.leftBumper()).onTrue(new Place(colorSensors,
-    HorizontalScoringLane.Left, VerticalScoringLane.Top));
-    placeTrigger.and(oper.rightBumper()).onTrue(new Place(colorSensors,
-    HorizontalScoringLane.Right, VerticalScoringLane.Top));
-    // Middle Place
-    placeTrigger.and(oper.leftTrigger()).onTrue(new Place(colorSensors,
-    HorizontalScoringLane.Left, VerticalScoringLane.Middle));
-    placeTrigger.and(oper.rightTrigger()).onTrue(new Place(colorSensors,
-    HorizontalScoringLane.Right, VerticalScoringLane.Middle));
-    // Bottom Place
-    placeTrigger.and(oper.povDown()).onTrue(new Place(colorSensors,
-    HorizontalScoringLane.Center, VerticalScoringLane.Bottom));
-    placeTrigger.and(oper.povLeft()).onTrue(new Place(colorSensors,
-    HorizontalScoringLane.Left, VerticalScoringLane.Bottom));
-    placeTrigger.and(oper.povRight()).onTrue(new Place(colorSensors,
-    HorizontalScoringLane.Right, VerticalScoringLane.Bottom));
+    CommandXboxController operator = dc.Operator();
+
+    driver.povLeft().onTrue(new MoveToFactory(
+      driver.leftBumper(),
+      driver.rightBumper(),
+      operator.leftBumper(),
+      operator.rightBumper()
+    ));
   }
 
 
