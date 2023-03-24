@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "eject_start"
+          "eject_no_deploy"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -156,12 +156,6 @@
       "position": 1.75,
       "names": [
         "intake_on"
-      ]
-    },
-    {
-      "position": 2.5,
-      "names": [
-        "intake_off"
       ]
     }
   ]

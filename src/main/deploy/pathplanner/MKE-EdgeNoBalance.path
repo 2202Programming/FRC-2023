@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "eject_start"
+          "eject_no_deploy"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -244,9 +244,7 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [
-          "intake_off"
-        ],
+        "names": [],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
@@ -256,6 +254,12 @@
   "markers": [
     {
       "position": 3.25,
+      "names": [
+        "intake_on"
+      ]
+    },
+    {
+      "position": 8.6,
       "names": [
         "intake_on"
       ]

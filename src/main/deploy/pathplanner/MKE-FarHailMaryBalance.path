@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "eject_start"
+          "eject_no_deploy"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -259,12 +259,12 @@
     },
     {
       "anchorPoint": {
-        "x": 3.8998118674203455,
-        "y": 3.4193634488963895
+        "x": 3.9352637371941417,
+        "y": 3.250021166709
       },
       "prevControl": {
-        "x": 3.560140001635936,
-        "y": 3.4080410533702428
+        "x": 3.595591871409732,
+        "y": 3.2386987711828534
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -293,21 +293,9 @@
       ]
     },
     {
-      "position": 2.8,
-      "names": [
-        "intake_off"
-      ]
-    },
-    {
-      "position": 6.2,
+      "position": 6.1,
       "names": [
         "intake_on"
-      ]
-    },
-    {
-      "position": 7.2,
-      "names": [
-        "intake_off"
       ]
     }
   ]
