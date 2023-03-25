@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.MatchTimer;
@@ -94,6 +97,11 @@ public class Robot extends TimedRobot {
     // remove this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
+    }
+
+    if (DriverStation.getAlliance().equals(Alliance.Red)) {
+      double currentYaw = m_robotContainer.sensors.getYaw();
+      m_robotContainer.sensors.setYaw((currentYaw > 0) ? currentYaw - 180 : currentYaw + 180);
     }
 
     new MatchTimer().schedule(); // a match time reporter for the telop portion of the match
