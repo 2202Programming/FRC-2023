@@ -280,7 +280,7 @@ public final class Constants {
     public static final double motorMaxRPM = 5600; // motor limit
 
     // Constraints on speeds enforeced in DriveTrain
-    public static final double kMaxSpeed = 20.0 * MperFT; // [m/s]
+    public static final double kMaxSpeed = 21.0 * MperFT; // [m/s]
     public static final double kMaxAngularSpeed = 2 * Math.PI; // [rad/s]
 
     /****
@@ -318,7 +318,7 @@ public final class Constants {
     public static final ChassisConfig compBotChassisConfig = new ChassisConfig(
         MperFT * (23.5 / 12.0) / 2.0, //based on CAD in reference_links
         MperFT * (19.5 / 12.0) / 2.0, //based on CAD in reference_links
-        0.999, // scale [] <= 1.0
+        0.960, // scale [] <= 1.0
         MperFT * (4.0/12.0), // wheel diameter[m] Comp bot is 4" wheels
         12.8, //confirmed with vince
         8.14); //confirmed with vince
