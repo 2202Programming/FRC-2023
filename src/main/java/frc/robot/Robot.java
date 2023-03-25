@@ -99,6 +99,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
+    // 2023 post-auto path changes for Red only so we drive in red coords
     if (DriverStation.getAlliance().equals(Alliance.Red)) {
       double currentYaw = m_robotContainer.sensors.getYaw();
       m_robotContainer.sensors.setYaw((currentYaw > 0) ? currentYaw - 180 : currentYaw + 180);
