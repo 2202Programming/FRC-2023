@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm.Positions;
+import frc.robot.commands.swerve.PrecisionMode;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
@@ -41,6 +42,7 @@ public class ArmLockForDrivingFS extends CommandBase {
    * Moves arm to a frontside position and locks it
    * down for driving with a piece. 
    * 
+   * Restores full driving speed by disabling PrecisionMode
    */
   public ArmLockForDrivingFS() {
 
@@ -52,7 +54,8 @@ public class ArmLockForDrivingFS extends CommandBase {
     on_frontside = new SequentialCommandGroup(
         // front tracking already enabled        
         new MoveCollectiveArm(move_slow),
-        new MoveCollectiveArm(CollectivePositions.travelLockFS)    );         
+        new MoveCollectiveArm(CollectivePositions.travelLockFS),
+        new PrecisionMode(false)    );         
     on_frontside.setName("safe fs move");
 
 
@@ -61,7 +64,8 @@ public class ArmLockForDrivingFS extends CommandBase {
         new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.frontSide); }),
         new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),
         new MoveCollectiveArm(move_slow),
-        new MoveCollectiveArm(CollectivePositions.travelLockFS)    );
+        new MoveCollectiveArm(CollectivePositions.travelLockFS),
+        new PrecisionMode(false)     );
     on_backside_safe.setName("backside safe to flip to fs");
 
     // on front-side but outside flip, move elbow out flip, move back
@@ -71,7 +75,8 @@ public class ArmLockForDrivingFS extends CommandBase {
         new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.frontSide); }),
         new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),
         new MoveCollectiveArm(move_slow),
-        new MoveCollectiveArm(CollectivePositions.travelLockFS)    );        
+        new MoveCollectiveArm(CollectivePositions.travelLockFS),
+        new PrecisionMode(false)     );        
     on_backside_mv2flip.setName("backside move out to flip_first");            
   }
 

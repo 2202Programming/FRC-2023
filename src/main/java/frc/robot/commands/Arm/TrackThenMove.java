@@ -10,14 +10,12 @@ public class TrackThenMove extends SequentialCommandGroup {
     // SSs
     Claw_Substyem claw = RobotContainer.RC().claw;
 
-    public TrackThenMove(CollectivePositions armPos) {
+    public TrackThenMove(CollectivePositions armPos, double wait) {
         addCommands(
                 new InstantCommand(() -> {
                     claw.setNearestClawTrackMode();
                 }),
-
-                new WaitCommand(0.3),
-
+                new WaitCommand(wait),
                 new MoveCollectiveArm(armPos));
     }
 }

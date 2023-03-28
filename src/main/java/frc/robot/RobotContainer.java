@@ -48,6 +48,7 @@ import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
+import frc.robot.commands.swerve.PrecisionMode;
 import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.swerve.RotateTo;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
@@ -342,15 +343,28 @@ public class RobotContainer {
 
     // dpad
     manual.and(operator.povUp())
-          .onTrue(new TrackThenMove(CollectivePositions.placeConeHighFS));
+          .onTrue(
+            new PrecisionMode(true)
+            .andThen(new TrackThenMove(CollectivePositions.placeConeHighFS, 0.2)));
+    
     manual.and(operator.povRight())
-          .onTrue(new TrackThenMove(CollectivePositions.placeConeMidFS));
+          .onTrue( 
+            new PrecisionMode(true)
+            .andThen(new TrackThenMove(CollectivePositions.placeConeMidFS, 0.2)));
+
     manual.and(operator.povDown()).and(operator.leftTrigger().negate())
-          .onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS).andThen(new CloseClawWithGate()));
+          .onTrue(
+            new PrecisionMode(true)
+            .andThen(new TrackThenMove(CollectivePositions.pickupShelfFS, 0.2))
+            .andThen(new CloseClawWithGate()));
+          
     manual.and(operator.povDown()).and(operator.leftTrigger())
-          .onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS).andThen(new InWheelsWithGate()));
-    manual.and(operator.povLeft())
-          .onTrue(new ArmLockForDrivingFS());
+          .onTrue(
+            new PrecisionMode(true)
+            .andThen(new TrackThenMove(CollectivePositions.pickupShelfFS, 0.2))
+            .andThen(new InWheelsWithGate()));
+
+    manual.and(operator.povLeft()).onTrue(new ArmLockForDrivingFS());
 
     // // WI only manual scoring TODO remove
     // // pickup

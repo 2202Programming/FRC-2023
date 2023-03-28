@@ -9,6 +9,7 @@ package frc.robot.subsystems.hid;
 
 import java.util.HashMap;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -57,7 +58,10 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
   int initAssistentButtons;
   int initSwitchBoardButtons;
 
-  boolean limitRotation = true;
+  //boolean limitRotation = true;
+  //Scale back the sticks for precision control
+  double scale_xy = 1.0;
+  double scale_rot = 1.0;
 
   //XYRot / Swerve (field or robot relative)
   ExpoShaper velXShaper;    // left/right  
@@ -68,6 +72,7 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
   double vel, z_rot;           //arcade
   double velLeft, velRight;    //tank
   double velX,velY, xyRot;     //XTRot
+  final double deadzone;;
 
   // invertGain is used to change the controls for driving backwards easily.
   // A negative value indicates you're driving backwards with forwards controls.
@@ -81,9 +86,8 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
     driver = (CommandXboxController) registerController(Id.Driver, new CommandXboxController(Id.Driver.value));
     operator = (CommandXboxController) registerController(Id.Operator, new CommandXboxController(Id.Operator.value));
     switchBoard = (CommandSwitchboardController) registerController(Id.SwitchBoard, new CommandSwitchboardController(Id.SwitchBoard.value));
-
    
-
+    this.deadzone = deadzone;
     /**
      * All Joysticks are read and shaped without sign conventions.
      * Sign convention added on periodic based on the type of driver control
@@ -148,14 +152,15 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
     // only read/shape the stick mode.
 
     //XYRot - field axis, pos X away from driver station, pos y to left side of field
-    velX = -velXShaper.get();    //invert, so right stick moves robot, right, lowering Y 
-    velY = -velYShaper.get();    //invert, so forward stick is positive, increase X
-    xyRot = -swRotShaper.get();  //invert, so positive is CCW 
+    //Added scale-factors for low-speed creeper mode
+    velX = -velXShaper.get() * scale_xy;    //invert, so right stick moves robot, right, lowering Y 
+    velY = -velYShaper.get() * scale_xy;    //invert, so forward stick is positive, increase X
+    xyRot = -swRotShaper.get() * scale_rot; //invert, so positive is CCW 
   }
   
-  public void setLimitRotation(boolean enableLimit) {
-    this.limitRotation = enableLimit;
-  }
+  //public void setLimitRotation(boolean enableLimit) {
+  //  this.limitRotation = enableLimit;
+  //}
 
   public double getVelocityX() {
     return velX;
@@ -180,6 +185,36 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
   public boolean isNormalized() {
     return true;
   }
+  
+  /*
+   * Scales the stick, must be between 0.1 and 1.0
+   */
+  public void setStickScale(double scale_xy, double scale_rot) {
+   this.scale_xy = MathUtil.clamp(scale_xy, 0.1, 1.0);
+   this.scale_rot = MathUtil.clamp(scale_rot, 0.1, 1.0);
+  }
+
+  /**
+   * Returns the stick scaling to 1.0
+   */
+  public void resetStickScale() {
+    this.scale_rot = 1.0;
+    this.scale_xy = 1.0;
+  }
+
+  /**
+   * 
+   * @param id  which to watch, Driver || Operator
+   * @return  true - stick moved past deadzone
+   *          false - no stick
+   */
+  public boolean rightStickMotion(final Id id) {
+    CommandXboxController device = (CommandXboxController)deviceMap.get(id);
+     double x = Math.abs(device.getRightX());
+     double y = Math.abs(device.getRightY());
+     return (x > deadzone) || (y > deadzone);
+  }
+
 
   public int getInitialButtons(final Id id) {
     switch (id) {

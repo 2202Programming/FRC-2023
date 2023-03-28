@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.swerve.RotateTo;
@@ -52,11 +53,7 @@ public class Pickup extends CommandBase {
         //retract();
         cmd.addCommands(new PrintCommand("SCG should be ending"));
         // bail when the driver says so
-        cmd.until(() -> {
-            boolean xStickStill = (Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE2; 
-            boolean yStickStill = (Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE2;
-            return !(xStickStill && yStickStill);
-          }).schedule();
+        cmd.until(() -> {return dc.rightStickMotion(Id.Driver);} ).schedule();
     }
 
     /**
