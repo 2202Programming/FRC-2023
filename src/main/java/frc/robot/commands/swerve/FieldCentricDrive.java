@@ -58,11 +58,16 @@ public class FieldCentricDrive extends CommandBase {
     ySpeed = MathUtil.clamp(ySpeed, -Constants.DriveTrain.kMaxSpeed, Constants.DriveTrain.kMaxSpeed);
     rot = MathUtil.clamp(rot, -Constants.DriveTrain.kMaxAngularSpeed, Constants.DriveTrain.kMaxAngularSpeed);
 
+    
     currrentHeading = drivetrain.getPose().getRotation();
     //convert field centric speeds to robot centric
     ChassisSpeeds tempChassisSpeed = (DriverStation.getAlliance().equals(Alliance.Blue)) 
-        ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, currrentHeading) 
-        : ChassisSpeeds.fromFieldRelativeSpeeds(-xSpeed, -ySpeed, rot, currrentHeading); // if on red alliance you're looking at robot from opposite. Pose is in blue coordinates so flip if red
+        ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed + RobotContainer.RC().antitipWatcher.getFieldCentricTipCorrection().vxMetersPerSecond,
+                                                ySpeed + RobotContainer.RC().antitipWatcher.getFieldCentricTipCorrection().vyMetersPerSecond,
+                                                rot, currrentHeading) 
+        : ChassisSpeeds.fromFieldRelativeSpeeds(-xSpeed + RobotContainer.RC().antitipWatcher.getFieldCentricTipCorrection().vxMetersPerSecond,
+                                                -ySpeed + RobotContainer.RC().antitipWatcher.getFieldCentricTipCorrection().vyMetersPerSecond,
+                                                rot, currrentHeading); // if on red alliance you're looking at robot from opposite. Pose is in blue coordinates so flip if red
 
     output_states = kinematics
         .toSwerveModuleStates(tempChassisSpeed);
@@ -70,6 +75,7 @@ public class FieldCentricDrive extends CommandBase {
 
   @Override
   public void execute() {
+    RobotContainer.RC().antitipWatcher.tipCalculate();
     calculate();
     drivetrain.drive(output_states);
   }

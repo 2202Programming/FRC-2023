@@ -7,6 +7,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -61,11 +62,14 @@ public class RobotCentricDrive extends CommandBase {
     ySpeed = MathUtil.clamp(ySpeed, -Constants.DriveTrain.kMaxSpeed, Constants.DriveTrain.kMaxSpeed);
     rot = MathUtil.clamp(rot, -Constants.DriveTrain.kMaxAngularSpeed, Constants.DriveTrain.kMaxAngularSpeed);
 
-    output_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(xSpeed, ySpeed, rot));
+    output_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(xSpeed + RobotContainer.RC().antitipWatcher.getRobotCentricTipCorrection().vxMetersPerSecond,
+                                                                      ySpeed + RobotContainer.RC().antitipWatcher.getRobotCentricTipCorrection().vyMetersPerSecond,
+                                                                      rot));
   }
 
   @Override
   public void execute() {
+    RobotContainer.RC().antitipWatcher.tipCalculate();
     calculate();
     drivetrain.drive(output_states);
   }

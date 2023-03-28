@@ -7,12 +7,10 @@ package frc.robot.commands.swerve;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem;
 
@@ -31,6 +29,7 @@ public class AntiTipWatcher {
     double pitch_kD = 0.0;
     double tipPitchPidOutput = 0.0;
 
+    private ChassisSpeeds robotCentricCorrection;
     private Sensors_Subsystem sensors;
 
     double kOffBalanceAngleThresholdDegrees; 
@@ -79,6 +78,10 @@ public class AntiTipWatcher {
         tipPitchPidOutput = tipPitchPid.calculate(-pitchAngleDegrees);
         nt_pitch_factor.setDouble(tipPitchPidOutput);
 
+        robotCentricCorrection = new ChassisSpeeds(tipPitchPidOutput, tipRollPidOutput, 0); //create chassis speeds from robot centric pitch and roll (X and Y)
+
+        //TODO: only enter tip correction if arm is extended
+
         //enter tip correction mode if either roll or pitch is high enough
         if (!tip_correction_mode &&
             (Math.abs(pitchAngleDegrees)>kOnBalanceAngleThresholdDegrees ||
@@ -99,38 +102,38 @@ public class AntiTipWatcher {
 
     }
 
-    public double getTipRollPidOutput(){
-            return (tip_correction_mode) ? tipRollPidOutput : 0.0; //return zero if not in tip correction mode
-    }
-
-    public double getTipPitchPidOutput(){
-        return (tip_correction_mode) ? tipPitchPidOutput : 0.0; //return zero if not in tip correction mode
+    //return tip correction in robot-centric
+    public ChassisSpeeds getRobotCentricTipCorrection(){
+        return (tip_correction_mode) ? robotCentricCorrection : new ChassisSpeeds(0.0,0.0,0.0); //return zero if not in tip correction mode
     }
     
-    public double getFieldCentricTipRollPidOutput(){
+    //return tip correction in field-centric
+    public ChassisSpeeds getFieldCentricTipCorrection(){
+        if (!tip_correction_mode) return new ChassisSpeeds(0.0,0.0,0.0); //return zero if not in tip correction mode
 
-        if (!tip_correction_mode) return 0.0;
-
-        Rotation2d currrentHeading = RobotContainer.RC().drivetrain.getPose().getRotation();
-        //convert field centric speeds to robot centric
-        ChassisSpeeds tempChassisSpeed = new ChassisSpeeds(tipRollPidOutput, 0, 0);
-
-        SwerveModuleState[] output_states = RobotContainer.RC().drivetrain.getKinematics().toSwerveModuleStates(tempChassisSpeed);
-        ChassisSpeeds chassisSpeeds = RobotContainer.RC().drivetrain.getKinematics().toChassisSpeeds(output_states);
+        return getFieldRelativeSpeed(robotCentricCorrection, RobotContainer.RC().drivetrain.getPose().getRotation());
         
-        (DriverStation.getAlliance().equals(Alliance.Blue))
-        ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, currrentHeading) 
-        : ChassisSpeeds.fromFieldRelativeSpeeds(-xSpeed, -ySpeed, rot, currrentHeading);
-
-        return (tip_correction_mode) ? tipRollPidOutput : 0.0; //return zero if not in tip correction mode
     }
 
-    public double getFieldCentricTipPitchPidOutput(){
+    //convert (rotate) robot-centric to field centric
+    ChassisSpeeds getFieldRelativeSpeed(ChassisSpeeds chassisSpeeds, Rotation2d robotAngle) {
 
-        if (!tip_correction_mode) return 0.0;
+        double robotX = chassisSpeeds.vxMetersPerSecond;
+        double robotY = chassisSpeeds.vyMetersPerSecond;
 
-        return (tip_correction_mode) ? tipPitchPidOutput : 0.0; //return zero if not in tip correction mode
+        // Gets the field relative X and Y components of the robot's speed in the X axis
+        double robotXXComp = robotAngle.getCos() * robotX;
+        double robotXYComp = robotAngle.getSin() * robotX;
+
+        // Gets the field relative X and Y components of the robot's speed in the Y axis
+        double robotYXComp = robotAngle.getSin() * robotY;
+        double robotYYComp = robotAngle.getCos() * robotY;
+
+        // Adds the field relative X and Y components of the robot's X and Y speeds to get the overall field relative X and Y speeds
+        double fieldX = robotXXComp + robotYXComp;
+        double fieldY = robotXYComp + robotYYComp;
+        
+        return new ChassisSpeeds(fieldX, fieldY, chassisSpeeds.omegaRadiansPerSecond);
     }
-
 
 }
