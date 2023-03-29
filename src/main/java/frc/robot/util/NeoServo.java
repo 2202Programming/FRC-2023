@@ -39,7 +39,7 @@ public class NeoServo implements VelocityControlled {
     double currentVel;
 
     // state vars
-    final PIDController positionPID;
+    final public PIDController positionPID;
     final public PIDFController hwVelPIDcfg; // matches hardware setting
     final PIDFController prevVelPIDcfg; // soft copy to edit /w NT and compare with hwVelPIDcfg
     final int hwVelSlot;
