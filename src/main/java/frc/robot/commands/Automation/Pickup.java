@@ -3,9 +3,7 @@ package frc.robot.commands.Automation;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.Arm.MoveCollectiveArm;
@@ -15,8 +13,9 @@ import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
+import frc.robot.util.FlexibleSCG;
 
-public class Pickup extends CommandBase {
+public class Pickup extends FlexibleSCG {
     // substation enum
     public enum Substation {
         Left, Right
@@ -24,7 +23,6 @@ public class Pickup extends CommandBase {
 
     // dc and related vars
     HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
-    final double DEADZONE2 = (0.025);  //put sq here
 
     // sdt and related vars
     SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
@@ -35,7 +33,6 @@ public class Pickup extends CommandBase {
     // state vars
     final Substation substation;
     final GamePiece gamePiece;
-    SequentialCommandGroup cmd;
 
     public Pickup(Substation substation, GamePiece gamePiece) {
         this.substation = substation;
@@ -43,17 +40,20 @@ public class Pickup extends CommandBase {
     }
 
     @Override
-    public void initialize() {
-        cmd = new SequentialCommandGroup();
-        cmd.addCommands(new PrintCommand("New SCG created"));
+    public void doFirstOnInit() {
+        this.addCommands(new PrintCommand("New SCG created"));
         //move();      // must move to close, but clear spot for arm extend
         extend();  
         getPiece();
         //backup();
         //retract();
-        cmd.addCommands(new PrintCommand("SCG should be ending"));
+        this.addCommands(new PrintCommand("SCG should be ending"));
+    }
+
+    @Override
+    public boolean isFinishedCondition() {
         // bail when the driver says so
-        cmd.until(() -> {return dc.rightStickMotion(Id.Driver);} ).schedule();
+        return dc.rightStickMotion(Id.Driver);
     }
 
     /**
@@ -61,7 +61,7 @@ public class Pickup extends CommandBase {
      * on point
      */
     public void move() {
-        cmd.addCommands(
+        this.addCommands(
                // WIP ---> new goToPickupPosition(new PathConstraints(3.0, 3.0), substation),
                 new RotateTo(new Rotation2d(DriverStation.getAlliance().equals(Alliance.Blue) ? 0 : 180)));
     }
@@ -70,7 +70,7 @@ public class Pickup extends CommandBase {
      * Extends arm out to pickup position
      */
     public void extend() {
-        cmd.addCommands(
+        this.addCommands(
             new PrintCommand("Before pickup shelf"),
             new MoveCollectiveArm(CollectivePositions.pickupShelfFS),
             new PrintCommand("After pickup shelf")
@@ -83,7 +83,7 @@ public class Pickup extends CommandBase {
      * have to interrupt the sequence.
      */
     public void getPiece() {
-        cmd.addCommands(
+        this.addCommands(
             new PrintCommand("Before PickupDrive"),
             new PickupDrive(0.5 , gamePiece),
             new PrintCommand("After PickupDrive")
@@ -94,7 +94,7 @@ public class Pickup extends CommandBase {
      * Backs up to safe distance to retract arm
      */
     public void backup() {
-        cmd.addCommands(new VelocityMove(BACKUP_SPEED, 0.0, BACKUP_TIME));
+        this.addCommands(new VelocityMove(BACKUP_SPEED, 0.0, BACKUP_TIME));
     
     }
 
@@ -102,12 +102,7 @@ public class Pickup extends CommandBase {
      * Retracts arm
      */
     public void retract() {
-        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.travelFS),
+        this.addCommands(new MoveCollectiveArm(CollectivePositions.travelFS),
                         new MoveCollectiveArm(CollectivePositions.travelLockFS));
-    }
-
-    @Override
-    public boolean isFinished() {
-        return true;
     }
 }

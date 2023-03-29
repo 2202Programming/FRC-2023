@@ -38,9 +38,6 @@ public class MoveToFactory extends CommandBase {
     CollectivePositions armPos;
     SequentialCommandGroup cmd;
 
-    // constants
-    private final double DEADZONE2 = 0.025; // [%^2] percent of deadzone squared
-
     /**
      * Creates a new MoveToFactory object.
      * 

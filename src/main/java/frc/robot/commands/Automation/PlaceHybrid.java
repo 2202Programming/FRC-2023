@@ -9,25 +9,22 @@ import com.pathplanner.lib.PathConstraints;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
+import frc.robot.Constants.DriverControls.Id;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.RotateTo;
 import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
+import frc.robot.util.FlexibleSCG;
 
-public class PlaceHybrid extends CommandBase {
+public class PlaceHybrid extends FlexibleSCG {
   // State vars
-  SequentialCommandGroup cmd;
+
   HorizontalScoringLane horizontalRequest;
   HorizontalSubstationLane substationRequest;
-
-  // Constants
-  final double DEADZONE2 = 0.025; // [%^2] squared number
 
   // SSs
   HID_Xbox_Subsystem dc = RobotContainer.RC().dc; 
@@ -41,11 +38,9 @@ public class PlaceHybrid extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    cmd = new SequentialCommandGroup();
-
+  public void doFirstOnInit() {
     // 1. Move to place
-    cmd.addCommands(
+    this.addCommands(
       new goToScoringPosition(new PathConstraints(2.0, 3.0), horizontalRequest, substationRequest), 
       new RotateTo(new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 180 : 0)),
       new VelocityMove(1.0, 0.0, 0.5) 
@@ -53,27 +48,12 @@ public class PlaceHybrid extends CommandBase {
       );
 
     // 2. Eject
-    cmd.addCommands(new outtakeCompetitionToggle().withTimeout(3.0));
-
-    // Schedule cmd, add stop condition
-    cmd.until(() -> {
-      boolean xStickStill = (Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE2;
-      boolean yStickStill = (Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE2;
-      return !(xStickStill && yStickStill);
-    }).schedule();
+    this.addCommands(new outtakeCompetitionToggle().withTimeout(3.0));
   }
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {}
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
-  public boolean isFinished() {
-    return true;
+  public boolean isFinishedCondition() {
+    return dc.rightStickMotion(Id.Driver);
   }
 }

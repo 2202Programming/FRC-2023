@@ -10,12 +10,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
+import frc.robot.Constants.DriverControls.Id;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.CollectivePositions;
@@ -27,8 +26,9 @@ import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
+import frc.robot.util.FlexibleSCG;
 
-public class PlaceMidHigh extends CommandBase {
+public class PlaceMidHigh extends FlexibleSCG {
 
   // SSs
   private HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
@@ -46,10 +46,7 @@ public class PlaceMidHigh extends CommandBase {
   private HorizontalSubstationLane substationRequest;
   private VerticalScoringLane verticalRequest;
   private GamePiece piece;
-  private Command dropCmd;
-
-  // the cmd
-  private SequentialCommandGroup cmd = new SequentialCommandGroup();
+  private Command dropthis;
 
   /**
    * This class acts as a command factory.
@@ -73,9 +70,7 @@ public class PlaceMidHigh extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    cmd = new SequentialCommandGroup();
-
+  public void doFirstOnInit() {
     // 1. Move to safe location for arm extension 
     move();
 
@@ -83,17 +78,17 @@ public class PlaceMidHigh extends CommandBase {
     switch (piece) {
       case Cube:
         Cube();   //moves arm to delivery point
-        dropCmd = new WheelsOut().withTimeout(TIME_DROP);
+        dropthis = new WheelsOut().withTimeout(TIME_DROP);
         break;
       case ConeFacingBack:
         ConeBack();
-        dropCmd = new InstantCommand(() -> {
+        dropthis = new InstantCommand(() -> {
           claw.open();
         }).withTimeout(TIME_DROP);
         break;
       case ConeFacingFront:
         ConeFront();
-        dropCmd = new InstantCommand(() -> {
+        dropthis = new InstantCommand(() -> {
           claw.open();
         }).withTimeout(TIME_DROP);
         break;
@@ -107,17 +102,12 @@ public class PlaceMidHigh extends CommandBase {
 
     // 4. Go to travel position
     Retract();
+  }
 
-    // MrL's comments: 3/13/23, this is pretty complicated, looks like a simple
-    // math.abs() would be good enough?
-    // nren 3/16/23: I mean it's just finding the magnitude of the vector of the
-    // stick in 2d space, but I think consistency is important so can't just check
-    // one axis
-    cmd.until(() -> {
-      boolean xStickStill = (Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE2;
-      boolean yStickStill = (Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE2;
-      return !(xStickStill && yStickStill);
-    }).schedule();
+  // Returns true when the command should end.
+  @Override
+  public boolean isFinishedCondition() {
+    return dc.rightStickMotion(Id.Driver);
   }
 
   /**
@@ -125,23 +115,23 @@ public class PlaceMidHigh extends CommandBase {
    */
   private void move() {
     // 1. move to general vicinity
-    cmd.addCommands(new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest));
+    this.addCommands(new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest));
 
     // 2. correct for OTF path generation rotation error
     // untested below
-    cmd.addCommands(new RotateTo(new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 0 : 180)));
+    this.addCommands(new RotateTo(new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 0 : 180)));
   }
 
   /**
-   * Constructs placing cmd based on object being a cone facing backwards.
+   * Constructs placing this based on object being a cone facing backwards.
    */
   private void ConeBack() {
     switch (verticalRequest) {
       case Top:
-        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS)); // TODO add back track constants
+        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS)); // TODO add back track constants
         break;
       case Middle:
-        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS)); // TODO add back track constants
+        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS)); // TODO add back track constants
         break;
       default:
         break;
@@ -149,15 +139,15 @@ public class PlaceMidHigh extends CommandBase {
   }
 
   /**
-   * Constructs pacing cmd based on object being a cone facing forward.
+   * Constructs pacing this based on object being a cone facing forward.
    */
   private void ConeFront() {
     switch (verticalRequest) {
       case Top:
-        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
         break;
       case Middle:
-        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
         break;
       default:
         break;
@@ -165,16 +155,16 @@ public class PlaceMidHigh extends CommandBase {
   }
 
   /**
-   * Constructs placing cmd based on object being a cube.
+   * Constructs placing this based on object being a cube.
    * Coming out of travel position.
    */
   private void Cube() {
     switch (verticalRequest) {
       case Top:
-        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
+        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
         break;
       case Middle:
-        cmd.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
+        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
         break;
       default:
         break;
@@ -186,11 +176,11 @@ public class PlaceMidHigh extends CommandBase {
    * target
    */
   private void MovePlace() {
-    cmd.addCommands(
+    this.addCommands(
       // 1. Move to       
       new VelocityMove(-SPEED_MOVE, 0.0, TIME_MOVE),
       // 2. Drop piece
-        dropCmd,
+        dropthis,
       // 3. Move back
       new VelocityMove(SPEED_MOVE, 0.0, TIME_MOVE));      
     }
@@ -199,26 +189,8 @@ public class PlaceMidHigh extends CommandBase {
    * Retracts piece
    */
   private void Retract() {
-    cmd.addCommands(
+    this.addCommands(
       new MoveCollectiveArm(CollectivePositions.travelFS), 
       new MoveCollectiveArm(CollectivePositions.travelLockFS));
-  }
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    // do nothing
-  }
-
-  @Override
-  public void end(boolean interrupted) {
-    // do nothing
-  }
-
-  @Override
-  public boolean isFinished() {
-    // it's movement cmd path factory, should be done after init / upon first time
-    // execute is called
-    return true;
   }
 }
