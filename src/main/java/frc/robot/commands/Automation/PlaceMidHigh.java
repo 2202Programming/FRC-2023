@@ -25,9 +25,9 @@ import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
-import frc.robot.util.FlexibleSCG;
+import frc.robot.util.DynamicSCG;
 
-public class PlaceMidHigh extends FlexibleSCG {
+public class PlaceMidHigh extends DynamicSCG {
 
   // SSs
   private HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
