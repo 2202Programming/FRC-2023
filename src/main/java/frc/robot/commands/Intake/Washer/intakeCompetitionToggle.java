@@ -7,6 +7,7 @@ package frc.robot.commands.Intake.Washer;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.Intake_Constants;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
 import frc.robot.subsystems.Intake;
@@ -38,7 +39,7 @@ public class intakeCompetitionToggle extends CommandBase implements BlinkyLightU
   @Override
   public void initialize() {
     intake.deploy();
-    intake.intakeOn();
+    intake.setIntakeSpeed(Intake_Constants.IntakeMotorStrength);
     intake.carwashOn();
     enableLights();
   }

@@ -204,16 +204,29 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
 
   /**
    * 
-   * @param id  which to watch, Driver || Operator
+   * rightStickMotion<Driver || Operator>
+   * 
+   * Useful to abort commands with an unitl() option.
+   * 
+   *   cmd.until(dc::rightStickMotionDriver)
+   * 
    * @return  true - stick moved past deadzone
    *          false - no stick
    */
-  public boolean rightStickMotion(final Id id) {
-    CommandXboxController device = (CommandXboxController)deviceMap.get(id);
-     double x = Math.abs(device.getRightX());
-     double y = Math.abs(device.getRightY());
-     return (x > deadzone) || (y > deadzone);
-  }
+  public boolean rightStickMotionDriver() {
+    final CommandXboxController device = driver;
+    double x = Math.abs(device.getRightX());
+    double y = Math.abs(device.getRightY());
+    return (x > deadzone) || (y > deadzone);
+ }
+
+ public boolean rightStickMotionOperator() {
+  final CommandXboxController device = operator;
+  double x = Math.abs(device.getRightX());
+  double y = Math.abs(device.getRightY());
+  return (x > deadzone) || (y > deadzone);
+}
+
 
 
   public int getInitialButtons(final Id id) {

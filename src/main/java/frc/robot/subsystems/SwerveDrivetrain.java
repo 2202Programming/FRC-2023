@@ -625,6 +625,14 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
   }
 
+public Pose2d getLLEstimate() {
+  return new Pose2d(llPose.getTranslation(), llPose.getRotation());
+}
+
+public Pose2d getPVEstimate() {
+  return new Pose2d(pvPose.getTranslation(), pvPose.getRotation());
+}
+
 public void disableVisionPoseRotation() {
   visionPoseUsingRotation = false;
   System.out.println("*** Vision pose updating rotation disabled***");

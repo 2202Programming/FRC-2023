@@ -9,11 +9,13 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.DigitalIO;
 import frc.robot.Constants.PCM1;
 import frc.robot.Constants.Intake_Constants;
 
@@ -25,7 +27,6 @@ import frc.robot.Constants.Intake_Constants;
 
 public class Intake extends SubsystemBase {
 
-  private double currentIntakeSpeed;
   private double currentCarwashSpeed;
 
   //Localized Constants - what valve value does what action
@@ -44,6 +45,8 @@ final DoubleSolenoid lt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
               PneumaticsModuleType.REVPH,
               PCM1.LT_INTAKE_UP_SOLENOID_PCM,
               PCM1.LT_INTAKE_DOWN_SOLENOID_PCM);
+
+  final DigitalInput lightgate = new DigitalInput(DigitalIO.IntakeLightGate);
 
 
   final CANSparkMax l_carwash_mtr = new CANSparkMax(CAN.CARWASH_LEFT_MTR, CANSparkMax.MotorType.kBrushless);
@@ -74,8 +77,19 @@ final DoubleSolenoid lt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
   public void setIntakeSpeed(double intakeMotorStrength) {
     l_intake_mtr.set(intakeMotorStrength);
     r_intake_mtr.set(intakeMotorStrength);
-    currentIntakeSpeed = intakeMotorStrength;
   }
+
+  public double getIntakeSpeed() {
+    return l_intake_mtr.get();
+  }
+
+  public void intakeOff() {
+    setIntakeSpeed(0.0);
+  }
+
+  /*
+    Mr.L - removing these to force using setIntakeSpeed(spd)  
+    Commands can change the speed and deal with directions.
 
   public void intakeOn(){    //on() with no-args is default
     setIntakeSpeed(Intake_Constants.IntakeMotorStrength);
@@ -85,14 +99,13 @@ final DoubleSolenoid lt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
     setIntakeSpeed(-Intake_Constants.IntakeMotorStrength);
   }
 
-  public void intakeOff() {
-    setIntakeSpeed(0.0);
-  }
+ 
 
   public void intakeReverse() {
     setIntakeSpeed(-currentIntakeSpeed);
     currentIntakeSpeed = -currentIntakeSpeed;
   }
+*/
 
   //Deploy arm mechanism using a Double Solenoids
   public void deploy() {
@@ -132,6 +145,10 @@ final DoubleSolenoid lt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
   public void carwashReverse() {
     setCarwashSpeed(-currentCarwashSpeed);
     currentCarwashSpeed = -currentCarwashSpeed;
+  }
+
+  public boolean lightgateIsBlocked() {
+    return lightgate.get();
   }
 
   /**

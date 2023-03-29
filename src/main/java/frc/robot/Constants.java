@@ -27,6 +27,7 @@ public final class Constants {
 
   public static final class SubsystemConfig {
 
+    //Support for multiple robots on same code base
     public final boolean HAS_INTAKE;
     public final boolean HAS_SHOOTER;
     public final boolean IS_COMPETITION_BOT;
@@ -50,6 +51,7 @@ public final class Constants {
     }
   }
 
+  //Support for multiple robots on same code base
   public static final class ChassisInversionSpecs{
     public ModuleInversionSpecs FR;
     public ModuleInversionSpecs FL;
@@ -76,6 +78,7 @@ public final class Constants {
       true,
       true);
 
+  //Support for multiple robots on same code base
   public static final ChassisInversionSpecs swerveBotChassisInversionSpecs = new ChassisInversionSpecs(
     new ModuleInversionSpecs(true,false,false), //FR
     new ModuleInversionSpecs(false,false,false), //FL
@@ -175,7 +178,6 @@ public final class Constants {
     
     //Claw
     public static final int CLAW_WHEEL_MOTOR = 16;
-    public static final int CLAW_ROTATE_MOTOR = 17;
     
     // IMU
     public static final int PIGEON_IMU_CAN = 60;
@@ -222,8 +224,8 @@ public final class Constants {
   // Intake Constants
   public static final class Intake_Constants {
     // PID values to get copied to the hardware
-    public static PIDFController r_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
-    public static PIDFController l_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
+    //public static PIDFController r_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
+    //public static PIDFController l_side_mtrPIDF = new PIDFController(1.0, 0.0, 0.0, 0.0);
     public static double IntakeMotorStrength = 0.35; //used for default ON
     public static double CarwashMotorStrength = 0.5; // used for default ON
   }

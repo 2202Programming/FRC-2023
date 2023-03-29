@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
-import frc.robot.Constants.DriverControls.Id;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.CollectivePositions;
@@ -107,7 +106,7 @@ public class PlaceMidHigh extends FlexibleSCG {
   // Returns true when the command should end.
   @Override
   public boolean isFinishedCondition() {
-    return dc.rightStickMotion(Id.Driver);
+    return dc.rightStickMotionDriver();
   }
 
   /**

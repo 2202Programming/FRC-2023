@@ -6,6 +6,7 @@ package frc.robot.commands.Intake.Washer;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.Intake_Constants;
 import frc.robot.subsystems.Intake;
 
 public class outtakeCompetitionToggle extends CommandBase {
@@ -21,7 +22,7 @@ public class outtakeCompetitionToggle extends CommandBase {
   @Override
   public void initialize() {
     intake.deploy();
-    intake.intakeOnReverse();
+    intake.setIntakeSpeed(-Intake_Constants.IntakeMotorStrength);
     intake.carwashOnReverse();
   }
 

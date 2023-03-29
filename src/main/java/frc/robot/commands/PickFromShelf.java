@@ -53,13 +53,16 @@ public class PickFromShelf extends CommandBase {
 
     // 2. Grab the piece
     pickPiece();
+    
+    //should be same as the code commented out below - TODO remove after testing
+    cmd.until(dc::rightStickMotionDriver).schedule();
 
     // Stealing this from the place command. Probably overkill, but I thought it would be easier on the drive team if picking and placing were about the same as possible.
-    cmd.until(() -> {
-      boolean xStickStill = (Math.sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE); 
-      boolean yStickStill = (Math.sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE);
-      return (xStickStill && yStickStill);
-    }).schedule();
+    //cmd.until(() -> {
+    //  boolean xStickStill = (Math.sqrt(Math.pow(dc.Driver().getLeftX(), 2) + Math.pow(dc.Driver().getLeftY(), 2)) > DEADZONE); 
+    //  boolean yStickStill = (Math.sqrt(Math.pow(dc.Driver().getRightX(), 2) + Math.pow(dc.Driver().getRightY(), 2)) > DEADZONE);
+    //  return (xStickStill && yStickStill);
+    //}).schedule();
   }
 
   /**

@@ -7,6 +7,7 @@ package frc.robot.commands.Intake.Washer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Intake;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.Intake_Constants;
 
 public class activateIntake extends CommandBase {
   /** Creates a new activateIntake. */
@@ -20,7 +21,7 @@ public class activateIntake extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.intakeOn();
+    intake.setIntakeSpeed(Intake_Constants.IntakeMotorStrength);
     intake.carwashOn();
   }
 

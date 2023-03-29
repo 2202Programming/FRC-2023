@@ -25,12 +25,14 @@ import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.swerve.RotateTo;
 import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.PoseMath;
 
 public class MoveToFactory extends CommandBase {
     // controlllers
-    CommandXboxController driver = RobotContainer.RC().dc.Driver();
-    CommandXboxController operator = RobotContainer.RC().dc.Operator();
+    HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
+    CommandXboxController driver = dc.Driver();
+    CommandXboxController operator = dc.Operator();
 
     // state vars
     HorizontalScoringLane horizLane;
@@ -78,13 +80,7 @@ public class MoveToFactory extends CommandBase {
         );
         
         // bail when the driver says so
-        cmd.
-        // until(() -> {
-        //     boolean xStickStill = (Math.pow(driver.getLeftX(), 2) + Math.pow(driver.getLeftY(), 2)) > DEADZONE2; 
-        //     boolean yStickStill = (Math.pow(driver.getRightX(), 2) + Math.pow(driver.getRightY(), 2)) > DEADZONE2;
-        //     return !(xStickStill && yStickStill);
-        //   }).
-          schedule();
+        cmd.until(dc::rightStickMotionDriver).schedule();
     }
 
     @Override

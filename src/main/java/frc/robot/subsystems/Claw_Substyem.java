@@ -9,7 +9,6 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.SparkMaxAlternateEncoder;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
@@ -82,7 +81,6 @@ public class Claw_Substyem extends SubsystemBase {
   final DoubleSolenoid solenoid = new DoubleSolenoid(CAN.PCM1, PneumaticsModuleType.REVPH, PCM1.CLAW_FWD, PCM1.CLAW_REV);
   final DigitalInput lightgate = new DigitalInput(DigitalIO.ClawLightgate);
   final NeoServo wrist_servo;
-  final NeoServo rotate_servo;
 
   final TalonSRX intake_wheels;
   double wheel_speed = 1.0;
@@ -92,8 +90,7 @@ public class Claw_Substyem extends SubsystemBase {
   // step response. 25% 3/4/23
   PIDController wrist_positionPID = new PIDController(8.0, 0.005, 0.05);
   PIDFController wrist_hwVelPID = new PIDFController(0.00045, 0.0000032, 0.01, 0.0017);
-  PIDController rotate_positionPID = new PIDController(5.0, 0.150, 0.250);
-  PIDFController rotate_hwVelPID = new PIDFController(0.002141, 0.00005, 0.15, 0.05017);
+ 
 
   // reads the elbow angle for tracking
   DoubleSupplier elbowAngle;
@@ -105,9 +102,7 @@ public class Claw_Substyem extends SubsystemBase {
 
   public Claw_Substyem() {
     wrist_servo = new NeoServo(CAN.WRIST_Motor, wrist_positionPID, wrist_hwVelPID, true);
-    rotate_servo = new NeoServo(CAN.CLAW_ROTATE_MOTOR, rotate_positionPID, rotate_hwVelPID, false, 0,
-                       SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
-
+    
     intake_wheels = new TalonSRX(CAN.CLAW_WHEEL_MOTOR);
     intake_wheels.setInverted(false);   //flip this is in/out is reversed
 
@@ -120,22 +115,12 @@ public class Claw_Substyem extends SubsystemBase {
         .setBrakeMode(IdleMode.kCoast)
         .burnFlash();
 
-    rotate_servo.setName(getName() + "/rotator")
-        .setConversionFactor(rotate_conversionFactor)
-        .setSmartCurrentLimit(ROTATE_STALL_CURRENT, ROTATE_FREE_CURRENT)
-        .setVelocityHW_PID(rotate_maxVel, rotate_maxAccel)
-        .setTolerance(rotate_posTol, rotate_velTol)
-        .setMaxVelocity(rotate_maxVel)
-        .burnFlash();
-
     wrist_servo.setClamp(WRIST_MIN_DEG , WRIST_MAX_DEG);
 
     // make sure we are at a good staring point (folded inside)
     wrist_servo.setSetpoint(PowerOnPos.wrist);
     wrist_servo.setPosition(PowerOnPos.wrist);
-    rotate_servo.setSetpoint(PowerOnPos.rotate);
-    rotate_servo.setPosition(PowerOnPos.rotate);
-
+  
     // Use elbow if we have one, otherwise zero
     elbowAngle = (RobotContainer.RC().elbow != null) ? RobotContainer.RC().elbow::getPosition : this::zero;
 
@@ -174,18 +159,7 @@ public class Claw_Substyem extends SubsystemBase {
     trackElbowMode = ClawTrackMode.free;
   }
  
- public VelocityControlled getRotator() {
-    return rotate_servo;
-  }
-
-  // getting the angles current position
-  public double getRotatetAngle() {
-    return rotate_servo.getPosition();
-  }
-
-  public boolean rotateAtSetpoint() {
-    return rotate_servo.atSetpoint();
-  }
+ 
 
 
   @Override
@@ -202,10 +176,10 @@ public class Claw_Substyem extends SubsystemBase {
       wrist_servo.setSetpoint(trackElbowMode.angle() - elbow_meas);
     }
     //NOTE:in Free mode, the wrist setpoint is called directly
-
+    
     //run the servo calcs
     wrist_servo.periodic();
-    rotate_servo.periodic();
+  
     // read gate, yes it needs to be negated.
     gate_blocked = !lightgate.get();
   }
@@ -254,7 +228,6 @@ public class Claw_Substyem extends SubsystemBase {
 
   public Command getWatcher() {
     wrist_servo.getWatcher();
-    rotate_servo.getWatcher();
     return new ClawWatcher();
   }
 
