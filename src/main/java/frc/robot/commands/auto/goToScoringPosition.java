@@ -35,7 +35,13 @@ public class goToScoringPosition extends CommandBase {
   PPSwerveControllerCommand pathCommand;
   JoystickRumbleEndless rumbleCmd;
 
-  //pick correct scoring pose based on alliance
+  /**
+   * Constructs a goToScoringPosition
+   *
+   * @param constraints path contraint object
+   * @param horizontalScoringLane Which of three macro station to go to (left/right/center)
+   * @param horizontalSubstationLane which lane of the station (micro scale) to go to (left/right/center)
+   */
   public goToScoringPosition(PathConstraints constraints, HorizontalScoringLane horizontalScoringLane, HorizontalSubstationLane horizontalSubstationLane) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.horizontalScoringLane = horizontalScoringLane;
