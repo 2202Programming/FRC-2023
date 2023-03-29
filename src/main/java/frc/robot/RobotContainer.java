@@ -46,7 +46,7 @@ import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoTest;
 import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
-import frc.robot.commands.swerve.AntiTipWatcher;
+import frc.robot.commands.swerve.AntiTip;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.RobotCentricDrive;
@@ -110,7 +110,7 @@ public class RobotContainer {
   public final Claw_Substyem claw;
   public final BlinkyLights lights;
   public final ColorSensors colorSensors;
-  public final AntiTipWatcher antitipWatcher;
+  public final AntiTip antiTip;
 
   public HashMap<String, Command> eventMap;
   public SwerveAutoBuilder autoBuilder;
@@ -136,7 +136,7 @@ public class RobotContainer {
         elbow = new Elbow();
         claw = new Claw_Substyem();
         colorSensors = new ColorSensors();
-        antitipWatcher = new AntiTipWatcher();
+        antiTip = new AntiTip();
         break;
 
       case SwerveBot:
@@ -149,7 +149,7 @@ public class RobotContainer {
         elbow = null;
         claw = null;
         colorSensors = null;
-        antitipWatcher = new AntiTipWatcher();
+        antiTip = new AntiTip();
         break;
 
       case ChadBot:
@@ -162,7 +162,7 @@ public class RobotContainer {
         elbow = null;
         claw = null;
         colorSensors = new ColorSensors();
-        antitipWatcher = new AntiTipWatcher();
+        antiTip = new AntiTip();
         break;
 
       case BotOnBoard: // fall through
@@ -177,7 +177,7 @@ public class RobotContainer {
         elbow = new Elbow();
         claw = new Claw_Substyem();
         colorSensors = null;
-        antitipWatcher = null;
+        antiTip = null;
         break;
     }
 

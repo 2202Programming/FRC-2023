@@ -24,6 +24,7 @@ public class FieldCentricDrive extends CommandBase {
   final SwerveDrivetrain drivetrain;
   final SwerveDriveKinematics kinematics;
   final HID_Xbox_Subsystem dc;
+  final AntiTip antiTip = RobotContainer.RC().antiTip;
 
   // output to Swerve Drivetrain
   double xSpeed, ySpeed, rot;
@@ -62,11 +63,11 @@ public class FieldCentricDrive extends CommandBase {
     currrentHeading = drivetrain.getPose().getRotation();
     //convert field centric speeds to robot centric
     ChassisSpeeds tempChassisSpeed = (DriverStation.getAlliance().equals(Alliance.Blue)) 
-        ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed + RobotContainer.RC().antitipWatcher.getFieldCentricTipCorrection().vxMetersPerSecond,
-                                                ySpeed + RobotContainer.RC().antitipWatcher.getFieldCentricTipCorrection().vyMetersPerSecond,
+        ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed + antiTip.getFieldCentricTipCorrection().vxMetersPerSecond,
+                                                ySpeed + antiTip.getFieldCentricTipCorrection().vyMetersPerSecond,
                                                 rot, currrentHeading) 
-        : ChassisSpeeds.fromFieldRelativeSpeeds(-xSpeed + RobotContainer.RC().antitipWatcher.getFieldCentricTipCorrection().vxMetersPerSecond,
-                                                -ySpeed + RobotContainer.RC().antitipWatcher.getFieldCentricTipCorrection().vyMetersPerSecond,
+        : ChassisSpeeds.fromFieldRelativeSpeeds(-xSpeed + antiTip.getFieldCentricTipCorrection().vxMetersPerSecond,
+                                                -ySpeed + antiTip.getFieldCentricTipCorrection().vyMetersPerSecond,
                                                 rot, currrentHeading); // if on red alliance you're looking at robot from opposite. Pose is in blue coordinates so flip if red
 
     output_states = kinematics
@@ -75,7 +76,7 @@ public class FieldCentricDrive extends CommandBase {
 
   @Override
   public void execute() {
-    RobotContainer.RC().antitipWatcher.tipCalculate();
+    antiTip.tipCalculate();
     calculate();
     drivetrain.drive(output_states);
   }

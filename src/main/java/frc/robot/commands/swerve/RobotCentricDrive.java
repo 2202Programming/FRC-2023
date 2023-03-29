@@ -26,6 +26,7 @@ public class RobotCentricDrive extends CommandBase {
   final SwerveDrivetrain drivetrain;
   final HID_Xbox_Subsystem dc;
   final SwerveDriveKinematics kinematics;
+  final AntiTip antiTip = RobotContainer.RC().antiTip;
 
   // output to Swerve Drivetrain
   double xSpeed, ySpeed, rot;
@@ -62,14 +63,14 @@ public class RobotCentricDrive extends CommandBase {
     ySpeed = MathUtil.clamp(ySpeed, -Constants.DriveTrain.kMaxSpeed, Constants.DriveTrain.kMaxSpeed);
     rot = MathUtil.clamp(rot, -Constants.DriveTrain.kMaxAngularSpeed, Constants.DriveTrain.kMaxAngularSpeed);
 
-    output_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(xSpeed + RobotContainer.RC().antitipWatcher.getRobotCentricTipCorrection().vxMetersPerSecond,
-                                                                      ySpeed + RobotContainer.RC().antitipWatcher.getRobotCentricTipCorrection().vyMetersPerSecond,
+    output_states = kinematics.toSwerveModuleStates(new ChassisSpeeds(xSpeed + antiTip.getRobotCentricTipCorrection().vxMetersPerSecond,
+                                                                      ySpeed + antiTip.getRobotCentricTipCorrection().vyMetersPerSecond,
                                                                       rot));
   }
 
   @Override
   public void execute() {
-    RobotContainer.RC().antitipWatcher.tipCalculate();
+    antiTip.tipCalculate();
     calculate();
     drivetrain.drive(output_states);
   }
