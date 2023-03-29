@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
-import frc.robot.Constants.DriverControls.Id;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -54,6 +53,6 @@ public class PlaceHybrid extends FlexibleSCG {
   // Returns true when the command should end.
   @Override
   public boolean isFinishedCondition() {
-    return dc.rightStickMotion(Id.Driver);
+    return dc.rightStickMotionDriver();
   }
 }

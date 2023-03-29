@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.RobotContainer;
-import frc.robot.Constants.DriverControls.Id;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.swerve.RotateTo;
@@ -53,7 +52,7 @@ public class Pickup extends FlexibleSCG {
     @Override
     public boolean isFinishedCondition() {
         // bail when the driver says so
-        return dc.rightStickMotion(Id.Driver);
+        return dc.rightStickMotionDriver();
     }
 
     /**

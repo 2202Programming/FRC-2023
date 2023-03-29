@@ -493,7 +493,8 @@ public class RobotContainer {
           new SequentialCommandGroup(
               new PrintCommand("***Eject No Deploy Start"),
               new InstantCommand(drivetrain::printPose),
-              new IntakeReverse().withTimeout(0.5)));
+              //was new IntakeReverse().withTimeout(0.5)));  below will finish when gate is cleared
+              new IntakeReverse(true).withTimeout(0.5)));
 
     if (intake != null)
       eventMap.put("eject_piece",
