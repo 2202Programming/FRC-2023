@@ -17,9 +17,9 @@ import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.RotateTo;
 import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
-import frc.robot.util.FlexibleSCG;
+import frc.robot.util.DynamicSCG;
 
-public class PlaceHybrid extends FlexibleSCG {
+public class PlaceHybrid extends DynamicSCG {
   // State vars
 
   HorizontalScoringLane horizontalRequest;

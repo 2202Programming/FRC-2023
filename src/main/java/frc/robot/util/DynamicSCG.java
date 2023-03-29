@@ -22,7 +22,7 @@ import java.util.List;
  * <p>This class is provided by the NewCommands VendorDep
  */
 @SuppressWarnings("removal")
-public class FlexibleSCG extends CommandGroupBase {
+public class DynamicSCG extends CommandGroupBase {
   private final List<Command> m_commands = new ArrayList<>();
   private int m_currentCommandIndex = -1;
   private boolean m_runWhenDisabled = true;
@@ -34,7 +34,7 @@ public class FlexibleSCG extends CommandGroupBase {
    *
    * @param commands the commands to include in this composition.
    */
-  public FlexibleSCG(Command... commands) {
+  public DynamicSCG(Command... commands) {
     addCommands(commands);
   }
 
@@ -109,8 +109,12 @@ public class FlexibleSCG extends CommandGroupBase {
     m_currentCommandIndex = -1;
   }
 
+  /**
+   * This method is called first on the end() method.
+   * Currently, it clears all commands in the group.
+   */
   public void doFirstOnEnd() {
-    return;
+    m_commands.clear();
   }
 
   @Override

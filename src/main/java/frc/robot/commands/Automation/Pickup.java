@@ -12,9 +12,9 @@ import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
-import frc.robot.util.FlexibleSCG;
+import frc.robot.util.DynamicSCG;
 
-public class Pickup extends FlexibleSCG {
+public class Pickup extends DynamicSCG {
     // substation enum
     public enum Substation {
         Left, Right
