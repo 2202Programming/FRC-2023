@@ -480,11 +480,6 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new PrintCommand("***Deploying intake"),
             new DeployIntake()));
-    eventMap.put("place_high",
-      new SequentialCommandGroup(
-        new PrintCommand("***Placing High"),
-        new MoveCollectiveArm(CollectivePositions.placeConeHighFS))
-      );
 
     if (intake != null)
       eventMap.put("eject_start",

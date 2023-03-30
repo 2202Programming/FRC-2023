@@ -46,15 +46,11 @@ public class ArmMoveTo extends CommandBase {
   /** Creates a new MoveOut. */
   final ArmSS armSS;
   final double length;
-  final double angle;
-  final Elbow elbow;
 
   
-  public ArmMoveTo(double arm_length_cm, double elbow_angle_deg) {
+  public ArmMoveTo(double arm_length_cm) {
     armSS = RobotContainer.RC().armSS; 
-    elbow = RobotContainer.RC().elbow;
     length = arm_length_cm;
-    angle = elbow_angle_deg;
     addRequirements(armSS);
 
   }
@@ -62,8 +58,7 @@ public class ArmMoveTo extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    armSS.setPosition(length);
-    elbow.setPosition(angle);
+    armSS.setSetpoint(length);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -84,6 +79,6 @@ public class ArmMoveTo extends CommandBase {
   @Override
   public boolean isFinished() {
     // everything is arm extension and elbo angle
-    return armSS.atSetpoint() && elbow.atSetpoint();
+    return armSS.atSetpoint();
   }
 }
