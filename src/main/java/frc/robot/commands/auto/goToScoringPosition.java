@@ -36,7 +36,7 @@ public class goToScoringPosition extends CommandBase {
   JoystickRumbleEndless rumbleCmd;
   Pose2d targetPose;
   int loopNum = 0;
-  double distanceTolerance = 0.1; //in meters
+  double distanceTolerance = 0.05; //in meters
   boolean finished = false;
   int maxLoops = 3;
 
