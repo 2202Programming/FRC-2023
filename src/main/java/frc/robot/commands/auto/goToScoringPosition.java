@@ -132,6 +132,7 @@ public class goToScoringPosition extends CommandBase {
     //takes contraints, final pose - returns a command to move from current post to final pose
 
     Rotation2d bearing = PoseMath.getHeading2Target(sdt.getPose(), finalPose); //direction directly from point A to B.
+    System.out.println("***BEARING = " + bearing);
     //using bearing as your exit and entry angle
     PathPoint startPoint = new PathPoint(sdt.getPose().getTranslation(), bearing, sdt.getPose().getRotation());
     PathPoint endPoint = new PathPoint(finalPose.getTranslation(), bearing, finalPose.getRotation());
