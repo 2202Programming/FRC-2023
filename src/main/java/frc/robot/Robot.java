@@ -4,9 +4,7 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.MatchTimer;
@@ -89,7 +87,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     if (m_robotContainer.drivetrain != null)
-      //m_robotContainer.drivetrain.enableVisionPose(); Disabling b/c may have f'ed up rotation, don't use at WI
+      m_robotContainer.drivetrain.enableVisionPose();
+      m_robotContainer.drivetrain.disableVisionPoseRotation();
 
     // This makes sure that the autonomous stops running when teleop starts running.
     // If you want the autonomous to continue until interrupted by another command,

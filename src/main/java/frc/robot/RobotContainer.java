@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
+import frc.robot.Constants.HorizontalScoringLane;
+import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.PowerOnPos;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.PickFromShelf;
@@ -45,6 +47,7 @@ import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.autoTest;
 import frc.robot.commands.auto.goToPickupPosition;
+import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
 import frc.robot.commands.swerve.ChargeStationBalance;
 import frc.robot.commands.swerve.FieldCentricDrive;
@@ -208,7 +211,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.vision_test);
 
     //Keep the wrist down at power up + 5 deg to put some pressure on it
     claw.setWristAngle(PowerOnPos.wrist + 5.0);  
@@ -286,7 +289,12 @@ public class RobotContainer {
         // // up and down for center trio request per Alek
         // driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
         // driver.povDown().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
-        // driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Right));
+        driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left, HorizontalSubstationLane.Left));
+        driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center, HorizontalSubstationLane.Center));
+        driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(4, 3), HorizontalScoringLane.Right, HorizontalSubstationLane.Right));
+
+        driver.leftBumper().onTrue(new InstantCommand(() -> {limelight.toggleLED();}));
+
         break;
 
       case Competition:
