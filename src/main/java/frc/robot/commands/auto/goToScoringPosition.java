@@ -34,6 +34,11 @@ public class goToScoringPosition extends CommandBase {
   SwerveDrivetrain sdt;
   PPSwerveControllerCommand pathCommand;
   JoystickRumbleEndless rumbleCmd;
+  Pose2d targetPose;
+  int loopNum = 0;
+  double distanceTolerance = 0.1; //in meters
+  boolean finished = false;
+  int maxLoops = 3;
 
   /**
    * Constructs a goToScoringPosition
@@ -55,6 +60,7 @@ public class goToScoringPosition extends CommandBase {
   public void initialize() {
     int scoringBlock; 
     int scoringAdjusted;
+    loopNum = 0;
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
       //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
@@ -75,7 +81,7 @@ public class goToScoringPosition extends CommandBase {
           scoringAdjusted = 0;
           break;      
       }
-      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted]);
+      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
     }
     else { //RED ALLIANCE
       //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
@@ -96,18 +102,40 @@ public class goToScoringPosition extends CommandBase {
           scoringAdjusted = 2;
           break;      
       }
-      pathCommand = MoveToPoseAutobuilder(constraints, Constants.FieldPoses.redScorePoses[scoringBlock][scoringAdjusted]);
+      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
     }
-    //sdt.disableVisionPose();
+    pathCommand = MoveToPoseAutobuilder(constraints, targetPose);
+    sdt.disableVisionPose();
     rumbleCmd = new JoystickRumbleEndless(Id.Operator);
     rumbleCmd.schedule();
     RobotContainer.RC().lights.setBlinking(BlinkyLights.GREEN);
     pathCommand.schedule();
+    loopNum++;
+    System.out.println("***Loop #" + loopNum);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    if(pathCommand.isFinished()){ //once path command finishes, check how close to target it is, and how many loops we've done
+      if(isAtTarget() || (loopNum == maxLoops)) {
+        finished = true;
+      }
+      else{ //run path command again to close error
+        loopNum++;
+        System.out.println("***Distance error too big, starting Loop #" + loopNum);
+        pathCommand = MoveToPoseAutobuilder(constraints, targetPose); //refresh pathCommand, since we are at a new pose (same target though)
+        pathCommand.schedule();
+      }
+
+    }
+  }
+
+  private boolean isAtTarget(){
+    double distance = frc.robot.util.PoseMath.poseDistance(targetPose, sdt.getPose());
+    System.out.println("*** Loop done, distance error: "+distance);
+    return (distance < distanceTolerance);
+  }
 
   // Called once the command ends or is interrupted.
   @Override
@@ -115,17 +143,18 @@ public class goToScoringPosition extends CommandBase {
     pathCommand.cancel();
     sdt.stop();
     sdt.enableVisionPose();
+    sdt.disableVisionPoseRotation();
     rumbleCmd.cancel();
     RobotContainer.RC().lights.stopBlinking();
     RobotContainer.RC().lights.setAllianceColors();
-    System.out.println("final End Point:" + sdt.getPose().getTranslation() + ", rot:" + sdt.getPose().getRotation().getDegrees());
+    System.out.println("***Final End Point:" + sdt.getPose().getTranslation() + ", rot:" + sdt.getPose().getRotation().getDegrees());
 
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return pathCommand.isFinished();
+    return finished;
   }
 
   public PPSwerveControllerCommand MoveToPoseAutobuilder(PathConstraints constraints, Pose2d finalPose) {

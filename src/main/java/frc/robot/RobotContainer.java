@@ -291,9 +291,7 @@ public class RobotContainer {
         // driver.povDown().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
         driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left, HorizontalSubstationLane.Left));
         driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center, HorizontalSubstationLane.Center));
-        driver.povRight().onTrue(new SequentialCommandGroup(
-          new goToScoringPosition(new PathConstraints(4, 3), HorizontalScoringLane.Right, HorizontalSubstationLane.Right),
-          new goToScoringPosition(new PathConstraints(4, 3), HorizontalScoringLane.Right, HorizontalSubstationLane.Right)));
+        driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(4, 3), HorizontalScoringLane.Right, HorizontalSubstationLane.Right));
 
         
         break;
