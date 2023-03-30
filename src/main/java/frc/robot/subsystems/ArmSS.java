@@ -196,7 +196,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     }
 
     public boolean isArmCmdExtended() {
-      return (leftArm.positionPID.getSetpoint() >= 38.0) && (rightArm.positionPID.getSetpoint() >= 38.0);
+      return (leftArm.getPosition() >= 37.0) && (rightArm.getPosition() >= 37.0);
     }
 
     class ArmSSWatcher extends WatcherCmd {
