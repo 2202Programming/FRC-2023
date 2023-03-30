@@ -4,22 +4,37 @@
 
 package frc.robot.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandGroupBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A command composition that runs a list of commands in sequence.
+ * 
+ * This is a modified version of the SequentialCommandGroup (SCG) that provides
+ * a lot more flexibility. While the init/execute/isFinished/end are all final,
+ * this version of the SCG adds various functions that are called at appropriate
+ * times within each of those functions to add back functionality. These
+ * functions are meant to be overriden. They are as follows:
+ * 
+ * public void doFirstOnInit()
+ * public void doFirstOnExecute()
+ * public void doFirstOnEnd(boolean interrupted)
+ * public boolean isFinishedCondition()
  *
- * <p>The rules for command compositions apply: command instances that are passed to it cannot be
- * added to any other composition or scheduled individually, and the composition requires all
+ * <p>
+ * The rules for command compositions apply: command instances that are passed
+ * to it cannot be
+ * added to any other composition or scheduled individually, and the composition
+ * requires all
  * subsystems its components require.
  *
- * <p>This class is provided by the NewCommands VendorDep
+ * <p>
+ * This class is provided by the NewCommands VendorDep
  */
 @SuppressWarnings("removal")
 public class DynamicSCG extends CommandGroupBase {
@@ -29,7 +44,8 @@ public class DynamicSCG extends CommandGroupBase {
   private InterruptionBehavior m_interruptBehavior = InterruptionBehavior.kCancelIncoming;
 
   /**
-   * Creates a new SequentialCommandGroup. The given commands will be run sequentially, with the
+   * Creates a new SequentialCommandGroup. The given commands will be run
+   * sequentially, with the
    * composition finishing when the last command finishes.
    *
    * @param commands the commands to include in this composition.
@@ -98,7 +114,7 @@ public class DynamicSCG extends CommandGroupBase {
 
   @Override
   public final void end(boolean interrupted) {
-    doFirstOnEnd();
+    doFirstOnEnd(interrupted);
 
     if (interrupted
         && !m_commands.isEmpty()
@@ -111,9 +127,10 @@ public class DynamicSCG extends CommandGroupBase {
 
   /**
    * This method is called first on the end() method.
-   * Currently, it clears all commands in the group.
+   * Currently, it clears all commands in the group. If overriden, decide whether
+   * or not to call the super method.
    */
-  public void doFirstOnEnd() {
+  public void doFirstOnEnd(boolean interrupted) {
     m_commands.clear();
   }
 
