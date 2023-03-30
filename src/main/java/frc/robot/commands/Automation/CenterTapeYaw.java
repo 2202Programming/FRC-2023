@@ -12,6 +12,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.SwerveDrivetrain;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,7 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class CenterTapeYaw extends CommandBase {
   final SwerveDrivetrain drivetrain;
   final SwerveDriveKinematics kinematics;
-  final PhotonVision photonvision;
+  final Limelight_Subsystem ll;
 
   // output to Swerve Drivetrain
   double xSpeed, ySpeed, rot;
@@ -52,7 +53,7 @@ public class CenterTapeYaw extends CommandBase {
       addRequirements(drivetrain);
     }
     this.kinematics = drivetrain.getKinematics();
-    this.photonvision = RobotContainer.RC().photonVision;
+    this.ll = RobotContainer.RC().limelight;
 
     tapePid = new PIDController(tape_kP, tape_kI, tape_kD);
     tapePid.setTolerance(pos_tol, vel_tol);
@@ -64,7 +65,10 @@ public class CenterTapeYaw extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    ll.setPipeline(1); //photoreflective pipeline
+    ll.enableLED();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -76,7 +80,7 @@ public class CenterTapeYaw extends CommandBase {
   }
 
   void calculate(){
-    double targetYawError = photonvision.getLargestTapeTarget().getYaw();
+    double targetYawError = ll.getX();
     tapePid.setSetpoint(0.0); //target yaw is centered - zero
     tapePidOutput = tapePid.calculate(targetYawError);
 
@@ -100,6 +104,8 @@ public class CenterTapeYaw extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     drivetrain.stop();
+    ll.setPipeline(0); //back to apriltag pipeline
+    ll.disableLED();
   }
 
   // Returns true when the command should end.

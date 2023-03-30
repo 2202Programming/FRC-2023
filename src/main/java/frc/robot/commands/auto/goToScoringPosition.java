@@ -21,6 +21,7 @@ import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.RobotContainer;
 import frc.robot.commands.JoystickRumbleEndless;
+import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.util.PoseMath;
@@ -37,8 +38,11 @@ public class goToScoringPosition extends CommandBase {
   Pose2d targetPose;
   int loopNum = 0;
   double distanceTolerance = 0.05; //in meters
-  boolean finished = false;
+  boolean pathingFinished = false;
+  boolean tapeFinished = false;
+  boolean allFinished = false;
   int maxLoops = 3;
+  CenterTapeYaw tapeCommand;
 
   /**
    * Constructs a goToScoringPosition
@@ -61,6 +65,10 @@ public class goToScoringPosition extends CommandBase {
     int scoringBlock; 
     int scoringAdjusted;
     loopNum = 0;
+    pathingFinished = false;
+    tapeFinished = false;
+    allFinished = false;
+    tapeCommand = new CenterTapeYaw();
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
       //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
@@ -118,8 +126,15 @@ public class goToScoringPosition extends CommandBase {
   @Override
   public void execute() {
     if(pathCommand.isFinished()){ //once path command finishes, check how close to target it is, and how many loops we've done
-      if(isAtTarget() || (loopNum == maxLoops)) {
-        finished = true;
+      if(isAtTarget() || (loopNum == maxLoops)) { //either at target, or max # of loops
+        pathingFinished = true;
+        if((horizontalSubstationLane == HorizontalSubstationLane.Left) || (horizontalSubstationLane == HorizontalSubstationLane.Right)){ //cone station
+          System.out.println("*** Running Tape Yaw... ");
+          tapeCommand.schedule();
+        }
+        else { //not a cone station, no need for RR tape turn
+          tapeFinished = true;
+        }
       }
       else{ //run path command again to close error
         loopNum++;
@@ -154,7 +169,11 @@ public class goToScoringPosition extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return finished;
+    if (pathingFinished && tapeFinished) return true; //both are done
+    else if (pathingFinished && !tapeFinished) {//pathing done, tape running
+      if(tapeCommand.isFinished()) return true; //pathing done, tape is now done
+    }
+    return false;
   }
 
   public PPSwerveControllerCommand MoveToPoseAutobuilder(PathConstraints constraints, Pose2d finalPose) {
