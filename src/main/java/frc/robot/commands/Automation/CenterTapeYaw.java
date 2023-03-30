@@ -30,7 +30,7 @@ public class CenterTapeYaw extends CommandBase {
 
   // PID for retroreflective-based heading to a target
   PIDController tapePid;
-  double tape_kP = 0.4;
+  double tape_kP = 2.0;
   double tape_kI = 0.0;
   double tape_kD = 0.0;
   double tapePidOutput = 0.0;
@@ -81,7 +81,7 @@ public class CenterTapeYaw extends CommandBase {
 
   void calculate(){
     double targetYawError = ll.getX();
-    tapePid.setSetpoint(0.0); //target yaw is centered - zero
+    tapePid.setSetpoint(-12.7); //target yaw is centered - 12.7 deg since ll offset
     tapePidOutput = tapePid.calculate(targetYawError);
 
     double min_rot = (Math.abs(targetYawError) > pos_tol)  ? - Math.signum(targetYawError) * min_rot_rate : 0.0;

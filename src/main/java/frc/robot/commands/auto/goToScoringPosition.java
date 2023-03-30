@@ -130,7 +130,8 @@ public class goToScoringPosition extends CommandBase {
         pathingFinished = true;
         if((horizontalSubstationLane == HorizontalSubstationLane.Left) || (horizontalSubstationLane == HorizontalSubstationLane.Right)){ //cone station
           System.out.println("*** Running Tape Yaw... ");
-          tapeCommand.schedule();
+          //tapeCommand.schedule();
+          tapeFinished = true; //disable tape for now
         }
         else { //not a cone station, no need for RR tape turn
           tapeFinished = true;
@@ -148,7 +149,7 @@ public class goToScoringPosition extends CommandBase {
 
   private boolean isAtTarget(){
     double distance = frc.robot.util.PoseMath.poseDistance(targetPose, sdt.getPose());
-    System.out.println("*** Loop done, distance error: "+distance);
+    System.out.println("*** Loop#" + loopNum +" done, distance error: "+distance);
     return (distance < distanceTolerance);
   }
 
