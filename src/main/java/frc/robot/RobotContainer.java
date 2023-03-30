@@ -290,6 +290,8 @@ public class RobotContainer {
         // driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
         // driver.povDown().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
         driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left, HorizontalSubstationLane.Left));
+        driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center, HorizontalSubstationLane.Center));
+        
         break;
 
       case Competition:

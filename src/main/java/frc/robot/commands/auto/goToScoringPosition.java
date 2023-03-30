@@ -141,7 +141,12 @@ public class goToScoringPosition extends CommandBase {
     PIDController anglePid = new PIDController(6.0, 0, 0);
     anglePid.setTolerance(Math.PI * 0.02);
     anglePid.enableContinuousInput(-Math.PI, Math.PI);
-    
+
+    PIDController xPid = new PIDController(6.0, 0, 0);
+    PIDController yPid = new PIDController(6.0, 0, 0);
+    xPid.setTolerance(0.01);
+    yPid.setTolerance(0.01);
+
     //create a path from current position to finalPoint
     PathPlannerTrajectory newPath = PathPlanner.generatePath(constraints, startPoint, endPoint);
     System.out.println("Path time: " + newPath.getTotalTimeSeconds());
@@ -150,8 +155,8 @@ public class goToScoringPosition extends CommandBase {
       newPath, 
       sdt::getPose, // Pose supplier
       sdt.getKinematics(), // SwerveDriveKinematics
-      new PIDController(4.0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-      new PIDController(4.0, 0, 0), // Y controller (usually the same values as X controller)
+      xPid, // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+      yPid, // Y controller (usually the same values as X controller)
       anglePid, // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
       sdt::drive, // Module states consumer
       false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
