@@ -11,15 +11,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
-import frc.robot.commands.Arm.ArmLockForDrivingFS;
-import frc.robot.commands.Arm.CollectivePositions;
-import frc.robot.commands.Arm.MoveCollectiveArm;
+import frc.robot.commands.Arm.ArmLockForDriving;
 import frc.robot.commands.auto.moveToPoint;
-import frc.robot.subsystems.Claw_Substyem;
 
 public class DisengageTele extends SequentialCommandGroup {
   /** Creates a new PlaceHighAuto. */
-  private Claw_Substyem claw = RobotContainer.RC().claw;
  
   public DisengageTele() {
     Pose2d targetPose;
@@ -33,10 +29,9 @@ public class DisengageTele extends SequentialCommandGroup {
     }
 
    addCommands(
-        new ArmLockForDrivingFS(),
         new ParallelCommandGroup(
             new moveToPoint(new PathConstraints(0.2, 0.1), targetPose),
-            new MoveCollectiveArm(CollectivePositions.travelLockNoPieceBS)
+            new ArmLockForDriving()
         )
    );
   }

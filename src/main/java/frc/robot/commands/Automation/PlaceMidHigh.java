@@ -6,27 +6,17 @@ package frc.robot.commands.Automation;
 
 import com.pathplanner.lib.PathConstraints;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
-import frc.robot.commands.Arm.MoveCollectiveArm;
-import frc.robot.commands.Arm.ArmLockForDrivingBS;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
-import frc.robot.commands.swerve.RotateTo;
-import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
-import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.DynamicSCG;
 
@@ -118,7 +108,6 @@ public class PlaceMidHigh extends DynamicSCG {
     this.addCommands(new InstantCommand(() -> {
       claw.open();
     }).andThen(new WaitCommand(TIME_DROP)));
-    this.addCommands(new DisengageTele());
   }
 
   /**
@@ -138,7 +127,6 @@ public class PlaceMidHigh extends DynamicSCG {
     }
 
     this.addCommands(new WheelsOut().withTimeout(TIME_DROP));
-    this.addCommands(new DisengageTele());
   }
 
   /**
@@ -146,9 +134,7 @@ public class PlaceMidHigh extends DynamicSCG {
    */
   private void Retract() {
     this.addCommands(
-      new ParallelCommandGroup(
-        new VelocityMove(0.0, SPEED_MOVE, TIME_MOVE),
-        new ArmLockForDrivingBS()
-    ));
+      new DisengageTele()
+      );
   }
 }
