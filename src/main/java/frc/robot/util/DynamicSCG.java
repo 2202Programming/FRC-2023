@@ -59,9 +59,9 @@ public class DynamicSCG extends CommandGroupBase {
 
   @Override
   public final void initialize() {
-    m_currentCommandIndex = 0;
-
     doFirstOnInit();
+    
+    m_currentCommandIndex = 0;
 
     if (!m_commands.isEmpty()) {
       m_commands.get(0).initialize();

@@ -37,7 +37,7 @@ import frc.robot.commands.Arm.TrackThenMove;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.MoveToFactory;
 import frc.robot.commands.Automation.PlaceHighAuto;
-import frc.robot.commands.Automation.PlaceHighTele;
+import frc.robot.commands.Automation.PlaceTele;
 import frc.robot.commands.Automation.PlaceMidHigh;
 import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
@@ -271,9 +271,9 @@ public class RobotContainer {
         oper.povDown().whileTrue(new ArmMoveAtSpeed(-2.0, true));
 
 
-        driver.leftBumper().onTrue(new PlaceHighTele());
+        driver.leftBumper().onTrue(new PlaceTele(CollectivePositions.placeConeHighFS));
 
-        driver.a().onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.Top, GamePiece.ConeFacingFront));
+        driver.a().onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.Top));
         break;
 
       case simulation:

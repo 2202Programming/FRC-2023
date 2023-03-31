@@ -11,11 +11,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
+import frc.robot.commands.Arm.ArmLockForDrivingBS;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -44,8 +47,6 @@ public class PlaceMidHigh extends DynamicSCG {
   private HorizontalScoringLane horizontalRequest;
   private HorizontalSubstationLane substationRequest;
   private VerticalScoringLane verticalRequest;
-  private GamePiece piece;
-  private Command dropthis;
 
   /**
    * This class acts as a command factory.
@@ -59,12 +60,10 @@ public class PlaceMidHigh extends DynamicSCG {
    */
   public PlaceMidHigh(HorizontalScoringLane horizontalRequest, 
                       HorizontalSubstationLane substationRequest, 
-                      VerticalScoringLane verticalRequest, 
-                      GamePiece piece) {
+                      VerticalScoringLane verticalRequest) {
     this.horizontalRequest = horizontalRequest;
     this.substationRequest = substationRequest;
     this.verticalRequest = verticalRequest;
-    this.piece = piece;
   }
 
   // Called when the command is initially scheduled.
@@ -73,26 +72,17 @@ public class PlaceMidHigh extends DynamicSCG {
     // 1. Move to safe location for arm extension 
     move();
 
-    // 2. Move arm out
-    switch (piece) {
-      case Cube:
-        Cube();   //moves arm to delivery point
-        dropthis = new WheelsOut().withTimeout(TIME_DROP);
+    // 2. Move arm out and drop, then wait 1sec
+    switch (substationRequest) {
+      case Center:
+        Cube();
         break;
-      case ConeFacingBack:
-        ConeBack();
-        dropthis = new InstantCommand(() -> {
-          claw.open();
-        }).withTimeout(TIME_DROP);
-        break;
-      case ConeFacingFront:
-        ConeFront();
-        break;
-      case None:
+      default:
+        Cone();
         break;
     }
 
-    // 4. Go to travel position
+    // 3. Move back 0.5m and retract arm to travel position
     //Retract();
   }
 
@@ -111,35 +101,23 @@ public class PlaceMidHigh extends DynamicSCG {
   }
 
   /**
-   * Constructs placing this based on object being a cone facing backwards.
-   */
-  private void ConeBack() {
-    switch (verticalRequest) {
-      case Top:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS)); // TODO add back track constants
-        break;
-      case Middle:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS)); // TODO add back track constants
-        break;
-      default:
-        break;
-    }
-  }
-
-  /**
    * Constructs pacing this based on object being a cone facing forward.
    */
-  private void ConeFront() {
+  private void Cone() {
     switch (verticalRequest) {
       case Top:
-        this.addCommands(new PlaceHighTele());
+        this.addCommands(new PlaceTele(CollectivePositions.placeConeHighFS));
         break;
       case Middle:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+        this.addCommands(new PlaceTele(CollectivePositions.placeConeMidFS));
         break;
       default:
         break;
     }
+
+    this.addCommands(new InstantCommand(() -> {
+      claw.open();
+    }).andThen(new WaitCommand(TIME_DROP)));
   }
 
   /**
@@ -149,36 +127,26 @@ public class PlaceMidHigh extends DynamicSCG {
   private void Cube() {
     switch (verticalRequest) {
       case Top:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
+        this.addCommands(new PlaceTele(CollectivePositions.placeConeHighFS));
         break;
       case Middle:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
+        this.addCommands(new PlaceTele(CollectivePositions.placeConeMidFS));
         break;
       default:
         break;
     }
-  }
 
-  /**
-   * Moves to / from the target with arm extended and places the piece on the
-   * target
-   */
-  private void MovePlace() {
-    this.addCommands(
-      // 1. Move to       
-      new VelocityMove(-SPEED_MOVE, 0.0, TIME_MOVE),
-      // 2. Drop piece
-        dropthis,
-      // 3. Move back
-      new VelocityMove(SPEED_MOVE, 0.0, TIME_MOVE));      
-    }
+    this.addCommands(new WheelsOut().withTimeout(TIME_DROP));
+  }
 
   /**
    * Retracts piece
    */
   private void Retract() {
     this.addCommands(
-      new MoveCollectiveArm(CollectivePositions.travelFS), 
-      new MoveCollectiveArm(CollectivePositions.travelLockFS));
+      new ParallelCommandGroup(
+        new VelocityMove(0.0, SPEED_MOVE, TIME_MOVE),
+        new ArmLockForDrivingBS()
+    ));
   }
 }

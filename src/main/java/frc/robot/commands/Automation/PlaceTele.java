@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
-import frc.robot.commands.Arm.ArmMoveTo;
+import frc.robot.commands.Arm.ArmLockForDrivingFS;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.Arm.MoveCollectiveArm;
@@ -18,13 +18,11 @@ import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 
-public class PlaceHighTele extends SequentialCommandGroup {
+public class PlaceTele extends SequentialCommandGroup {
   /** Creates a new PlaceHighAuto. */
   private Claw_Substyem claw = RobotContainer.RC().claw;
-  private Elbow elbow = RobotContainer.RC().elbow;
-  private ArmSS arm = RobotContainer.RC().armSS;
 
-  public PlaceHighTele() {
+  public PlaceTele(CollectivePositions finalPosition) {
    addCommands(
         // new ParallelCommandGroup(
         //     new ElbowMoveTo(20.0),
@@ -41,6 +39,7 @@ public class PlaceHighTele extends SequentialCommandGroup {
         //     new ElbowMoveTo(100.0),
         //     new WristMoveTo(-90.0)
         // ),
+        new ArmLockForDrivingFS(),
         new ParallelCommandGroup(
             new ElbowMoveTo(25.0),
             new WristMoveTo(-25.0)
@@ -49,11 +48,6 @@ public class PlaceHighTele extends SequentialCommandGroup {
             claw.setTrackElbowMode(ClawTrackMode.faceDown);
         }),
         new ElbowMoveTo(155.0),
-        new MoveCollectiveArm(CollectivePositions.placeConeHighFS),
-        new InstantCommand(() -> {
-          claw.open();
-        }));
-
-    // Use addRequirements() here to declare subsystem dependencies.
+        new MoveCollectiveArm(finalPosition));
       }
 }
