@@ -29,8 +29,8 @@ public enum CollectivePositions {
     placeConeMidFS(12.0, 130.0, -51.0, ClawTrackMode.frontSide),
     placeCubeMidFS(12.0, 125.0, -51.0, ClawTrackMode.frontSide),
 
-    placeConeHighFS(37.0, 135.0, -40.0, ClawTrackMode.frontSide),
-    placeCubeHighFS(37.0, 105.0, -50.0, ClawTrackMode.frontSide),
+    placeConeHighFS(39.0, 135.0, -40.0, ClawTrackMode.frontSide),
+    placeCubeHighFS(39.0, 105.0, -50.0, ClawTrackMode.frontSide),
    
     pickupTransitionFS(15.0, 105.0, 0.0, ClawTrackMode.frontSide),
     placeMidFS(20.0, 90.0, 0.0, ClawTrackMode.frontSide),
