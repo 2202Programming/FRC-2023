@@ -15,22 +15,26 @@ import frc.robot.commands.Arm.ArmLockForDrivingBS;
 import frc.robot.commands.auto.moveToPoint;
 
 public class DisengageTelePlace extends SequentialCommandGroup {
-  /** Creates a new PlaceHighAuto. */
- 
-  public DisengageTelePlace() {
+
+  /**
+   * Constructs a DisengageTelePlace
+   * @param constraints path constraints
+   * @param distance distance to creep away from scoring station to make room for arm retraction (meters)
+   */
+   public DisengageTelePlace(PathConstraints pathConstraints, double distance) {
     Pose2d targetPose;
     Pose2d currentPose = RobotContainer.RC().drivetrain.getPose();
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
-      targetPose = new Pose2d(currentPose.getX() + 0.2, currentPose.getY(), currentPose.getRotation()); //20 cm away from scoring station, blue side
+      targetPose = new Pose2d(currentPose.getX() + distance, currentPose.getY(), currentPose.getRotation()); //20 cm away from scoring station, blue side
     }
     else{
-      targetPose = new Pose2d(currentPose.getX() - 0.2, currentPose.getY(), currentPose.getRotation()); //20 cm away from scoring station, red side
+      targetPose = new Pose2d(currentPose.getX() - distance, currentPose.getY(), currentPose.getRotation()); //20 cm away from scoring station, red side
     }
 
    addCommands(
         new ParallelCommandGroup(
-            new moveToPoint(new PathConstraints(0.2, 0.1), targetPose),
+            new moveToPoint(pathConstraints, targetPose),
             new ArmLockForDrivingBS()
         )
    );
