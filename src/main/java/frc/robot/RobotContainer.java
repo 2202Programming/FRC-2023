@@ -33,6 +33,8 @@ import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.TrackThenMove;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.MoveToFactory;
+import frc.robot.commands.Automation.PlaceHighAuto;
+import frc.robot.commands.Automation.PlaceHighTele;
 import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
 import frc.robot.commands.EndEffector.InWheelsWithGate;
@@ -62,6 +64,7 @@ import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 import frc.robot.subsystems.hid.CommandSwitchboardController;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
@@ -208,7 +211,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.arm_test);
 
     //Keep the wrist down at power up + 5 deg to put some pressure on it
     claw.setWristAngle(PowerOnPos.wrist + 5.0);  
@@ -242,7 +245,10 @@ public class RobotContainer {
         GenericAlignEelementFactory(wrist, 5.0, driver.b(), driver.povRight(), driver.povLeft());
 
         // We need a way to put the arm back to Power-On
-        driver.y().onTrue(new MoveCollectiveArm(CollectivePositions.power_on));
+        driver.y().onTrue(new ArmLockForDrivingBS());
+        driver.x().onTrue(new ArmLockForDrivingFS());
+        driver.rightBumper().onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS, 0.2)
+                                        .andThen(new CloseClawWithGate()));
 
         driver.leftBumper().and(driver.a()).onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
         driver.leftBumper().and(driver.b()).onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
@@ -257,6 +263,13 @@ public class RobotContainer {
         oper.b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
         oper.povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));
         oper.povDown().whileTrue(new ArmMoveAtSpeed(-2.0, true));
+
+
+        driver.leftBumper().onTrue(new PlaceHighTele());
+
+        driver.a().onTrue(new InstantCommand(() -> {
+          claw.setTrackElbowMode(ClawTrackMode.faceDown);
+        }));
         break;
 
       case simulation:

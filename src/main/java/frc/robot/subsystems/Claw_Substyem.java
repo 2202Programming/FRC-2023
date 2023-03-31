@@ -38,6 +38,7 @@ public class Claw_Substyem extends SubsystemBase {
   public enum ClawTrackMode {
     frontSide(94.0),
     backSide(-109.0),
+    faceDown(-10.0),
     free(0.0);   //any angle, use setWristAngle()
     double angle;
 
