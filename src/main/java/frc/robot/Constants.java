@@ -466,8 +466,8 @@ public final class Constants {
   }
   public enum VerticalScoringLane{
     Middle,
-    Top,
-    Bottom
+    High,
+    Hybrid
   }
   public enum ScoringBlock {
     Left(0), Center(1), Right(2);

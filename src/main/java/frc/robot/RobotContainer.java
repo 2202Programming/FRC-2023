@@ -274,7 +274,7 @@ public class RobotContainer {
 
         driver.leftBumper().onTrue(new PlaceTele(CollectivePositions.placeConeHighFS));
 
-        driver.a().onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.Top));
+        driver.a().onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
         break;
 
       case simulation:

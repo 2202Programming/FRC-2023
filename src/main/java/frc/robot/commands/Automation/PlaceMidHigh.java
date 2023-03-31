@@ -39,14 +39,15 @@ public class PlaceMidHigh extends DynamicSCG {
   private VerticalScoringLane verticalRequest;
 
   /**
-   * This class acts as a command factory.
+   * This class is a DynamicSCG.
    * 
    * Constructs and schedules a new Place command. Encompasses sdt movement, arm
    * extension / retraction.
    * Assumes piece is already in claw (this should be done upon picking up).
    * 
-   * @param horizontalRequest
-   * @param verticalRequest
+   * @param horizontalRequest The station (macro-level) request
+   * @param substationRequest The substation (micro-level) request
+   * @param verticalRequest The height
    */
   public PlaceMidHigh(HorizontalScoringLane horizontalRequest, 
                       HorizontalSubstationLane substationRequest, 
@@ -95,7 +96,7 @@ public class PlaceMidHigh extends DynamicSCG {
    */
   private void Cone() {
     switch (verticalRequest) {
-      case Top:
+      case High:
         this.addCommands(new PlaceTele(CollectivePositions.placeConeHighFS));
         break;
       case Middle:
@@ -116,7 +117,7 @@ public class PlaceMidHigh extends DynamicSCG {
    */
   private void Cube() {
     switch (verticalRequest) {
-      case Top:
+      case High:
         this.addCommands(new PlaceTele(CollectivePositions.placeConeHighFS));
         break;
       case Middle:
