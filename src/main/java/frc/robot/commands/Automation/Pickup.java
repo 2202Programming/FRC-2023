@@ -3,14 +3,20 @@ package frc.robot.commands.Automation;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.MoveCollectiveArm;
+import frc.robot.commands.Arm.WristMoveTo;
+import frc.robot.commands.Arm.ArmLockForDrivingBS;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.swerve.RotateTo;
-import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.ColorSensors.GamePiece;
+import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.DynamicSCG;
 
@@ -19,6 +25,9 @@ public class Pickup extends DynamicSCG {
     public enum Substation {
         Left, Right
     }
+
+    // claw
+    Claw_Substyem claw = RobotContainer.RC().claw;
 
     // dc and related vars
     HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
@@ -45,7 +54,6 @@ public class Pickup extends DynamicSCG {
         extend();  
         getPiece();
         //backup();
-        //retract();
         this.addCommands(new PrintCommand("SCG should be ending"));
     }
 
@@ -93,15 +101,25 @@ public class Pickup extends DynamicSCG {
      * Backs up to safe distance to retract arm
      */
     public void backup() {
-        this.addCommands(new VelocityMove(BACKUP_SPEED, 0.0, BACKUP_TIME));
-    
-    }
+        this.addCommands(new ParallelCommandGroup(
+            // A. drivetrain movement
+            new DisengageTelePickup(),
 
-    /**
-     * Retracts arm
-     */
-    public void retract() {
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.travelFS),
-                        new MoveCollectiveArm(CollectivePositions.travelLockFS));
+            // B. claw movement
+            new SequentialCommandGroup(
+
+                // i. move wrist up
+                new ParallelCommandGroup(
+                    new WristMoveTo(25.0),
+                    new InstantCommand(() -> {
+                        claw.setTrackElbowMode(ClawTrackMode.free);
+                    })
+                ),
+
+                // ii. retract
+                new ArmLockForDrivingBS()
+            )
+        ));
+    
     }
 }

@@ -348,21 +348,31 @@ public class RobotContainer {
     CommandSwitchboardController sb = dc.SwitchBoard();
     Trigger manual = sb.sw16();
 
-    /**
+    /*
      * =======================
      * SINGLE-BUTTON BIDNINGS
      * =======================
      */
-
-    // Triggers + shoulder buttons
-    operator.leftBumper().whileTrue(new WheelsIn());
-    operator.rightBumper().whileTrue(new WheelsOut());
 
     // xyab
     operator.x().onTrue(new ToggleClaw());
     operator.y().onTrue(new ArmLockForDrivingBS());
     operator.a().whileTrue(new intakeCompetitionToggle());
     operator.b().whileTrue(new outtakeCompetitionToggle());
+
+
+    /*
+     * =======================
+     * MANUAL MODE
+     * ======================= 
+     */
+
+
+    // Triggers + shoulder buttons
+    manual.and(operator.leftBumper())
+      .whileTrue(new WheelsIn());
+    manual.and(operator.rightBumper())
+      .whileTrue(new WheelsOut());
 
     // dpad
     manual.and(operator.povUp())
@@ -389,58 +399,22 @@ public class RobotContainer {
 
     manual.and(operator.povLeft()).onTrue(new ArmLockForDrivingFS());
 
-    // // WI only manual scoring TODO remove
-    // // pickup
-    // operator.povDown().and(operator.x())
-    //     .onTrue(new Pickup(Substation.Left, GamePiece.Cube)); // substation doesn't matter
+    /*
+     * =======================
+     * TRIM MODE
+     * ======================= 
+     */
+    
+    Trigger trim = sb.sw26();
 
-    // operator.povDown().and(operator.leftTrigger())
-    //     .onTrue(new Pickup(Substation.Left, GamePiece.ConeFacingFront)); // which cone doesn't matter
-
-    // // score
-    // operator.povUp().and(operator.x())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
-
-    // operator.povUp().and(operator.rightTrigger())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
-
-    // operator.povRight().and(operator.x())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
-
-    // operator.povRight().and(operator.rightTrigger())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
-
-    // ELBOW TRIM - Button not finalized TODO- FIX BUTTONS
-    Trigger manualOn = sb.sw26();
-
-    manualOn.and(operator.povDown()).onTrue(new InstantCommand(() -> {
+    trim.and(operator.povDown()).onTrue(new InstantCommand(() -> {
       elbow.decrementTrim();
     }));
 
-    manualOn.and(operator.povUp()).onTrue(new InstantCommand(() -> {
+    trim.and(operator.povUp()).onTrue(new InstantCommand(() -> {
       elbow.incrementTrim();
     }));
   }
-
-  /**
-   * Same STL cmds but 0.5m back for WI
-   * 
-   * TODO remove after Wisconsin
-   */
-  public void wisconsinMoveTo() {
-    CommandXboxController driver = dc.Driver();
-    CommandXboxController operator = dc.Operator();
-
-    driver.povLeft().onTrue(new MoveToFactory(
-      driver.leftBumper(),
-      driver.rightBumper(),
-      operator.leftBumper(),
-      operator.rightBumper(),
-      operator.povUp(),
-      operator.povRight()
-    ));
-  }
-
 
 
   public void testPeriodic() {
