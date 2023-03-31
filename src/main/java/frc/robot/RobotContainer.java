@@ -217,7 +217,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.vision_test);
+    configureBindings(Bindings.arm_test);
 
     //Keep the wrist down at power up + 5 deg to put some pressure on it
     claw.setWristAngle(PowerOnPos.wrist + 5.0);  
@@ -267,6 +267,7 @@ public class RobotContainer {
         // USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
         oper.a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
         oper.b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
+        oper.y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
         oper.povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));
         oper.povDown().whileTrue(new ArmMoveAtSpeed(-2.0, true));
 

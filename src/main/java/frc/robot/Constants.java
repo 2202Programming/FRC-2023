@@ -333,7 +333,7 @@ public final class Constants {
 
   public final static class FieldPoses {
     // taken into account 0.5m sdt travel
-    public final static Pose2d blueScorePose1 = new Pose2d(new Translation2d(2.5,0.50), Rotation2d.fromDegrees(0)); //lowest scoring position in Y
+    public final static Pose2d blueScorePose1 = new Pose2d(new Translation2d(1.85,0.50), Rotation2d.fromDegrees(0)); //lowest scoring position in Y
     public final static Pose2d blueScorePose2 = new Pose2d(new Translation2d(2.5,1.05), Rotation2d.fromDegrees(0));
     public final static Pose2d blueScorePose3 = new Pose2d(new Translation2d(2.5,1.60), Rotation2d.fromDegrees(0));
     public final static Pose2d blueScorePose4 = new Pose2d(new Translation2d(2.5,2.15), Rotation2d.fromDegrees(0));
