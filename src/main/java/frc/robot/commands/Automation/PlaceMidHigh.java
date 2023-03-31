@@ -118,6 +118,7 @@ public class PlaceMidHigh extends DynamicSCG {
     this.addCommands(new InstantCommand(() -> {
       claw.open();
     }).andThen(new WaitCommand(TIME_DROP)));
+    this.addCommands(new DisengageTele());
   }
 
   /**
@@ -137,6 +138,7 @@ public class PlaceMidHigh extends DynamicSCG {
     }
 
     this.addCommands(new WheelsOut().withTimeout(TIME_DROP));
+    this.addCommands(new DisengageTele());
   }
 
   /**
