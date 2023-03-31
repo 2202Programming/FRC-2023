@@ -24,6 +24,7 @@ import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.PowerOnPos;
+import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
@@ -37,6 +38,7 @@ import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.MoveToFactory;
 import frc.robot.commands.Automation.PlaceHighAuto;
 import frc.robot.commands.Automation.PlaceHighTele;
+import frc.robot.commands.Automation.PlaceMidHigh;
 import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
 import frc.robot.commands.EndEffector.InWheelsWithGate;
@@ -68,6 +70,7 @@ import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
+import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.CommandSwitchboardController;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
@@ -270,9 +273,7 @@ public class RobotContainer {
 
         driver.leftBumper().onTrue(new PlaceHighTele());
 
-        driver.a().onTrue(new InstantCommand(() -> {
-          claw.setTrackElbowMode(ClawTrackMode.faceDown);
-        }));
+        driver.a().onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.Top, GamePiece.ConeFacingFront));
         break;
 
       case simulation:

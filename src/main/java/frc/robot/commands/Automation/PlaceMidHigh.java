@@ -87,20 +87,13 @@ public class PlaceMidHigh extends DynamicSCG {
         break;
       case ConeFacingFront:
         ConeFront();
-        dropthis = new InstantCommand(() -> {
-          claw.open();
-        }).withTimeout(TIME_DROP);
         break;
       case None:
         break;
     }
 
-    // 3. Move above target, place, moves back
-    // NOTE: THIS COULD TRACK LimeLight via reflective tape, center and dist estimate
-    MovePlace(); // <-- this uses odometry to move forward to "right" openloop position
-
     // 4. Go to travel position
-    Retract();
+    //Retract();
   }
 
   // Returns true when the command should end.
@@ -115,10 +108,6 @@ public class PlaceMidHigh extends DynamicSCG {
   private void move() {
     // 1. move to general vicinity
     this.addCommands(new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest));
-
-    // 2. correct for OTF path generation rotation error
-    // untested below
-    this.addCommands(new RotateTo(new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 0 : 180)));
   }
 
   /**
@@ -143,7 +132,7 @@ public class PlaceMidHigh extends DynamicSCG {
   private void ConeFront() {
     switch (verticalRequest) {
       case Top:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+        this.addCommands(new PlaceHighTele());
         break;
       case Middle:
         this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
