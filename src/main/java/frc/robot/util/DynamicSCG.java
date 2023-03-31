@@ -119,11 +119,11 @@ public class DynamicSCG extends CommandGroupBase {
 
   @Override
   public final boolean isFinished() {
-    return (m_currentCommandIndex == m_commands.size()) && (isFinishedCondition());
+    return (m_currentCommandIndex == m_commands.size()) || (isFinishedCondition());
   }
 
   public boolean isFinishedCondition() {
-    return true;
+    return false;
   }
 
   @Override
