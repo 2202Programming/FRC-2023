@@ -5,17 +5,23 @@
 package frc.robot.commands.Automation;
 
 import com.pathplanner.lib.PathConstraints;
-
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
+import frc.robot.commands.Arm.ArmLockForDrivingFS;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
+import frc.robot.commands.auto.moveToPoint;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -38,6 +44,7 @@ public class PlaceMidHigh extends DynamicSCG {
   private HorizontalScoringLane horizontalRequest;
   private HorizontalSubstationLane substationRequest;
   private VerticalScoringLane verticalRequest;
+  private Pose2d goalPose;
 
   /**
    * This class is a DynamicSCG.
@@ -61,6 +68,7 @@ public class PlaceMidHigh extends DynamicSCG {
   // Called when the command is initially scheduled.
   @Override
   public void doFirstOnInit() {
+    goalPose = calculateTargetPose();
     // 1. Move to safe location for arm extension 
     move();
 
@@ -136,10 +144,81 @@ public class PlaceMidHigh extends DynamicSCG {
    * Retracts piece
    */
   private void Retract() {
+    Pose2d retractPose;
+    double distance = 0.3; //how far back to move (m)
+
+    if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
+      retractPose = new Pose2d(goalPose.getX() + distance, goalPose.getY(), goalPose.getRotation()); //distance away from scoring station, blue side
+    }
+    else{
+      retractPose = new Pose2d(goalPose.getX() - distance, goalPose.getY(), goalPose.getRotation()); //distance away from scoring station, red side
+    }
+
     this.addCommands(
       new ElbowMoveTo(145.0), //return to high position to avoid low post
-      // dl -.5 because its an offset from the start of the path not the end - Dr.J to fix
-      new DisengageTelePlace(new PathConstraints(0.5, 0.1), -0.5) //move slowly back while retracting arm
+      new ParallelCommandGroup(
+        new moveToPoint(new PathConstraints(0.3, 0.1), retractPose), //move slowly back while retracting arm
+        new SequentialCommandGroup(
+          new WaitCommand(0.5), //let the move start first for 0.5s so arm doesn't catch low pole
+          new ArmLockForDrivingFS() //then start to retract arm
+        )
+      )
       );
   }
+
+  //calculate which constant scoring pose is appropriate goal
+  private Pose2d calculateTargetPose(){
+      //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
+      HorizontalScoringLane horizontalScoringLane = this.horizontalRequest;
+      HorizontalSubstationLane horizontalSubstationLane = this.substationRequest;
+      int scoringBlock; 
+      int scoringAdjusted;
+      Pose2d targetPose;
+
+    if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
+
+
+      if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 2;
+      else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 0;
+      else scoringBlock = 1;
+
+      //FOR BLUE: left is largest index of scoring trio
+      switch(horizontalScoringLane){
+        case Left:
+          scoringAdjusted = 2;
+          break;
+        case Center:
+          scoringAdjusted = 1;
+          break;
+        default:
+        case Right:
+          scoringAdjusted = 0;
+          break;      
+      }
+      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
+    }
+    else { //RED ALLIANCE
+      //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
+      if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 0;
+      else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 2;
+      else scoringBlock = 1;
+
+      //FOR RED: left is smallest index of scoring trio
+      switch(horizontalScoringLane){
+        case Left:
+          scoringAdjusted = 0;
+          break;
+        case Center:
+          scoringAdjusted = 1;
+          break;
+        default:
+        case Right:
+          scoringAdjusted = 2;
+          break;      
+      }
+      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
+    }
+   return targetPose;
+  }
+
 }

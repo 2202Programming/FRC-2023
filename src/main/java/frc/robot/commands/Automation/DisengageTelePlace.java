@@ -23,16 +23,7 @@ public class DisengageTelePlace extends SequentialCommandGroup {
    * @param constraints path constraints
    * @param distance distance to creep away from scoring station to make room for arm retraction (meters)
    */
-   public DisengageTelePlace(PathConstraints pathConstraints, double distance) {
-    Pose2d targetPose;
-    Pose2d currentPose = RobotContainer.RC().drivetrain.getPose();
-
-    if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
-      targetPose = new Pose2d(currentPose.getX() + distance, currentPose.getY(), currentPose.getRotation()); //20 cm away from scoring station, blue side
-    }
-    else{
-      targetPose = new Pose2d(currentPose.getX() - distance, currentPose.getY(), currentPose.getRotation()); //20 cm away from scoring station, red side
-    }
+   public DisengageTelePlace(PathConstraints pathConstraints, Pose2d targetPose) {
 
    addCommands(
             new moveToPoint(pathConstraints, targetPose),
