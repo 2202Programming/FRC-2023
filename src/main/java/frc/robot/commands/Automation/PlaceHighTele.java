@@ -8,15 +8,14 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
-import frc.robot.commands.Arm.ArmMoveTo;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.WristMoveTo;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
-import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
+import frc.robot.subsystems.Elbow;
 
 public class PlaceHighTele extends SequentialCommandGroup {
   /** Creates a new PlaceHighAuto. */

@@ -72,6 +72,7 @@ import frc.robot.subsystems.hid.CommandSwitchboardController;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
 import frc.robot.util.VelocityControlled;
+//import frc.robot.commands.Arm.ArmLockForDrivingFS;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -326,6 +327,16 @@ public class RobotContainer {
         break;
 
     }
+  }
+
+  private void GenericAlignEelementFactory(VelocityControlled wrist, double d, Trigger b, Trigger povRight,
+      Trigger povLeft) {
+  }
+
+  private void GenericAlignEelementFactory(Elbow elbow2, double d, Trigger a, Trigger povRight, Trigger povLeft) {
+  }
+
+  private void GenericAlignEelementFactory(ArmSS armSS2, double d, Trigger a, Trigger povUp, Trigger povDown) {
   }
 
   private void driverIndividualBindings() {
