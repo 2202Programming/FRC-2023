@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFactory;
+// static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFactory;
 
 import java.util.HashMap;
 
@@ -34,10 +34,8 @@ import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.TrackThenMove;
 import frc.robot.commands.Automation.CenterTapeSkew;
-import frc.robot.commands.Automation.MoveToFactory;
-import frc.robot.commands.Automation.PlaceHighAuto;
-import frc.robot.commands.Automation.PlaceHighTele;
 import frc.robot.commands.Automation.Pickup.Substation;
+import frc.robot.commands.Automation.PlaceHighTele;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
 import frc.robot.commands.EndEffector.InWheelsWithGate;
 import frc.robot.commands.EndEffector.ToggleClaw;
@@ -60,6 +58,7 @@ import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.Claw_Substyem;
+import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Intake;
@@ -67,7 +66,6 @@ import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 import frc.robot.subsystems.hid.CommandSwitchboardController;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
@@ -329,14 +327,16 @@ public class RobotContainer {
     }
   }
 
-  private void GenericAlignEelementFactory(VelocityControlled wrist, double d, Trigger b, Trigger povRight,
-      Trigger povLeft) {
+  private void GenericAlignEelementFactory(VelocityControlled wrist, double d, Trigger b, Trigger povRight, Trigger povLeft) {
+
   }
 
   private void GenericAlignEelementFactory(Elbow elbow2, double d, Trigger a, Trigger povRight, Trigger povLeft) {
+
   }
 
   private void GenericAlignEelementFactory(ArmSS armSS2, double d, Trigger a, Trigger povUp, Trigger povDown) {
+
   }
 
   private void driverIndividualBindings() {
@@ -398,26 +398,6 @@ public class RobotContainer {
 
     manual.and(operator.povLeft()).onTrue(new ArmLockForDrivingFS());
 
-    // // WI only manual scoring TODO remove
-    // // pickup
-    // operator.povDown().and(operator.x())
-    //     .onTrue(new Pickup(Substation.Left, GamePiece.Cube)); // substation doesn't matter
-
-    // operator.povDown().and(operator.leftTrigger())
-    //     .onTrue(new Pickup(Substation.Left, GamePiece.ConeFacingFront)); // which cone doesn't matter
-
-    // // score
-    // operator.povUp().and(operator.x())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
-
-    // operator.povUp().and(operator.rightTrigger())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
-
-    // operator.povRight().and(operator.x())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
-
-    // operator.povRight().and(operator.rightTrigger())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
 
     // ELBOW TRIM - Button not finalized TODO- FIX BUTTONS
     Trigger manualOn = sb.sw26();
@@ -433,24 +413,7 @@ public class RobotContainer {
 
   /**
    * Same STL cmds but 0.5m back for WI
-   * 
-   * TODO remove after Wisconsin
    */
-  public void wisconsinMoveTo() {
-    CommandXboxController driver = dc.Driver();
-    CommandXboxController operator = dc.Operator();
-
-    driver.povLeft().onTrue(new MoveToFactory(
-      driver.leftBumper(),
-      driver.rightBumper(),
-      operator.leftBumper(),
-      operator.rightBumper(),
-      operator.povUp(),
-      operator.povRight()
-    ));
-  }
-
-
 
   public void testPeriodic() {
     elbow.periodic();
