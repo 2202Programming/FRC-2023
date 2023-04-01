@@ -237,7 +237,7 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
         /**
          * If all 3 are purple it's probably a cube
          * If all 3 are yellow it's probably a cone facing backwards
-         * If 1 or 2 are yellow it's probably a cone facing backwords
+         * If 1 or 2 are yellow it's probably a cone facing forwards
          * Otherwise it's probably nothing
          */
         if (numPurple == 3)
@@ -258,8 +258,9 @@ public class ColorSensors extends SubsystemBase implements AutoCloseable {
      * 
      * @return the orientation of the cone as a GamePiece enum. Will only ever
      *         return GamePiece.ConeFacingFront or GamePiece.ConeFacingBack
+     * @deprecated superceded by getGamePiece
      */
-    public GamePiece getConeOrientation() {
+    public GamePiece getConeOrientation() {  //is this still being used or is it superceeded by getGamepiece
         // if no color is detected from the front color sensor then skinny end probably
         // facing front
         if (results[0] == null)
