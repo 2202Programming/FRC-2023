@@ -107,9 +107,9 @@ public class PlaceMidHigh extends DynamicSCG {
         break;
     }
 
-    this.addCommands(new InstantCommand(() -> {
-      claw.open();
-    }).andThen(new WaitCommand(TIME_DROP)));
+    this.addCommands(
+      new ElbowMoveTo(120.0, 5.0),
+      new InstantCommand(() -> { claw.open();}).andThen(new WaitCommand(TIME_DROP)));
   }
 
   /**
@@ -128,7 +128,8 @@ public class PlaceMidHigh extends DynamicSCG {
         break;
     }
 
-    this.addCommands(new WheelsOut().withTimeout(TIME_DROP));
+    this.addCommands(
+      new WheelsOut().withTimeout(TIME_DROP));  //wait for claw to open and cone drop
   }
 
   /**
