@@ -36,17 +36,20 @@ public class CenterTapeYaw extends CommandBase {
   double tapePidOutput = 0.0;
 
   Rotation2d currentAngle;
-  double min_rot_rate = 6.0;        //about 7.5 deg is min we measured
-  double r_min_rot_rate = min_rot_rate;
-
-  final double vel_tol = 10.0;
+  double min_rot_rate = 6.0;        
+ 
+  final double vel_tol = 2.0;
   final double pos_tol = 2.0;
   final double max_rot_rate = 60.0;  //[deg/s]
 
   private boolean control_motors;
+  int frameCount;
+
+  double goalYaw;
 
   /** Creates a new CenterTapeYaw. */
-  public CenterTapeYaw(boolean control_motors) {
+  public CenterTapeYaw(boolean control_motors, double goalYaw) {
+    this.goalYaw = goalYaw;
     this.control_motors = control_motors;
     this.drivetrain = RobotContainer.RC().drivetrain;
     if (control_motors) {
@@ -60,7 +63,7 @@ public class CenterTapeYaw extends CommandBase {
   }
 
   public CenterTapeYaw(){
-    this(true);
+    this(true, -26.8);
   }
 
   // Called when the command is initially scheduled.
@@ -68,32 +71,38 @@ public class CenterTapeYaw extends CommandBase {
   public void initialize() {
     ll.setPipeline(1); //photoreflective pipeline
     ll.enableLED();
+    System.out.println("***Starting Tape Correction, current ll X:"+ll.getX() + ", LL valid=" + ll.valid());
+    frameCount = 0;
+    tapePid.reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    // frameCount++;
+    // if(!ll.valid()) return;
+    frameCount++;
     calculate();
-    if(control_motors){
+    if(control_motors && frameCount > 15){ //wait for LL to get target
       drivetrain.drive(output_states);
     }
   }
 
   void calculate(){
-    double targetYawError = ll.getX();
-    tapePid.setSetpoint(-12.7); //target yaw is centered - 12.7 deg since ll offset
-    tapePidOutput = tapePid.calculate(targetYawError);
-
-    double min_rot = (Math.abs(targetYawError) > pos_tol)  ? - Math.signum(targetYawError) * min_rot_rate : 0.0;
+    double Yaw = ll.getX();
+    tapePidOutput = tapePid.calculate(Yaw, goalYaw);//goal yaw is centered - 12.7 deg since ll offset
+    double yError = tapePid.getPositionError();
+    double min_rot =  Math.signum(tapePidOutput) * min_rot_rate;
     rot = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3;   //clamp in [deg/s] convert to [rad/s]
-    
-    if(control_motors){
-      currentAngle = drivetrain.getPose().getRotation();
-      output_states = kinematics
+    currentAngle = drivetrain.getPose().getRotation();
+    output_states = kinematics
           .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
-    }
+
     SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
-    SmartDashboard.putNumber("targetYawError", targetYawError);       
+    SmartDashboard.putNumber("rot", rot * 57.3);
+    SmartDashboard.putNumber("Yaw Error", yError);   
+    SmartDashboard.putBoolean("LL Valid", ll.valid());
+    SmartDashboard.putNumber("Framecount", frameCount); 
   }
 
   public double getRot(){
@@ -106,6 +115,7 @@ public class CenterTapeYaw extends CommandBase {
     drivetrain.stop();
     ll.setPipeline(0); //back to apriltag pipeline
     ll.disableLED();
+    System.out.println("***Ending Tape Correction, interrupted?" + interrupted);
   }
 
   // Returns true when the command should end.
@@ -115,7 +125,7 @@ public class CenterTapeYaw extends CommandBase {
   }
 
   public boolean isReady() {
-    return tapePid.atSetpoint();
+    return (tapePid.atSetpoint());
   }
 
 }

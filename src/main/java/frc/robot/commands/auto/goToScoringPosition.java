@@ -125,13 +125,16 @@ public class goToScoringPosition extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if(tapeCommand.isScheduled()) return; //nothing to do, waiting for LL tape to complete
+
     if(pathCommand.isFinished()){ //once path command finishes, check how close to target it is, and how many loops we've done
       if(isAtTarget() || (loopNum == maxLoops)) { //either at target, or max # of loops
         pathingFinished = true;
+        
         if((horizontalSubstationLane == HorizontalSubstationLane.Left) || (horizontalSubstationLane == HorizontalSubstationLane.Right)){ //cone station
           System.out.println("*** Running Tape Yaw... ");
-          //tapeCommand.schedule();
-          tapeFinished = true; //disable tape for now
+          tapeCommand.schedule();
+          tapeFinished = false;
         }
         else { //not a cone station, no need for RR tape turn
           tapeFinished = true;

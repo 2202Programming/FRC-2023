@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
@@ -35,6 +36,7 @@ import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.TrackThenMove;
 import frc.robot.commands.Automation.CenterTapeSkew;
+import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.PlaceHybrid;
 import frc.robot.commands.Automation.PlaceTele;
 import frc.robot.commands.Automation.PlaceMidHigh;
@@ -262,14 +264,14 @@ public class RobotContainer {
         driver.leftBumper().and(driver.rightTrigger()).onTrue(new MoveCollectiveArm(CollectivePositions.travelFS));
         driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(4, 3), HorizontalScoringLane.Right, HorizontalSubstationLane.Right));
 
-        
+
         // USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
         oper.a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
         oper.b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
         oper.y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
         oper.povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));
         oper.povDown().whileTrue(new ArmMoveAtSpeed(-2.0, true));
-
+        oper.x().onTrue(new InstantCommand(()->{ limelight.enableLED();}));
 
         driver.leftBumper().onTrue(new PlaceTele(CollectivePositions.placeConeHighFS));
 
