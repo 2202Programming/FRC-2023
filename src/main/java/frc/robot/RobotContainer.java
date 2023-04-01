@@ -37,6 +37,7 @@ import frc.robot.commands.Arm.TrackThenMove;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.MoveToFactory;
 import frc.robot.commands.Automation.PlaceHighAuto;
+import frc.robot.commands.Automation.PlaceHybrid;
 import frc.robot.commands.Automation.PlaceTele;
 import frc.robot.commands.Automation.PlaceMidHigh;
 import frc.robot.commands.Automation.Pickup.Substation;
@@ -323,7 +324,7 @@ public class RobotContainer {
         
         driverIndividualBindings();
         operatorIndividualBindings();
-        //wisconsinMoveTo();
+        automationPickupPlace();
 
         break;
 
@@ -414,6 +415,147 @@ public class RobotContainer {
     trim.and(operator.povUp()).onTrue(new InstantCommand(() -> {
       elbow.incrementTrim();
     }));
+  }
+
+  private void automationPickupPlace() {
+    CommandSwitchboardController sb = dc.SwitchBoard();
+    CommandXboxController driver = dc.Driver();
+    CommandXboxController operator = dc.Operator();
+
+    // manual not turned on and driver hits dpad left
+    Trigger automation = sb.sw16().negate().and(driver.povLeft());
+
+    // Scoring positions
+    Trigger high = operator.povUp();
+    Trigger low = operator.povDown();
+    Trigger mid = high.negate().and(low.negate());
+
+    // Station
+    Trigger leftStation = driver.leftBumper();
+    Trigger rightStation = driver.rightBumper();
+    Trigger centerStation = leftStation.negate().and(rightStation.negate());
+
+    // Substation
+    Trigger leftSubstation = driver.leftBumper();
+    Trigger rightSubstation = driver.rightBumper();
+    Trigger centerSubstation = leftSubstation.negate().and(rightSubstation.negate());
+    
+
+    /*
+     * =======================
+     * PICKUP
+     * =======================
+     */
+
+    
+
+     /*
+      * =======================
+      * PLACE HYBRID
+      * =======================
+      */
+
+      // left station
+      automation.and(low).and(leftStation).and(leftSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Left, HorizontalSubstationLane.Left));
+      
+      automation.and(low).and(leftStation).and(centerSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Left, HorizontalSubstationLane.Center));
+
+      automation.and(low).and(leftStation).and(rightSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Left, HorizontalSubstationLane.Right));
+
+      // center station
+      automation.and(low).and(centerStation).and(leftSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Center, HorizontalSubstationLane.Left));
+      
+      automation.and(low).and(centerStation).and(centerSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Center, HorizontalSubstationLane.Center));
+
+      automation.and(low).and(centerStation).and(rightSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Center, HorizontalSubstationLane.Right));
+
+      // right station
+      automation.and(low).and(rightStation).and(leftSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Right, HorizontalSubstationLane.Left));
+      
+      automation.and(low).and(rightStation).and(centerSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Right, HorizontalSubstationLane.Center));
+
+      automation.and(low).and(rightStation).and(rightSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Right, HorizontalSubstationLane.Right));
+      
+      /*
+       * =======================
+       * PLACE MID
+       * =======================
+       */
+
+      // left station
+      automation.and(mid).and(leftStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+      
+      automation.and(mid).and(leftStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+
+      automation.and(mid).and(leftStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+
+      // center station
+      automation.and(mid).and(centerStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+      
+      automation.and(mid).and(centerStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+
+      automation.and(mid).and(centerStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+
+      // right station
+      automation.and(mid).and(rightStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+      
+      automation.and(mid).and(rightStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+
+      automation.and(mid).and(rightStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+
+      /*
+       * =======================
+       * PLACE HIGH
+       * =======================
+       */
+
+      // left station
+      automation.and(high).and(leftStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Left, VerticalScoringLane.High));
+      
+      automation.and(high).and(leftStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Center, VerticalScoringLane.High));
+
+      automation.and(high).and(leftStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+
+      // center station
+      automation.and(high).and(centerStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Left, VerticalScoringLane.High));
+      
+      automation.and(high).and(centerStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Center, VerticalScoringLane.High));
+
+      automation.and(high).and(centerStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+
+      // right station
+      automation.and(high).and(rightStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Left, VerticalScoringLane.High));
+      
+      automation.and(high).and(rightStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Center, VerticalScoringLane.High));
+
+      automation.and(mid).and(rightStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
   }
 
 
