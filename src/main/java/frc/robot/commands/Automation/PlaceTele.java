@@ -48,6 +48,7 @@ public class PlaceTele extends SequentialCommandGroup {
             claw.setTrackElbowMode(ClawTrackMode.faceDown);
         }),
         new ElbowMoveTo(145.0),
-        new MoveCollectiveArm(finalPosition));
+        new MoveCollectiveArm(finalPosition),
+        new ElbowMoveTo(140.0));
       }
 }

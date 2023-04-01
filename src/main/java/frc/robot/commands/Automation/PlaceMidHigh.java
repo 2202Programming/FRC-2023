@@ -13,6 +13,7 @@ import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.CollectivePositions;
+import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.subsystems.Claw_Substyem;
@@ -135,6 +136,7 @@ public class PlaceMidHigh extends DynamicSCG {
    */
   private void Retract() {
     this.addCommands(
+      new ElbowMoveTo(145.0),
       new DisengageTelePlace(new PathConstraints(0.1,0.1), 0.2) //move slowly back while retracting arm
       );
   }
