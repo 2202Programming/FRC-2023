@@ -137,7 +137,8 @@ public class PlaceMidHigh extends DynamicSCG {
   private void Retract() {
     this.addCommands(
       new ElbowMoveTo(145.0), //return to high position to avoid low post
-      new DisengageTelePlace(new PathConstraints(0.5,0.1), 0.2) //move slowly back while retracting arm
+      // dl -.5 because its an offset from the start of the path not the end - Dr.J to fix
+      new DisengageTelePlace(new PathConstraints(0.5, 0.1), -0.5) //move slowly back while retracting arm
       );
   }
 }
