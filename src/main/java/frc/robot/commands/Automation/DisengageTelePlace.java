@@ -9,6 +9,7 @@ import com.pathplanner.lib.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.ArmLockForDrivingBS;
@@ -33,7 +34,7 @@ public class DisengageTelePlace extends SequentialCommandGroup {
     }
 
    addCommands(
-        new ParallelCommandGroup(
+        new ParallelRaceGroup(
             new moveToPoint(pathConstraints, targetPose),
             new ArmLockForDrivingBS()
         )
