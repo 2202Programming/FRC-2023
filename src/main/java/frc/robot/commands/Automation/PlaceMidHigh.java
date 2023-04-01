@@ -73,8 +73,8 @@ public class PlaceMidHigh extends DynamicSCG {
         break;
     }
 
-    // 3. Move back 0.5m and retract arm to travel position
-    //Retract();
+    // 3. Move back and retract arm to travel position
+    Retract();
   }
 
   // Returns true when the command should end.
@@ -135,7 +135,7 @@ public class PlaceMidHigh extends DynamicSCG {
    */
   private void Retract() {
     this.addCommands(
-      new DisengageTelePlace()
+      new DisengageTelePlace(new PathConstraints(0.1,0.1), 0.2) //move slowly back while retracting arm
       );
   }
 }

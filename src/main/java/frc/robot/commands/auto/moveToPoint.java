@@ -32,7 +32,7 @@ public class moveToPoint extends CommandBase {
 
 
   /**
-   * Constructs a goToScoringPosition
+   * Constructs a moveToPoint
    * @param constraints path constraints
    * @param targetPose target pose2D
    */
