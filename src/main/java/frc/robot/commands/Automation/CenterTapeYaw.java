@@ -83,7 +83,7 @@ public class CenterTapeYaw extends CommandBase {
     // if(!ll.valid()) return;
     frameCount++;
     calculate();
-    if(control_motors && frameCount > 15){ //wait for LL to get target
+    if(control_motors && frameCount > 20){ //wait for LL to get target
       drivetrain.drive(output_states);
     }
   }

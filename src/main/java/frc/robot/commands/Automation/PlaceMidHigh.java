@@ -145,7 +145,7 @@ public class PlaceMidHigh extends DynamicSCG {
    */
   private void Retract() {
     Pose2d retractPose;
-    double distance = 0.3; //how far back to move (m)
+    double distance = 0.5; //how far back to move (m)
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
       retractPose = new Pose2d(goalPose.getX() + distance, goalPose.getY(), goalPose.getRotation()); //distance away from scoring station, blue side
@@ -157,7 +157,7 @@ public class PlaceMidHigh extends DynamicSCG {
     this.addCommands(
       new ElbowMoveTo(145.0), //return to high position to avoid low post
       new ParallelCommandGroup(
-        new moveToPoint(new PathConstraints(0.3, 0.1), retractPose), //move slowly back while retracting arm
+        new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
         new SequentialCommandGroup(
           new WaitCommand(0.5), //let the move start first for 0.5s so arm doesn't catch low pole
           new ArmLockForDrivingFS() //then start to retract arm
