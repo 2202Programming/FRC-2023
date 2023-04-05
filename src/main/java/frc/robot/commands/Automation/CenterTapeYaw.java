@@ -44,7 +44,8 @@ public class CenterTapeYaw extends CommandBase {
 
   private boolean control_motors;
   int frameCount;
-
+  boolean lastValid = false;
+  boolean currentValid = false;
   double goalYaw;
 
   /** Creates a new CenterTapeYaw. */
@@ -69,8 +70,6 @@ public class CenterTapeYaw extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    ll.setPipeline(1); //photoreflective pipeline
-    ll.enableLED();
     System.out.println("***Starting Tape Correction, current ll X:"+ll.getX() + ", LL valid=" + ll.valid());
     frameCount = 0;
     tapePid.reset();
@@ -82,8 +81,11 @@ public class CenterTapeYaw extends CommandBase {
     // frameCount++;
     // if(!ll.valid()) return;
     frameCount++;
+    lastValid = currentValid;
+    currentValid = ll.valid();
+    if(!lastValid && currentValid) System.out.println("***LL became valid at frame# " + frameCount);
     calculate();
-    if(control_motors && frameCount > 20){ //wait for LL to get target
+    if(control_motors && frameCount > 1){ //wait for LL to get target
       drivetrain.drive(output_states);
     }
   }
@@ -113,8 +115,6 @@ public class CenterTapeYaw extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     drivetrain.stop();
-    ll.setPipeline(0); //back to apriltag pipeline
-    ll.disableLED();
     System.out.println("***Ending Tape Correction, interrupted?" + interrupted);
   }
 

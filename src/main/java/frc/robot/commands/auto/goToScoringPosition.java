@@ -114,8 +114,10 @@ public class goToScoringPosition extends CommandBase {
     }
     pathCommand = MoveToPoseAutobuilder(constraints, targetPose);
     sdt.disableVisionPose();
+    RobotContainer.RC().limelight.enableLED();
+    RobotContainer.RC().limelight.setPipeline(1); //no more april tag update during the move, get ready for tape
     rumbleCmd = new JoystickRumbleEndless(Id.Operator);
-    rumbleCmd.schedule();
+    //rumbleCmd.schedule();
     RobotContainer.RC().lights.setBlinking(BlinkyLights.GREEN);
     pathCommand.schedule();
     loopNum++;
@@ -161,6 +163,8 @@ public class goToScoringPosition extends CommandBase {
   public void end(boolean interrupted) {
     pathCommand.cancel();
     sdt.stop();
+    RobotContainer.RC().limelight.disableLED();
+    RobotContainer.RC().limelight.setPipeline(0); //back to apriltag pipe
     sdt.enableVisionPose();
     sdt.disableVisionPoseRotation();
     rumbleCmd.cancel();
