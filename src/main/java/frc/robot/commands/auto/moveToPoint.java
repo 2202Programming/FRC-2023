@@ -50,7 +50,7 @@ public class moveToPoint extends CommandBase {
     pathCommand = MoveToPoseAutobuilder(constraints, targetPose);
     sdt.disableVisionPose();
     rumbleCmd = new JoystickRumbleEndless(Id.Operator);
-    rumbleCmd.schedule();
+    //rumbleCmd.schedule();
     RobotContainer.RC().lights.setBlinking(BlinkyLights.GREEN);
     pathCommand.schedule();
   }

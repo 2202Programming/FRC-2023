@@ -15,6 +15,7 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.SwerveDrivetrain;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 //rotates robot to center front reflective tape target
@@ -44,14 +45,17 @@ public class CenterTapeYaw extends CommandBase {
 
   private boolean control_motors;
   int frameCount;
+  Timer timer = new Timer();
+  final double timeoutSeconds;
   boolean lastValid = false;
   boolean currentValid = false;
   double goalYaw;
 
   /** Creates a new CenterTapeYaw. */
-  public CenterTapeYaw(boolean control_motors, double goalYaw) {
+  public CenterTapeYaw(boolean control_motors, double goalYaw, double timeoutSeconds) {
     this.goalYaw = goalYaw;
     this.control_motors = control_motors;
+    this.timeoutSeconds = timeoutSeconds;
     this.drivetrain = RobotContainer.RC().drivetrain;
     if (control_motors) {
       addRequirements(drivetrain);
@@ -64,12 +68,14 @@ public class CenterTapeYaw extends CommandBase {
   }
 
   public CenterTapeYaw(){
-    this(true, -26.8);
+    //this(true, -26.8);
+    this(true, -24.7, 2.0);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    timer.restart();
     System.out.println("***Starting Tape Correction, current ll X:"+ll.getX() + ", LL valid=" + ll.valid());
     frameCount = 0;
     tapePid.reset();
@@ -115,13 +121,14 @@ public class CenterTapeYaw extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     drivetrain.stop();
+    timer.stop();
     System.out.println("***Ending Tape Correction, interrupted?" + interrupted);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return isReady();
+    return isReady() || timer.hasElapsed(timeoutSeconds);
   }
 
   public boolean isReady() {

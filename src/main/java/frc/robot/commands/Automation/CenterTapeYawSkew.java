@@ -13,7 +13,7 @@ import frc.robot.subsystems.SwerveDrivetrain;
 public class CenterTapeYawSkew extends CommandBase {
   /** Creates a new CenterTapeYawSkew. */
 
-  CenterTapeYaw yawCommand = new CenterTapeYaw(false, -12.7);
+  CenterTapeYaw yawCommand = new CenterTapeYaw(false, -12.7, 2.0);
   CenterTapeSkew skewCommand = new CenterTapeSkew(false);
   SwerveDrivetrain drivetrain;
   final SwerveDriveKinematics kinematics;

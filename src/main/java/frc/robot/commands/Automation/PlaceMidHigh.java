@@ -116,7 +116,7 @@ public class PlaceMidHigh extends DynamicSCG {
     }
 
     this.addCommands(
-      new ElbowMoveTo(120.0, 5.0),
+      new ElbowMoveTo(105.0, 60.0), // lower to dropping position
       new InstantCommand(() -> { claw.open();}).andThen(new WaitCommand(TIME_DROP)));
   }
 
@@ -145,7 +145,7 @@ public class PlaceMidHigh extends DynamicSCG {
    */
   private void Retract() {
     Pose2d retractPose;
-    double distance = 0.5; //how far back to move (m)
+    double distance = 0.6; //how far back to move (m)
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
       retractPose = new Pose2d(goalPose.getX() + distance, goalPose.getY(), goalPose.getRotation()); //distance away from scoring station, blue side
