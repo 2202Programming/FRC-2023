@@ -5,6 +5,7 @@
 package frc.robot.commands.swerve;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
@@ -15,6 +16,7 @@ public class VelocityMove extends CommandBase {
   final double x_speed;
   final double y_speed;
   final double duration;
+  SwerveModuleState[] states;
   final Timer runTime = new Timer();
 
   // speeds [m/s]  duration [s]
@@ -31,14 +33,14 @@ public class VelocityMove extends CommandBase {
     runTime.reset();
     runTime.start();
     // compute our drive vector and let it run
-    var states = sdt.getKinematics().toSwerveModuleStates(new ChassisSpeeds(x_speed, y_speed, 0.0));
-    sdt.drive(states);
+    states = sdt.getKinematics().toSwerveModuleStates(new ChassisSpeeds(x_speed, y_speed, 0.0));
+    System.out.println("&&&&&&&&&&&--Init finished");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
+    sdt.drive(states);
   }
 
   // Called once the command ends or is interrupted.
@@ -46,6 +48,7 @@ public class VelocityMove extends CommandBase {
   public void end(boolean interrupted) {
     runTime.stop();
     sdt.stop();
+    System.out.println("&&&&&&&&&&&--Ended, interrupted " + interrupted);
   }
 
   // Returns true when the command should end.

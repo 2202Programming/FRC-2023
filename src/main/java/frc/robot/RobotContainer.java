@@ -59,6 +59,7 @@ import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.PrecisionMode;
 import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.swerve.RotateTo;
+import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
@@ -277,6 +278,7 @@ public class RobotContainer {
         driver.leftBumper().onTrue(new PlaceTele(CollectivePositions.placeConeHighFS));
 
         driver.a().onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+        driver.b().onTrue(new VelocityMove(0.5, 0, 1.0));
         break;
 
       case simulation:

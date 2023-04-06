@@ -217,14 +217,14 @@ public class HID_Xbox_Subsystem extends SubsystemBase {
     final CommandXboxController device = driver;
     double x = Math.abs(device.getRightX());
     double y = Math.abs(device.getRightY());
-    return (x > deadzone) || (y > deadzone);
+    return (x > (deadzone * 2.0)) || (y > (deadzone * 2.0)); // 2x multiplier so doesn't abort too easily
  }
 
  public boolean rightStickMotionOperator() {
   final CommandXboxController device = operator;
   double x = Math.abs(device.getRightX());
   double y = Math.abs(device.getRightY());
-  return (x > deadzone) || (y > deadzone);
+  return (x > (deadzone * 2.0)) || (y > (deadzone * 2.0)); // 2x multiplier so doesn't abort too easily
 }
 
 

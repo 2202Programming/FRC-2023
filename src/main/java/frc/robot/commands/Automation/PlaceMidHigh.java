@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
@@ -22,6 +23,7 @@ import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.auto.moveToPoint;
+import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -116,7 +118,7 @@ public class PlaceMidHigh extends DynamicSCG {
     }
 
     this.addCommands(
-      new ElbowMoveTo(105.0, 60.0), // lower to dropping position
+      new ElbowMoveTo(95.0, 60.0), // lower to dropping position
       new InstantCommand(() -> { claw.open();}).andThen(new WaitCommand(TIME_DROP)));
   }
 
@@ -157,9 +159,12 @@ public class PlaceMidHigh extends DynamicSCG {
     this.addCommands(
       new ElbowMoveTo(145.0), //return to high position to avoid low post
       new ParallelCommandGroup(
-        new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
+        new PrintCommand("Starting Parallel group + derek getting pissed"),
+        new VelocityMove(-0.5, 0.0, 1.0),
+        new PrintCommand("it's a race!"),
+        //no worky 2+ new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
         new SequentialCommandGroup(
-          new WaitCommand(0.5), //let the move start first for 0.5s so arm doesn't catch low pole
+          new WaitCommand(3.0), //let the move start first for 0.5s so arm doesn't catch low pole
           new ArmLockForDrivingFS() //then start to retract arm
         )
       )
@@ -219,6 +224,12 @@ public class PlaceMidHigh extends DynamicSCG {
       targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
     }
    return targetPose;
+  }
+
+  @Override
+  public void doFirstOnEnd() {
+    RobotContainer.RC().drivetrain.enableVisionPose();
+    RobotContainer.RC().drivetrain.disableVisionPoseRotation();
   }
 
 }

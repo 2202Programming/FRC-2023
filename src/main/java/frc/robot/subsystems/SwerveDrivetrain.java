@@ -564,8 +564,10 @@ public class SwerveDrivetrain extends SubsystemBase {
       if(visionPoseEnabled) {
       if (visionPoseUsingRotation) {
         setPose(llPose); //update robot pose from swervedriveposeestimator, include vision-based rotation
+        //System.out.println("***POSE FULL VISION UPDATE***");
       }
       else{
+        //System.out.println("***POSE NON ROTATION VISION UPDATE***");
         setPose(new Pose2d(llPose.getTranslation(), prev_m_Pose.getRotation())); //update robot translation from swervedriveposeestimator, do not update rotation
       }
     }
