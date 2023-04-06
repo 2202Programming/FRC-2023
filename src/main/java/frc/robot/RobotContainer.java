@@ -40,6 +40,7 @@ import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.PlaceHybrid;
 import frc.robot.commands.Automation.PlaceTele;
 import frc.robot.commands.Automation.PlaceMidHigh;
+import frc.robot.commands.Automation.PlaceMidHighJR;
 import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
 import frc.robot.commands.EndEffector.InWheelsWithGate;
@@ -277,7 +278,7 @@ public class RobotContainer {
 
         driver.leftBumper().onTrue(new PlaceTele(CollectivePositions.placeConeHighFS));
 
-        driver.a().onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+        driver.a().onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
         driver.b().onTrue(new VelocityMove(0.5, 0, 1.0));
         break;
 
