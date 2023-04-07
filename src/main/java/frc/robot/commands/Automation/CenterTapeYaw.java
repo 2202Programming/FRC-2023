@@ -24,10 +24,14 @@ public class CenterTapeYaw extends CommandBase {
   final SwerveDrivetrain drivetrain;
   final SwerveDriveKinematics kinematics;
   final Limelight_Subsystem ll;
+  final PhotonVision photonVision;
 
   // output to Swerve Drivetrain
   double xSpeed, ySpeed, rot;
   SwerveModuleState[] output_states;
+
+  public enum PhotoreflectiveMethod{Photonvision, Limelight}
+  private PhotoreflectiveMethod PRmethod;
 
   // PID for retroreflective-based heading to a target
   PIDController tapePid;
@@ -51,32 +55,44 @@ public class CenterTapeYaw extends CommandBase {
   boolean currentValid = false;
   double goalYaw;
 
-  /** Creates a new CenterTapeYaw. */
-  public CenterTapeYaw(boolean control_motors, double goalYaw, double timeoutSeconds) {
+  /** Creates a new CenterTapeYaw.
+   * 
+   * @param control_motors if the motors should be controlled
+   * @param goalYaw goal X error
+   * @param timeoutSeconds seconds until timeout of run
+   * @param PRmedthod enum for if photonvision or Limelight should be used
+   * 
+   */
+  public CenterTapeYaw(boolean control_motors, double goalYaw, double timeoutSeconds, PhotoreflectiveMethod PRmethod) {
     this.goalYaw = goalYaw;
     this.control_motors = control_motors;
     this.timeoutSeconds = timeoutSeconds;
     this.drivetrain = RobotContainer.RC().drivetrain;
+    this.photonVision = RobotContainer.RC().photonVision;
+    this.PRmethod = PRmethod;
+    this.kinematics = drivetrain.getKinematics();
+    this.ll = RobotContainer.RC().limelight;
+
     if (control_motors) {
       addRequirements(drivetrain);
     }
-    this.kinematics = drivetrain.getKinematics();
-    this.ll = RobotContainer.RC().limelight;
 
     tapePid = new PIDController(tape_kP, tape_kI, tape_kD);
     tapePid.setTolerance(pos_tol, vel_tol);
   }
 
   public CenterTapeYaw(){
-    //this(true, -26.8);
-    this(true, -24.7, 2.0);
+    this(true, -24.7, 2.0, PhotoreflectiveMethod.Limelight);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     timer.restart();
-    System.out.println("***Starting Tape Correction, current ll X:"+ll.getX() + ", LL valid=" + ll.valid());
+    if(PRmethod==PhotoreflectiveMethod.Limelight)
+      System.out.println("***Starting LL Tape Correction, current ll X:"+ll.getX() + ", LL valid=" + ll.valid());
+    else
+      System.out.println("***Starting PV Tape Correction, current PV X:"+photonVision.getLargestTapeTarget().getYaw() + ", PV valid=" + photonVision.hasTapeTarget());
     frameCount = 0;
     tapePid.reset();
   }
@@ -84,19 +100,36 @@ public class CenterTapeYaw extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // frameCount++;
-    // if(!ll.valid()) return;
     frameCount++;
-    lastValid = currentValid;
-    currentValid = ll.valid();
-    if(!lastValid && currentValid) System.out.println("***LL became valid at frame# " + frameCount);
-    calculate();
-    if(control_motors && frameCount > 1){ //wait for LL to get target
-      drivetrain.drive(output_states);
+    switch(PRmethod){
+      case Photonvision:
+        lastValid = currentValid;
+        currentValid = photonVision.hasTapeTarget();
+        if(!lastValid && currentValid) System.out.println("***PV became valid at frame# " + frameCount);
+        if(currentValid) { 
+          calculatePV();
+          if(control_motors){ 
+            drivetrain.drive(output_states);
+          }
+        }
+        break;
+      default:
+      case Limelight:
+        lastValid = currentValid;
+        currentValid = ll.valid();
+        if(!lastValid && currentValid) System.out.println("***LL became valid at frame# " + frameCount);
+        if(currentValid){
+          calculateLL();
+          if(control_motors){ 
+            drivetrain.drive(output_states);
+          }
+        }
+        break;
+      }
     }
-  }
 
-  void calculate(){
+
+  void calculateLL(){
     double Yaw = ll.getX();
     tapePidOutput = tapePid.calculate(Yaw, goalYaw);//goal yaw is centered - 12.7 deg since ll offset
     double yError = tapePid.getPositionError();
@@ -108,8 +141,24 @@ public class CenterTapeYaw extends CommandBase {
 
     SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
     SmartDashboard.putNumber("rot", rot * 57.3);
-    SmartDashboard.putNumber("Yaw Error", yError);   
+    SmartDashboard.putNumber("LL Yaw Error", yError);   
     SmartDashboard.putBoolean("LL Valid", ll.valid());
+    SmartDashboard.putNumber("Framecount", frameCount); 
+  }
+
+  void calculatePV(){
+    double Yaw = photonVision.getLargestTapeTarget().getYaw();
+    tapePidOutput = tapePid.calculate(Yaw, goalYaw);//goal yaw is centered - 12.7 deg since ll offset
+    double yError = tapePid.getPositionError();
+    double min_rot =  Math.signum(tapePidOutput) * min_rot_rate;
+    rot = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3;   //clamp in [deg/s] convert to [rad/s]
+    currentAngle = drivetrain.getPose().getRotation();
+    output_states = kinematics
+          .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
+
+    SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
+    SmartDashboard.putNumber("rot", rot * 57.3);
+    SmartDashboard.putNumber("PV Yaw Error", yError);   
     SmartDashboard.putNumber("Framecount", frameCount); 
   }
 

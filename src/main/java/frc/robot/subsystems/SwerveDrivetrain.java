@@ -562,15 +562,13 @@ public class SwerveDrivetrain extends SubsystemBase {
     if ((limelight != null) && (llPose != null) && (limelight.getNumApriltags() > 0)) { //just use LL for now
       Pose2d prev_m_Pose = m_pose;
       if(visionPoseEnabled) {
-      if (visionPoseUsingRotation) {
-        setPose(llPose); //update robot pose from swervedriveposeestimator, include vision-based rotation
-        //System.out.println("***POSE FULL VISION UPDATE***");
+        if (visionPoseUsingRotation) {
+          setPose(llPose); //update robot pose from swervedriveposeestimator, include vision-based rotation
+        }
+        else{
+          setPose(new Pose2d(llPose.getTranslation(), prev_m_Pose.getRotation())); //update robot translation from swervedriveposeestimator, do not update rotation
+        }
       }
-      else{
-        //System.out.println("***POSE NON ROTATION VISION UPDATE***");
-        setPose(new Pose2d(llPose.getTranslation(), prev_m_Pose.getRotation())); //update robot translation from swervedriveposeestimator, do not update rotation
-      }
-    }
       x_diff = Math.abs(prev_m_Pose.getX() -  m_pose.getX());
       y_diff = Math.abs(prev_m_Pose.getY() - m_pose.getY());
       yaw_diff = Math.abs(prev_m_Pose.getRotation().getDegrees() - m_pose.getRotation().getDegrees());
