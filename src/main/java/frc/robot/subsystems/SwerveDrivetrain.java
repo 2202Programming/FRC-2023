@@ -46,6 +46,7 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
 import frc.robot.util.ModMath;
 import frc.robot.util.PoseMath;
+import frc.robot.util.VisionWatchdog;
 import frc.robot.Constants.ChassisInversionSpecs;
 
 public class SwerveDrivetrain extends SubsystemBase {
@@ -76,6 +77,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   private Pose2d m_pose_integ; // incorporates vision
 
   private double maxImagingVelocity = 5.0; //m/s
+  private VisionWatchdog watchdog;
 
   private SwerveModuleState[] meas_states; // measured wheel speed & angle
   private SwerveModulePosition[] meas_pos = new SwerveModulePosition[] {
@@ -160,6 +162,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     sensors = RobotContainer.RC().sensors;
     photonVision = RobotContainer.RC().photonVision;
     limelight = RobotContainer.RC().limelight;
+    watchdog = new VisionWatchdog(3.0);
 
     var MT = CANSparkMax.MotorType.kBrushless;
     modules = new SwerveModuleMK3[] {
@@ -562,6 +565,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     if ((limelight != null) && (llPose != null) && (limelight.getNumApriltags() > 0)) { //just use LL for now
       Pose2d prev_m_Pose = m_pose;
       if(visionPoseEnabled) {
+        watchdog.update(prev_m_Pose, llPose);
         if (visionPoseUsingRotation) {
           setPose(llPose); //update robot pose from swervedriveposeestimator, include vision-based rotation
         }
