@@ -55,7 +55,7 @@ public class Limelight_Subsystem extends SubsystemBase {
 
   private LinearFilter x_iir;
   private LinearFilter area_iir;
-  public final String NT_Name = "DT"; // expose data under DriveTrain table
+  public final String NT_Name = "Vision"; // expose data under DriveTrain table
   final String NT_Shooter_Name = "Shooter";
   private double filterTC = 0.08; // seconds, 2Hz cutoff T = 1/(2pi*f) was .2hz T=.8
   private int log_counter = 0;
@@ -83,8 +83,8 @@ public class Limelight_Subsystem extends SubsystemBase {
     leds = table.getEntry("ledMode");
     booleanLeds = table.getEntry("booleanLeds");
     pipelineNTE = table.getEntry("pipeline");
-    outputTv = outputTable.getEntry("Limelight Valid");
-    outputTx = outputTable.getEntry("Limelight X error");
+    outputTv = outputTable.getEntry("/Limelight Valid");
+    outputTx = outputTable.getEntry("/Limelight X error");
     disableLED();
 
   }

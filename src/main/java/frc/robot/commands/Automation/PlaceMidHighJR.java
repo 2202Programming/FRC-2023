@@ -7,6 +7,9 @@ package frc.robot.commands.Automation;
 import com.pathplanner.lib.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -58,6 +61,11 @@ public class PlaceMidHighJR extends CommandBase {
       Moving, Placing, Retracting, Finished;
     }
 
+    private NetworkTable table;
+    private NetworkTableEntry nt_state;
+
+    public final String NT_Name = "CommandStatus"; // expose data under Command table
+
   /**
    * Constructs and schedules a new Place command. Encompasses sdt movement, arm
    * extension / retraction.
@@ -73,11 +81,15 @@ public class PlaceMidHighJR extends CommandBase {
     this.horizontalRequest = horizontalRequest;
     this.substationRequest = substationRequest;
     this.verticalRequest = verticalRequest;
+
+    table = NetworkTableInstance.getDefault().getTable(NT_Name);
+    nt_state = table.getEntry("/PlaceMidHighJR State");
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    nt_state.setString("Init");
     goalPose = calculateTargetPose();
     // 1. Move to safe location for arm extension 
     moveCommand = new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest);
@@ -89,6 +101,7 @@ public class PlaceMidHighJR extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    nt_state.setString(commandState.toString());
 
     switch(commandState){
       case Moving:
@@ -132,6 +145,7 @@ public class PlaceMidHighJR extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     System.out.println("***PlaceMidHighJR done... interrupted=" + interrupted);
+    nt_state.setString("Ended");
     RobotContainer.RC().drivetrain.enableVisionPose();
     RobotContainer.RC().drivetrain.disableVisionPoseRotation();
   }
