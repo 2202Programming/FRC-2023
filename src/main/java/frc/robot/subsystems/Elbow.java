@@ -18,8 +18,8 @@ import frc.robot.util.VelocityControlled;
 public class Elbow extends SubsystemBase implements VelocityControlled {
   final int STALL_CURRENT = 40;
   final int FREE_CURRENT = 20;
-  final double ELBOW_MIN_DEG = -120.0;
-  final double ELBOW_MAX_DEG = 180.0;
+  final double ELBOW_MIN_DEG = -20.0; // TODO 4/8/2023 -120.0
+  final double ELBOW_MAX_DEG = 115.0; // TODO 4/8/2023 145.0
  
   // mechanical gearing motor rotations to degrees with gear ratio
   final double conversionFactor = (360.0 / 350.0); //orig. 20% bump (5:7:10)
@@ -29,7 +29,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   double velTol = 2.0; // [deg/s]
 
   // motion speed limits
-  double velLimit = 160.0; // [deg/s]
+  double velLimit = 10.0; // [deg/s] TODO 160.0 4/8/2023
   double accelLimit = 5.0; // [deg/s^2] - only in future smartmode
 
   // ArbFeedforward to compensate for static torque

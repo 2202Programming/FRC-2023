@@ -28,10 +28,10 @@ public class PlaceTele extends SequentialCommandGroup {
    addCommands(
         new ParallelCommandGroup( //start to unwind claw/cone from inside robot without going too far out to hit station
             new ElbowMoveTo(25.0),
-            new WristMoveTo(-25.0)
+            new WristMoveTo(75.0) // move wrist a little so easier to get to face up track mode
         ),
         new InstantCommand(() -> {
-            claw.setTrackElbowMode(ClawTrackMode.faceDown); //face claw down to remain tucked in as we rotate to place
+            claw.setTrackElbowMode(ClawTrackMode.faceUp); //face claw up to not hit post as we rotate to place
         }),
         new ElbowMoveTo(145.0),  //get above the post, so when we rotate wrist & extend are we miss posts
         new MoveCollectiveArm(finalPosition));

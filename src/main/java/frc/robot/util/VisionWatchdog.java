@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.Timer;
 /** Add your docs here. */
 public class VisionWatchdog {
 
-    private Timer timer;
+    private Timer timer = new Timer();
     private double lastUpdateTime;
     private double updateInterval;
     private NetworkTable table;

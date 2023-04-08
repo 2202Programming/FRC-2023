@@ -17,8 +17,8 @@ public enum CollectivePositions {
     safeToFlip(0.0, 70.0, 0.0, ClawTrackMode.free, -1.0, 60),
     
     //TODO ORGANIZE OR MOVE THIS
-    travelFS(0.0, -28.0, 85.0, ClawTrackMode.frontSide, -1.0, 120.0),
-    travelLockFS(0.0, -28.0, 85.0, ClawTrackMode.free, -1.0, 120.0), 
+    travelFS(0.0, 0.0, 85.0, ClawTrackMode.frontSide, -1.0, 120.0), // TODO -28.0 4/8/2023
+    travelLockFS(0.0, 0.0, 85.0, ClawTrackMode.free, -1.0, 120.0), // TODO -28.0 4/8/2023
    
    
 

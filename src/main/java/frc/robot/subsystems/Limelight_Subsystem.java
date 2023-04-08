@@ -61,8 +61,8 @@ public class Limelight_Subsystem extends SubsystemBase {
   private int log_counter = 0;
 
   //private Pose2d megaPose;
-  private Pose2d teamPose;
-  private Pose2d bluePose;
+  private Pose2d teamPose = new Pose2d(); //todo hack inits to avoid NPE 4/8/2023
+  private Pose2d bluePose = new Pose2d();
   final private String LL_NAME = "";// "limelight" for if left blank
   private int numAprilTags;
   private double visionTimestamp;
@@ -85,7 +85,8 @@ public class Limelight_Subsystem extends SubsystemBase {
     ta = outputTable.getEntry("/LL Tape area"); 
     nt_bluepose_x = outputTable.getEntry("/LL Blue Pose X");
     nt_bluepose_y = outputTable.getEntry("/LL Blue Pose Y");
-    nt_numApriltags = outputTable.getEntry("LL_Num_Apriltag");
+    nt_numApriltags = outputTable.getEntry("/LL_Num_Apriltag");
+    NT_hasTarget = outputTable.getEntry("/LL hasTarget");
     outputTv = outputTable.getEntry("/Limelight Valid");
     outputTx = outputTable.getEntry("/Limelight X error");
     disableLED();
@@ -241,9 +242,11 @@ public class Limelight_Subsystem extends SubsystemBase {
       tx.setDouble(x);
       ty.setDouble(y);
       ta.setDouble(area);
-      
-      nt_bluepose_x.setDouble(bluePose.getX());
-      nt_bluepose_y.setDouble(bluePose.getY());
+
+      if (bluePose != null) {
+        nt_bluepose_x.setDouble(bluePose.getX());
+        nt_bluepose_y.setDouble(bluePose.getY());
+      }
 
       outputTv.setValue(target);
       outputTx.setDouble(x);

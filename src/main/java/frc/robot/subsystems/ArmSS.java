@@ -56,7 +56,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     boolean follow_mode;
 
     // PID and speed constants
-    double maxVel = 21.0; // [cm/s]
+    double maxVel = 5.0; // [cm/s] TODO 21.0 4/8/2023
     double maxAccel = 20.0; // [cm/s^2] Not enforce until smartmode used
     double posTol = 0.30; // [cm]
     double velTol = 0.25; // [cm/s]

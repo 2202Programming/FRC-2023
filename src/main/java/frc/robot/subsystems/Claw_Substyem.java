@@ -39,6 +39,7 @@ public class Claw_Substyem extends SubsystemBase {
     frontSide(94.0),
     backSide(-109.0),
     faceDown(-10.0),
+    faceUp(180.0),
     free(0.0);   //any angle, use setWristAngle()
     double angle;
 
@@ -61,7 +62,7 @@ public class Claw_Substyem extends SubsystemBase {
   final double WRIST_MIN_DEG = -150.0;
   final double WRIST_MAX_DEG = 150.0;
   double wrist_maxAccel = 10.0; // only used if in smartmode, a future
-  double wrist_maxVel = 160.0;
+  double wrist_maxVel = 60.0; // TODO 160.0 4/8/2023
   double wrist_posTol = 3.0;
   double wrist_velTol = 2.0;
   final double wrist_conversionFactor = 360.0 / 150.0; // GR=150.0
