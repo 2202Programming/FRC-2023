@@ -257,23 +257,14 @@ public class RobotContainer {
         driver.rightBumper().onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS, 0.2)
                                         .andThen(new CloseClawWithGate()));
 
-        driver.leftBumper().and(driver.a()).onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
-        driver.leftBumper().and(driver.b()).onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
-        driver.leftBumper().and(driver.y()).onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
-        driver.leftBumper().and(driver.x()).onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
-        driver.leftBumper().and(driver.leftTrigger())
-            .onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
-        driver.leftBumper().and(driver.rightTrigger()).onTrue(new MoveCollectiveArm(CollectivePositions.travelFS));
-        driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(4, 3), HorizontalScoringLane.Right, HorizontalSubstationLane.Right));
-
 
         // USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
         //oper.a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
-        //oper.b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
+        oper.b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
 
         oper.y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
         oper.povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));
-        oper.povDown().whileTrue(new ArmMoveAtSpeed(-2.0, true));
+        oper.povDown().whileTrue(new ArmMoveAtSpeed(-1.0, true));
         oper.x().onTrue(new InstantCommand(()->{ limelight.enableLED();}));
 
         driver.leftBumper().onTrue(new PlaceTele(CollectivePositions.placeConeHighFS));
