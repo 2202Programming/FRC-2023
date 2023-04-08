@@ -63,7 +63,7 @@ public class PlaceMidHighJR extends CommandBase {
 
     private NetworkTable table;
     private NetworkTableEntry nt_state;
-
+    private NetworkTableEntry nt_subState;
     public final String NT_Name = "CommandStatus"; // expose data under Command table
 
   /**
@@ -84,6 +84,7 @@ public class PlaceMidHighJR extends CommandBase {
 
     table = NetworkTableInstance.getDefault().getTable(NT_Name);
     nt_state = table.getEntry("/PlaceMidHighJR State");
+    nt_subState = table.getEntry("/PlaceMidHighJR SubState");
   }
 
   // Called when the command is initially scheduled.
@@ -93,6 +94,7 @@ public class PlaceMidHighJR extends CommandBase {
     goalPose = calculateTargetPose();
     // 1. Move to safe location for arm extension 
     moveCommand = new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest);
+    nt_subState.setString("Moving");
     System.out.println("***PlaceMidHighJR scheduling move command...");
     moveCommand.schedule();
     commandState = CommandState.Moving;
@@ -116,6 +118,7 @@ public class PlaceMidHighJR extends CommandBase {
               placeCommand = Cone();
               break;
           }
+          nt_subState.setString("Placing");
           System.out.println("***PlaceMidHighJR scheduling place command...");
           placeCommand.schedule();
         }
@@ -125,6 +128,7 @@ public class PlaceMidHighJR extends CommandBase {
           commandState = CommandState.Retracting;
           // 3. Move back and retract arm to travel position
           retractCommand = Retract();
+          nt_subState.setString("Retracting");
           System.out.println("***PlaceMidHighJR scheduling retract command...");
           retractCommand.schedule();
         }
@@ -132,6 +136,7 @@ public class PlaceMidHighJR extends CommandBase {
       case Retracting:
         if(retractCommand.isFinished()){
           commandState = CommandState.Finished;
+          nt_subState.setString("Finishing");
           System.out.println("***PlaceMidHighJR retract done, finishing up..");
         }
         break;
