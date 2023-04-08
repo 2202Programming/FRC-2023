@@ -16,27 +16,21 @@ public class NT_Print extends InstantCommand {
 
   // Create new NetworkTable entry
   public NT_Print(NetworkTable table, String key, Object value) {
-    
+    this.table = table;
+    NetworkTableEntry nt_value;
+    nt_value = table.getEntry(key);
     if (value instanceof Integer) {
+      int temp = (int) value;
+      nt_value.setInteger(temp);
     } else if (value instanceof String) {
-
+      String temp = (String) value;
+      nt_value.setString(temp);
     } else if (value instanceof Boolean) {
-
-    } else {// Double
-
-    }
-  }
-
-  // Use existing NetworkTable entry
-  public NT_Print(NetworkTableEntry entry, Object value) {
-    if (value instanceof Integer) {
-
-    } else if (value instanceof String) {
-
-    } else if (value instanceof Boolean) {
-
-    } else {// Double
-
+      boolean temp = (boolean) value;
+      nt_value.setBoolean(temp);
+    } else if(value instanceof Double) {
+      double temp = (double) value;
+      nt_value.setDouble(temp);
     }
   }
 
