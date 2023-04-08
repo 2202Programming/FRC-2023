@@ -140,6 +140,6 @@ public class DynamicSCG extends CommandGroupBase {
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
 
-    builder.addIntegerProperty("index", () -> m_currentCommandIndex, null);
+    builder.addIntegerProperty("DSCG_index", () -> m_currentCommandIndex, null);
   }
 }

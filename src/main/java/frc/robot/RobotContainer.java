@@ -247,9 +247,9 @@ public class RobotContainer {
         // MAKE SURE THE BUTTONS DON"T COLLIDE WITH OTHER COMMANDS
         // claw.setWristAngle(PowerOnPos.wrist);
 
-        GenericAlignEelementFactory(armSS, 1.0, driver.a(), driver.povUp(), driver.povDown());
-        GenericAlignEelementFactory(elbow, 2.0, driver.a(), driver.povRight(), driver.povLeft());
-        GenericAlignEelementFactory(wrist, 5.0, driver.b(), driver.povRight(), driver.povLeft());
+        //GenericAlignEelementFactory(armSS, 1.0, driver.a(), driver.povUp(), driver.povDown());
+        //GenericAlignEelementFactory(elbow, 2.0, driver.a(), driver.povRight(), driver.povLeft());
+        //GenericAlignEelementFactory(wrist, 5.0, driver.b(), driver.povRight(), driver.povLeft());
 
         // We need a way to put the arm back to Power-On
         driver.y().onTrue(new ArmLockForDrivingBS());
@@ -268,8 +268,8 @@ public class RobotContainer {
 
 
         // USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
-        oper.a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
-        oper.b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
+        //oper.a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
+        //oper.b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
 
         oper.y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
         oper.povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));

@@ -222,7 +222,6 @@ public class NeoServo implements VelocityControlled {
 
         // set our setpoint, but stay in whatever control mode is being used
         positionPID.calculate(currentPos, currentPos);
-        positionPID.reset();
     }
 
     public void periodic() {
