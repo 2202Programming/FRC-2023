@@ -28,6 +28,9 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -65,11 +68,26 @@ public class PhotonVision extends SubsystemBase {
   private SwerveDrivetrain sdt = null;
   private Pair<Pose2d, Double> previousPoseEstimate;
 
+  private NetworkTable table;
+  private NetworkTableEntry nt_tapeTargets;
+  private NetworkTableEntry nt_aprilTargets;
+  private NetworkTableEntry nt_PVPoseX;
+  private NetworkTableEntry nt_PVPoseY;
+  private NetworkTableEntry nt_PVTapeYaw;
+
+  public final String NT_Name = "Vision"; // expose data under Vision table
   
   public PhotonVision() {
     // build path to apriltag json file in deploy directory
     File deploy = Filesystem.getDeployDirectory();
     String path = deploy.getPath() + "/aprilTags.json";
+
+    table = NetworkTableInstance.getDefault().getTable(NT_Name);
+    nt_tapeTargets = table.getEntry("/PV Num Tape Targets");
+    nt_aprilTargets = table.getEntry("/PV Num April Targets");
+    nt_PVPoseX = table.getEntry("/PV Pose X");
+    nt_PVPoseY = table.getEntry("/PV Pose Y");
+    nt_PVTapeYaw = table.getEntry("/PV Tape Yaw");
 
     // load apriltag field layout
     try {
@@ -110,6 +128,7 @@ public class PhotonVision extends SubsystemBase {
 
     // Check if the latest result has any targets.
     hasAprilTargets = result_global.hasTargets();
+    nt_aprilTargets.setInteger(result_global.getTargets().size());
 
     if (hasAprilTargets) {
       // Get a list of currently tracked targets.
@@ -141,8 +160,8 @@ public class PhotonVision extends SubsystemBase {
 
         //don't update dash if there isn't a pose, photonVision return null if it doesn't have an estimate
         if (currentPoseEstimate.getFirst() != null) {
-          SmartDashboard.putNumber("PV Pose X", currentPoseEstimate.getFirst().getX());
-          SmartDashboard.putNumber("PV Pose Y", currentPoseEstimate.getFirst().getY());
+          nt_PVPoseX.setDouble(currentPoseEstimate.getFirst().getX());
+          nt_PVPoseY.setDouble(currentPoseEstimate.getFirst().getY());
         }
         else {
           previousPoseEstimate = previousPoseEstimateHolder;
@@ -164,8 +183,9 @@ public class PhotonVision extends SubsystemBase {
       bestTarget = result_microsoft.getBestTarget();
 
       // Get information from target.
-      SmartDashboard.putNumber("# of PV targets", TapeTargets.size());
-      SmartDashboard.putNumber("PV Yaw #1", TapeTargets.get(0).getYaw());
+      nt_tapeTargets.setInteger(TapeTargets.size());
+      nt_PVTapeYaw.setDouble(TapeTargets.get(0).getYaw());
+
       SmartDashboard.putNumber("PV Area #1", TapeTargets.get(0).getArea());
       if (getNumberOfTapeTargets() > 1) {
         SmartDashboard.putNumber("PV Yaw #2", TapeTargets.get(1).getYaw());
