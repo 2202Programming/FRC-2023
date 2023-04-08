@@ -74,6 +74,7 @@ public class PhotonVision extends SubsystemBase {
   private NetworkTableEntry nt_PVPoseX;
   private NetworkTableEntry nt_PVPoseY;
   private NetworkTableEntry nt_PVTapeYaw;
+  private NetworkTableEntry nt_PVTapeYaw2;
 
   public final String NT_Name = "Vision"; // expose data under Vision table
   
@@ -88,7 +89,7 @@ public class PhotonVision extends SubsystemBase {
     nt_PVPoseX = table.getEntry("/PV Pose X");
     nt_PVPoseY = table.getEntry("/PV Pose Y");
     nt_PVTapeYaw = table.getEntry("/PV Tape Yaw");
-
+    nt_PVTapeYaw2 = table.getEntry("/PV Tape Yaw Two");
     // load apriltag field layout
     try {
       fieldLayout = new AprilTagFieldLayout(path);
@@ -188,6 +189,7 @@ public class PhotonVision extends SubsystemBase {
 
       SmartDashboard.putNumber("PV Area #1", TapeTargets.get(0).getArea());
       if (getNumberOfTapeTargets() > 1) {
+        nt_PVTapeYaw2.setDouble(TapeTargets.get(1).getYaw());
         SmartDashboard.putNumber("PV Yaw #2", TapeTargets.get(1).getYaw());
         SmartDashboard.putNumber("PV Area #2", TapeTargets.get(1).getArea());
         SmartDashboard.putNumber("PV Largest Yaw", getLargestTapeTarget().getYaw());

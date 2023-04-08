@@ -73,16 +73,19 @@ public class Limelight_Subsystem extends SubsystemBase {
     table = NetworkTableInstance.getDefault().getTable("limelight");
     outputTable = NetworkTableInstance.getDefault().getTable(NT_Name);
 
-    tx = table.getEntry("tx"); // -27 degrees to 27 degrees
-    ty = table.getEntry("ty"); // -20.5 to 20.5 degrees
-    ta = table.getEntry("ta");
+    //these are "input" entries, to pull data from LL only
     tv = table.getEntry("tv"); // target validity (1 or 0)
-    nt_bluepose_x = table.getEntry("Blue Pose X");
-    nt_bluepose_y = table.getEntry("Blue Pose Y");
-    nt_numApriltags = table.getEntry("LL_Num_Apriltag");
     leds = table.getEntry("ledMode");
     booleanLeds = table.getEntry("booleanLeds");
     pipelineNTE = table.getEntry("pipeline");
+
+    //these are "output" entries for user debugging
+    tx = outputTable.getEntry("/LL Tape x"); // -27 degrees to 27 degrees
+    ty = outputTable.getEntry("/LL Tape y"); // -20.5 to 20.5 degrees
+    ta = outputTable.getEntry("/LL Tape area"); 
+    nt_bluepose_x = outputTable.getEntry("/LL Blue Pose X");
+    nt_bluepose_y = outputTable.getEntry("/LL Blue Pose Y");
+    nt_numApriltags = outputTable.getEntry("LL_Num_Apriltag");
     outputTv = outputTable.getEntry("/Limelight Valid");
     outputTx = outputTable.getEntry("/Limelight X error");
     disableLED();
@@ -101,11 +104,12 @@ public class Limelight_Subsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    log();
 
     pipeline = pipelineNTE.getInteger(0);
 
     if (pipeline == 1) {
-      // LL reflective tape stuff
+      // LL reflective tape stuff, pull from API or NT
       x = LimelightHelpers.getTX(LL_NAME);
       y = LimelightHelpers.getTY(LL_NAME);
       area = LimelightHelpers.getTA(LL_NAME);
@@ -114,39 +118,22 @@ public class Limelight_Subsystem extends SubsystemBase {
       filteredArea = area_iir.calculate(area);
       ledStatus = (leds.getDouble(0) == 3) ? (true) : (false);
 
-      tx.setDouble(x);
-      ty.setDouble(y);
-      ta.setDouble(area);
     } else if (pipeline == 0) {
 
       // LL apriltags stuff
       LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
       numAprilTags = llresults.targetingResults.targets_Fiducials.length;
+      nt_numApriltags.setInteger(numAprilTags);
       visionTimestamp = Timer.getFPGATimestamp() - (LimelightHelpers.getLatency_Pipeline(LL_NAME) / 1000.0)
           - (LimelightHelpers.getLatency_Capture(LL_NAME) / 1000.0);
 
       if (numAprilTags > 0) {
-        //megaPose = LimelightHelpers.getBotPose2d(LL_NAME);
         bluePose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
         if (DriverStation.getAlliance() == Alliance.Blue)
           teamPose = LimelightHelpers.getBotPose2d_wpiBlue(LL_NAME);
         else
           teamPose = LimelightHelpers.getBotPose2d_wpiRed(LL_NAME);
-
-        nt_bluepose_x.setDouble(bluePose.getX());
-        nt_bluepose_y.setDouble(bluePose.getY());
-
-        // this if for when we are ready to have LL update pose
-        // RobotContainer.RC().drivetrain.setPose(
-        // new Pose2d(bluePose.getTranslation(), //heavy handed way to update robot
-        // pose, DL will not like
-        // RobotContainer.RC().drivetrain.getPose().getRotation())); //do not update
-        // facing, only X,Y
-
       }
-
-      nt_numApriltags.setInteger(numAprilTags);
-
     }
   }
 
@@ -250,10 +237,16 @@ public class Limelight_Subsystem extends SubsystemBase {
     log_counter++;
     if (log_counter % 20 == 0) {
       NT_hasTarget.setBoolean(target);
+
+      tx.setDouble(x);
+      ty.setDouble(y);
+      ta.setDouble(area);
+      
+      nt_bluepose_x.setDouble(bluePose.getX());
+      nt_bluepose_y.setDouble(bluePose.getY());
+
       outputTv.setValue(target);
       outputTx.setDouble(x);
-      // SmartDashboard.putBoolean("Target Lock", target);
     }
   }
-
 }
