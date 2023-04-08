@@ -94,7 +94,7 @@ public class PlaceMidHighJR extends CommandBase {
     goalPose = calculateTargetPose();
     // 1. Move to safe location for arm extension 
     moveCommand = new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest);
-    nt_subState.setString("Moving");
+    nt_subState.setString("Moving to "+horizontalRequest.toString()+","+substationRequest.toString());
     System.out.println("***PlaceMidHighJR scheduling move command...");
     moveCommand.schedule();
     commandState = CommandState.Moving;
