@@ -28,6 +28,7 @@ public class NeoServo implements VelocityControlled {
     // commands
     double velocity_cmd; // computed from pid, or external_vel_cmd
     double maxVelocity; // limits
+    double initialMaxVelocity = 0.0; // keep the first non-zero as the hard max
     double arbFeedforward = 0.0; // for specialized control cases
     double external_vel_cmd = 0.0; // for velocity_mode == true
     boolean velocity_mode = false;
@@ -186,7 +187,8 @@ public class NeoServo implements VelocityControlled {
     }
 
     public void setMaxVel(double v) {
-        maxVelocity = Math.abs(v);
+        if (initialMaxVelocity == 0.0) initialMaxVelocity = maxVelocity; // saving the initial as hard max
+        maxVelocity = (Math.abs(v) <= initialMaxVelocity) ? v : initialMaxVelocity;
     }
 
     public double getMaxVel() {
@@ -241,13 +243,15 @@ public class NeoServo implements VelocityControlled {
      *      true => servo is stalled, cut the motor
      */
     boolean stall_check() {
-        boolean not_moving = Math.abs(velocity_cmd) > positionPID.getVelocityTolerance() && // motion requested
-                Math.abs(currentVel) < positionPID.getVelocityTolerance(); // motion not seen
+        boolean not_moving = 
+                (Math.abs(velocity_cmd) > positionPID.getVelocityTolerance()) && // motion requested
+                (Math.abs(currentVel) < positionPID.getVelocityTolerance()) && // motion not seen
+                (DriverStation.isEnabled()); // is enabled 
 
         // count frames we aren't moving
         safety_frame_count = not_moving ? ++safety_frame_count : 0;
 
-        return safety_frame_count < NO_MOTION_FRAMES;
+        return safety_frame_count > NO_MOTION_FRAMES;
     }
 
     public void periodic() {
