@@ -187,6 +187,13 @@ public class Claw_Substyem extends SubsystemBase {
     gate_blocked = !lightgate.get();
   }
 
+
+  @Override
+  public void simulationPeriodic(){
+    wrist_servo.simulationPeriodic();
+  }
+
+
   //enter the track mode based on our current angle
   public ClawTrackMode  setNearestClawTrackMode() {
     //looks at claw anglesto pick which side we should be on coming from free mode.

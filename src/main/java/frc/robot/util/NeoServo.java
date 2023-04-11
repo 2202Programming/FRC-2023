@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.commands.utility.WatcherCmd;
 
 public class NeoServo implements VelocityControlled {
@@ -188,7 +189,8 @@ public class NeoServo implements VelocityControlled {
 
     public void setMaxVel(double v) {
         v = Math.abs(v);
-        if (initialMaxVelocity == 0.0) initialMaxVelocity = v; // saving the initial as hard max
+        if (initialMaxVelocity == 0.0)
+            initialMaxVelocity = v; // saving the initial as hard max
         maxVelocity = (v <= initialMaxVelocity) ? v : initialMaxVelocity;
     }
 
@@ -239,19 +241,18 @@ public class NeoServo implements VelocityControlled {
     }
 
     /*
-     * stall_check()
+     * isStalled()
      * 
      * Looks for motion on the servo to ensure we are not stalled.
      * 
      * return -
-     *      false => servo is moving correctly
-     *      true => servo is stalled, cut the motor
+     * false => servo is moving correctly
+     * true => servo is stalled for N frames or more, cut the motor in periodic()
      */
-    boolean stall_check() {
-        boolean not_moving = 
-                (Math.abs(velocity_cmd) > positionPID.getVelocityTolerance()) && // motion requested
+    boolean isStalled() {
+        boolean not_moving = (Math.abs(velocity_cmd) > positionPID.getVelocityTolerance()) && // motion requested
                 (Math.abs(currentVel) < positionPID.getVelocityTolerance()) && // motion not seen
-                (DriverStation.isEnabled()); // is enabled 
+                (DriverStation.isEnabled()); // is enabled
 
         // count frames we aren't moving
         safety_frame_count = not_moving ? ++safety_frame_count : 0;
@@ -270,7 +271,7 @@ public class NeoServo implements VelocityControlled {
 
         // velocity_mode, update position setpoint so we don't jump back on mode switch
         if (velocity_mode) {
-            //4/10/2023 dpl positionPID.reset();
+            // 4/10/2023 dpl positionPID.reset();
             positionPID.setSetpoint(currentPos);
         }
 
@@ -279,26 +280,40 @@ public class NeoServo implements VelocityControlled {
 
         // if velocity mode, use external_vel_cmd, otherwise use positionPID
         velocity_cmd = velocity_mode ? external_vel_cmd + compAdjustment : velocity_cmd;
+        
+        //local copy of arbFeedforward incase stall has to zero it and it isn't set every frame by class user
+        double arbFF = arbFeedforward;   
 
-        //confirm we are moving and not stalled
-        // if (stall_check()) {            
-        //     //issue stall warning, but not every frame
-        //     if ((warning_count++ % WARNING_MSG_FRAMES) == 0) {
-        //         System.out.println(name +" servo stalled at pos=" + currentPos +
-        //             " set point=" + positionPID.getSetpoint() + 
-        //             " velocity_cmd="+velocity_cmd+
-        //             " measured_vel="+currentVel);
-                
-        //         //stalled for NO_MOTION_FRAMES frames, stop trying to move
-        //         velocity_cmd = 0.0;   
-        //     }
-        //     else {
-        //         // moving, clear the warning counter
-        //         warning_count = 0;
-        //     }
-        // }
+        // confirm we are moving and not stalled
+        if (isStalled()) {
+            // issue stall warning, but not every frame
+            if ((warning_count++ % WARNING_MSG_FRAMES) == 0) {
+                DriverStation.reportError(name + " servo stalled at pos=" + currentPos +
+                        " set point=" + positionPID.getSetpoint() +
+                        " velocity_cmd=" + velocity_cmd +
+                        " measured_vel=" + currentVel, false);
+                // stalled for NO_MOTION_FRAMES frames, stop trying to move
+                velocity_cmd = 0.0;
+                arbFF = 0.0;
+            } else {
+                // moving, clear the warning counter
+                warning_count = 0;
+            }
+        }
         // potential use of feedforward
-        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFeedforward, ArbFFUnits.kPercentOut);
+        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFF, ArbFFUnits.kPercentOut);
+    }
+
+
+    public void simulationPeriodic() {
+        // nothing to do if we are not enabled
+        if (!DriverStation.isEnabled()) 
+            return;
+        //simple model - encoder vel is set in sim when a velocity mode is used
+        //so move the position based on velocity being commanded
+        // no dynamics are modeled 
+        double pos = encoder.getPosition() + encoder.getVelocity() * Constants.DT; 
+        encoder.setPosition(pos);
     }
 
     public Command getWatcher() {

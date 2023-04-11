@@ -104,6 +104,12 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         rightArm.periodic(0.0);
     }
 
+    @Override
+    public void simulationPeriodic() {
+      leftArm.simulationPeriodic();
+      rightArm.simulationPeriodic();
+    }
+
     // At Position flags for use in the commands
     public boolean atSetpoint() {
         return (rightArm.atSetpoint() && leftArm.atSetpoint());

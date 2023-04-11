@@ -63,7 +63,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   }
 
-  // @Override
+  @Override
   public void periodic() {
     // use our desired postion to set a min %pwr for gravity - sin(pos),
     // where 0 deg is hanging vertical. +-180 is vertical up.
@@ -77,6 +77,13 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
     elbow_servo.setArbFeedforward(arbFF);
     elbow_servo.periodic();
   }
+
+  @Override
+  public void simulationPeriodic(){
+    elbow_servo.simulationPeriodic();
+  }
+
+
   public void incrementTrim(){
     Ktrim += trim_increment;
   }
