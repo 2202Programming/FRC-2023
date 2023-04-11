@@ -187,8 +187,9 @@ public class NeoServo implements VelocityControlled {
     }
 
     public void setMaxVel(double v) {
+        v = Math.abs(v);
         if (initialMaxVelocity == 0.0) initialMaxVelocity = maxVelocity; // saving the initial as hard max
-        maxVelocity = (Math.abs(v) <= initialMaxVelocity) ? v : initialMaxVelocity;
+        maxVelocity = (v <= initialMaxVelocity) ? v : initialMaxVelocity;
     }
 
     public double getMaxVel() {
