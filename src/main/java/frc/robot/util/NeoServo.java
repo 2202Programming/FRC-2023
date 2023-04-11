@@ -234,6 +234,10 @@ public class NeoServo implements VelocityControlled {
         positionPID.calculate(currentPos, currentPos);
     }
 
+    public void clearHwPID() {
+        ctrl.getPIDController().setIAccum(0.0);
+    }
+
     /*
      * stall_check()
      * 

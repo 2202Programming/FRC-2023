@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.MatchTimer;
 import frc.robot.subsystems.BlinkyLights.BlinkyLightController;
+import frc.robot.util.NeoServo;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -56,6 +57,21 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
   }
 
+  /** This function is called FIRST on every mode (tele, auto, test) init */
+  public void enabledInit() {
+    // 4-10-2023 DPL and nren
+    // if it's stuck on carwash (or anywhere) integral term gain is going to be very high,
+    // we remove the I gain so it's 0, which, yes, removes the i-term, but it is
+    // mostly inconsequential since the I term is so small. If we don't do this it would
+    // result in a very high integral term which is obviously bad --> this solves the
+    // problem of the windeup on a high cmd vel when disabling / renabling
+    //
+    // NOTE: we also took out the kI term on the HW PID for the wrist, so this should do
+    // nothing, but hey we might add it back
+    // --END-- 4/10/2023
+    ((NeoServo) RobotContainer.RC().claw.getWrist()).clearHwPID();
+  }
+
   @Override
   public void disabledPeriodic() {
     BlinkyLightController.onDisabledPeriodic();
@@ -67,6 +83,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    enabledInit();
+
     if (m_robotContainer.drivetrain != null)
       m_robotContainer.drivetrain.disableVisionPose();
 
@@ -86,6 +104,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    enabledInit();
+
     if (m_robotContainer.drivetrain != null)
       m_robotContainer.drivetrain.enableVisionPose();
       m_robotContainer.drivetrain.disableVisionPoseRotation();
@@ -108,6 +128,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+    enabledInit();
+
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
     BlinkyLightController.onTestInit();
