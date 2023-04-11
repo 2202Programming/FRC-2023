@@ -188,7 +188,7 @@ public class NeoServo implements VelocityControlled {
 
     public void setMaxVel(double v) {
         v = Math.abs(v);
-        if (initialMaxVelocity == 0.0) initialMaxVelocity = maxVelocity; // saving the initial as hard max
+        if (initialMaxVelocity == 0.0) initialMaxVelocity = v; // saving the initial as hard max
         maxVelocity = (v <= initialMaxVelocity) ? v : initialMaxVelocity;
     }
 
@@ -281,22 +281,22 @@ public class NeoServo implements VelocityControlled {
         velocity_cmd = velocity_mode ? external_vel_cmd + compAdjustment : velocity_cmd;
 
         //confirm we are moving and not stalled
-        if (stall_check()) {            
-            //issue stall warning, but not every frame
-            if (warning_count++ % WARNING_MSG_FRAMES == 0) {
-                System.out.println(name +" servo stalled at pos=" + currentPos +
-                    " set point=" + positionPID.getSetpoint() + 
-                    " velocity_cmd="+velocity_cmd+
-                    " measured_vel="+currentVel);
+        // if (stall_check()) {            
+        //     //issue stall warning, but not every frame
+        //     if ((warning_count++ % WARNING_MSG_FRAMES) == 0) {
+        //         System.out.println(name +" servo stalled at pos=" + currentPos +
+        //             " set point=" + positionPID.getSetpoint() + 
+        //             " velocity_cmd="+velocity_cmd+
+        //             " measured_vel="+currentVel);
                 
-                //stalled for NO_MOTION_FRAMES frames, stop trying to move
-                velocity_cmd = 0.0;   
-            }
-            else {
-                // moving, clear the warning counter
-                warning_count = 0;
-            }
-        }
+        //         //stalled for NO_MOTION_FRAMES frames, stop trying to move
+        //         velocity_cmd = 0.0;   
+        //     }
+        //     else {
+        //         // moving, clear the warning counter
+        //         warning_count = 0;
+        //     }
+        // }
         // potential use of feedforward
         pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFeedforward, ArbFFUnits.kPercentOut);
     }

@@ -62,7 +62,7 @@ public class Claw_Substyem extends SubsystemBase {
   final double WRIST_MIN_DEG = -130.0;  //WITH THE CLAW CLOSED
   final double WRIST_MAX_DEG = 110.0;
   double wrist_maxAccel = 10.0; // only used if in smartmode, a future
-  double wrist_maxVel = 40.0;
+  double wrist_maxVel = 160.0;
   double wrist_posTol = 3.0;
   double wrist_velTol = 2.0;
   final double wrist_conversionFactor = 360.0 / 150.0; // GR=150.0
@@ -91,7 +91,7 @@ public class Claw_Substyem extends SubsystemBase {
   // Testing showed 200 [deg/sec] was good to go! Still lots of overshoot on vel
   // step response. 25% 3/4/23
   PIDController wrist_positionPID = new PIDController(4.0, 0.005, 0.05);
-  PIDFController wrist_hwVelPID = new PIDFController(0.00045, 0.0, 0.01, 0.0017);
+  PIDFController wrist_hwVelPID = new PIDFController(0.00045, 0.0, 0.01, 0.0017); // original kI 0.0000052
  
 
   // reads the elbow angle for tracking

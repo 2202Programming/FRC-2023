@@ -35,7 +35,7 @@ public class ArmLockForDrivingFS extends CommandBase {
   Positions arm_current;
   double ELBOW_RETRACT = 140.0; // [deg/s] use slower speed
   double ARM_RETRACT = 20.0;
-  double FLIP_TIME = 10.0; // [s] for waiting when flip in safe area
+  double FLIP_TIME = 2.0; // [s] for waiting when flip in safe area
   Positions safe = CollectivePositions.safeToFlip.pos_info;
 
   /**
