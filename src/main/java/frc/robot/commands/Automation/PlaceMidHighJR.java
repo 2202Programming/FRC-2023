@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
@@ -29,14 +28,13 @@ import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.auto.moveToPoint;
+import frc.robot.commands.utility.NT_Print;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
-import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 public class PlaceMidHighJR extends CommandBase {
   
     // SSs
-    private HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
     public ColorSensors colorSensors = RobotContainer.RC().colorSensors;
     private Claw_Substyem claw = RobotContainer.RC().claw;
   
@@ -200,10 +198,12 @@ public class PlaceMidHighJR extends CommandBase {
     SequentialCommandGroup command = new SequentialCommandGroup();
     switch (verticalRequest) {
       case High:
+        command.addCommands(new NT_Print(nt_subState, "Running PlaceTeleConeHigh"));
         command.addCommands(new PrintCommand("***PlaceMidHigh: Running placetele high..."));
         command.addCommands(new PlaceTele(CollectivePositions.placeConeHighFS));
         break;
       case Middle:
+        command.addCommands(new NT_Print(nt_subState, "Running PlaceTeleConeMid"));
         command.addCommands(new PrintCommand("***PlaceMidHigh: Running placetele mid..."));
         command.addCommands(new PlaceTele(CollectivePositions.placeConeMidFS));
         break;
@@ -212,6 +212,7 @@ public class PlaceMidHighJR extends CommandBase {
     }
 
     command.addCommands(
+      new NT_Print(nt_subState, "Running wheels out"),
       new PrintCommand("***PlaceMidHigh: Running wheels out..."),
       new WheelsOut().withTimeout(TIME_DROP));  //wait for claw to open and cone drop
 
@@ -234,13 +235,16 @@ public class PlaceMidHighJR extends CommandBase {
     }
 
     command.addCommands(
+      new NT_Print(nt_subState, "Running elbow move"),
       new PrintCommand("***PlaceMidHigh: Running elbow move..."),
       new ElbowMoveTo(145.0), //return to high position to avoid low post
       new ParallelCommandGroup(
+        new NT_Print(nt_subState, "Running move to point retract pose"),
         new PrintCommand("***PlaceMidHigh: Running move to point retract pose..."),
         new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
         new SequentialCommandGroup(
           new WaitCommand(3.0), //let the move start first for 0.5s so arm doesn't catch low pole
+          new NT_Print(nt_subState, "Running arm lock for driving FS"),
           new PrintCommand("***PlaceMidHigh: Running arm lock for driving FS..."),
           new ArmLockForDrivingFS() //then start to retract arm
         )
