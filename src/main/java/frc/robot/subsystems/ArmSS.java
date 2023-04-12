@@ -32,7 +32,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     final int STALL_CURRENT = 50;
     final int FREE_CURRENT = 20;
     final double ARM_MIN_EXT = 0.0;
-    final double ARM_MAX_EXT = 38.0;
+    final double ARM_MAX_EXT = 37.0;
 
     final double gearRadius = 2.63398 * 2 * Math.PI; // 2.633[cm] is drive gear radius
     final double gearRatio = (1.0 / 75.0);
@@ -56,7 +56,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     boolean follow_mode;
 
     // PID and speed constants
-    double maxVel = 21.0; // [cm/s]
+    double maxVel = 21.0; // [cm/s] 
     double maxAccel = 20.0; // [cm/s^2] Not enforce until smartmode used
     double posTol = 0.30; // [cm]
     double velTol = 0.25; // [cm/s]
@@ -102,6 +102,12 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
         syncCompensation = sync ? syncPID.calculate(leftArm.getPosition(), rightArm.getPosition()) : 0.0;
         leftArm.periodic(syncCompensation);
         rightArm.periodic(0.0);
+    }
+
+    @Override
+    public void simulationPeriodic() {
+      leftArm.simulationPeriodic();
+      rightArm.simulationPeriodic();
     }
 
     // At Position flags for use in the commands

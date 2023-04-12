@@ -114,8 +114,10 @@ public class goToScoringPosition extends CommandBase {
     }
     pathCommand = MoveToPoseAutobuilder(constraints, targetPose);
     sdt.disableVisionPose();
+    RobotContainer.RC().limelight.enableLED();
+    RobotContainer.RC().limelight.setPipeline(1); //no more april tag update during the move, get ready for tape
     rumbleCmd = new JoystickRumbleEndless(Id.Operator);
-    rumbleCmd.schedule();
+    //rumbleCmd.schedule();
     RobotContainer.RC().lights.setBlinking(BlinkyLights.GREEN);
     pathCommand.schedule();
     loopNum++;
@@ -125,13 +127,16 @@ public class goToScoringPosition extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if(tapeCommand.isScheduled()) return; //nothing to do, waiting for LL tape to complete
+
     if(pathCommand.isFinished()){ //once path command finishes, check how close to target it is, and how many loops we've done
       if(isAtTarget() || (loopNum == maxLoops)) { //either at target, or max # of loops
         pathingFinished = true;
+        
         if((horizontalSubstationLane == HorizontalSubstationLane.Left) || (horizontalSubstationLane == HorizontalSubstationLane.Right)){ //cone station
           System.out.println("*** Running Tape Yaw... ");
-          //tapeCommand.schedule();
-          tapeFinished = true; //disable tape for now
+          tapeCommand.schedule();
+          tapeFinished = false;
         }
         else { //not a cone station, no need for RR tape turn
           tapeFinished = true;
@@ -158,6 +163,8 @@ public class goToScoringPosition extends CommandBase {
   public void end(boolean interrupted) {
     pathCommand.cancel();
     sdt.stop();
+    RobotContainer.RC().limelight.disableLED();
+    RobotContainer.RC().limelight.setPipeline(0); //back to apriltag pipe
     sdt.enableVisionPose();
     sdt.disableVisionPoseRotation();
     rumbleCmd.cancel();

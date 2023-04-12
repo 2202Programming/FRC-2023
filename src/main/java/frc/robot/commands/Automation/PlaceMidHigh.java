@@ -5,25 +5,27 @@
 package frc.robot.commands.Automation;
 
 import com.pathplanner.lib.PathConstraints;
-
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
-import frc.robot.commands.Arm.MoveCollectiveArm;
+import frc.robot.commands.Arm.ArmLockForDrivingFS;
 import frc.robot.commands.Arm.CollectivePositions;
+import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
-import frc.robot.commands.swerve.RotateTo;
+import frc.robot.commands.auto.moveToPoint;
 import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
-import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.DynamicSCG;
 
@@ -44,62 +46,45 @@ public class PlaceMidHigh extends DynamicSCG {
   private HorizontalScoringLane horizontalRequest;
   private HorizontalSubstationLane substationRequest;
   private VerticalScoringLane verticalRequest;
-  private GamePiece piece;
-  private Command dropthis;
+  private Pose2d goalPose;
 
   /**
-   * This class acts as a command factory.
+   * This class is a DynamicSCG.
    * 
    * Constructs and schedules a new Place command. Encompasses sdt movement, arm
    * extension / retraction.
    * Assumes piece is already in claw (this should be done upon picking up).
    * 
-   * @param horizontalRequest
-   * @param verticalRequest
+   * @param horizontalRequest The station (macro-level) request
+   * @param substationRequest The substation (micro-level) request
+   * @param verticalRequest The height
    */
   public PlaceMidHigh(HorizontalScoringLane horizontalRequest, 
                       HorizontalSubstationLane substationRequest, 
-                      VerticalScoringLane verticalRequest, 
-                      GamePiece piece) {
+                      VerticalScoringLane verticalRequest) {
     this.horizontalRequest = horizontalRequest;
     this.substationRequest = substationRequest;
     this.verticalRequest = verticalRequest;
-    this.piece = piece;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void doFirstOnInit() {
+    goalPose = calculateTargetPose();
     // 1. Move to safe location for arm extension 
     move();
 
-    // 2. Move arm out
-    switch (piece) {
-      case Cube:
-        Cube();   //moves arm to delivery point
-        dropthis = new WheelsOut().withTimeout(TIME_DROP);
+    // 2. Move arm out and drop, then wait 1sec
+    switch (substationRequest) {
+      case Center:
+        Cube();
         break;
-      case ConeFacingBack:
-        ConeBack();
-        dropthis = new InstantCommand(() -> {
-          claw.open();
-        }).withTimeout(TIME_DROP);
-        break;
-      case ConeFacingFront:
-        ConeFront();
-        dropthis = new InstantCommand(() -> {
-          claw.open();
-        }).withTimeout(TIME_DROP);
-        break;
-      case None:
+      default:
+        Cone();
         break;
     }
 
-    // 3. Move above target, place, moves back
-    // NOTE: THIS COULD TRACK LimeLight via reflective tape, center and dist estimate
-    MovePlace(); // <-- this uses odometry to move forward to "right" openloop position
-
-    // 4. Go to travel position
+    // 3. Move back and retract arm to travel position
     Retract();
   }
 
@@ -115,42 +100,26 @@ public class PlaceMidHigh extends DynamicSCG {
   private void move() {
     // 1. move to general vicinity
     this.addCommands(new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest));
-
-    // 2. correct for OTF path generation rotation error
-    // untested below
-    this.addCommands(new RotateTo(new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 0 : 180)));
-  }
-
-  /**
-   * Constructs placing this based on object being a cone facing backwards.
-   */
-  private void ConeBack() {
-    switch (verticalRequest) {
-      case Top:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS)); // TODO add back track constants
-        break;
-      case Middle:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS)); // TODO add back track constants
-        break;
-      default:
-        break;
-    }
   }
 
   /**
    * Constructs pacing this based on object being a cone facing forward.
    */
-  private void ConeFront() {
+  private void Cone() {
     switch (verticalRequest) {
-      case Top:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
+      case High:
+        this.addCommands(new PlaceTele(CollectivePositions.placeConeHighFS));
         break;
       case Middle:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
+        this.addCommands(new PlaceTele(CollectivePositions.placeConeMidFS));
         break;
       default:
         break;
     }
+
+    this.addCommands(
+      new ElbowMoveTo(95.0, 60.0), // lower to dropping position
+      new InstantCommand(() -> { claw.open();}).andThen(new WaitCommand(TIME_DROP)));
   }
 
   /**
@@ -159,37 +128,108 @@ public class PlaceMidHigh extends DynamicSCG {
    */
   private void Cube() {
     switch (verticalRequest) {
-      case Top:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
+      case High:
+        this.addCommands(new PlaceTele(CollectivePositions.placeConeHighFS));
         break;
       case Middle:
-        this.addCommands(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
+        this.addCommands(new PlaceTele(CollectivePositions.placeConeMidFS));
         break;
       default:
         break;
     }
-  }
 
-  /**
-   * Moves to / from the target with arm extended and places the piece on the
-   * target
-   */
-  private void MovePlace() {
     this.addCommands(
-      // 1. Move to       
-      new VelocityMove(-SPEED_MOVE, 0.0, TIME_MOVE),
-      // 2. Drop piece
-        dropthis,
-      // 3. Move back
-      new VelocityMove(SPEED_MOVE, 0.0, TIME_MOVE));      
-    }
+      new WheelsOut().withTimeout(TIME_DROP));  //wait for claw to open and cone drop
+  }
 
   /**
    * Retracts piece
    */
   private void Retract() {
+    Pose2d retractPose;
+    double distance = 0.6; //how far back to move (m)
+
+    if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
+      retractPose = new Pose2d(goalPose.getX() + distance, goalPose.getY(), goalPose.getRotation()); //distance away from scoring station, blue side
+    }
+    else{
+      retractPose = new Pose2d(goalPose.getX() - distance, goalPose.getY(), goalPose.getRotation()); //distance away from scoring station, red side
+    }
+
     this.addCommands(
-      new MoveCollectiveArm(CollectivePositions.travelFS), 
-      new MoveCollectiveArm(CollectivePositions.travelLockFS));
+      new ElbowMoveTo(145.0), //return to high position to avoid low post
+      new ParallelCommandGroup(
+        new PrintCommand("Starting Parallel group + derek getting pissed"),
+        new VelocityMove(-0.5, 0.0, 1.0),
+        new PrintCommand("it's a race!"),
+        //no worky 2+ new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
+        new SequentialCommandGroup(
+          new WaitCommand(3.0), //let the move start first for 0.5s so arm doesn't catch low pole
+          new ArmLockForDrivingFS() //then start to retract arm
+        )
+      )
+      );
   }
+
+  //calculate which constant scoring pose is appropriate goal
+  private Pose2d calculateTargetPose(){
+      //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
+      HorizontalScoringLane horizontalScoringLane = this.horizontalRequest;
+      HorizontalSubstationLane horizontalSubstationLane = this.substationRequest;
+      int scoringBlock; 
+      int scoringAdjusted;
+      Pose2d targetPose;
+
+    if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
+
+
+      if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 2;
+      else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 0;
+      else scoringBlock = 1;
+
+      //FOR BLUE: left is largest index of scoring trio
+      switch(horizontalScoringLane){
+        case Left:
+          scoringAdjusted = 2;
+          break;
+        case Center:
+          scoringAdjusted = 1;
+          break;
+        default:
+        case Right:
+          scoringAdjusted = 0;
+          break;      
+      }
+      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
+    }
+    else { //RED ALLIANCE
+      //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
+      if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 0;
+      else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 2;
+      else scoringBlock = 1;
+
+      //FOR RED: left is smallest index of scoring trio
+      switch(horizontalScoringLane){
+        case Left:
+          scoringAdjusted = 0;
+          break;
+        case Center:
+          scoringAdjusted = 1;
+          break;
+        default:
+        case Right:
+          scoringAdjusted = 2;
+          break;      
+      }
+      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
+    }
+   return targetPose;
+  }
+
+  @Override
+  public void doFirstOnEnd() {
+    RobotContainer.RC().drivetrain.enableVisionPose();
+    RobotContainer.RC().drivetrain.disableVisionPoseRotation();
+  }
+
 }

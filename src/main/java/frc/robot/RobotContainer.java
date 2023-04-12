@@ -18,12 +18,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.PowerOnPos;
+import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.PickFromShelf;
 import frc.robot.commands.takeConeFromShelf;
@@ -34,9 +36,11 @@ import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.TrackThenMove;
 import frc.robot.commands.Automation.CenterTapeSkew;
-import frc.robot.commands.Automation.MoveToFactory;
-import frc.robot.commands.Automation.PlaceHighAuto;
-import frc.robot.commands.Automation.PlaceHighTele;
+import frc.robot.commands.Automation.CenterTapeYaw;
+import frc.robot.commands.Automation.PlaceHybrid;
+import frc.robot.commands.Automation.PlaceTele;
+import frc.robot.commands.Automation.PlaceMidHigh;
+import frc.robot.commands.Automation.PlaceMidHighJR;
 import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
 import frc.robot.commands.EndEffector.InWheelsWithGate;
@@ -56,6 +60,7 @@ import frc.robot.commands.swerve.FieldCentricDrive;
 import frc.robot.commands.swerve.PrecisionMode;
 import frc.robot.commands.swerve.RobotCentricDrive;
 import frc.robot.commands.swerve.RotateTo;
+import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.commands.test.ArmMoveAtSpeed_L_R_test;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.BlinkyLights;
@@ -67,7 +72,6 @@ import frc.robot.subsystems.Limelight_Subsystem;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 import frc.robot.subsystems.hid.CommandSwitchboardController;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
@@ -214,10 +218,10 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.vision_test);
+    configureBindings(Bindings.arm_test);
 
-    //Keep the wrist down at power up + 5 deg to put some pressure on it
-    claw.setWristAngle(PowerOnPos.wrist + 5.0);  
+    //Keep the wrist down at power up + 2 deg to put some pressure on it - 4/11/23 stall check
+    claw.setWristAngle(PowerOnPos.wrist + 2.0);  
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -243,9 +247,9 @@ public class RobotContainer {
         // MAKE SURE THE BUTTONS DON"T COLLIDE WITH OTHER COMMANDS
         // claw.setWristAngle(PowerOnPos.wrist);
 
-        GenericAlignEelementFactory(armSS, 1.0, driver.a(), driver.povUp(), driver.povDown());
-        GenericAlignEelementFactory(elbow, 2.0, driver.a(), driver.povRight(), driver.povLeft());
-        GenericAlignEelementFactory(wrist, 5.0, driver.b(), driver.povRight(), driver.povLeft());
+        //GenericAlignEelementFactory(armSS, 1.0, driver.a(), driver.povUp(), driver.povDown());
+        //GenericAlignEelementFactory(elbow, 2.0, driver.a(), driver.povRight(), driver.povLeft());
+        //GenericAlignEelementFactory(wrist, 5.0, driver.b(), driver.povRight(), driver.povLeft());
 
         // We need a way to put the arm back to Power-On
         driver.y().onTrue(new ArmLockForDrivingBS());
@@ -253,26 +257,20 @@ public class RobotContainer {
         driver.rightBumper().onTrue(new TrackThenMove(CollectivePositions.pickupShelfFS, 0.2)
                                         .andThen(new CloseClawWithGate()));
 
-        driver.leftBumper().and(driver.a()).onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
-        driver.leftBumper().and(driver.b()).onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
-        driver.leftBumper().and(driver.y()).onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
-        driver.leftBumper().and(driver.x()).onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
-        driver.leftBumper().and(driver.leftTrigger())
-            .onTrue(new MoveCollectiveArm(CollectivePositions.pickupShelfFS));
-        driver.leftBumper().and(driver.rightTrigger()).onTrue(new MoveCollectiveArm(CollectivePositions.travelFS));
 
         // USE A and LR POV to align the arm to a NEW ZERO (operator :=port 1)
-        oper.a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
+        //oper.a().whileTrue(new ArmMoveAtSpeed_L_R_test(2.0, 1).WithLockout(10.0));
         oper.b().whileTrue(new ArmMoveAtSpeed_L_R_test(-0.5, 1).WithLockout(10.0));
+
+        oper.y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
         oper.povUp().whileTrue(new ArmMoveAtSpeed(5.0, true));
-        oper.povDown().whileTrue(new ArmMoveAtSpeed(-2.0, true));
+        oper.povDown().whileTrue(new ArmMoveAtSpeed(-1.0, true));
+        oper.x().onTrue(new InstantCommand(()->{ limelight.enableLED();}));
 
+        driver.leftBumper().onTrue(new PlaceTele(CollectivePositions.placeConeHighFS));
 
-        driver.leftBumper().onTrue(new PlaceHighTele());
-
-        driver.a().onTrue(new InstantCommand(() -> {
-          claw.setTrackElbowMode(ClawTrackMode.faceDown);
-        }));
+        driver.a().onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+        driver.b().onTrue(new VelocityMove(0.5, 0, 1.0));
         break;
 
       case simulation:
@@ -321,7 +319,7 @@ public class RobotContainer {
         
         driverIndividualBindings();
         operatorIndividualBindings();
-        //wisconsinMoveTo();
+        automationPickupPlace();
 
         break;
 
@@ -346,21 +344,31 @@ public class RobotContainer {
     CommandSwitchboardController sb = dc.SwitchBoard();
     Trigger manual = sb.sw16();
 
-    /**
+    /*
      * =======================
      * SINGLE-BUTTON BIDNINGS
      * =======================
      */
-
-    // Triggers + shoulder buttons
-    operator.leftBumper().whileTrue(new WheelsIn());
-    operator.rightBumper().whileTrue(new WheelsOut());
 
     // xyab
     operator.x().onTrue(new ToggleClaw());
     operator.y().onTrue(new ArmLockForDrivingBS());
     operator.a().whileTrue(new intakeCompetitionToggle());
     operator.b().whileTrue(new outtakeCompetitionToggle());
+
+
+    /*
+     * =======================
+     * MANUAL MODE
+     * ======================= 
+     */
+
+
+    // Triggers + shoulder buttons
+    manual.and(operator.leftBumper())
+      .whileTrue(new WheelsIn());
+    manual.and(operator.rightBumper())
+      .whileTrue(new WheelsOut());
 
     // dpad
     manual.and(operator.povUp())
@@ -387,58 +395,163 @@ public class RobotContainer {
 
     manual.and(operator.povLeft()).onTrue(new ArmLockForDrivingFS());
 
-    // // WI only manual scoring TODO remove
-    // // pickup
-    // operator.povDown().and(operator.x())
-    //     .onTrue(new Pickup(Substation.Left, GamePiece.Cube)); // substation doesn't matter
+    /*
+     * =======================
+     * TRIM MODE
+     * ======================= 
+     */
+    
+    Trigger trim = sb.sw26();
 
-    // operator.povDown().and(operator.leftTrigger())
-    //     .onTrue(new Pickup(Substation.Left, GamePiece.ConeFacingFront)); // which cone doesn't matter
-
-    // // score
-    // operator.povUp().and(operator.x())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeHighFS));
-
-    // operator.povUp().and(operator.rightTrigger())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeHighFS));
-
-    // operator.povRight().and(operator.x())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeCubeMidFS));
-
-    // operator.povRight().and(operator.rightTrigger())
-    //     .onTrue(new MoveCollectiveArm(CollectivePositions.placeConeMidFS));
-
-    // ELBOW TRIM - Button not finalized TODO- FIX BUTTONS
-    Trigger manualOn = sb.sw26();
-
-    manualOn.and(operator.povDown()).onTrue(new InstantCommand(() -> {
+    trim.and(operator.povDown()).onTrue(new InstantCommand(() -> {
       elbow.decrementTrim();
     }));
 
-    manualOn.and(operator.povUp()).onTrue(new InstantCommand(() -> {
+    trim.and(operator.povUp()).onTrue(new InstantCommand(() -> {
       elbow.incrementTrim();
     }));
   }
 
-  /**
-   * Same STL cmds but 0.5m back for WI
-   * 
-   * TODO remove after Wisconsin
-   */
-  public void wisconsinMoveTo() {
+  private void automationPickupPlace() {
+    CommandSwitchboardController sb = dc.SwitchBoard();
     CommandXboxController driver = dc.Driver();
     CommandXboxController operator = dc.Operator();
 
-    driver.povLeft().onTrue(new MoveToFactory(
-      driver.leftBumper(),
-      driver.rightBumper(),
-      operator.leftBumper(),
-      operator.rightBumper(),
-      operator.povUp(),
-      operator.povRight()
-    ));
-  }
+    // manual not turned on and driver hits dpad left
+    Trigger automation = sb.sw16().negate().and(driver.povLeft());
 
+    // Scoring positions
+    Trigger high = operator.povUp();
+    Trigger low = operator.povDown();
+    Trigger mid = high.negate().and(low.negate());
+
+    // Station
+    Trigger leftStation = driver.leftBumper();
+    Trigger rightStation = driver.rightBumper();
+    Trigger centerStation = leftStation.negate().and(rightStation.negate());
+
+    // Substation
+    Trigger leftSubstation = driver.leftBumper();
+    Trigger rightSubstation = driver.rightBumper();
+    Trigger centerSubstation = leftSubstation.negate().and(rightSubstation.negate());
+    
+
+    /*
+     * =======================
+     * PICKUP
+     * =======================
+     */
+
+    
+
+     /*
+      * =======================
+      * PLACE HYBRID
+      * =======================
+      */
+
+      // left station
+      automation.and(low).and(leftStation).and(leftSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Left, HorizontalSubstationLane.Left));
+      
+      automation.and(low).and(leftStation).and(centerSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Left, HorizontalSubstationLane.Center));
+
+      automation.and(low).and(leftStation).and(rightSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Left, HorizontalSubstationLane.Right));
+
+      // center station
+      automation.and(low).and(centerStation).and(leftSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Center, HorizontalSubstationLane.Left));
+      
+      automation.and(low).and(centerStation).and(centerSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Center, HorizontalSubstationLane.Center));
+
+      automation.and(low).and(centerStation).and(rightSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Center, HorizontalSubstationLane.Right));
+
+      // right station
+      automation.and(low).and(rightStation).and(leftSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Right, HorizontalSubstationLane.Left));
+      
+      automation.and(low).and(rightStation).and(centerSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Right, HorizontalSubstationLane.Center));
+
+      automation.and(low).and(rightStation).and(rightSubstation)
+        .onTrue(new PlaceHybrid(HorizontalScoringLane.Right, HorizontalSubstationLane.Right));
+      
+      /*
+       * =======================
+       * PLACE MID
+       * =======================
+       */
+
+      // left station
+      automation.and(mid).and(leftStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+      
+      automation.and(mid).and(leftStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+
+      automation.and(mid).and(leftStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+
+      // center station
+      automation.and(mid).and(centerStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+      
+      automation.and(mid).and(centerStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+
+      automation.and(mid).and(centerStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+
+      // right station
+      automation.and(mid).and(rightStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+      
+      automation.and(mid).and(rightStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+
+      automation.and(mid).and(rightStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+
+      /*
+       * =======================
+       * PLACE HIGH
+       * =======================
+       */
+
+      // left station
+      automation.and(high).and(leftStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Left, VerticalScoringLane.High));
+      
+      automation.and(high).and(leftStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Center, VerticalScoringLane.High));
+
+      automation.and(high).and(leftStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+
+      // center station
+      automation.and(high).and(centerStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Left, VerticalScoringLane.High));
+      
+      automation.and(high).and(centerStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Center, VerticalScoringLane.High));
+
+      automation.and(high).and(centerStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+
+      // right station
+      automation.and(high).and(rightStation).and(leftSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Left, VerticalScoringLane.High));
+      
+      automation.and(high).and(rightStation).and(centerSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Center, VerticalScoringLane.High));
+
+      automation.and(mid).and(rightStation).and(rightSubstation)
+        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+  }
 
 
   public void testPeriodic() {

@@ -18,18 +18,18 @@ import frc.robot.util.VelocityControlled;
 public class Elbow extends SubsystemBase implements VelocityControlled {
   final int STALL_CURRENT = 40;
   final int FREE_CURRENT = 20;
-  final double ELBOW_MIN_DEG = -120.0;
-  final double ELBOW_MAX_DEG = 180.0;
+  final double ELBOW_MIN_DEG = -20.0;
+  final double ELBOW_MAX_DEG = 110.0;
  
   // mechanical gearing motor rotations to degrees with gear ratio
   final double conversionFactor = (360.0 / 350.0); //orig. 20% bump (5:7:10)
 
   // positionPID at position tolerances
   double posTol = 3.0; // [deg]
-  double velTol = 2.0; // [deg/s]
+  double velTol = 4.0; // [deg/s]
 
   // motion speed limits
-  double velLimit = 160.0; // [deg/s]
+  double velLimit = 120.0; // [deg/s]
   double accelLimit = 5.0; // [deg/s^2] - only in future smartmode
 
   // ArbFeedforward to compensate for static torque
@@ -42,8 +42,9 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   // NeoServo - TODO (It's what arm values are rn, will need to change) - verify fix is complete
   final NeoServo elbow_servo;
-  PIDController positionPID = new PIDController(6.0, 0.083, 0.0);  
-  PIDFController hwVelPID = new PIDFController(0.0042, 0.0000052, 0.00, .003);
+  PIDController positionPID = new PIDController(5.0, 0.083, 0.0);  
+  // hw original kI 0.0000052, potentially killed wrist so removing 4/11/2023 DPL and nren
+  PIDFController hwVelPID = new PIDFController(0.0042, 0.0000052, 0.00, .003); 
 
   public Elbow() {
     elbow_servo = new NeoServo(CAN.ELBOW_Motor, positionPID, hwVelPID, true);
@@ -63,7 +64,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   }
 
-  // @Override
+  @Override
   public void periodic() {
     // use our desired postion to set a min %pwr for gravity - sin(pos),
     // where 0 deg is hanging vertical. +-180 is vertical up.
@@ -77,6 +78,13 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
     elbow_servo.setArbFeedforward(arbFF);
     elbow_servo.periodic();
   }
+
+  @Override
+  public void simulationPeriodic(){
+    elbow_servo.simulationPeriodic();
+  }
+
+
   public void incrementTrim(){
     Ktrim += trim_increment;
   }

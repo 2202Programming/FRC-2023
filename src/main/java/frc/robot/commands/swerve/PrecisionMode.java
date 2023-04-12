@@ -13,8 +13,8 @@ import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
  * false - restores values
  */
 public class PrecisionMode extends InstantCommand {
-  double scale_xy = 0.25;
-  double scale_rot = 0.2;
+  double scale_xy = 0.15;
+  double scale_rot = 0.1;
   final boolean enable;
   final HID_Xbox_Subsystem  dc = RobotContainer.RC().dc;
 

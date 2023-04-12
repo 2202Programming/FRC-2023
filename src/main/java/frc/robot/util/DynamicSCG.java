@@ -59,9 +59,9 @@ public class DynamicSCG extends CommandGroupBase {
 
   @Override
   public final void initialize() {
-    m_currentCommandIndex = 0;
-
     doFirstOnInit();
+    
+    m_currentCommandIndex = 0;
 
     if (!m_commands.isEmpty()) {
       m_commands.get(0).initialize();
@@ -119,11 +119,11 @@ public class DynamicSCG extends CommandGroupBase {
 
   @Override
   public final boolean isFinished() {
-    return (m_currentCommandIndex == m_commands.size()) && (isFinishedCondition());
+    return (m_currentCommandIndex == m_commands.size()) || (isFinishedCondition());
   }
 
   public boolean isFinishedCondition() {
-    return true;
+    return false;
   }
 
   @Override
@@ -140,6 +140,6 @@ public class DynamicSCG extends CommandGroupBase {
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
 
-    builder.addIntegerProperty("index", () -> m_currentCommandIndex, null);
+    builder.addIntegerProperty("DSCG_index", () -> m_currentCommandIndex, null);
   }
 }

@@ -121,15 +121,11 @@ public class ArmLockForDrivingBS extends CommandBase {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    System.out.println("*********ArmLockForDriving ended, interrupted " + interrupted);
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-
-    System.out.println("*********ArmLockForDriving cmd.sched" + cmd.isScheduled() + "  fin="+cmd.isFinished());    
     return !cmd.isScheduled();
   }
 

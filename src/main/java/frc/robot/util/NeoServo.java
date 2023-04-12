@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.commands.utility.WatcherCmd;
 
 public class NeoServo implements VelocityControlled {
@@ -28,15 +29,24 @@ public class NeoServo implements VelocityControlled {
     // commands
     double velocity_cmd; // computed from pid, or external_vel_cmd
     double maxVelocity; // limits
+    double initialMaxVelocity = 0.0; // keep the first non-zero as the hard max
     double arbFeedforward = 0.0; // for specialized control cases
     double external_vel_cmd = 0.0; // for velocity_mode == true
     boolean velocity_mode = false;
-    double trim = 0.0;  // offset from the commanded position (not seen in measured)
-    double MIN_POS=-500.0, MAX_POS=500.0;     // PLEASE SET YOUR CLAMP VALUES
+    double trim = 0.0; // offset from the commanded position (not seen in measured)
+    double MIN_POS = -500.0, MAX_POS = 500.0; // PLEASE SET YOUR CLAMP VALUES
+
+    // safety checks
+    int NO_MOTION_FRAMES = 5;
 
     // measured values
     double currentPos;
     double currentVel;
+
+    // safety checks on servo movement
+    int safety_frame_count = 0;
+    final int WARNING_MSG_FRAMES = 100;
+    int warning_count = 0; // limits warning msg to once every N frames
 
     // state vars
     final PIDController positionPID;
@@ -71,19 +81,19 @@ public class NeoServo implements VelocityControlled {
 
     // not really a NEO, but a sparkmax controller on brushed motor and alt encoder
     public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot,
-            Type  extEncoderType, int kCPR)  {
-            ctrl = new CANSparkMax(canID, MotorType.kBrushed);
-            ctrl.clearFaults();
-            ctrl.restoreFactoryDefaults();
-            ctrl.setInverted(inverted);
-            ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
-            pid = ctrl.getPIDController();   
-            encoder = ctrl.getAlternateEncoder(extEncoderType, kCPR);
+            Type extEncoderType, int kCPR) {
+        ctrl = new CANSparkMax(canID, MotorType.kBrushed);
+        ctrl.clearFaults();
+        ctrl.restoreFactoryDefaults();
+        ctrl.setInverted(inverted);
+        ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        pid = ctrl.getPIDController();
+        encoder = ctrl.getAlternateEncoder(extEncoderType, kCPR);
 
-            this.positionPID = positionPID;
-            this.hwVelSlot = hwVelSlot;
-            this.hwVelPIDcfg = hwVelPIDcfg;
-            this.prevVelPIDcfg = new PIDFController(hwVelPIDcfg);
+        this.positionPID = positionPID;
+        this.hwVelSlot = hwVelSlot;
+        this.hwVelPIDcfg = hwVelPIDcfg;
+        this.prevVelPIDcfg = new PIDFController(hwVelPIDcfg);
     }
 
     public NeoServo setName(String name) {
@@ -137,7 +147,6 @@ public class NeoServo implements VelocityControlled {
         return this;
     }
 
-
     /*
      * VelocityControlled API
      * 
@@ -150,7 +159,7 @@ public class NeoServo implements VelocityControlled {
         external_vel_cmd = 0.0;
     }
 
-    public void setClamp(double min_pos, double max_pos){
+    public void setClamp(double min_pos, double max_pos) {
         MIN_POS = min_pos;
         MAX_POS = max_pos;
     }
@@ -158,7 +167,7 @@ public class NeoServo implements VelocityControlled {
     public boolean isVelocityMode() {
         return velocity_mode;
     }
-    
+
     public double getSetpoint() {
         return positionPID.getSetpoint();
     }
@@ -171,7 +180,7 @@ public class NeoServo implements VelocityControlled {
     public void setPosition(double pos) {
         encoder.setPosition(pos); // tell our encoder we are at pos
         positionPID.reset(); // clear any history in the pid
-        positionPID.calculate(pos - trim, pos ); // tell our pid we want that position; measured, setpoint same
+        positionPID.calculate(pos - trim, pos); // tell our pid we want that position; measured, setpoint same
     }
 
     public double getPosition() {
@@ -179,7 +188,10 @@ public class NeoServo implements VelocityControlled {
     }
 
     public void setMaxVel(double v) {
-        maxVelocity = Math.abs(v);
+        v = Math.abs(v);
+        if (initialMaxVelocity == 0.0)
+            initialMaxVelocity = v; // saving the initial as hard max
+        maxVelocity = (v <= initialMaxVelocity) ? v : initialMaxVelocity;
     }
 
     public double getMaxVel() {
@@ -222,7 +234,31 @@ public class NeoServo implements VelocityControlled {
 
         // set our setpoint, but stay in whatever control mode is being used
         positionPID.calculate(currentPos, currentPos);
-        positionPID.reset();
+    }
+
+    public void clearHwPID() {
+        ctrl.getPIDController().setIAccum(0.0);
+    }
+
+    /*
+     * isStalled()
+     * 
+     * Looks for motion on the servo to ensure we are not stalled.
+     * 
+     * return -
+     * false => servo is moving correctly
+     * true => servo is stalled for N frames or more, cut the motor in periodic()
+     */
+    boolean isStalled() {
+        boolean not_moving = (Math.abs(velocity_cmd) > positionPID.getVelocityTolerance()) && // motion requested
+                (Math.abs(currentVel) < positionPID.getVelocityTolerance()) && // motion not seen
+                (!positionPID.atSetpoint()) &&
+                (DriverStation.isEnabled()); // is enabled
+
+        // count frames we aren't moving
+        safety_frame_count = not_moving ? ++safety_frame_count : 0;
+
+        return safety_frame_count > NO_MOTION_FRAMES;
     }
 
     public void periodic() {
@@ -236,7 +272,7 @@ public class NeoServo implements VelocityControlled {
 
         // velocity_mode, update position setpoint so we don't jump back on mode switch
         if (velocity_mode) {
-            positionPID.reset();
+            // 4/10/2023 dpl positionPID.reset();
             positionPID.setSetpoint(currentPos);
         }
 
@@ -245,13 +281,40 @@ public class NeoServo implements VelocityControlled {
 
         // if velocity mode, use external_vel_cmd, otherwise use positionPID
         velocity_cmd = velocity_mode ? external_vel_cmd + compAdjustment : velocity_cmd;
+        
+        //local copy of arbFeedforward incase stall has to zero it and it isn't set every frame by class user
+        double arbFF = arbFeedforward;   
 
-        // command hard 0.0 if POS is at tollerence
-        /// velocity_cmd = positionPID.atSetpoint() ? 0.0 : velocity_cmd;
-        // output - send our vel to the controller
-
+        // confirm we are moving and not stalled
+        if (isStalled()) {
+            // issue stall warning, but not every frame
+            if ((warning_count++ % WARNING_MSG_FRAMES) == 0) {
+                DriverStation.reportError(name + " servo stalled at pos=" + currentPos +
+                        " set point=" + positionPID.getSetpoint() +
+                        " velocity_cmd=" + velocity_cmd +
+                        " measured_vel=" + currentVel, false);
+                // stalled for NO_MOTION_FRAMES frames, stop trying to move
+                velocity_cmd = 0.0;
+                arbFF = 0.0;
+            } else {
+                // moving, clear the warning counter
+                warning_count = 0;
+            }
+        }
         // potential use of feedforward
-        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFeedforward, ArbFFUnits.kPercentOut);
+        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFF, ArbFFUnits.kPercentOut);
+    }
+
+
+    public void simulationPeriodic() {
+        // nothing to do if we are not enabled
+        if (!DriverStation.isEnabled()) 
+            return;
+        //simple model - encoder vel is set in sim when a velocity mode is used
+        //so move the position based on velocity being commanded
+        // no dynamics are modeled 
+        double pos = encoder.getPosition() + encoder.getVelocity() * Constants.DT; 
+        encoder.setPosition(pos);
     }
 
     public Command getWatcher() {
@@ -265,6 +328,7 @@ public class NeoServo implements VelocityControlled {
         NetworkTableEntry nt_desiredVel;
         NetworkTableEntry nt_currentVel;
         NetworkTableEntry nt_trim;
+
         @Override
         public String getTableName() {
             return name; // from NeoServo
