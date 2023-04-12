@@ -122,7 +122,7 @@ public class PlaceMidHighJR extends CommandBase {
         }
         break;
       case Placing:
-        if(placeCommand.isFinished()){
+        if(placeCommand.isFinished() || !placeCommand.isScheduled()){
           commandState = CommandState.Retracting;
           // 3. Move back and retract arm to travel position
           retractCommand = Retract();
@@ -132,7 +132,7 @@ public class PlaceMidHighJR extends CommandBase {
         }
         break;
       case Retracting:
-        if(retractCommand.isFinished()){
+        if(retractCommand.isFinished() || !retractCommand.isScheduled()){
           commandState = CommandState.Finished;
           nt_subState.setString("Finishing");
           System.out.println("***PlaceMidHighJR retract done, finishing up..");
@@ -185,9 +185,11 @@ public class PlaceMidHighJR extends CommandBase {
       new PrintCommand("***PlaceMidHigh: Running ElbowMove..."),
       new ElbowMoveTo(95.0, 60.0), // lower to dropping position
       new PrintCommand("***PlaceMidHigh: Running Claw open..."),
-      new InstantCommand(() -> { claw.open();}).andThen(new WaitCommand(TIME_DROP)));
+      new InstantCommand(() -> { claw.open();}).andThen(new WaitCommand(TIME_DROP)),
+      new PrintCommand("***Done with instants Claw open..."));
 
   return command;
+
   }
 
   /**

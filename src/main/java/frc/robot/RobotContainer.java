@@ -220,8 +220,8 @@ public class RobotContainer {
     // Edit the binding confiuration for testing
     configureBindings(Bindings.arm_test);
 
-    //Keep the wrist down at power up + 5 deg to put some pressure on it
-    claw.setWristAngle(PowerOnPos.wrist + 5.0);  
+    //Keep the wrist down at power up + 2 deg to put some pressure on it - 4/11/23 stall check
+    claw.setWristAngle(PowerOnPos.wrist + 2.0);  
 
     // Quiet some of the noise
     DriverStation.silenceJoystickConnectionWarning(true);

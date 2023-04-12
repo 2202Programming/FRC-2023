@@ -13,7 +13,8 @@ import frc.robot.Constants.ConePickup;;
 public enum CollectivePositions {
     power_on(PowerOnPos.arm, PowerOnPos.elbow, PowerOnPos.wrist, ClawTrackMode.backSide, 18.0, 60.0),
     travelNoPieceBS(PowerOnPos.arm, 10.0, PowerOnPos.wrist, ClawTrackMode.backSide, 18.0, 120.0),  
-    travelLockNoPieceBS(0.0, PowerOnPos.elbow, PowerOnPos.wrist + 5.0, ClawTrackMode.free, -1.0, 120.0), 
+    // 4/11/23 + 2 deg instead of 5 so we dont trip stall detect
+    travelLockNoPieceBS(0.0, PowerOnPos.elbow, PowerOnPos.wrist + 2.0, ClawTrackMode.free, -1.0, 120.0), 
     safeToFlip(0.0, 70.0, 0.0, ClawTrackMode.free, -1.0, 60),
     
     //TODO ORGANIZE OR MOVE THIS

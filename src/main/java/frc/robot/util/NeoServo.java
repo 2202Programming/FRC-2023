@@ -252,6 +252,7 @@ public class NeoServo implements VelocityControlled {
     boolean isStalled() {
         boolean not_moving = (Math.abs(velocity_cmd) > positionPID.getVelocityTolerance()) && // motion requested
                 (Math.abs(currentVel) < positionPID.getVelocityTolerance()) && // motion not seen
+                (!positionPID.atSetpoint()) &&
                 (DriverStation.isEnabled()); // is enabled
 
         // count frames we aren't moving

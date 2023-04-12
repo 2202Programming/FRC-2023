@@ -124,7 +124,7 @@ public final class Constants {
   }
 
   public static class ConePickup {
-    public static final double armLength = 4.0; //[cm] not the final number
+    public static final double armLength = 9.0; //[cm] not the final number
     public static final double elbowAngle = 125.0;  //[degrees]
     public static final double wristAngle = 0.0; //[degrees] not final
   }
