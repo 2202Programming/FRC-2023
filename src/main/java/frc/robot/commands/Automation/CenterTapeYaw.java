@@ -54,6 +54,7 @@ public class CenterTapeYaw extends CommandBase {
   boolean lastValid = false;
   boolean currentValid = false;
   double goalYaw;
+  int validCount;
 
   /** Creates a new CenterTapeYaw.
    * 
@@ -94,6 +95,7 @@ public class CenterTapeYaw extends CommandBase {
     else
       System.out.println("***Starting PV Tape Correction, current PV X:"+photonVision.getLargestTapeTarget().getYaw() + ", PV valid=" + photonVision.hasTapeTarget());
     frameCount = 0;
+    validCount = 0;
     tapePid.reset();
   }
 
@@ -117,8 +119,11 @@ public class CenterTapeYaw extends CommandBase {
       case Limelight:
         lastValid = currentValid;
         currentValid = ll.valid();
+        validCount = (currentValid) ? validCount + 1 : 0;
+
         if(!lastValid && currentValid) System.out.println("***LL became valid at frame# " + frameCount);
-        if(currentValid){
+        if(lastValid && !currentValid) System.out.println("***LL became invalid at frame# " + frameCount);
+        if(validCount > 5){
           calculateLL();
           if(control_motors){ 
             drivetrain.drive(output_states);

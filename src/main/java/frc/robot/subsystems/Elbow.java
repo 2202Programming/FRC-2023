@@ -26,7 +26,7 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   // positionPID at position tolerances
   double posTol = 3.0; // [deg]
-  double velTol = 2.0; // [deg/s]
+  double velTol = 4.0; // [deg/s]
 
   // motion speed limits
   double velLimit = 120.0; // [deg/s]
@@ -42,8 +42,9 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
 
   // NeoServo - TODO (It's what arm values are rn, will need to change) - verify fix is complete
   final NeoServo elbow_servo;
-  PIDController positionPID = new PIDController(6.0, 0.083, 0.0);  
-  PIDFController hwVelPID = new PIDFController(0.0042, 0.0000052, 0.00, .003);
+  PIDController positionPID = new PIDController(5.0, 0.083, 0.0);  
+  // hw original kI 0.0000052, potentially killed wrist so removing 4/11/2023 DPL and nren
+  PIDFController hwVelPID = new PIDFController(0.0042, 0.0000052, 0.00, .003); 
 
   public Elbow() {
     elbow_servo = new NeoServo(CAN.ELBOW_Motor, positionPID, hwVelPID, true);

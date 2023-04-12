@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -53,7 +54,7 @@ public class PlaceMidHighJR extends CommandBase {
     private goToScoringPosition moveCommand;
     private SequentialCommandGroup placeCommand;
     private SequentialCommandGroup retractCommand;
-
+    Command cmd;
     private CommandState commandState;
     public enum CommandState {
       Moving, Placing, Retracting, Finished;
@@ -91,7 +92,7 @@ public class PlaceMidHighJR extends CommandBase {
     nt_state.setString("Init");
     goalPose = calculateTargetPose();
     // 1. Move to safe location for arm extension 
-    moveCommand = new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest);
+    cmd = moveCommand = new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest);
     nt_subState.setString("Moving to "+horizontalRequest.toString()+","+substationRequest.toString());
     System.out.println("***PlaceMidHighJR scheduling move command...");
     moveCommand.schedule();
@@ -116,6 +117,7 @@ public class PlaceMidHighJR extends CommandBase {
               placeCommand = Cone();
               break;
           }
+          cmd = placeCommand;
           nt_subState.setString("Placing");
           System.out.println("***PlaceMidHighJR scheduling place command...");
           placeCommand.schedule();
@@ -125,7 +127,7 @@ public class PlaceMidHighJR extends CommandBase {
         if(placeCommand.isFinished() || !placeCommand.isScheduled()){
           commandState = CommandState.Retracting;
           // 3. Move back and retract arm to travel position
-          retractCommand = Retract();
+          cmd = retractCommand = Retract();
           nt_subState.setString("Retracting");
           System.out.println("***PlaceMidHighJR scheduling retract command...");
           retractCommand.schedule();
@@ -157,6 +159,9 @@ public class PlaceMidHighJR extends CommandBase {
   @Override
   public boolean isFinished() {
     //finished when state machine in finished state, or if driver moves stick
+    if (RobotContainer.RC().dc.rightStickMotionDriver()) {
+      cmd.cancel();   //driver aborting, abort the cmd running but THIS IS A HACK
+    }
     return ((commandState == CommandState.Finished) || RobotContainer.RC().dc.rightStickMotionDriver());
   }
 
@@ -239,13 +244,13 @@ public class PlaceMidHighJR extends CommandBase {
     command.addCommands(
       new NT_Print(nt_subState, "Running elbow move"),
       new PrintCommand("***PlaceMidHigh: Running elbow move..."),
-      new ElbowMoveTo(145.0), //return to high position to avoid low post
+      new ElbowMoveTo(115.0), //return to high position to avoid low post
       new ParallelCommandGroup(
         new NT_Print(nt_subState, "Running move to point retract pose"),
         new PrintCommand("***PlaceMidHigh: Running move to point retract pose..."),
         new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
         new SequentialCommandGroup(
-          new WaitCommand(3.0), //let the move start first for 0.5s so arm doesn't catch low pole
+          new WaitCommand(0.25), //let the move start first for 0.5s so arm doesn't catch low pole
           new NT_Print(nt_subState, "Running arm lock for driving FS"),
           new PrintCommand("***PlaceMidHigh: Running arm lock for driving FS..."),
           new ArmLockForDrivingFS() //then start to retract arm

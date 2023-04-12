@@ -76,7 +76,7 @@ public class Claw_Substyem extends SubsystemBase {
   double rotate_maxAccel = 10.0; // only used if in smartmode, a future
   double rotate_maxVel = 20.0;
   double rotate_posTol = 3.0;
-  double rotate_velTol = 2.0;
+  double rotate_velTol = 4.0;
   final double rotate_conversionFactor = 360.0 / 100.0; // GR=100.0
 
   // Hardware
