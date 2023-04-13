@@ -250,7 +250,7 @@ public class PlaceMidHighJR extends CommandBase {
         new PrintCommand("***PlaceMidHigh: Running move to point retract pose..."),
         new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
         new SequentialCommandGroup(
-          new WaitCommand(0.25), //let the move start first for 0.5s so arm doesn't catch low pole
+          new WaitCommand(0.5), //let the move start first for 0.5s so arm doesn't catch low pole
           new NT_Print(nt_subState, "Running arm lock for driving FS"),
           new PrintCommand("***PlaceMidHigh: Running arm lock for driving FS..."),
           new ArmLockForDrivingFS() //then start to retract arm
