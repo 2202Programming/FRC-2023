@@ -29,8 +29,13 @@ public class CenterTapeYaw extends CommandBase {
   // output to Swerve Drivetrain
   double xSpeed, ySpeed, rot;
   SwerveModuleState[] output_states;
+  ChassisSpeeds zero_cs = new ChassisSpeeds(0.0, 0.0, 0.0);
+  SwerveModuleState[] no_turn_states;
 
-  public enum PhotoreflectiveMethod{Photonvision, Limelight}
+  public enum PhotoreflectiveMethod {
+    Photonvision, Limelight
+  }
+
   private PhotoreflectiveMethod PRmethod;
 
   // PID for retroreflective-based heading to a target
@@ -41,11 +46,11 @@ public class CenterTapeYaw extends CommandBase {
   double tapePidOutput = 0.0;
 
   Rotation2d currentAngle;
-  double min_rot_rate = 6.0;        
- 
+  double min_rot_rate = 6.0;
+
   final double vel_tol = 2.0;
   final double pos_tol = 2.0;
-  final double max_rot_rate = 60.0;  //[deg/s]
+  final double max_rot_rate = 60.0; // [deg/s]
 
   private boolean control_motors;
   int frameCount;
@@ -56,12 +61,13 @@ public class CenterTapeYaw extends CommandBase {
   double goalYaw;
   int validCount;
 
-  /** Creates a new CenterTapeYaw.
+  /**
+   * Creates a new CenterTapeYaw.
    * 
    * @param control_motors if the motors should be controlled
-   * @param goalYaw goal X error
+   * @param goalYaw        goal X error
    * @param timeoutSeconds seconds until timeout of run
-   * @param PRmedthod enum for if photonvision or Limelight should be used
+   * @param PRmedthod      enum for if photonvision or Limelight should be used
    * 
    */
   public CenterTapeYaw(boolean control_motors, double goalYaw, double timeoutSeconds, PhotoreflectiveMethod PRmethod) {
@@ -77,12 +83,12 @@ public class CenterTapeYaw extends CommandBase {
     if (control_motors) {
       addRequirements(drivetrain);
     }
-
+    no_turn_states = kinematics.toSwerveModuleStates(zero_cs);
     tapePid = new PIDController(tape_kP, tape_kI, tape_kD);
     tapePid.setTolerance(pos_tol, vel_tol);
   }
 
-  public CenterTapeYaw(){
+  public CenterTapeYaw() {
     this(true, -24.7, 2.0, PhotoreflectiveMethod.Limelight);
   }
 
@@ -90,10 +96,11 @@ public class CenterTapeYaw extends CommandBase {
   @Override
   public void initialize() {
     timer.restart();
-    if(PRmethod==PhotoreflectiveMethod.Limelight)
-      System.out.println("***Starting LL Tape Correction, current ll X:"+ll.getX() + ", LL valid=" + ll.valid());
+    if (PRmethod == PhotoreflectiveMethod.Limelight)
+      System.out.println("***Starting LL Tape Correction, current ll X:" + ll.getX() + ", LL valid=" + ll.valid());
     else
-      System.out.println("***Starting PV Tape Correction, current PV X:"+photonVision.getLargestTapeTarget().getYaw() + ", PV valid=" + photonVision.hasTapeTarget());
+      System.out.println("***Starting PV Tape Correction, current PV X:" + photonVision.getLargestTapeTarget().getYaw()
+          + ", PV valid=" + photonVision.hasTapeTarget());
     frameCount = 0;
     validCount = 0;
     tapePid.reset();
@@ -102,17 +109,18 @@ public class CenterTapeYaw extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    boolean valid_tape = false;
+    SwerveModuleState[] out;
     frameCount++;
-    switch(PRmethod){
+    switch (PRmethod) {
       case Photonvision:
         lastValid = currentValid;
         currentValid = photonVision.hasTapeTarget();
-        if(!lastValid && currentValid) System.out.println("***PV became valid at frame# " + frameCount);
-        if(currentValid) { 
+        if (!lastValid && currentValid)
+          System.out.println("***PV became valid at frame# " + frameCount);
+        if (currentValid) {
           calculatePV();
-          if(control_motors){ 
-            drivetrain.drive(output_states);
-          }
+          valid_tape = true;
         }
         break;
       default:
@@ -120,54 +128,61 @@ public class CenterTapeYaw extends CommandBase {
         lastValid = currentValid;
         currentValid = ll.valid();
         validCount = (currentValid) ? validCount + 1 : 0;
-
-        if(!lastValid && currentValid) System.out.println("***LL became valid at frame# " + frameCount);
-        if(lastValid && !currentValid) System.out.println("***LL became invalid at frame# " + frameCount);
-        if(validCount > 5){
+        if (!lastValid && currentValid)
+          System.out.println("***LL became valid at frame# " + frameCount);
+        if (lastValid && !currentValid)
+          System.out.println("***LL became invalid at frame# " + frameCount);
+        if (validCount > 5) {
           calculateLL();
-          if(control_motors){ 
-            drivetrain.drive(output_states);
-          }
+          valid_tape = true;
         }
         break;
-      }
     }
 
+    // pick our pid output or no motion output based on valid_tape
+    out = (valid_tape) ? output_states : no_turn_states;
+    if (control_motors) {
+      drivetrain.drive(out);
+    }
 
-  void calculateLL(){
+  }
+
+  void calculateLL() {
     double Yaw = ll.getX();
-    tapePidOutput = tapePid.calculate(Yaw, goalYaw);//goal yaw is centered - 12.7 deg since ll offset
+    tapePidOutput = tapePid.calculate(Yaw, goalYaw);// goal yaw is centered - 12.7 deg since ll offset
     double yError = tapePid.getPositionError();
-    double min_rot =  Math.signum(tapePidOutput) * min_rot_rate;
-    rot = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3;   //clamp in [deg/s] convert to [rad/s]
+    double min_rot = Math.signum(tapePidOutput) * min_rot_rate;
+    rot = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3; // clamp in [deg/s] convert to
+                                                                                       // [rad/s]
     currentAngle = drivetrain.getPose().getRotation();
     output_states = kinematics
-          .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
+        .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
 
     SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
     SmartDashboard.putNumber("rot", rot * 57.3);
-    SmartDashboard.putNumber("LL Yaw Error", yError);   
+    SmartDashboard.putNumber("LL Yaw Error", yError);
     SmartDashboard.putBoolean("LL Valid", ll.valid());
-    SmartDashboard.putNumber("Framecount", frameCount); 
+    SmartDashboard.putNumber("Framecount", frameCount);
   }
 
-  void calculatePV(){
+  void calculatePV() {
     double Yaw = photonVision.getLargestTapeTarget().getYaw();
-    tapePidOutput = tapePid.calculate(Yaw, goalYaw);//goal yaw is centered - 12.7 deg since ll offset
+    tapePidOutput = tapePid.calculate(Yaw, goalYaw);// goal yaw is centered - 12.7 deg since ll offset
     double yError = tapePid.getPositionError();
-    double min_rot =  Math.signum(tapePidOutput) * min_rot_rate;
-    rot = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3;   //clamp in [deg/s] convert to [rad/s]
+    double min_rot = Math.signum(tapePidOutput) * min_rot_rate;
+    rot = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3; // clamp in [deg/s] convert to
+                                                                                       // [rad/s]
     currentAngle = drivetrain.getPose().getRotation();
     output_states = kinematics
-          .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
+        .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
 
     SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
     SmartDashboard.putNumber("rot", rot * 57.3);
-    SmartDashboard.putNumber("PV Yaw Error", yError);   
-    SmartDashboard.putNumber("Framecount", frameCount); 
+    SmartDashboard.putNumber("PV Yaw Error", yError);
+    SmartDashboard.putNumber("Framecount", frameCount);
   }
 
-  public double getRot(){
+  public double getRot() {
     return rot;
   }
 
