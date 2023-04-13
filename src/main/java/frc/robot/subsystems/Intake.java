@@ -148,7 +148,7 @@ final DoubleSolenoid lt_intake_solenoid = new DoubleSolenoid(CAN.PCM1,
   }
 
   public boolean lightgateIsBlocked() {
-    return lightgate.get();
+    return !lightgate.get();
   }
 
   /**
