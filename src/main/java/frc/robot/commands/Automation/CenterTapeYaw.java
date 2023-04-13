@@ -28,7 +28,7 @@ public class CenterTapeYaw extends CommandBase {
 
   // output to Swerve Drivetrain
   double xSpeed, ySpeed, rot;
-  SwerveModuleState[] output_states;
+  SwerveModuleState[] vision_out;
   ChassisSpeeds zero_cs = new ChassisSpeeds(0.0, 0.0, 0.0);
   SwerveModuleState[] no_turn_states;
 
@@ -140,7 +140,7 @@ public class CenterTapeYaw extends CommandBase {
     }
 
     // pick our pid output or no motion output based on valid_tape
-    out = (valid_tape) ? output_states : no_turn_states;
+    out = (valid_tape) ? vision_out : no_turn_states;
     if (control_motors) {
       drivetrain.drive(out);
     }
@@ -150,17 +150,17 @@ public class CenterTapeYaw extends CommandBase {
   void calculateLL() {
     double Yaw = ll.getX();
     tapePidOutput = tapePid.calculate(Yaw, goalYaw);// goal yaw is centered - 12.7 deg since ll offset
-    double yError = tapePid.getPositionError();
+    double yawError = tapePid.getPositionError();
     double min_rot = Math.signum(tapePidOutput) * min_rot_rate;
     rot = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3; // clamp in [deg/s] convert to
                                                                                        // [rad/s]
     currentAngle = drivetrain.getPose().getRotation();
-    output_states = kinematics
+    vision_out = kinematics
         .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
 
     SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
     SmartDashboard.putNumber("rot", rot * 57.3);
-    SmartDashboard.putNumber("LL Yaw Error", yError);
+    SmartDashboard.putNumber("LL Yaw Error", yawError);
     SmartDashboard.putBoolean("LL Valid", ll.valid());
     SmartDashboard.putNumber("Framecount", frameCount);
   }
@@ -173,7 +173,7 @@ public class CenterTapeYaw extends CommandBase {
     rot = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3; // clamp in [deg/s] convert to
                                                                                        // [rad/s]
     currentAngle = drivetrain.getPose().getRotation();
-    output_states = kinematics
+    vision_out = kinematics
         .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
 
     SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
