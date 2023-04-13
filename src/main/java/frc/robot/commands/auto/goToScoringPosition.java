@@ -72,12 +72,12 @@ public class goToScoringPosition extends CommandBase {
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
       //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
-      if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 2;
-      else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 0;
+      if(horizontalScoringLane.equals(HorizontalScoringLane.Left)) scoringBlock = 2;
+      else if(horizontalScoringLane.equals(HorizontalScoringLane.Right)) scoringBlock = 0;
       else scoringBlock = 1;
 
       //FOR BLUE: left is largest index of scoring trio
-      switch(horizontalScoringLane){
+      switch(horizontalSubstationLane){
         case Left:
           scoringAdjusted = 2;
           break;
