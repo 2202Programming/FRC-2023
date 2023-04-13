@@ -9,11 +9,11 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 /*
  * Scales the sticks for precise tracking. 
- * true  - (25% xy, 20% rot)
+ * true  - (20% xy, 10% rot)
  * false - restores values
  */
 public class PrecisionMode extends InstantCommand {
-  double scale_xy = 0.15;
+  double scale_xy = 0.2;
   double scale_rot = 0.1;
   final boolean enable;
   final HID_Xbox_Subsystem  dc = RobotContainer.RC().dc;
