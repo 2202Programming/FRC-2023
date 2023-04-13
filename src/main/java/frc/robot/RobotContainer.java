@@ -9,6 +9,7 @@ import static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFa
 import java.util.HashMap;
 
 import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
@@ -218,7 +219,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.arm_test);
+    configureBindings(Bindings.Competition);
 
     //Keep the wrist down at power up + 2 deg to put some pressure on it - 4/11/23 stall check
     claw.setWristAngle(PowerOnPos.wrist + 2.0);  
@@ -488,33 +489,33 @@ public class RobotContainer {
 
       // left station
       automation.and(mid).and(leftStation).and(leftSubstation)
-        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Left, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
       
       automation.and(mid).and(leftStation).and(centerSubstation)
-        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Left, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
 
       automation.and(mid).and(leftStation).and(rightSubstation)
-        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Left, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Left, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
 
       // center station
       automation.and(mid).and(centerStation).and(leftSubstation)
-        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Center, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
       
       automation.and(mid).and(centerStation).and(centerSubstation)
-        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Center, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
 
       automation.and(mid).and(centerStation).and(rightSubstation)
-        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Center, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Center, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
 
       // right station
       automation.and(mid).and(rightStation).and(leftSubstation)
-        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
       
       automation.and(mid).and(rightStation).and(centerSubstation)
-        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
 
       automation.and(mid).and(rightStation).and(rightSubstation)
-        .onTrue(new PlaceMidHigh(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
 
       /*
        * =======================
@@ -576,6 +577,7 @@ public class RobotContainer {
     // new PathConstraints(4, 4)));
 
     return new autoTest();
+    //return autoBuilder.fullAuto(PathPlanner.loadPath("MoveTwentyFeet", new PathConstraints(1.0, 1.0)));
   }
 
   /**
