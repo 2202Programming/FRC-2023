@@ -419,7 +419,7 @@ public class RobotContainer {
     CommandXboxController operator = dc.Operator();
 
     // manual not turned on and driver hits dpad left
-    Trigger automation = sb.sw16().negate().and(driver.povLeft());
+    Trigger automation = sb.sw16().negate().and(driver.povLeft()); // this must be pressed to trigger all the followin
 
     // Scoring positions
     Trigger high = operator.povUp();
@@ -432,8 +432,8 @@ public class RobotContainer {
     Trigger centerStation = leftStation.negate().and(rightStation.negate());
 
     // Substation
-    Trigger leftSubstation = driver.leftBumper();
-    Trigger rightSubstation = driver.rightBumper();
+    Trigger leftSubstation = operator.leftBumper();
+    Trigger rightSubstation = operator.rightBumper();
     Trigger centerSubstation = leftSubstation.negate().and(rightSubstation.negate());
     
 
