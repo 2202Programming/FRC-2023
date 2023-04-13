@@ -52,7 +52,7 @@ import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
-import frc.robot.commands.auto.autoTest;
+import frc.robot.commands.auto.autoChamps;
 import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.AllianceAwareGyroReset;
@@ -576,7 +576,7 @@ public class RobotContainer {
     // return autoBuilder.fullAuto(PathPlanner.loadPath("MKE-FarHailMaryNoBalance",
     // new PathConstraints(4, 4)));
 
-    return new autoTest();
+    return new autoChamps();
     //return autoBuilder.fullAuto(PathPlanner.loadPath("MoveTwentyFeet", new PathConstraints(1.0, 1.0)));
   }
 
