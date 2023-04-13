@@ -52,6 +52,12 @@ public class CenterTapeYaw extends CommandBase {
   final double pos_tol = 2.0;
   final double max_rot_rate = 60.0; // [deg/s]
 
+  final double high_tape_Y = 20.58;
+  final double mid_tape_Y = 2.21;
+  final double high_tape_goal = -13.75;
+  final double mid_tape_goal = -24.7;
+  final double max_yaw_error = 10.0; // max number of degrees the target can be off and we still think it's legit
+
   private boolean control_motors;
   int frameCount;
   Timer timer = new Timer();
@@ -70,8 +76,7 @@ public class CenterTapeYaw extends CommandBase {
    * @param PRmedthod      enum for if photonvision or Limelight should be used
    * 
    */
-  public CenterTapeYaw(boolean control_motors, double goalYaw, double timeoutSeconds, PhotoreflectiveMethod PRmethod) {
-    this.goalYaw = goalYaw;
+  public CenterTapeYaw(boolean control_motors, double timeoutSeconds, PhotoreflectiveMethod PRmethod) {
     this.control_motors = control_motors;
     this.timeoutSeconds = timeoutSeconds;
     this.drivetrain = RobotContainer.RC().drivetrain;
@@ -89,7 +94,7 @@ public class CenterTapeYaw extends CommandBase {
   }
 
   public CenterTapeYaw() {
-    this(true, -24.7, 2.0, PhotoreflectiveMethod.Limelight);
+    this(true, 2.0, PhotoreflectiveMethod.Limelight);
   }
 
   // Called when the command is initially scheduled.
@@ -149,7 +154,17 @@ public class CenterTapeYaw extends CommandBase {
 
   void calculateLL() {
     double Yaw = ll.getX();
-    tapePidOutput = tapePid.calculate(Yaw, goalYaw);// goal yaw is centered - 12.7 deg since ll offset
+    double Elevation = ll.getY();
+
+    //Is measured target elevation closer to what we expect for the high tape (back pole) or mid tape?
+    //Different X goals depending which target is being visualized
+    if(Math.abs(high_tape_Y - Elevation) > Math.abs(mid_tape_Y - Elevation)){ //true means elevation closer to mid tape
+      goalYaw = mid_tape_goal;
+    }
+    else {
+      goalYaw = high_tape_goal;
+    }
+    tapePidOutput = tapePid.calculate(Yaw, goalYaw); //set measurement AND goal in one foul swoop
     double yawError = tapePid.getPositionError();
     double min_rot = Math.signum(tapePidOutput) * min_rot_rate;
     rot = MathUtil.clamp(tapePidOutput + min_rot, -max_rot_rate, max_rot_rate) / 57.3; // clamp in [deg/s] convert to
@@ -157,6 +172,11 @@ public class CenterTapeYaw extends CommandBase {
     currentAngle = drivetrain.getPose().getRotation();
     vision_out = kinematics
         .toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rot, currentAngle));
+
+    //if our yaw error is too big maybe we are seeing the next pole over, so don't move.
+    if (Math.abs(yawError) > max_yaw_error){ 
+      vision_out = no_turn_states;
+    }
 
     SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
     SmartDashboard.putNumber("rot", rot * 57.3);
