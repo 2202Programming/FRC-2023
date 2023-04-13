@@ -37,7 +37,7 @@ public class NeoServo implements VelocityControlled {
     double MIN_POS = -500.0, MAX_POS = 500.0; // PLEASE SET YOUR CLAMP VALUES
 
     // safety checks
-    int NO_MOTION_FRAMES = 5;
+    int NO_MOTION_FRAMES = 10;
 
     // measured values
     double currentPos;
@@ -294,6 +294,7 @@ public class NeoServo implements VelocityControlled {
                         " velocity_cmd=" + velocity_cmd +
                         " measured_vel=" + currentVel, false);
                 // stalled for NO_MOTION_FRAMES frames, stop trying to move
+                setSetpoint(currentPos); // stay where we are 
                 velocity_cmd = 0.0;
                 arbFF = 0.0;
             } else {
