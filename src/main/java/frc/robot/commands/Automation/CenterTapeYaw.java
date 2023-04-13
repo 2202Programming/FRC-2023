@@ -64,8 +64,10 @@ public class CenterTapeYaw extends CommandBase {
   final double timeoutSeconds;
   boolean lastValid = false;
   boolean currentValid = false;
+  boolean highYaw = false;
   double goalYaw;
   int validCount;
+  int sequentialBadFrames;
 
   /**
    * Creates a new CenterTapeYaw.
@@ -108,6 +110,7 @@ public class CenterTapeYaw extends CommandBase {
           + ", PV valid=" + photonVision.hasTapeTarget());
     frameCount = 0;
     validCount = 0;
+    sequentialBadFrames = 0;
     tapePid.reset();
   }
 
@@ -140,6 +143,12 @@ public class CenterTapeYaw extends CommandBase {
         if (validCount > 5) {
           calculateLL();
           valid_tape = true;
+        }
+        if(!currentValid || highYaw) {
+          sequentialBadFrames++;
+          System.out.println("Sequental bad frame #" + sequentialBadFrames);
+        } else {
+          sequentialBadFrames = 0;
         }
         break;
     }
@@ -175,7 +184,10 @@ public class CenterTapeYaw extends CommandBase {
 
     //if our yaw error is too big maybe we are seeing the next pole over, so don't move.
     if (Math.abs(yawError) > max_yaw_error){ 
+      highYaw = true;
       vision_out = no_turn_states;
+    } else {
+      highYaw = false;
     }
 
     SmartDashboard.putNumber("tapePidOutput", tapePidOutput);
