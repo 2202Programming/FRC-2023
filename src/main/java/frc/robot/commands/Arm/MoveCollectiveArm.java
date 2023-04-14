@@ -63,12 +63,12 @@ public class MoveCollectiveArm extends CommandBase {
    * State of colective Positions, either start or target.
    */
   public static class Positions {
-    double armPos;
-    double elbowPos;
-    double wristPos;
-    double armMaxVel; // <0.0 means use existing maxvel
-    double elbowMaxVel; // <0.0 means use existing maxvel
-    ClawTrackMode mode;
+   public double armPos;
+   public double elbowPos;
+   public double wristPos;
+   public double armMaxVel; // <0.0 means use existing maxvel
+   public double elbowMaxVel; // <0.0 means use existing maxvel
+   public ClawTrackMode mode;
 
     public Positions(double armPos, double elbowPos, double wristPos, ClawTrackMode mode) {
       this(armPos, elbowPos, wristPos, mode, -1.0, -1.0);

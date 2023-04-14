@@ -8,6 +8,7 @@ import frc.robot.commands.Arm.ArmLockForDrivingFS;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
+import frc.robot.commands.EndEffector.MoveWrist;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 
@@ -22,6 +23,7 @@ public class AutoUprightConePickup extends SequentialCommandGroup {
                 claw.setTrackElbowMode(ClawTrackMode.free);
             }),
             new MoveCollectiveArm(CollectivePositions.uprightConePickup),
+            new MoveWrist(CollectivePositions.uprightConePickup.pos_info.wristPos),
             new CloseClawWithGate(),
             new WaitCommand(0.25),
             new MoveCollectiveArm(CollectivePositions.uprightConeTravelHalfway),

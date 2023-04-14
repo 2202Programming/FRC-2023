@@ -22,8 +22,8 @@ public enum CollectivePositions {
     travelLockFS(0.0, -20.0, 85.0, ClawTrackMode.free, -1.0, 120.0), // TODO -28.0 4/8/2023
 
     // upright cone pickup position
-    uprightConePickup(0.0, 15.0, -30.0, ClawTrackMode.free),
-    uprightConeTravelHalfway(0.0, 15.0, 20.0, ClawTrackMode.free),
+    uprightConePickup(0.0, 15.0, 20.0, ClawTrackMode.free),
+    uprightConeTravelHalfway(0.0, 85.0, 20.0, ClawTrackMode.free),
 
     // cube car wash to claw
     cubeToClaw(0.0, 10.0, 0.0, ClawTrackMode.backSide),  
@@ -50,7 +50,7 @@ public enum CollectivePositions {
     travelMidBS(20.0, -10.0, 0.0, ClawTrackMode.backSide);
 
     // posistions and modes for target positions
-    Positions pos_info;
+    public Positions pos_info;
 
     CollectivePositions(double arm, double elbow, double wrist, ClawTrackMode mode, double armMaxVel, double elbowMaxVel) {
       pos_info = new Positions(arm, elbow, wrist, mode, armMaxVel, elbowMaxVel);
