@@ -40,6 +40,7 @@ import frc.robot.commands.Automation.AutoUprightConePickup;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
 import frc.robot.commands.Automation.CubeIntoClaw;
+import frc.robot.commands.Automation.PlaceHighAuto;
 import frc.robot.commands.Automation.PlaceHybrid;
 import frc.robot.commands.Automation.PlaceTele;
 import frc.robot.commands.Automation.PlaceMidHigh;
@@ -661,5 +662,11 @@ public class RobotContainer {
             new PrintCommand("***Balance"),
             new InstantCommand(drivetrain::printPose),
             new ChargeStationBalance(false)));
+    
+    eventMap.put("placeConeHigh", 
+        new SequentialCommandGroup(
+            new PrintCommand("***Auto Cone Balance"),
+            new InstantCommand(drivetrain::printPose),
+            new PlaceHighAuto()));
   }
 }
