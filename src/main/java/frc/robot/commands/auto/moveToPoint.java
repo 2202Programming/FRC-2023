@@ -69,7 +69,7 @@ public class moveToPoint extends CommandBase {
     rumbleCmd.cancel();
     RobotContainer.RC().lights.stopBlinking();
     RobotContainer.RC().lights.setAllianceColors();
-    System.out.println("***Final End Point:" + sdt.getPose().getTranslation() + ", rot:" + sdt.getPose().getRotation().getDegrees());
+    System.out.println("***Movetopoint Final End Point:" + sdt.getPose().getTranslation() + ", rot:" + sdt.getPose().getRotation().getDegrees());
 
   }
 
@@ -87,8 +87,8 @@ public class moveToPoint extends CommandBase {
     //using bearing as your exit and entry angle
     PathPoint startPoint = new PathPoint(sdt.getPose().getTranslation(), bearing, sdt.getPose().getRotation());
     PathPoint endPoint = new PathPoint(finalPose.getTranslation(), bearing, finalPose.getRotation());
-    System.out.println("From Point:" + sdt.getPose().getTranslation() + ", rot:" + sdt.getPose().getRotation().getDegrees());
-    System.out.println("Expected End Point:" + finalPose.getTranslation()  + ", rot:" + finalPose.getRotation().getDegrees());
+    System.out.println("MoveToPoseAutobuilder From Point:" + sdt.getPose().getTranslation() + ", rot:" + sdt.getPose().getRotation().getDegrees());
+    System.out.println("MoveToPoseAutobuilder Expected End Point:" + finalPose.getTranslation()  + ", rot:" + finalPose.getRotation().getDegrees());
     
     PIDController anglePid = new PIDController(6.0, 0, 0);
     anglePid.setTolerance(Math.PI * 0.02);

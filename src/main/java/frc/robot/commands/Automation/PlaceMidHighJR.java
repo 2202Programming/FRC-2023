@@ -247,7 +247,7 @@ public class PlaceMidHighJR extends CommandBase {
       new ElbowMoveTo(115.0), //return to high position to avoid low post
       new ParallelCommandGroup(
         new NT_Print(nt_subState, "Running move to point retract pose"),
-        new PrintCommand("***PlaceMidHigh: Running move to point retract pose... goal pose="+goalPose),
+        new PrintCommand("***PlaceMidHigh: Running move to point retract pose... goal pose="+retractPose),
         new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
         new SequentialCommandGroup(
           new WaitCommand(0.5), //let the move start first for 0.5s so arm doesn't catch low pole
