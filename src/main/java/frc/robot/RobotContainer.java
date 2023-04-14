@@ -36,8 +36,10 @@ import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.TrackThenMove;
+import frc.robot.commands.Automation.AutoUprightConePickup;
 import frc.robot.commands.Automation.CenterTapeSkew;
 import frc.robot.commands.Automation.CenterTapeYaw;
+import frc.robot.commands.Automation.CubeIntoClaw;
 import frc.robot.commands.Automation.PlaceHybrid;
 import frc.robot.commands.Automation.PlaceTele;
 import frc.robot.commands.Automation.PlaceMidHigh;
@@ -52,7 +54,6 @@ import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
-import frc.robot.commands.auto.AutoUprightConePickup;
 import frc.robot.commands.auto.autoChamps;
 import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -365,6 +366,7 @@ public class RobotContainer {
     operator.b().whileTrue(new outtakeCompetitionToggle());
 
     // shoulder buttons / triggers
+    operator.rightTrigger().whileTrue(new CubeIntoClaw());
 
     
     // dpad

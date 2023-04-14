@@ -25,6 +25,9 @@ public enum CollectivePositions {
     uprightConePickup(0.0, 15.0, -30.0, ClawTrackMode.free),
     uprightConeTravelHalfway(0.0, 15.0, 20.0, ClawTrackMode.free),
 
+    // cube car wash to claw
+    cubeToClaw(0.0, 10.0, 0.0, ClawTrackMode.backSide),  
+
     pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),
     haveConeAtShelf(ConePickup.armLength, ConePickup.elbowAngle, 35.0, ClawTrackMode.free),   //assumes wrist near zero
     

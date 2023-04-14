@@ -71,6 +71,7 @@ public class ArmLockForDrivingFS extends CommandBase {
     // on front-side but outside flip, move elbow out flip, move back
     on_backside_mv2flip = new SequentialCommandGroup(
         //need to move to a flip point with elbow
+        new WaitUntilCommand(elbow::atSetpoint),
         new MoveElbow(safe.elbowPos, safe.elbowMaxVel),
         new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.frontSide); }),
         new WaitUntilCommand(claw::wristAtSetpoint).withTimeout(FLIP_TIME),
