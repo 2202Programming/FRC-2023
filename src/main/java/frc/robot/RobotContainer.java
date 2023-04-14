@@ -52,6 +52,7 @@ import frc.robot.commands.Intake.Washer.DeployIntake;
 import frc.robot.commands.Intake.Washer.IntakeReverse;
 import frc.robot.commands.Intake.Washer.intakeCompetitionToggle;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
+import frc.robot.commands.auto.AutoUprightConePickup;
 import frc.robot.commands.auto.autoChamps;
 import frc.robot.commands.auto.goToPickupPosition;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -356,12 +357,30 @@ public class RobotContainer {
 
     // xyab
     operator.x().onTrue(new ToggleClaw());
-    operator.y().onTrue(new MoveCollectiveArm(CollectivePositions.uprightConePickup));
+
+    operator.y().onTrue(new AutoUprightConePickup());
+
     operator.a().whileTrue(new intakeCompetitionToggle());
+
     operator.b().whileTrue(new outtakeCompetitionToggle());
 
     // shoulder buttons / triggers
+
     
+    // dpad
+    operator.povLeft().onTrue(new ArmLockForDrivingFS());
+
+    operator.povDown().and(operator.leftTrigger().negate())
+      .onTrue(
+        new PrecisionMode(true)
+        .andThen(new TrackThenMove(CollectivePositions.pickupShelfFS, 0.2))
+        .andThen(new CloseClawWithGate()));
+
+      operator.povDown().and(operator.leftTrigger())
+        .onTrue(
+          new PrecisionMode(true)
+          .andThen(new TrackThenMove(CollectivePositions.pickupShelfFS, 0.2))
+          .andThen(new InWheelsWithGate()));
 
 
     /*
@@ -387,20 +406,6 @@ public class RobotContainer {
           .onTrue( 
             new PrecisionMode(true)
             .andThen(new TrackThenMove(CollectivePositions.placeConeMidFS, 0.2)));
-
-    manual.and(operator.povDown()).and(operator.leftTrigger().negate())
-          .onTrue(
-            new PrecisionMode(true)
-            .andThen(new TrackThenMove(CollectivePositions.pickupShelfFS, 0.2))
-            .andThen(new CloseClawWithGate()));
-          
-    manual.and(operator.povDown()).and(operator.leftTrigger())
-          .onTrue(
-            new PrecisionMode(true)
-            .andThen(new TrackThenMove(CollectivePositions.pickupShelfFS, 0.2))
-            .andThen(new InWheelsWithGate()));
-
-    manual.and(operator.povLeft()).onTrue(new ArmLockForDrivingFS());
 
     manual.and(operator.y()).onTrue(new ArmLockForDrivingBS());
 
