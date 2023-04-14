@@ -314,9 +314,9 @@ public class RobotContainer {
         if (drivetrain == null)
           break;
         // enable any network table watchers we want in competion
-        // armSS.getWatcher(); // remove for comp
-        // claw.getWatcher(); // ditto
-        // elbow.getWatcher(); // ditto
+        armSS.getWatcher(); // TODO remove for comp
+        claw.getWatcher(); // ditto
+        elbow.getWatcher(); // ditto
         
         driverIndividualBindings();
         operatorIndividualBindings();
@@ -356,7 +356,7 @@ public class RobotContainer {
 
     // xyab
     operator.x().onTrue(new ToggleClaw());
-    operator.y().onTrue(new MoveCollectiveArm(CollectivePositions.uprightConePickup));
+    operator.y().onTrue(new MoveCollectiveArm(CollectivePositions.uprightConePickup).andThen(new CloseClawWithGate()));
     operator.a().whileTrue(new intakeCompetitionToggle());
     operator.b().whileTrue(new outtakeCompetitionToggle());
 
