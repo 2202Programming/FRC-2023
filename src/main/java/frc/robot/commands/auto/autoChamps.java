@@ -14,7 +14,7 @@ import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.subsystems.hid.SwitchboardController.SBButton;
 
-public class autoTest extends CommandBase {
+public class autoChamps extends CommandBase {
     // Subsystems
     SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
     HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
@@ -24,11 +24,11 @@ public class autoTest extends CommandBase {
     double macAccel = 4.0; // for mid going over charge station (STL elims) pre 4.0
 
     // Path info
-    String pathName = "MKE-";
+    String pathName = "CMP-";
     SequentialCommandGroup cmd;
     List<PathPlannerTrajectory> pathGroup;
 
-    public autoTest() {
+    public autoChamps() {
         addRequirements(sdt, dc);
     }
 
