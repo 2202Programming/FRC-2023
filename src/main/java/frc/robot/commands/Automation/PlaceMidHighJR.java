@@ -120,7 +120,7 @@ public class PlaceMidHighJR extends CommandBase {
           cmd = placeCommand;
           nt_subState.setString("Placing");
           System.out.println("***PlaceMidHighJR scheduling place command...");
-          //placeCommand.schedule();
+          placeCommand.schedule();
         }
         break;
       case Placing:
@@ -130,7 +130,7 @@ public class PlaceMidHighJR extends CommandBase {
           cmd = retractCommand = Retract();
           nt_subState.setString("Retracting");
           System.out.println("***PlaceMidHighJR scheduling retract command...");
-          //retractCommand.schedule();
+          retractCommand.schedule();
         }
         break;
       case Retracting:
