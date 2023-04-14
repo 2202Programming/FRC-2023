@@ -20,8 +20,9 @@ public enum CollectivePositions {
     //TODO ORGANIZE OR MOVE THIS
     travelFS(0.0, -20.0, 85.0, ClawTrackMode.frontSide, -1.0, 120.0), // TODO -28.0 4/8/2023
     travelLockFS(0.0, -20.0, 85.0, ClawTrackMode.free, -1.0, 120.0), // TODO -28.0 4/8/2023
-   
-   
+
+    // upright cone pickup position
+    uprightConePickup(0.0, 25.0, 0.0, ClawTrackMode.frontSide),
 
     pickupShelfFS(ConePickup.armLength, ConePickup.elbowAngle, 0.0, ClawTrackMode.frontSide),
     haveConeAtShelf(ConePickup.armLength, ConePickup.elbowAngle, 35.0, ClawTrackMode.free),   //assumes wrist near zero

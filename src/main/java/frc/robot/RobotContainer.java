@@ -356,9 +356,12 @@ public class RobotContainer {
 
     // xyab
     operator.x().onTrue(new ToggleClaw());
-    operator.y().onTrue(new ArmLockForDrivingBS());
+    operator.y().onTrue(new MoveCollectiveArm(CollectivePositions.uprightConePickup));
     operator.a().whileTrue(new intakeCompetitionToggle());
     operator.b().whileTrue(new outtakeCompetitionToggle());
+
+    // shoulder buttons / triggers
+    
 
 
     /*
@@ -398,6 +401,8 @@ public class RobotContainer {
             .andThen(new InWheelsWithGate()));
 
     manual.and(operator.povLeft()).onTrue(new ArmLockForDrivingFS());
+
+    manual.and(operator.y()).onTrue(new ArmLockForDrivingBS());
 
     /*
      * =======================
