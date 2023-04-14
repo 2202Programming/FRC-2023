@@ -25,11 +25,11 @@ public class Elbow extends SubsystemBase implements VelocityControlled {
   final double conversionFactor = (360.0 / 350.0); //orig. 20% bump (5:7:10)
 
   // positionPID at position tolerances
-  double posTol = 3.0; // [deg]
-  double velTol = 4.0; // [deg/s]
+  double posTol = 5.0; // [deg]
+  double velTol = 5.0; // [deg/s]
 
   // motion speed limits
-  double velLimit = 120.0; // [deg/s]
+  double velLimit = 140.0; // [deg/s]
   double accelLimit = 5.0; // [deg/s^2] - only in future smartmode
 
   // ArbFeedforward to compensate for static torque
