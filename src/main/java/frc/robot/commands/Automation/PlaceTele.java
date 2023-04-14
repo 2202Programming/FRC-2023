@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
+import frc.robot.commands.Arm.ArmLockForDrivingFS;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.Arm.MoveCollectiveArm;
@@ -26,6 +27,7 @@ public class PlaceTele extends SequentialCommandGroup {
 
   public PlaceTele(CollectivePositions finalPosition) {
    addCommands(
+        new ArmLockForDrivingFS(), // TODO remove for competition
         new ParallelCommandGroup( //start to unwind claw/cone from inside robot without going too far out to hit station
             new ElbowMoveTo(25.0),
             new WristMoveTo(110.0) // move wrist a little so easier to get to face up track mode

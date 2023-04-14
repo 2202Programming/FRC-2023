@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -29,6 +30,7 @@ import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.auto.moveToPoint;
+import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.commands.utility.NT_Print;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors;
@@ -248,7 +250,8 @@ public class PlaceMidHighJR extends CommandBase {
       new ParallelCommandGroup(
         new NT_Print(nt_subState, "Running move to point retract pose"),
         new PrintCommand("***PlaceMidHigh: Running move to point retract pose... goal pose="+retractPose),
-        new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
+        //new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
+        new VelocityMove(1.0, 0.0, 1.0),
         new SequentialCommandGroup(
           new WaitCommand(0.5), //let the move start first for 0.5s so arm doesn't catch low pole
           new NT_Print(nt_subState, "Running arm lock for driving FS"),
