@@ -52,11 +52,11 @@ public class CenterTapeYaw extends CommandBase {
   final double pos_tol = 2.0;
   final double max_rot_rate = 60.0; // [deg/s]
 
-  final double high_tape_Y = 20.58;
-  final double mid_tape_Y = 2.21;
-  final double high_tape_goal = -13.75;
-  final double mid_tape_goal = -24.7;
-  final double max_yaw_error = 10.0; // max number of degrees the target can be off and we still think it's legit
+  final double high_tape_Y = 21.0;
+  final double mid_tape_Y = 0.0;
+  final double high_tape_goal = -16.0;
+  final double mid_tape_goal = -24.6;
+  final double max_yaw_error = 15.0; // max number of degrees the target can be off and we still think it's legit
 
   private boolean control_motors;
   int frameCount;
@@ -146,7 +146,7 @@ public class CenterTapeYaw extends CommandBase {
         }
         if(!currentValid || highYaw) {
           sequentialBadFrames++;
-          System.out.println("Sequental bad frame #" + sequentialBadFrames);
+          System.out.println("Sequental bad frame #" + sequentialBadFrames + ", valid="+currentValid+", highYaw="+highYaw);
         } else {
           sequentialBadFrames = 0;
         }

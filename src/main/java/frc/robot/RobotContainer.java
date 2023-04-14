@@ -219,7 +219,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.arm_test);
+    configureBindings(Bindings.Competition);
 
     //Keep the wrist down at power up + 2 deg to put some pressure on it - 4/11/23 stall check
     claw.setWristAngle(PowerOnPos.wrist + 2.0);  
@@ -321,6 +321,9 @@ public class RobotContainer {
         driverIndividualBindings();
         operatorIndividualBindings();
         automationPickupPlace();
+
+        dc.SwitchBoard().sw24().onTrue(new InstantCommand(() -> {limelight.enableLED();})); // TODO REMOVE!!!
+        dc.SwitchBoard().sw24().onFalse(new InstantCommand(() -> {limelight.disableLED();})); // TODO REMOVE!!!
 
         break;
 
@@ -550,7 +553,7 @@ public class RobotContainer {
       automation.and(high).and(rightStation).and(centerSubstation)
         .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Center, VerticalScoringLane.High));
 
-      automation.and(mid).and(rightStation).and(rightSubstation)
+      automation.and(high).and(rightStation).and(rightSubstation)
         .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
   }
 
