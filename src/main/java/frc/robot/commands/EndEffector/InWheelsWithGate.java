@@ -12,7 +12,7 @@ import frc.robot.subsystems.Claw_Substyem;
 public class InWheelsWithGate extends CommandBase {
   final Claw_Substyem claw = RobotContainer.RC().claw;
   Timer closeTimer = new Timer();
-  double waitPeriod = 0.55; // [sec]
+  double waitPeriod = 0.75; // [sec]
   int framesBlocked; // [frames]
   boolean done;
   
@@ -40,7 +40,7 @@ public class InWheelsWithGate extends CommandBase {
       closeTimer.reset();
     }
     
-    if (framesBlocked == 5)  {
+    if (framesBlocked == 10)  {
       closeTimer.start();
       System.out.printf("WheelTimer Started");
     }
