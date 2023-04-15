@@ -33,7 +33,7 @@ public class PlaceTele extends SequentialCommandGroup {
         new InstantCommand(() -> {
             claw.setTrackElbowMode(ClawTrackMode.faceUp); //face claw up to not hit post as we rotate to place
         }),
-        new ElbowMoveTo(145.0),  //get above the post, so when we rotate wrist & extend are we miss posts
+        new ElbowMoveTo(110.0),  //get above the post, so when we rotate wrist & extend are we miss posts
         new MoveCollectiveArm(finalPosition));
         //new ElbowMoveTo(130.0)); TODO remove this
       }
