@@ -123,12 +123,7 @@ public final class Constants {
     public static final double rotate = 0.0;   //[deg]
   }
 
-  public static class ConePickup {
-    public static final double armLength = 9.0; //[cm] not the final number
-    public static final double elbowAngle = 125.0;  //[degrees]
-    public static final double wristAngle = 0.0; //[degrees] not final
-  }
-
+ 
   /**
    * CAN bus IDs
    * 
@@ -320,7 +315,7 @@ public final class Constants {
     public static final ChassisConfig compBotChassisConfig = new ChassisConfig(
         MperFT * (23.5 / 12.0) / 2.0, //based on CAD in reference_links
         MperFT * (19.5 / 12.0) / 2.0, //based on CAD in reference_links
-        0.960, // scale [] <= 1.0
+        0.999, // scale [] <= 1.0
         MperFT * (4.0/12.0), // wheel diameter[m] Comp bot is 4" wheels
         12.8, //confirmed with vince
         8.14); //confirmed with vince
