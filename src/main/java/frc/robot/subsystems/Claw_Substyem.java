@@ -37,6 +37,7 @@ public class Claw_Substyem extends SubsystemBase {
    */
   public enum ClawTrackMode {
     frontSide(90.0),  //dpl 4/14/23 level out for shelf pickup, was 94
+    placeFrontSide(100), //dpl 4/15/23 used for cone place to tile wrist up more
     backSide(-109.0),
     faceDown(-10.0),
     faceUp(170.0),
