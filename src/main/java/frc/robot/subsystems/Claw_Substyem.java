@@ -70,14 +70,6 @@ public class Claw_Substyem extends SubsystemBase {
   // compensate for wrist rotation
   double maxArbFF = 0.02;
 
-  // Rotation Constants
-  final int ROTATE_STALL_CURRENT = 20;
-  final int ROTATE_FREE_CURRENT = 10;
-  double rotate_maxAccel = 10.0; // only used if in smartmode, a future
-  double rotate_maxVel = 20.0;
-  double rotate_posTol = 3.0;
-  double rotate_velTol = 4.0;
-  final double rotate_conversionFactor = 360.0 / 100.0; // GR=100.0
 
   // Hardware
   final DoubleSolenoid solenoid = new DoubleSolenoid(CAN.PCM1, PneumaticsModuleType.REVPH, PCM1.CLAW_FWD, PCM1.CLAW_REV);
