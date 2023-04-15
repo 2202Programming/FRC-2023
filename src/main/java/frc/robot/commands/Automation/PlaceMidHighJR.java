@@ -11,7 +11,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -29,7 +28,6 @@ import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.ElbowMoveTo;
 import frc.robot.commands.EndEffector.WheelsOut;
 import frc.robot.commands.auto.goToScoringPosition;
-import frc.robot.commands.auto.moveToPoint;
 import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.commands.utility.NT_Print;
 import frc.robot.subsystems.Claw_Substyem;
@@ -46,6 +44,7 @@ public class PlaceMidHighJR extends CommandBase {
     final double SPEED_MOVE = 0.5; // [m/s] speed moving to / from target
     final double TIME_MOVE = 1.0; // [s] time to move to / from target
     final double TIME_DROP = 0.5; // [s] time to wait after claw opens / wheels spin out before going back
+    final double CUBE_TIME_DROP = 0.75; // [s] Cube only 
   
     // state vars
     private HorizontalScoringLane horizontalRequest;
@@ -223,7 +222,7 @@ public class PlaceMidHighJR extends CommandBase {
     command.addCommands(
       new NT_Print(nt_subState, "Running wheels out"),
       new PrintCommand("***PlaceMidHigh: Running wheels out..."),
-      new WheelsOut().withTimeout(TIME_DROP));  //wait for claw to open and cone drop
+      new WheelsOut().withTimeout(CUBE_TIME_DROP));  //wait for claw to open and cube eject
 
     return command;
   }

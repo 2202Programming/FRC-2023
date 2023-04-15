@@ -76,7 +76,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   private Pose2d old_pose;
   private Pose2d m_pose_integ; // incorporates vision
 
-  private double maxImagingVelocity = 5.0; //m/s
+  private double maxImagingVelocity = 2.0; //m/s
   private VisionWatchdog watchdog;
 
   private SwerveModuleState[] meas_states; // measured wheel speed & angle
