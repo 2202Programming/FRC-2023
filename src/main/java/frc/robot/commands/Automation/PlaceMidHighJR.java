@@ -6,11 +6,9 @@ package frc.robot.commands.Automation;
 
 import com.pathplanner.lib.PathConstraints;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -18,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.Constants;
 import frc.robot.Constants.HorizontalScoringLane;
 import frc.robot.Constants.HorizontalSubstationLane;
 import frc.robot.Constants.VerticalScoringLane;
@@ -31,6 +28,7 @@ import frc.robot.commands.auto.goToScoringPosition;
 import frc.robot.commands.swerve.VelocityMove;
 import frc.robot.commands.utility.NT_Print;
 import frc.robot.subsystems.Claw_Substyem;
+import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 import frc.robot.subsystems.ColorSensors;
 
 public class PlaceMidHighJR extends CommandBase {
@@ -46,15 +44,12 @@ public class PlaceMidHighJR extends CommandBase {
     final double TIME_DROP = 0.5; // [s] time to wait after claw opens / wheels spin out before going back
     final double CUBE_TIME_DROP = 0.75; // [s] Cube only 
   
-    // state vars
+    // Deliery request vars
     private HorizontalScoringLane horizontalRequest;
     private HorizontalSubstationLane substationRequest;
     private VerticalScoringLane verticalRequest;
-    private Pose2d goalPose;
 
-    private goToScoringPosition moveCommand;
-    private SequentialCommandGroup placeCommand;
-    private SequentialCommandGroup retractCommand;
+    //State machine vars
     Command cmd;
     private CommandState commandState;
     public enum CommandState {
@@ -91,12 +86,12 @@ public class PlaceMidHighJR extends CommandBase {
   @Override
   public void initialize() {
     nt_state.setString("Init");
-    goalPose = calculateTargetPose();
+    
     // 1. Move to safe location for arm extension 
-    cmd = moveCommand = new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest);
+    cmd = new goToScoringPosition(new PathConstraints(2, 3), horizontalRequest, substationRequest);
     nt_subState.setString("Moving to "+horizontalRequest.toString()+","+substationRequest.toString());
     System.out.println("***PlaceMidHighJR scheduling move command...");
-    moveCommand.schedule();
+    cmd.schedule();
     commandState = CommandState.Moving;
   }
 
@@ -105,45 +100,36 @@ public class PlaceMidHighJR extends CommandBase {
   public void execute() {
     nt_state.setString(commandState.toString());
 
+    //demorgans of the guard inside each case, 
+    if (!cmd.isFinished() &&  cmd.isScheduled())
+      return;
+
     switch(commandState){
       case Moving:
-        if(moveCommand.isFinished()){
           commandState = CommandState.Placing;
-          // 2. Move arm out and drop, then wait 1sec
-          switch (substationRequest) {
-            case Center:
-              placeCommand = Cube();
-              break;
-            default:
-              placeCommand = Cone();
-              break;
-          }
-          cmd = placeCommand;
-          nt_subState.setString("Placing");
-          System.out.println("***PlaceMidHighJR scheduling place command...");
-          placeCommand.schedule();
-        }
-        break;
+          // 2. Move arm out and drop, then wait 1sec 
+          cmd = (substationRequest == HorizontalSubstationLane.Center) ? Cube() : Cone();
+         break;
+
       case Placing:
-        if(placeCommand.isFinished() || !placeCommand.isScheduled()){
           commandState = CommandState.Retracting;
           // 3. Move back and retract arm to travel position
-          cmd = retractCommand = Retract();
-          nt_subState.setString("Retracting");
-          System.out.println("***PlaceMidHighJR scheduling retract command...");
-          retractCommand.schedule();
-        }
-        break;
+          cmd = Retract();
+          break;
+
       case Retracting:
-        if(retractCommand.isFinished() || !retractCommand.isScheduled()){
           commandState = CommandState.Finished;
-          nt_subState.setString("Finishing");
-          System.out.println("***PlaceMidHighJR retract done, finishing up..");
-        }
-        break;
+          cmd = null;
+          break;
       default:
         break;
       }
+
+      if (cmd != null) {
+        cmd.schedule();
+        System.out.print("****PlaceMidHighJR scheduled cmdSt= "+ commandState.toString());
+      }
+      nt_subState.setString(commandState.toString());
     }
 
 
@@ -151,7 +137,10 @@ public class PlaceMidHighJR extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     System.out.println("***PlaceMidHighJR done... interrupted=" + interrupted);
-    nt_state.setString("Ended");
+    nt_state.setString("Ended intr=" + interrupted);
+    if (interrupted) 
+      cmd.cancel();
+    //return to normal vision updates
     RobotContainer.RC().drivetrain.enableVisionPose();
     RobotContainer.RC().drivetrain.disableVisionPoseRotation();
   }
@@ -161,7 +150,7 @@ public class PlaceMidHighJR extends CommandBase {
   public boolean isFinished() {
     //finished when state machine in finished state, or if driver moves stick
     if (RobotContainer.RC().dc.rightStickMotionDriver()) {
-      cmd.cancel();   //driver aborting, abort the cmd running but THIS IS A HACK
+      cmd.cancel();   //driver aborting, abort the child cmd too.
     }
     return ((commandState == CommandState.Finished) || RobotContainer.RC().dc.rightStickMotionDriver());
   }
@@ -189,9 +178,11 @@ public class PlaceMidHighJR extends CommandBase {
 
     command.addCommands(
       new PrintCommand("***PlaceMidHigh: Running ElbowMove..."),
+      new InstantCommand(() -> { claw.setTrackElbowMode(ClawTrackMode.frontSide); }), //level claw
       new ElbowMoveTo(95.0, 60.0), // lower to dropping position
       new PrintCommand("***PlaceMidHigh: Running Claw open..."),
-      new InstantCommand(() -> { claw.open();}).andThen(new WaitCommand(TIME_DROP)),
+      new InstantCommand(() -> { claw.open();} ),
+      new WaitCommand(TIME_DROP),
       new PrintCommand("***Done with instants Claw open..."));
 
   return command;
@@ -232,24 +223,13 @@ public class PlaceMidHighJR extends CommandBase {
    */
   private SequentialCommandGroup Retract() {
     SequentialCommandGroup command = new SequentialCommandGroup();
-    Pose2d retractPose;
-    double distance = 0.6; //how far back to move (m)
-
-    if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
-      retractPose = new Pose2d(goalPose.getX() + distance, goalPose.getY(), goalPose.getRotation()); //distance away from scoring station, blue side
-    }
-    else{
-      retractPose = new Pose2d(goalPose.getX() - distance, goalPose.getY(), goalPose.getRotation()); //distance away from scoring station, red side
-    }
-
+    
     command.addCommands(
       new NT_Print(nt_subState, "Running elbow move"),
-      new PrintCommand("***PlaceMidHigh: Running elbow move..."),
-      new ElbowMoveTo(115.0), //return to high position to avoid low post
+      new PrintCommand("***PlaceMidHighJR: Running elbow move..."),
+      new InstantCommand(()->{claw.setTrackElbowMode(ClawTrackMode.faceUp);}), //move wrist back up
+      new ElbowMoveTo(110.0), //return to high position to avoid low post
       new ParallelCommandGroup(
-        new NT_Print(nt_subState, "Running move to point retract pose"),
-        new PrintCommand("***PlaceMidHigh: Running move to point retract pose... goal pose="+retractPose),
-        //new moveToPoint(new PathConstraints(1.0, 1.0), retractPose), //move slowly back while retracting arm
         new VelocityMove(0.90, 0.0, 1.11),
         new SequentialCommandGroup(
           new WaitCommand(0.5), //let the move start first for 0.5s so arm doesn't catch low pole
@@ -262,59 +242,4 @@ public class PlaceMidHighJR extends CommandBase {
     return command;
   }
 
-  //calculate which constant scoring pose is appropriate goal
-  private Pose2d calculateTargetPose(){
-    //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
-    HorizontalScoringLane horizontalScoringLane = this.horizontalRequest;
-    HorizontalSubstationLane horizontalSubstationLane = this.substationRequest;
-    int scoringBlock; 
-    int scoringAdjusted;
-    Pose2d targetPose;
-
-  if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
-
-
-    if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 2;
-    else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 0;
-    else scoringBlock = 1;
-
-    //FOR BLUE: left is largest index of scoring trio
-    switch(horizontalScoringLane){
-      case Left:
-        scoringAdjusted = 2;
-        break;
-      case Center:
-        scoringAdjusted = 1;
-        break;
-      default:
-      case Right:
-        scoringAdjusted = 0;
-        break;      
-    }
-    targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
-  }
-  else { //RED ALLIANCE
-    //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
-    if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 0;
-    else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 2;
-    else scoringBlock = 1;
-
-    //FOR RED: left is smallest index of scoring trio
-    switch(horizontalScoringLane){
-      case Left:
-        scoringAdjusted = 0;
-        break;
-      case Center:
-        scoringAdjusted = 1;
-        break;
-      default:
-      case Right:
-        scoringAdjusted = 2;
-        break;      
-    }
-    targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
-  }
-  System.out.println("Calculated target pose is " + targetPose);
- return targetPose;
-}
 }
