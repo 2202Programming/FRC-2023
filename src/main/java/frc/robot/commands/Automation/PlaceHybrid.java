@@ -9,8 +9,8 @@ import com.pathplanner.lib.PathConstraints;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Constants.HorizontalScoringLane;
-import frc.robot.Constants.HorizontalSubstationLane;
+import frc.robot.Constants.HorizontalScoringBlock;
+import frc.robot.Constants.HorizontalScoringSubstation;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Intake.Washer.outtakeCompetitionToggle;
 import frc.robot.commands.auto.goToScoringPosition;
@@ -22,15 +22,15 @@ import frc.robot.util.DynamicSCG;
 public class PlaceHybrid extends DynamicSCG {
   // State vars
 
-  HorizontalScoringLane horizontalRequest;
-  HorizontalSubstationLane substationRequest;
+  HorizontalScoringBlock horizontalRequest;
+  HorizontalScoringSubstation substationRequest;
 
   // SSs
   HID_Xbox_Subsystem dc = RobotContainer.RC().dc; 
 
   
   /** Creates a new PlaceHybrid. */
-  public PlaceHybrid(HorizontalScoringLane horizontalRequest, HorizontalSubstationLane substationRequest) {
+  public PlaceHybrid(HorizontalScoringBlock horizontalRequest, HorizontalScoringSubstation substationRequest) {
     this.horizontalRequest = horizontalRequest;
     this.substationRequest = substationRequest;
   }

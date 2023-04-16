@@ -88,7 +88,7 @@ public class SafeMoveToCubePickup extends CommandBase {
 
     // this move the claw to the nearest elbow track mode
     // it should always be safe because tracking is clear of the robot frame.
-    var mode = claw.setNearestClawTrackMode();
+    var mode = claw.setTransitionClawTrackMode();
     System.out.println("==========Here's the mode: " + mode.toString());
     switch (mode) {
       case backSide:

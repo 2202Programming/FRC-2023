@@ -13,7 +13,7 @@ public class TrackThenMove extends SequentialCommandGroup {
     public TrackThenMove(CollectivePositions armPos, double wait) {
         addCommands(
                 new InstantCommand(() -> {
-                    claw.setNearestClawTrackMode();
+                    claw.setTransitionClawTrackMode();
                 }),
                 new WaitCommand(wait),
                 new MoveCollectiveArm(armPos));

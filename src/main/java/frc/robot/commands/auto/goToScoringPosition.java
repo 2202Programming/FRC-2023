@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriverControls.Id;
-import frc.robot.Constants.HorizontalScoringLane;
-import frc.robot.Constants.HorizontalSubstationLane;
+import frc.robot.Constants.HorizontalScoringBlock;
+import frc.robot.Constants.HorizontalScoringSubstation;
 import frc.robot.RobotContainer;
 import frc.robot.commands.JoystickRumbleEndless;
 import frc.robot.commands.Automation.CenterTapeYaw;
@@ -29,8 +29,8 @@ import frc.robot.util.PoseMath;
 public class goToScoringPosition extends CommandBase {
   /** Creates a new goToScoringPosition. */
 
-  HorizontalScoringLane horizontalScoringLane;
-  HorizontalSubstationLane horizontalSubstationLane;
+  HorizontalScoringBlock horizontalScoringBlock;
+  HorizontalScoringSubstation horizontalScoringSubstation;
   PathConstraints constraints;
   SwerveDrivetrain sdt;
   PPSwerveControllerCommand pathCommand;
@@ -48,14 +48,14 @@ public class goToScoringPosition extends CommandBase {
    * Constructs a goToScoringPosition
    *
    * @param constraints path contraint object
-   * @param horizontalScoringLane Which of three macro station to go to (left/right/center)
-   * @param horizontalSubstationLane which lane of the station (micro scale) to go to (left/right/center)
+   * @param HorizontalScoringBlock Which of three macro station to go to (left/right/center)
+   * @param HorizontalScoringSubstation which lane of the station (micro scale) to go to (left/right/center)
    */
-  public goToScoringPosition(PathConstraints constraints, HorizontalScoringLane horizontalScoringLane, HorizontalSubstationLane horizontalSubstationLane) {
+  public goToScoringPosition(PathConstraints constraints, HorizontalScoringBlock horizontalScoringBlock, HorizontalScoringSubstation horizontalScoringSubstation) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.horizontalScoringLane = horizontalScoringLane;
+    this.horizontalScoringBlock = horizontalScoringBlock;
     this.constraints = constraints;
-    this.horizontalSubstationLane = horizontalSubstationLane;
+    this.horizontalScoringSubstation = horizontalScoringSubstation;
     sdt = RobotContainer.RC().drivetrain;
   }
 
@@ -63,7 +63,7 @@ public class goToScoringPosition extends CommandBase {
   @Override
   public void initialize() {
     int scoringBlock; 
-    int scoringAdjusted;
+    int scoringSubstation;
     loopNum = 0;
     pathingFinished = false;
     tapeFinished = false;
@@ -72,45 +72,45 @@ public class goToScoringPosition extends CommandBase {
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
       //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
-      if(horizontalScoringLane.equals(HorizontalScoringLane.Left)) scoringBlock = 2;
-      else if(horizontalScoringLane.equals(HorizontalScoringLane.Right)) scoringBlock = 0;
+      if(horizontalScoringBlock.equals(HorizontalScoringBlock.Left)) scoringBlock = 2;
+      else if(horizontalScoringBlock.equals(HorizontalScoringBlock.Right)) scoringBlock = 0;
       else scoringBlock = 1;
 
       //FOR BLUE: left is largest index of scoring trio
-      switch(horizontalSubstationLane){
+      switch(horizontalScoringSubstation){
         case Left:
-          scoringAdjusted = 2;
+          scoringSubstation = 2;
           break;
         case Center:
-          scoringAdjusted = 1;
+          scoringSubstation = 1;
           break;
         default:
         case Right:
-          scoringAdjusted = 0;
+          scoringSubstation = 0;
           break;      
       }
-      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
+      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringSubstation];
     }
     else { //RED ALLIANCE
       //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
-      if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 0;
-      else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 2;
+      if(horizontalScoringSubstation.equals(HorizontalScoringSubstation.Left)) scoringBlock = 0;
+      else if(horizontalScoringSubstation.equals(HorizontalScoringSubstation.Right)) scoringBlock = 2;
       else scoringBlock = 1;
 
       //FOR RED: left is smallest index of scoring trio
-      switch(horizontalScoringLane){
+      switch(horizontalScoringBlock){
         case Left:
-          scoringAdjusted = 0;
+          scoringSubstation = 0;
           break;
         case Center:
-          scoringAdjusted = 1;
+          scoringSubstation = 1;
           break;
         default:
         case Right:
-          scoringAdjusted = 2;
+          scoringSubstation = 2;
           break;      
       }
-      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringAdjusted];
+      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringSubstation];
     }
     pathCommand = MoveToPoseAutobuilder(constraints, targetPose);
     sdt.disableVisionPose();
@@ -133,7 +133,7 @@ public class goToScoringPosition extends CommandBase {
       if(isAtTarget() || (loopNum == maxLoops)) { //either at target, or max # of loops
         pathingFinished = true;
         
-        if((horizontalSubstationLane == HorizontalSubstationLane.Left) || (horizontalSubstationLane == HorizontalSubstationLane.Right)){ //cone station
+        if((horizontalScoringSubstation == HorizontalScoringSubstation.Left) || (horizontalScoringSubstation == HorizontalScoringSubstation.Right)){ //cone station
           System.out.println("*** Running Tape Yaw... ");
           tapeCommand.schedule();
           tapeFinished = false;

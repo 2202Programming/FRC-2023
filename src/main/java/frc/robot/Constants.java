@@ -449,12 +449,12 @@ public final class Constants {
   }
 
   //Enums for placement, used in Place.java command
-  public enum HorizontalScoringLane {
+  public enum HorizontalScoringBlock {
     Left,
     Right,
     Center
   }
-  public enum HorizontalSubstationLane {
+  public enum HorizontalScoringSubstation {
     Left,
     Right,
     Center

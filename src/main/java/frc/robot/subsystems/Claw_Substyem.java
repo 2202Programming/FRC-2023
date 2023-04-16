@@ -188,10 +188,11 @@ public class Claw_Substyem extends SubsystemBase {
 
   /**
    * Sets the track mode to front or back based on the angle of the claw relative to the field.
+   * These two moves are what should be used when transitioning, or moving, between unknown states.
    * 
    * @return The claw track mode in its current state, regardless of whether it has been changed.
    */
-  public ClawTrackMode  setNearestClawTrackMode() {
+  public ClawTrackMode  setTransitionClawTrackMode() {
     // elbow angle + wrist angle relative to elbow = field-relative angle
     // field-relative angle is what track mode angles are based on so this is what we want to use
     double fieldRelAngle = getWristAngle() + elbowAngle.getAsDouble();

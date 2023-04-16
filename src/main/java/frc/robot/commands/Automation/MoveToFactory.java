@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
-import frc.robot.Constants.HorizontalScoringLane;
-import frc.robot.Constants.HorizontalSubstationLane;
+import frc.robot.Constants.HorizontalScoringBlock;
+import frc.robot.Constants.HorizontalScoringSubstation;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.CollectivePositions;
 import frc.robot.commands.Arm.MoveCollectiveArm;
@@ -35,8 +35,8 @@ public class MoveToFactory extends CommandBase {
     CommandXboxController operator = dc.Operator();
 
     // state vars
-    HorizontalScoringLane horizLane;
-    HorizontalSubstationLane subLane;
+    HorizontalScoringBlock horizBlock;
+    HorizontalScoringSubstation horizSub;
     CollectivePositions armPos;
     SequentialCommandGroup cmd;
 
@@ -52,26 +52,26 @@ public class MoveToFactory extends CommandBase {
     public void initialize() {
         cmd = new SequentialCommandGroup();
         // Station lane
-        if (driver.leftBumper().getAsBoolean()) horizLane = HorizontalScoringLane.Left;
-        else if (driver.rightBumper().getAsBoolean()) horizLane = HorizontalScoringLane.Right;
-        else horizLane = HorizontalScoringLane.Center;
+        if (driver.leftBumper().getAsBoolean()) horizBlock = HorizontalScoringBlock.Left;
+        else if (driver.rightBumper().getAsBoolean()) horizBlock = HorizontalScoringBlock.Right;
+        else horizBlock = HorizontalScoringBlock.Center;
 
         // Substation lane
-        if (operator.leftBumper().getAsBoolean()) subLane = HorizontalSubstationLane.Left;
-        else if (operator.rightBumper().getAsBoolean()) subLane = HorizontalSubstationLane.Right;
-        else subLane = HorizontalSubstationLane.Center;
+        if (operator.leftBumper().getAsBoolean()) horizSub = HorizontalScoringSubstation.Left;
+        else if (operator.rightBumper().getAsBoolean()) horizSub = HorizontalScoringSubstation.Right;
+        else horizSub = HorizontalScoringSubstation.Center;
 
         // Arm mid/high
         armPos = (operator.povUp().getAsBoolean()) ? CollectivePositions.placeConeHighFS : CollectivePositions.placeConeMidFS;
 
         Rotation2d scoreRotation = new Rotation2d((DriverStation.getAlliance().equals(Alliance.Blue)) ? 0.0 : 180.0);
 
-        System.out.println("Ready to create SCG, Horizontal Scoring Lane: " + horizLane.toString() + 
-                            ", Substation Lane: " + subLane.toString() + ", arm position: " + armPos.toString());
+        System.out.println("Ready to create SCG, Horizontal Scoring Lane: " + horizBlock.toString() + 
+                            ", Substation Lane: " + horizSub.toString() + ", arm position: " + armPos.toString());
 
         cmd.addCommands(
             new PrintCommand("Starting SCG"),
-            goToScoringPos(new PathConstraints(2.0, 3.0), horizLane, subLane),
+            goToScoringPos(new PathConstraints(2.0, 3.0), horizBlock, horizSub),
             new PrintCommand("End autopath"),
             new RotateTo(scoreRotation),
             new PrintCommand("End rotation"),
@@ -86,19 +86,19 @@ public class MoveToFactory extends CommandBase {
     @Override
     public boolean isFinished() {return true;}
 
-    public static Command goToScoringPos(PathConstraints constraints, HorizontalScoringLane horizLane, HorizontalSubstationLane subLane) {
+    public static Command goToScoringPos(PathConstraints constraints, HorizontalScoringBlock horizBlock, HorizontalScoringSubstation horizSub) {
     Command pathCommand;
     int scoringBlock; 
     int scoringAdjusted;
 
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
       //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
-      if(subLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 2;
-      else if(subLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 0;
+      if(horizSub.equals(HorizontalScoringSubstation.Left)) scoringBlock = 2;
+      else if(horizSub.equals(HorizontalScoringSubstation.Right)) scoringBlock = 0;
       else scoringBlock = 1;
 
       //FOR BLUE: left is largest index of scoring trio
-      switch(horizLane){
+      switch(horizBlock){
         case Left:
           scoringAdjusted = 2;
           break;
@@ -114,12 +114,12 @@ public class MoveToFactory extends CommandBase {
     }
     else { //RED ALLIANCE
       //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
-      if(subLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 0;
-      else if(subLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 2;
+      if(horizSub.equals(HorizontalScoringSubstation.Left)) scoringBlock = 0;
+      else if(horizSub.equals(HorizontalScoringSubstation.Right)) scoringBlock = 2;
       else scoringBlock = 1;
 
       //FOR RED: left is smallest index of scoring trio
-      switch(horizLane){
+      switch(horizBlock){
         case Left:
           scoringAdjusted = 0;
           break;

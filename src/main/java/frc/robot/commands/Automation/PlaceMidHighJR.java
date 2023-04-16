@@ -16,8 +16,8 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.Constants.HorizontalScoringLane;
-import frc.robot.Constants.HorizontalSubstationLane;
+import frc.robot.Constants.HorizontalScoringBlock;
+import frc.robot.Constants.HorizontalScoringSubstation;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.ArmLockForDrivingFS;
@@ -45,8 +45,8 @@ public class PlaceMidHighJR extends CommandBase {
     final double CUBE_TIME_DROP = 0.75; // [s] Cube only 
   
     // Deliery request vars
-    private HorizontalScoringLane horizontalRequest;
-    private HorizontalSubstationLane substationRequest;
+    private HorizontalScoringBlock horizontalRequest;
+    private HorizontalScoringSubstation substationRequest;
     private VerticalScoringLane verticalRequest;
 
     //State machine vars
@@ -70,8 +70,8 @@ public class PlaceMidHighJR extends CommandBase {
    * @param substationRequest The substation (micro-level) request
    * @param verticalRequest The height
    */
-  public PlaceMidHighJR(HorizontalScoringLane horizontalRequest, 
-                      HorizontalSubstationLane substationRequest, 
+  public PlaceMidHighJR(HorizontalScoringBlock horizontalRequest, 
+                      HorizontalScoringSubstation substationRequest, 
                       VerticalScoringLane verticalRequest) {
     this.horizontalRequest = horizontalRequest;
     this.substationRequest = substationRequest;
@@ -108,7 +108,7 @@ public class PlaceMidHighJR extends CommandBase {
       case Moving:
           commandState = CommandState.Placing;
           // 2. Move arm out and drop, then wait 1sec 
-          cmd = (substationRequest == HorizontalSubstationLane.Center) ? Cube() : Cone();
+          cmd = (substationRequest == HorizontalScoringSubstation.Center) ? Cube() : Cone();
          break;
 
       case Placing:

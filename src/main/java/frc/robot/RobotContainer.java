@@ -23,8 +23,8 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
-import frc.robot.Constants.HorizontalScoringLane;
-import frc.robot.Constants.HorizontalSubstationLane;
+import frc.robot.Constants.HorizontalScoringBlock;
+import frc.robot.Constants.HorizontalScoringSubstation;
 import frc.robot.Constants.PowerOnPos;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.commands.JoystickRumbleEndless;
@@ -272,7 +272,7 @@ public class RobotContainer {
 
         driver.leftBumper().onTrue(new PlaceTele(CollectivePositions.placeConeHighFS));
 
-        driver.a().onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+        driver.a().onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Right, VerticalScoringLane.High));
         driver.b().onTrue(new VelocityMove(0.5, 0, 1.0));
         break;
 
@@ -299,13 +299,13 @@ public class RobotContainer {
         driver.y().onTrue(new AllianceAwareGyroReset(true)); // disable vision rot
         driver.leftTrigger().whileTrue(new JoystickRumbleEndless(Id.Driver));
 
-        // driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left));
+        // driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringBlock.Left));
         // // up and down for center trio request per Alek
-        // driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
-        // driver.povDown().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center));
-        driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Left, HorizontalSubstationLane.Left));
-        driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringLane.Center, HorizontalSubstationLane.Center));
-        driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(4, 3), HorizontalScoringLane.Right, HorizontalSubstationLane.Right));
+        // driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringBlock.Center));
+        // driver.povDown().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringBlock.Center));
+        driver.povLeft().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringBlock.Left, HorizontalScoringSubstation.Left));
+        driver.povUp().onTrue(new goToScoringPosition(new PathConstraints(2, 3), HorizontalScoringBlock.Center, HorizontalScoringSubstation.Center));
+        driver.povRight().onTrue(new goToScoringPosition(new PathConstraints(4, 3), HorizontalScoringBlock.Right, HorizontalScoringSubstation.Right));
 
         driver.leftBumper().onTrue(new InstantCommand(() -> {limelight.toggleLED();}));
 
@@ -468,33 +468,33 @@ public class RobotContainer {
 
       // left station
       automation.and(low).and(leftStation).and(leftSubstation)
-        .onTrue(new PlaceHybrid(HorizontalScoringLane.Left, HorizontalSubstationLane.Left));
+        .onTrue(new PlaceHybrid(HorizontalScoringBlock.Left, HorizontalScoringSubstation.Left));
       
       automation.and(low).and(leftStation).and(centerSubstation)
-        .onTrue(new PlaceHybrid(HorizontalScoringLane.Left, HorizontalSubstationLane.Center));
+        .onTrue(new PlaceHybrid(HorizontalScoringBlock.Left, HorizontalScoringSubstation.Center));
 
       automation.and(low).and(leftStation).and(rightSubstation)
-        .onTrue(new PlaceHybrid(HorizontalScoringLane.Left, HorizontalSubstationLane.Right));
+        .onTrue(new PlaceHybrid(HorizontalScoringBlock.Left, HorizontalScoringSubstation.Right));
 
       // center station
       automation.and(low).and(centerStation).and(leftSubstation)
-        .onTrue(new PlaceHybrid(HorizontalScoringLane.Center, HorizontalSubstationLane.Left));
+        .onTrue(new PlaceHybrid(HorizontalScoringBlock.Center, HorizontalScoringSubstation.Left));
       
       automation.and(low).and(centerStation).and(centerSubstation)
-        .onTrue(new PlaceHybrid(HorizontalScoringLane.Center, HorizontalSubstationLane.Center));
+        .onTrue(new PlaceHybrid(HorizontalScoringBlock.Center, HorizontalScoringSubstation.Center));
 
       automation.and(low).and(centerStation).and(rightSubstation)
-        .onTrue(new PlaceHybrid(HorizontalScoringLane.Center, HorizontalSubstationLane.Right));
+        .onTrue(new PlaceHybrid(HorizontalScoringBlock.Center, HorizontalScoringSubstation.Right));
 
       // right station
       automation.and(low).and(rightStation).and(leftSubstation)
-        .onTrue(new PlaceHybrid(HorizontalScoringLane.Right, HorizontalSubstationLane.Left));
+        .onTrue(new PlaceHybrid(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Left));
       
       automation.and(low).and(rightStation).and(centerSubstation)
-        .onTrue(new PlaceHybrid(HorizontalScoringLane.Right, HorizontalSubstationLane.Center));
+        .onTrue(new PlaceHybrid(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Center));
 
       automation.and(low).and(rightStation).and(rightSubstation)
-        .onTrue(new PlaceHybrid(HorizontalScoringLane.Right, HorizontalSubstationLane.Right));
+        .onTrue(new PlaceHybrid(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Right));
       
       /*
        * =======================
@@ -504,33 +504,33 @@ public class RobotContainer {
 
       // left station
       automation.and(mid).and(leftStation).and(leftSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Left, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Left, HorizontalScoringSubstation.Left, VerticalScoringLane.Middle));
       
       automation.and(mid).and(leftStation).and(centerSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Left, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Left, HorizontalScoringSubstation.Center, VerticalScoringLane.Middle));
 
       automation.and(mid).and(leftStation).and(rightSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Left, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Left, HorizontalScoringSubstation.Right, VerticalScoringLane.Middle));
 
       // center station
       automation.and(mid).and(centerStation).and(leftSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Center, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Center, HorizontalScoringSubstation.Left, VerticalScoringLane.Middle));
       
       automation.and(mid).and(centerStation).and(centerSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Center, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Center, HorizontalScoringSubstation.Center, VerticalScoringLane.Middle));
 
       automation.and(mid).and(centerStation).and(rightSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Center, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Center, HorizontalScoringSubstation.Right, VerticalScoringLane.Middle));
 
       // right station
       automation.and(mid).and(rightStation).and(leftSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Left, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Left, VerticalScoringLane.Middle));
       
       automation.and(mid).and(rightStation).and(centerSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Center, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Center, VerticalScoringLane.Middle));
 
       automation.and(mid).and(rightStation).and(rightSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.Middle));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Right, VerticalScoringLane.Middle));
 
       /*
        * =======================
@@ -540,33 +540,33 @@ public class RobotContainer {
 
       // left station
       automation.and(high).and(leftStation).and(leftSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Left, HorizontalSubstationLane.Left, VerticalScoringLane.High));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Left, HorizontalScoringSubstation.Left, VerticalScoringLane.High));
       
       automation.and(high).and(leftStation).and(centerSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Left, HorizontalSubstationLane.Center, VerticalScoringLane.High));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Left, HorizontalScoringSubstation.Center, VerticalScoringLane.High));
 
       automation.and(high).and(leftStation).and(rightSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Left, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Left, HorizontalScoringSubstation.Right, VerticalScoringLane.High));
 
       // center station
       automation.and(high).and(centerStation).and(leftSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Center, HorizontalSubstationLane.Left, VerticalScoringLane.High));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Center, HorizontalScoringSubstation.Left, VerticalScoringLane.High));
       
       automation.and(high).and(centerStation).and(centerSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Center, HorizontalSubstationLane.Center, VerticalScoringLane.High));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Center, HorizontalScoringSubstation.Center, VerticalScoringLane.High));
 
       automation.and(high).and(centerStation).and(rightSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Center, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Center, HorizontalScoringSubstation.Right, VerticalScoringLane.High));
 
       // right station
       automation.and(high).and(rightStation).and(leftSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Left, VerticalScoringLane.High));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Left, VerticalScoringLane.High));
       
       automation.and(high).and(rightStation).and(centerSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Center, VerticalScoringLane.High));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Center, VerticalScoringLane.High));
 
       automation.and(high).and(rightStation).and(rightSubstation)
-        .onTrue(new PlaceMidHighJR(HorizontalScoringLane.Right, HorizontalSubstationLane.Right, VerticalScoringLane.High));
+        .onTrue(new PlaceMidHighJR(HorizontalScoringBlock.Right, HorizontalScoringSubstation.Right, VerticalScoringLane.High));
   }
 
 

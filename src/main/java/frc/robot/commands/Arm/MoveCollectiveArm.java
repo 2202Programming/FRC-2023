@@ -138,7 +138,7 @@ public class MoveCollectiveArm extends CommandBase {
     if (flip_requested) {
       //need to be in a tracking mode, Free could be pointing weird
       //so track nearest frontside/backside angle
-      start.mode = claw.setNearestClawTrackMode();
+      start.mode = claw.setTransitionClawTrackMode();
     }
 
     // which way are we moving, in or out

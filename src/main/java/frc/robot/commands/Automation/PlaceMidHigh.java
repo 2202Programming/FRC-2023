@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
-import frc.robot.Constants.HorizontalScoringLane;
-import frc.robot.Constants.HorizontalSubstationLane;
+import frc.robot.Constants.HorizontalScoringBlock;
+import frc.robot.Constants.HorizontalScoringSubstation;
 import frc.robot.Constants.VerticalScoringLane;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Arm.ArmLockForDrivingFS;
@@ -43,8 +43,8 @@ public class PlaceMidHigh extends DynamicSCG {
   final double TIME_DROP = 0.5; // [s] time to wait after claw opens / wheels spin out before going back
 
   // state vars
-  private HorizontalScoringLane horizontalRequest;
-  private HorizontalSubstationLane substationRequest;
+  private HorizontalScoringBlock horizontalRequest;
+  private HorizontalScoringSubstation substationRequest;
   private VerticalScoringLane verticalRequest;
   private Pose2d goalPose;
 
@@ -59,8 +59,8 @@ public class PlaceMidHigh extends DynamicSCG {
    * @param substationRequest The substation (micro-level) request
    * @param verticalRequest The height
    */
-  public PlaceMidHigh(HorizontalScoringLane horizontalRequest, 
-                      HorizontalSubstationLane substationRequest, 
+  public PlaceMidHigh(HorizontalScoringBlock horizontalRequest, 
+                      HorizontalScoringSubstation substationRequest, 
                       VerticalScoringLane verticalRequest) {
     this.horizontalRequest = horizontalRequest;
     this.substationRequest = substationRequest;
@@ -174,8 +174,8 @@ public class PlaceMidHigh extends DynamicSCG {
   //calculate which constant scoring pose is appropriate goal
   private Pose2d calculateTargetPose(){
       //FOR BLUE: 2 for left (driver's point of view), 1 for center, 0 for right
-      HorizontalScoringLane horizontalScoringLane = this.horizontalRequest;
-      HorizontalSubstationLane horizontalSubstationLane = this.substationRequest;
+      HorizontalScoringBlock HorizontalScoringBlock = this.horizontalRequest;
+      HorizontalScoringSubstation HorizontalScoringSubstation = this.substationRequest;
       int scoringBlock; 
       int scoringAdjusted;
       Pose2d targetPose;
@@ -183,12 +183,12 @@ public class PlaceMidHigh extends DynamicSCG {
     if(DriverStation.getAlliance() == DriverStation.Alliance.Blue) { //BLUE ALLIANCE
 
 
-      if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 2;
-      else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 0;
+      if(HorizontalScoringSubstation.equals(HorizontalScoringSubstation.Left)) scoringBlock = 2;
+      else if(HorizontalScoringSubstation.equals(HorizontalScoringSubstation.Right)) scoringBlock = 0;
       else scoringBlock = 1;
 
       //FOR BLUE: left is largest index of scoring trio
-      switch(horizontalScoringLane){
+      switch(HorizontalScoringBlock){
         case Left:
           scoringAdjusted = 2;
           break;
@@ -204,12 +204,12 @@ public class PlaceMidHigh extends DynamicSCG {
     }
     else { //RED ALLIANCE
       //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
-      if(horizontalSubstationLane.equals(HorizontalSubstationLane.Left)) scoringBlock = 0;
-      else if(horizontalSubstationLane.equals(HorizontalSubstationLane.Right)) scoringBlock = 2;
+      if(HorizontalScoringSubstation.equals(HorizontalScoringSubstation.Left)) scoringBlock = 0;
+      else if(HorizontalScoringSubstation.equals(HorizontalScoringSubstation.Right)) scoringBlock = 2;
       else scoringBlock = 1;
 
       //FOR RED: left is smallest index of scoring trio
-      switch(horizontalScoringLane){
+      switch(HorizontalScoringBlock){
         case Left:
           scoringAdjusted = 0;
           break;
