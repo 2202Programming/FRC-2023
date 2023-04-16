@@ -38,7 +38,8 @@ public enum CollectivePositions {
     placeConeMidFS(12.0, 110.0, 100.0, ClawTrackMode.free),
     placeCubeMidFS(12.0, 110.0, -51.0, ClawTrackMode.frontSide),
 
-    placeConeHighFS(37.0, 110.0, 100.0, ClawTrackMode.free),  
+    // not in trackmode so to get 100 deg relative, take off the elbow angle
+    placeConeHighFS(37.0, 110.0, (100.0 - 110.0), ClawTrackMode.free),  
     placeCubeHighFS(37.0, 105.0, -50.0, ClawTrackMode.frontSide);
    
 
