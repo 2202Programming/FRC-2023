@@ -37,7 +37,6 @@ public class Claw_Substyem extends SubsystemBase {
    */
   public enum ClawTrackMode {
     frontSide(90.0),  //dpl 4/14/23 level out for shelf pickup, was 94
-    placeFrontSide(100), //dpl 4/15/23 used for cone place to tile wrist up more
     backSide(-109.0),
     faceDown(-10.0),
     faceUp(170.0),
@@ -187,14 +186,18 @@ public class Claw_Substyem extends SubsystemBase {
   }
 
 
-  //enter the track mode based on our current angle
+  /**
+   * Sets the track mode to front or back based on the angle of the claw relative to the field.
+   * 
+   * @return The claw track mode in its current state, regardless of whether it has been changed.
+   */
   public ClawTrackMode  setNearestClawTrackMode() {
+    // elbow angle + wrist angle relative to elbow = field-relative angle
+    // field-relative angle is what track mode angles are based on so this is what we want to use
+    double fieldRelAngle = getWristAngle() + elbowAngle.getAsDouble();
     //looks at claw anglesto pick which side we should be on coming from free mode.
-    if (trackElbowMode == ClawTrackMode.free) {
-      var mode =  getWristAngle() >= 0.0 ? ClawTrackMode.frontSide : ClawTrackMode.backSide;
-      setTrackElbowMode(mode);
-    }
-    //otherwise just keep what we have
+    ClawTrackMode mode =  fieldRelAngle >= 0.0 ? ClawTrackMode.frontSide : ClawTrackMode.backSide;
+    setTrackElbowMode(mode);
     return getTrackElbowMode();
   } 
 

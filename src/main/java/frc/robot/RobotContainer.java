@@ -221,7 +221,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.Competition);
+    configureBindings(Bindings.arm_test);
 
     //Keep the wrist down at power up + 2 deg to put some pressure on it - 4/11/23 stall check
     claw.setWristAngle(PowerOnPos.wrist + 2.0);  
