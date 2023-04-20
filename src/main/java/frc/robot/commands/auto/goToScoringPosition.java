@@ -93,12 +93,12 @@ public class goToScoringPosition extends CommandBase {
     }
     else { //RED ALLIANCE
       //FOR RED: 0 for left (driver's point of view), 1 for center, 2 for right
-      if(horizontalScoringSubstation.equals(HorizontalScoringSubstation.Left)) scoringBlock = 0;
-      else if(horizontalScoringSubstation.equals(HorizontalScoringSubstation.Right)) scoringBlock = 2;
+      if(horizontalScoringBlock.equals(HorizontalScoringBlock.Left)) scoringBlock = 0;
+      else if(horizontalScoringBlock.equals(HorizontalScoringBlock.Right)) scoringBlock = 2;
       else scoringBlock = 1;
 
       //FOR RED: left is smallest index of scoring trio
-      switch(horizontalScoringBlock){
+      switch(horizontalScoringSubstation){
         case Left:
           scoringSubstation = 0;
           break;
