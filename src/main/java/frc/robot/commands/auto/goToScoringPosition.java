@@ -110,7 +110,7 @@ public class goToScoringPosition extends CommandBase {
           scoringSubstation = 2;
           break;      
       }
-      targetPose = Constants.FieldPoses.blueScorePoses[scoringBlock][scoringSubstation];
+      targetPose = Constants.FieldPoses.redScorePoses[scoringBlock][scoringSubstation];
     }
     pathCommand = MoveToPoseAutobuilder(constraints, targetPose);
     sdt.disableVisionPose();
