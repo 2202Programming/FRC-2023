@@ -35,7 +35,7 @@ public enum CollectivePositions {
     haveConeAtShelf(9.0, 110.0, 35.0, ClawTrackMode.free),   //assumes wrist near zero
     
     //cone placeFrontside tilts up more than cube using frontSide tracking
-    placeConeMidFS(12.0, 110.0, 100.0, ClawTrackMode.free),
+    placeConeMidFS(12.0, 110.0, (100.0 - 110.0), ClawTrackMode.free),
     placeCubeMidFS(12.0, 110.0, -51.0, ClawTrackMode.frontSide),
 
     // not in trackmode so to get 100 deg relative, take off the elbow angle

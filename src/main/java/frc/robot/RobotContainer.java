@@ -4,12 +4,9 @@
 
 package frc.robot;
 
-import static frc.robot.commands.test.GenericAlignElement.GenericAlignEelementFactory;
-
 import java.util.HashMap;
 
 import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
@@ -19,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverControls.Id;
@@ -34,17 +30,14 @@ import frc.robot.commands.Arm.ArmLockForDrivingBS;
 import frc.robot.commands.Arm.ArmLockForDrivingFS;
 import frc.robot.commands.Arm.ArmMoveAtSpeed;
 import frc.robot.commands.Arm.CollectivePositions;
-import frc.robot.commands.Arm.MoveCollectiveArm;
 import frc.robot.commands.Arm.TrackThenMove;
+import frc.robot.commands.Automation.AutoCubePickup;
 import frc.robot.commands.Automation.AutoUprightConePickup;
 import frc.robot.commands.Automation.CenterTapeSkew;
-import frc.robot.commands.Automation.CenterTapeYaw;
-import frc.robot.commands.Automation.CubeIntoClaw;
-import frc.robot.commands.Automation.PlaceHybrid;
-import frc.robot.commands.Automation.PlaceTele;
-import frc.robot.commands.Automation.PlaceMidHigh;
-import frc.robot.commands.Automation.PlaceMidHighJR;
 import frc.robot.commands.Automation.Pickup.Substation;
+import frc.robot.commands.Automation.PlaceHybrid;
+import frc.robot.commands.Automation.PlaceMidHighJR;
+import frc.robot.commands.Automation.PlaceTele;
 import frc.robot.commands.EndEffector.CloseClawWithGate;
 import frc.robot.commands.EndEffector.InWheelsWithGate;
 import frc.robot.commands.EndEffector.ToggleClaw;
@@ -78,7 +71,6 @@ import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.CommandSwitchboardController;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.RobotSpecs;
-import frc.robot.util.VelocityControlled;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -221,7 +213,7 @@ public class RobotContainer {
     }
 
     // Edit the binding confiuration for testing
-    configureBindings(Bindings.arm_test);
+    configureBindings(Bindings.Competition);
 
     //Keep the wrist down at power up + 2 deg to put some pressure on it - 4/11/23 stall check
     claw.setWristAngle(PowerOnPos.wrist + 2.0);  
@@ -244,7 +236,7 @@ public class RobotContainer {
         claw.getWatcher();
         elbow.getWatcher();
         // claw.setElbowDoubleSupplier(elbow::getPosition);
-        VelocityControlled wrist = claw.getWrist();
+        //VelocityControlled wrist = claw.getWrist();
 
         // Setup some alignment tooling for the arm's components
         // MAKE SURE THE BUTTONS DON"T COLLIDE WITH OTHER COMMANDS
@@ -366,7 +358,7 @@ public class RobotContainer {
     operator.b().whileTrue(new outtakeCompetitionToggle());
 
     // shoulder buttons / triggers
-    operator.rightTrigger().whileTrue(new CubeIntoClaw());
+    operator.rightTrigger().onTrue(new AutoCubePickup());
 
     
     // dpad
