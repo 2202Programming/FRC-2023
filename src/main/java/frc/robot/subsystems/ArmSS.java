@@ -53,7 +53,7 @@ public class ArmSS extends SubsystemBase implements VelocityControlled {
     // State vars
     final NeoServo leftArm;
     final NeoServo rightArm;
-    boolean follow_mode; 
+    boolean follow_mode;
 
     // PID and speed constants
     double maxVel = 21.0; // [cm/s] 
