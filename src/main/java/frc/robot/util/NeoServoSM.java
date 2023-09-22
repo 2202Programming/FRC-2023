@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.commands.utility.WatcherCmd;
 
-public class NeoServo implements VelocityControlled {
+public class NeoServoSM implements VelocityControlled {
     String name = "no-name";
 
     // commands
@@ -59,11 +59,35 @@ public class NeoServo implements VelocityControlled {
     final SparkMaxPIDController pid;
     final RelativeEncoder encoder;
 
-    public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted) {
+    //Using SmartMotion
+    //TODO: hwVelPIDcfg and hwVelSlot aovoids error? consider creating new file just for this or something else
+    public NeoServoSM(int canID, PIDController positionPID, PIDFController hwVelPIDcfg,int hwVelSlot, boolean inverted, double maxVel,double minVel,double maxAcc,boolean allow_closed_loop_error){
+        ctrl = new CANSparkMax(canID, MotorType.kBrushless);
+        ctrl.clearFaults();
+        ctrl.restoreFactoryDefaults();
+        ctrl.setInverted(inverted);
+        ctrl.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        pid = ctrl.getPIDController();
+        encoder = ctrl.getEncoder();
+
+        this.positionPID = positionPID;
+        this.hwVelSlot = hwVelSlot;
+        this.hwVelPIDcfg = hwVelPIDcfg;
+        this.prevVelPIDcfg = new PIDFController(hwVelPIDcfg);
+
+        int smartMotionSlot = 0;
+        pid.setSmartMotionMaxVelocity(maxVel, smartMotionSlot);
+        pid.setSmartMotionMinOutputVelocity(minVel, smartMotionSlot);
+        pid.setSmartMotionMaxAccel(maxAcc, smartMotionSlot);
+        pid.setSmartMotionAllowedClosedLoopError(maxAcc, smartMotionSlot);
+
+    }
+    //TODO What is this for?
+    public NeoServoSM(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted) {
         this(canID, positionPID, hwVelPIDcfg, inverted, 0);
     }
 
-    public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot) {
+    public NeoServoSM(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot) {
         // use canID to get controller and supporting objects
         ctrl = new CANSparkMax(canID, MotorType.kBrushless);
         ctrl.clearFaults();
@@ -80,7 +104,7 @@ public class NeoServo implements VelocityControlled {
     }
 
     // not really a NEO, but a sparkmax controller on brushed motor and alt encoder
-    public NeoServo(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot,
+    public NeoServoSM(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot,
             Type extEncoderType, int kCPR) {
         ctrl = new CANSparkMax(canID, MotorType.kBrushed);
         ctrl.clearFaults();
@@ -96,53 +120,53 @@ public class NeoServo implements VelocityControlled {
         this.prevVelPIDcfg = new PIDFController(hwVelPIDcfg);
     }
 
-    public NeoServo setName(String name) {
+    public NeoServoSM setName(String name) {
         this.name = name;
         return this;
     }
 
     // methods to tune the servo very SmartMax Neo specific
-    public NeoServo setConversionFactor(double conversionFactor) {
+    public NeoServoSM setConversionFactor(double conversionFactor) {
         encoder.setPositionConversionFactor(conversionFactor);
         encoder.setVelocityConversionFactor(conversionFactor / 60);
         return this;
     }
 
-    public NeoServo setTolerance(double posTol, double velTol) {
+    public NeoServoSM setTolerance(double posTol, double velTol) {
         positionPID.setTolerance(posTol, velTol);
         return this;
     }
 
-    public NeoServo setSmartCurrentLimit(int stallLimit, int freeLimit) {
+    public NeoServoSM setSmartCurrentLimit(int stallLimit, int freeLimit) {
         // sets curren limits, but RPMLimit is not enabled, 10K is default
         return setSmartCurrentLimit(stallLimit, freeLimit, 10000);
     }
 
-    public NeoServo setSmartCurrentLimit(int stallLimit, int freeLimit, int rpmLimit) {
+    public NeoServoSM setSmartCurrentLimit(int stallLimit, int freeLimit, int rpmLimit) {
         ctrl.setSmartCurrentLimit(stallLimit, freeLimit, rpmLimit);
         return this;
     }
 
-    public NeoServo setVelocityHW_PID(double smVelMax, double smAccelMax) {
+    public NeoServoSM setVelocityHW_PID(double smVelMax, double smAccelMax) {
         // write the hwVelPIDcfgcfg constants to the sparkmax
         hwVelPIDcfg.copyTo(pid, hwVelSlot, smVelMax, smAccelMax);
         return this;
     }
 
-    public NeoServo burnFlash() {
+    public NeoServoSM burnFlash() {
         ctrl.burnFlash();
         Timer.delay(.2); // this holds up the current thread
         return this;
     }
 
     // defers to setMaxVel(), but returns this for config chaining
-    public NeoServo setMaxVelocity(double maxVelocity) {
+    public NeoServoSM setMaxVelocity(double maxVelocity) {
         // defer to the VelocityControlled API
         setMaxVel(maxVelocity);
         return this;
     }
 
-    public NeoServo setBrakeMode(CANSparkMax.IdleMode mode) {
+    public NeoServoSM setBrakeMode(CANSparkMax.IdleMode mode) {
         ctrl.setIdleMode(mode);
         return this;
     }
@@ -303,7 +327,8 @@ public class NeoServo implements VelocityControlled {
             }
         }
         // potential use of feedforward
-        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFF, ArbFFUnits.kPercentOut);
+        //pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFF, ArbFFUnits.kPercentOut);
+        pid.setReference(setPoint, CANSparkMax.ControlType.kSmartMotion);
     }
 
 
