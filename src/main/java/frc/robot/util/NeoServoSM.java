@@ -82,7 +82,6 @@ public class NeoServoSM implements VelocityControlled {
         pid.setSmartMotionAllowedClosedLoopError(maxAcc, smartMotionSlot);
 
     }
-    //TODO What is this for?
     public NeoServoSM(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted) {
         this(canID, positionPID, hwVelPIDcfg, inverted, 0);
     }
