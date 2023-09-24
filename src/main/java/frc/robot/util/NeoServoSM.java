@@ -67,8 +67,8 @@ public class NeoServoSM implements VelocityControlled {
     //     this(canID, positionPID, hwVelPIDcfg, inverted, 0);
     // }
 
-
-    public NeoServoSM(int canID, PIDController positionPID, PIDFController hwVelPIDcfg, boolean inverted, int hwVelSlot) {
+        //do we want this to be spark?
+    public NeoServoSM(int canID, PIDController positionPID, boolean inverted) {
         // use canID to get controller and supporting objects
         ctrl = new CANSparkMax(canID, MotorType.kBrushless);
         ctrl.clearFaults();
@@ -97,8 +97,8 @@ public class NeoServoSM implements VelocityControlled {
     }
 
 
-    public NeoServoSM setTolerance(double posTol, double velTol) {
-        positionPID.setTolerance(posTol, velTol);
+    public NeoServoSM setTolerance(double allowedErr, int smartMotionSlot) {
+        pid.setSmartMotionAllowedClosedLoopError(allowedErr, smartMotionSlot);
         return this;
     }
 
