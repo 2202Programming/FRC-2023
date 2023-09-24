@@ -23,7 +23,7 @@ import frc.robot.Constants;
 import frc.robot.commands.utility.WatcherCmd;
 
 
-public class NeoServoSM implements VelocityControlled {
+public class NeoServoSM {
     String name = "no-name";
 
 
@@ -148,9 +148,9 @@ public class NeoServoSM implements VelocityControlled {
      *
      */
     // Servo's position setpoint
-    public void setSetpoint(double pos) {
+    public void setReference(double pos) {
         pos = MathUtil.clamp(pos, MIN_POS, MAX_POS);
-        positionPID.setSetpoint(pos);
+        pid.setReference(pos, CANSparkMax.ControlType.kPosition);
         velocity_mode = false;
         external_vel_cmd = 0.0;
     }
@@ -316,7 +316,7 @@ public class NeoServoSM implements VelocityControlled {
                         " velocity_cmd=" + velocity_cmd +
                         " measured_vel=" + currentVel, false);
                 // stalled for NO_MOTION_FRAMES frames, stop trying to move
-                setSetpoint(currentPos); // stay where we are
+                setReference(currentPos); // stay where we are
                 velocity_cmd = 0.0;
                 arbFF = 0.0;
             } else {
