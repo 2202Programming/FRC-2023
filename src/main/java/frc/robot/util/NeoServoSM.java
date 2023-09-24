@@ -24,7 +24,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.commands.utility.WatcherCmd;
 
-
+/*
+ * Noah SM Changes documentation (Komei & Mr. Laufenberg pls look & edit)
+ * changed setTolerance to setSmartMotionAllowedClosedLoopError, added separate vel setSmartMotionMaxVelocity & same for min
+ * changed getVelocityTolerance to a getter subtracting max/min vel
+ * changed error to getSmartMotionAllowedClosedLoopError
+ * doesn't implement vel controlled anymore
+ * changed setpoint to setreference
+ * added desiredpos var as a getter essentially since there's none built into SM
+ * changed reset to setIAccum & resetting the closed loop error
+ * Note: Need to figure out how to do calculate & atSetpoint
+ */
 public class NeoServoSM {
     String name = "no-name";
 
@@ -102,8 +112,10 @@ public class NeoServoSM {
     }
 
 
-    public NeoServoSM setTolerance(double allowedErr, int smartMotionSlot) {
+    public NeoServoSM setTolerance(double allowedErr, int smartMotionSlot, double maxVel, double minVel) {
         pid.setSmartMotionAllowedClosedLoopError(allowedErr, smartMotionSlot);
+        pid.setSmartMotionMaxVelocity(maxVel, hwVelSlot);
+        pid.setSmartMotionMinOutputVelocity(minVel, hwVelSlot);
         return this;
     }
 
@@ -181,13 +193,17 @@ public class NeoServoSM {
     public boolean atSetpoint() {
         return desiredPos == currentPos;
     }
+    public double getVelocityTolerances(){
+        return pid.getSmartMotionMaxVelocity(hwVelSlot) - pid.getSmartMotionMinOutputVelocity(hwVelSlot);
+    }
 
 
     // Sets the encoder position (Doesn't move anything)
     public void setPosition(double pos) {
         encoder.setPosition(pos); // tell our encoder we are at pos
-        pid.setIAccum(pos);
-        positionPID.reset(); // clear any history in the pid
+        pid.setIAccum(0);
+        pid.setSmartMotionAllowedClosedLoopError(0, hwVelSlot);
+        // positionPID.reset(); // clear any history in the pid
         positionPID.calculate(pos - trim, pos); // tell our pid we want that position; measured, setpoint same
     }
 
@@ -271,8 +287,8 @@ public class NeoServoSM {
      * true => servo is stalled for N frames or more, cut the motor in periodic()
      */
     boolean isStalled() {
-        boolean not_moving = (Math.abs(velocity_cmd) > positionPID.getVelocityTolerance()) && // motion requested
-                (Math.abs(currentVel) < positionPID.getVelocityTolerance()) && // motion not seen
+        boolean not_moving = (Math.abs(velocity_cmd) > getVelocityTolerances()) && // motion requested
+                (Math.abs(currentVel) < getVelocityTolerances()) && // motion not seen
                 (!positionPID.atSetpoint()) &&
                 (DriverStation.isEnabled()); // is enabled
 
