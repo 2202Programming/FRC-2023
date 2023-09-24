@@ -10,6 +10,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
 
 import edu.wpi.first.math.MathUtil;
@@ -56,6 +58,7 @@ public class NeoServoSM {
 
     // state vars
     final PIDController positionPID;
+    final int hwVelSlot;
 
 
     // hardware
@@ -69,7 +72,7 @@ public class NeoServoSM {
     // }
 
         //positionPID only in there rn so i don't have error.. will take out 
-    public NeoServoSM(int canID, SparkMaxPIDController pid, boolean inverted, PIDController positionPID) {
+    public NeoServoSM(int canID, SparkMaxPIDController pid, boolean inverted, PIDController positionPID, int hwVelSlot) {
         // use canID to get controller and supporting objects
         ctrl = new CANSparkMax(canID, MotorType.kBrushless);
         ctrl.clearFaults();
@@ -80,6 +83,7 @@ public class NeoServoSM {
         encoder = ctrl.getEncoder();
 
         this.positionPID = positionPID;
+        this.hwVelSlot = hwVelSlot;
         this.pid = pid;
     }
 
@@ -151,7 +155,7 @@ public class NeoServoSM {
     // Servo's position setpoint
     public void setReference(double pos) {
         pos = MathUtil.clamp(pos, MIN_POS, MAX_POS);
-        pid.setReference(pos, CANSparkMax.ControlType.kPosition);
+        pid.setReference(pos, ControlType.kPosition, hwVelSlot);
         velocity_mode = false;
         external_vel_cmd = 0.0;
         desiredPos = pos;
@@ -182,6 +186,7 @@ public class NeoServoSM {
     // Sets the encoder position (Doesn't move anything)
     public void setPosition(double pos) {
         encoder.setPosition(pos); // tell our encoder we are at pos
+        pid.setIAccum(pos);
         positionPID.reset(); // clear any history in the pid
         positionPID.calculate(pos - trim, pos); // tell our pid we want that position; measured, setpoint same
     }
@@ -294,7 +299,7 @@ public class NeoServoSM {
         // velocity_mode, update position setpoint so we don't jump back on mode switch
         if (velocity_mode) {
             // 4/10/2023 dpl positionPID.reset();
-            pid.setReference(currentPos, CANSparkMax.ControlType.kPosition);
+            pid.setReference(currentPos, ControlType.kPosition, hwVelSlot);
         }
 
 
@@ -327,6 +332,7 @@ public class NeoServoSM {
             }
         }
         // potential use of feedforward
+        pid.setReference(velocity_cmd, ControlType.kVelocity, hwVelSlot, arbFF, ArbFFUnits.kPercentOut);
     }
 
 
