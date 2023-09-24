@@ -45,6 +45,7 @@ public class NeoServoSM {
     // measured values
     double currentPos;
     double currentVel;
+    double desiredPos;
 
 
     // safety checks on servo movement
@@ -67,8 +68,8 @@ public class NeoServoSM {
     //     this(canID, positionPID, hwVelPIDcfg, inverted, 0);
     // }
 
-        //do we want this to be spark?
-    public NeoServoSM(int canID, PIDController positionPID, boolean inverted) {
+        //positionPID only in there rn so i don't have error.. will take out 
+    public NeoServoSM(int canID, SparkMaxPIDController pid, boolean inverted, PIDController positionPID) {
         // use canID to get controller and supporting objects
         ctrl = new CANSparkMax(canID, MotorType.kBrushless);
         ctrl.clearFaults();
@@ -78,8 +79,8 @@ public class NeoServoSM {
         pid = ctrl.getPIDController();
         encoder = ctrl.getEncoder();
 
-
         this.positionPID = positionPID;
+        this.pid = pid;
     }
 
 
@@ -153,6 +154,7 @@ public class NeoServoSM {
         pid.setReference(pos, CANSparkMax.ControlType.kPosition);
         velocity_mode = false;
         external_vel_cmd = 0.0;
+        desiredPos = pos;
     }
 
 
@@ -168,12 +170,12 @@ public class NeoServoSM {
 
 
     public double getSetpoint() {
-        return positionPID.getSetpoint();
+        return currentPos;
     }
 
 
     public boolean atSetpoint() {
-        return positionPID.atSetpoint();
+        return desiredPos == currentPos;
     }
 
 
@@ -186,7 +188,7 @@ public class NeoServoSM {
 
 
     public double getPosition() {
-        return currentPos;
+        return desiredPos;
     }
 
 
@@ -292,7 +294,7 @@ public class NeoServoSM {
         // velocity_mode, update position setpoint so we don't jump back on mode switch
         if (velocity_mode) {
             // 4/10/2023 dpl positionPID.reset();
-            positionPID.setSetpoint(currentPos);
+            pid.setReference(currentPos, CANSparkMax.ControlType.kPosition);
         }
 
 
