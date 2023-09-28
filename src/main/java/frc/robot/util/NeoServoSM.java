@@ -26,6 +26,8 @@ import frc.robot.commands.utility.WatcherCmd;
 
 /*
  * Noah SM Changes documentation (Komei & Mr. Laufenberg pls look & edit)
+ * note: one thing i wasn't sure of was the smart motion control type, with velocity/position and such.. rn i just did it based off
+ * of what we were actually changing
  * changed setTolerance to setSmartMotionAllowedClosedLoopError, added separate vel setSmartMotionMaxVelocity & same for min
  * changed getVelocityTolerance to a getter subtracting max/min vel
  * changed error to getSmartMotionAllowedClosedLoopError
