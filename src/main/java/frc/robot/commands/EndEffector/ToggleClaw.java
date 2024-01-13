@@ -1,10 +1,10 @@
 package frc.robot.commands.EndEffector;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Claw_Substyem;
 
-public class ToggleClaw extends CommandBase {
+public class ToggleClaw extends Command {
     // SSs
     Claw_Substyem claw = RobotContainer.RC().claw;
     

@@ -4,11 +4,11 @@
 
 package frc.robot.commands.Arm;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ArmSS;
 
-public class ArmMoveAtSpeed extends CommandBase {
+public class ArmMoveAtSpeed extends Command {
  
   ArmSS arm;
   final boolean zero_position;

@@ -5,11 +5,11 @@
 package frc.robot.commands.test;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.util.VelocityControlled;
 
-public class GenericAlignElement extends CommandBase {
+public class GenericAlignElement extends Command {
   double increment;
   final VelocityControlled device;
 

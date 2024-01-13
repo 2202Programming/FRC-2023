@@ -5,12 +5,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.Constants.DriverControls.Id;
 
-public class JoystickRumbleEndless extends CommandBase {
+public class JoystickRumbleEndless extends Command {
   /** Rumbless while scheduled. */
 
   HID_Xbox_Subsystem dc;

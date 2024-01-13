@@ -13,7 +13,7 @@ import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.RobotContainer;
 import frc.robot.commands.JoystickRumbleEndless;
@@ -21,7 +21,7 @@ import frc.robot.subsystems.BlinkyLights;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.util.PoseMath;
 
-public class moveToPoint extends CommandBase {
+public class moveToPoint extends Command {
   /** Creates a new goToScoringPosition. */
 
   PathConstraints constraints;

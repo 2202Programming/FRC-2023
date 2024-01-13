@@ -7,11 +7,11 @@ package frc.robot.commands.swerve;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
 
-public class VelocityMove extends CommandBase {
+public class VelocityMove extends Command {
   final SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
   final double x_speed;
   final double y_speed;

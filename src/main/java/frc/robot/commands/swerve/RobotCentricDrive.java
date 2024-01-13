@@ -5,7 +5,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -19,7 +19,7 @@ import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 */
 
 
-public class RobotCentricDrive extends CommandBase {
+public class RobotCentricDrive extends Command {
 
   final SwerveDrivetrain drivetrain;
   final HID_Xbox_Subsystem dc;

@@ -6,10 +6,10 @@ package frc.robot.commands.utility;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.util.NetworkTableUtil;
 
-public abstract class WatcherCmd extends CommandBase implements NetworkTableUtil{
+public abstract class WatcherCmd extends Command implements NetworkTableUtil{
   /** Creates a new Watcher. */
    final NetworkTable table;
   final String name;

@@ -1,10 +1,10 @@
 package frc.robot.commands.test;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.utility.Lockout;
 import frc.robot.util.VelocityControlled;
 
-public class GenericPositionTest extends CommandBase implements Lockout {
+public class GenericPositionTest extends Command implements Lockout {
 
     final VelocityControlled device;
     boolean setpointAtZero;

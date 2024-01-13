@@ -2,10 +2,10 @@
 
 package frc.robot.commands.test;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.util.VelocityControlled;
 
-public class GenericMoveAtSpeed extends CommandBase {
+public class GenericMoveAtSpeed extends Command {
 
   final VelocityControlled device;
   final boolean zero_pos_when_done;

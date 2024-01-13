@@ -6,12 +6,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.Constants.DriverControls.Id;
 
-public class JoystickRumble extends CommandBase {
+public class JoystickRumble extends Command {
   /** Creates a new JoystickRumble. */
 
   HID_Xbox_Subsystem dc;

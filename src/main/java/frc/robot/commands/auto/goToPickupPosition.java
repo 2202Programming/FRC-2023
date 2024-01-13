@@ -14,7 +14,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Constants.DriverControls.Id;
 import frc.robot.RobotContainer;
@@ -23,7 +23,7 @@ import frc.robot.commands.Automation.Pickup.Substation;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.util.PoseMath;
 
-public class goToPickupPosition extends CommandBase {
+public class goToPickupPosition extends Command {
   /** Creates a new goToScoringPosition. */
 
   public Substation moveDirection;

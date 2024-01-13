@@ -2,7 +2,7 @@
 
 package frc.robot.commands.Arm;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Elbow;
@@ -42,7 +42,7 @@ import frc.robot.subsystems.Elbow;
  * We dont know the exact gear ratios, so we will be using X (The current idea is 8.5)
  * 1.75 * x = Amount of rotations for imput. 
  */
-public class ArmMoveTo extends CommandBase {
+public class ArmMoveTo extends Command {
   /** Creates a new MoveOut. */
   final ArmSS armSS;
   final double length;

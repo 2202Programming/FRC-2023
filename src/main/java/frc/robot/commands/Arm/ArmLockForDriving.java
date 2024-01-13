@@ -5,7 +5,7 @@
 package frc.robot.commands.Arm;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -17,7 +17,7 @@ import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.Claw_Substyem.ClawTrackMode;
 import frc.robot.subsystems.Elbow;
 
-public class ArmLockForDriving extends CommandBase {
+public class ArmLockForDriving extends Command {
 
   // hardware commanded
   ArmSS arm = RobotContainer.RC().armSS;

@@ -4,10 +4,10 @@
 
 package frc.robot.commands.test;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.util.VelocityControlled;
 
-public class GenericZeroPos extends CommandBase {
+public class GenericZeroPos extends Command {
 
   final VelocityControlled device;
   public GenericZeroPos(VelocityControlled device){

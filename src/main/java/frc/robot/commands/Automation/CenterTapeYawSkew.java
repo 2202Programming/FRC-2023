@@ -6,11 +6,11 @@ package frc.robot.commands.Automation;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
 
-public class CenterTapeYawSkew extends CommandBase {
+public class CenterTapeYawSkew extends Command {
   /** Creates a new CenterTapeYawSkew. */
 
   CenterTapeYaw yawCommand = new CenterTapeYaw();

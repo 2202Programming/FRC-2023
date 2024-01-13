@@ -2,11 +2,11 @@
 
 package frc.robot.commands.Arm;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Claw_Substyem;
 
-public class WristMoveTo extends CommandBase {
+public class WristMoveTo extends Command {
   /** Creates a new MoveOut. */
   final Claw_Substyem claw;
   final double angle;

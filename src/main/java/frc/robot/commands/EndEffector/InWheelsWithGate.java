@@ -5,11 +5,11 @@
 package frc.robot.commands.EndEffector;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Claw_Substyem;
 
-public class InWheelsWithGate extends CommandBase {
+public class InWheelsWithGate extends Command {
   final Claw_Substyem claw = RobotContainer.RC().claw;
   Timer closeTimer = new Timer();
   double waitPeriod = 0.75; // [sec]

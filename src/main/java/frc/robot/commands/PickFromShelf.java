@@ -6,7 +6,7 @@ package frc.robot.commands;
 
 import com.pathplanner.lib.PathConstraints;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Automation.Pickup.Substation;
@@ -15,7 +15,7 @@ import frc.robot.subsystems.ColorSensors;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 
-public class PickFromShelf extends CommandBase {
+public class PickFromShelf extends Command {
 
   // SSs
   private HID_Xbox_Subsystem dc = RobotContainer.RC().dc;

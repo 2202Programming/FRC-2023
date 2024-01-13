@@ -4,11 +4,11 @@
 
 package frc.robot.commands.Intake.Washer;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake;
 import frc.robot.RobotContainer;
 
-public class DeployIntake extends CommandBase {
+public class DeployIntake extends Command {
   /** Creates a new activateIntake. */
   final Intake intake;
 

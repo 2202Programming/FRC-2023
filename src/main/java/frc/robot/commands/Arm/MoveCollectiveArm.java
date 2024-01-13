@@ -5,7 +5,7 @@
 package frc.robot.commands.Arm;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ArmSS;
 import frc.robot.subsystems.Claw_Substyem;
@@ -24,7 +24,7 @@ import frc.robot.util.VelocityControlled;
  * 
  */
 
-public class MoveCollectiveArm extends CommandBase {
+public class MoveCollectiveArm extends Command {
 
   // hardware commanded
   ArmSS arm = RobotContainer.RC().armSS;

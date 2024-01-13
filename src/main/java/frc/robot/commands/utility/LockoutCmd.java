@@ -6,9 +6,9 @@ package frc.robot.commands.utility;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class LockoutCmd extends CommandBase {
+public class LockoutCmd extends Command {
 
   Command protected_cmd;
   double lockout_period;

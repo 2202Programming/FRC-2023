@@ -4,9 +4,9 @@
 
 package frc.robot.commands.auto;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class auto_cmd extends CommandBase {
+public class auto_cmd extends Command {
   /** Creates a new auto_cmd. */
   public auto_cmd() {
     // Use addRequirements() here to declare subsystem dependencies.

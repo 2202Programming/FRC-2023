@@ -1,10 +1,10 @@
 package frc.robot.commands.Intake.Washer;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Intake;
 
-public class CarwashForward extends CommandBase {
+public class CarwashForward extends Command {
 
     Intake intake;
 

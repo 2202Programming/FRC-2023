@@ -1,10 +1,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.BlinkyLights.BlinkyLightUser;
 
-public class ContinuousBlink extends CommandBase implements BlinkyLightUser {
+public class ContinuousBlink extends Command implements BlinkyLightUser {
 
     private final boolean blink;
     private final Color8Bit color;

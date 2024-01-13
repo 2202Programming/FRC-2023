@@ -6,7 +6,7 @@ import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
@@ -14,7 +14,7 @@ import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.subsystems.hid.SwitchboardController.SBButton;
 
-public class autoChamps extends CommandBase {
+public class autoChamps extends Command {
     // Subsystems
     SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
     HID_Xbox_Subsystem dc = RobotContainer.RC().dc;

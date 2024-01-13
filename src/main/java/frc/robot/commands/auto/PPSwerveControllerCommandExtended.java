@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /** Custom PathPlanner version of SwerveControllerCommand */
-public class PPSwerveControllerCommandExtended extends CommandBase {
+public class PPSwerveControllerCommandExtended extends Command {
   private final Timer timer = new Timer();
   private final PathPlannerTrajectory trajectory;
   private final Supplier<Pose2d> poseSupplier;

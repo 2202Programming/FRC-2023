@@ -12,14 +12,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.SwerveDrivetrain;
 
 //translates robot to get both reflective tape targets aligned to same yaw
 
-public class CenterTapeSkew extends CommandBase {
+public class CenterTapeSkew extends Command {
   final SwerveDrivetrain drivetrain;
   final SwerveDriveKinematics kinematics;
   final PhotonVision photonvision;

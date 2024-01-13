@@ -1,12 +1,12 @@
 package frc.robot.commands.Automation;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Claw_Substyem;
 import frc.robot.subsystems.ColorSensors.GamePiece;
 import frc.robot.subsystems.SwerveDrivetrain;
 
-public class PickupDrive extends CommandBase {
+public class PickupDrive extends Command {
     // Subsystems
     SwerveDrivetrain sdt = RobotContainer.RC().drivetrain;
     Claw_Substyem claw = RobotContainer.RC().claw;

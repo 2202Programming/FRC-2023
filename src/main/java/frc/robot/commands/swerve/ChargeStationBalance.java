@@ -11,7 +11,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.utility.WatcherCmd;
@@ -43,7 +43,7 @@ import frc.robot.subsystems.SwerveDrivetrain;
  * 
  */
 
-public class ChargeStationBalance extends CommandBase implements BlinkyLightUser {
+public class ChargeStationBalance extends Command implements BlinkyLightUser {
 
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java

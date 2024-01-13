@@ -4,7 +4,7 @@
 
 package frc.robot.commands.test;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.utility.Lockout;
 
 /**
@@ -22,7 +22,7 @@ import frc.robot.commands.utility.Lockout;
  */
 
 /* To use the withLockout() decorator, you must use 'implements lockout' */
-public class LockoutExampleCmd extends CommandBase implements Lockout {
+public class LockoutExampleCmd extends Command implements Lockout {
   int count;
 
   /** Creates a new LockoutExampleCmd. */

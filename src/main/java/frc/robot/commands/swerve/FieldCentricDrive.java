@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrivetrain;
@@ -18,7 +18,7 @@ import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
   Driver controls the robot using field coordinates.
     X,Y, Rotation
 */
-public class FieldCentricDrive extends CommandBase {
+public class FieldCentricDrive extends Command {
 
   final SwerveDrivetrain drivetrain;
   final SwerveDriveKinematics kinematics;

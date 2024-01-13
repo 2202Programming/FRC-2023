@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem;
@@ -49,7 +49,7 @@ import frc.robot.subsystems.SwerveDrivetrain;
  *  SEE non-roll version for latest
  */
 @Deprecated //don't use with Comp2023 bot, it uses pitch and has a speedup
-public class ChargeStationBalanceRoll extends CommandBase {
+public class ChargeStationBalanceRoll extends Command {
 
     final boolean exitOnLevel; // mode
     // Constants, some may be beter as args or from Constants.java

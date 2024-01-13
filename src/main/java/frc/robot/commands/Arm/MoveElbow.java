@@ -1,11 +1,11 @@
 package frc.robot.commands.Arm;
 
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elbow;
 
-public class MoveElbow extends CommandBase {
+public class MoveElbow extends Command {
   final Elbow elbow = RobotContainer.RC().elbow;
   final double angle;
   final double maxVel;

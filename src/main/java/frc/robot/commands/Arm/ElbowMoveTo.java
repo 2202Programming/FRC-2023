@@ -2,12 +2,12 @@
 
 package frc.robot.commands.Arm;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elbow;
 
 
-public class ElbowMoveTo extends CommandBase {
+public class ElbowMoveTo extends Command {
   /** Creates a new MoveOut. */
   final double angle;
   final Elbow elbow;

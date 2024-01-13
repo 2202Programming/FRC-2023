@@ -7,13 +7,13 @@ package frc.robot.commands.test;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.commands.utility.Lockout;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.util.VelocityControlled;
 
-public class GenericJoystickPositionTest extends CommandBase implements Lockout {
+public class GenericJoystickPositionTest extends Command implements Lockout {
   final VelocityControlled device;
   final HID_Xbox_Subsystem dc = RobotContainer.RC().dc;
   final double max_vel;

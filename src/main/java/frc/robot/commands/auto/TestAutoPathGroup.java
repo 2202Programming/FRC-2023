@@ -7,7 +7,7 @@ import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.commands.swerve.ChargeStationBalance;
@@ -20,7 +20,7 @@ import frc.robot.subsystems.hid.SwitchboardController.SBButton;
  * 
  * To run the first part, enable Sw13, first and second, Sw13 and Sw14, etc. all the way to Sw16 --> Sw21 --> Sw26 for a max of 10 parts
  */
-public class TestAutoPathGroup extends CommandBase {
+public class TestAutoPathGroup extends Command {
 
     String pathName;
     SequentialCommandGroup cmd;
