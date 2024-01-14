@@ -28,7 +28,7 @@ public class AllianceAwareGyroReset extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if (DriverStation.getAlliance() == Alliance.Blue){
+    if (DriverStation.getAlliance().get() == Alliance.Blue){
       RobotContainer.RC().drivetrain.resetAnglePose(Rotation2d.fromDegrees(0)); //away from blue driverstation is 0 degrees
     }
     else{

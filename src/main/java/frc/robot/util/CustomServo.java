@@ -40,7 +40,7 @@ public class CustomServo extends PWM {
       DefaultMinServoPWM = minPWMuS;
       // compute range once
       ServoRange = MaxServoAngle - MinServoAngle;
-      setBounds(DefaultMaxServoPWM, 0.0, 0.0, 0.0, DefaultMinServoPWM);
+      setBoundsMicroseconds((int)DefaultMaxServoPWM, 0, 0, 0, (int)DefaultMinServoPWM);
       setPeriodMultiplier(PeriodMultiplier.k4X);
 
       HAL.report(tResourceType.kResourceType_Servo, getChannel());

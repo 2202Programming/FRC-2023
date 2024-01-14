@@ -92,7 +92,7 @@ public class Robot extends TimedRobot {
     if (m_robotContainer.drivetrain != null)
       m_robotContainer.drivetrain.disableVisionPose();
 
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    //m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -159,8 +159,9 @@ public class Robot extends TimedRobot {
     if (m_robotContainer.drivetrain != null)
       m_robotContainer.drivetrain.simulationInit();
 
-    if (m_robotContainer.photonVision != null)
-      m_robotContainer.photonVision.simulationInit();
+    if (m_robotContainer.photonVision != null){
+      //m_robotContainer.photonVision.simulationInit();
+    }
   }
 
   /** This function is called periodically whilst in simulation. */

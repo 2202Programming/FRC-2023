@@ -14,9 +14,6 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.SimPhotonCamera;
-import org.photonvision.SimVisionSystem;
-import org.photonvision.SimVisionTarget;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 
@@ -106,7 +103,7 @@ public class PhotonVision extends SubsystemBase {
     camList.add(new Pair<PhotonCamera, Transform3d>(camera_arducam, robotToCam));
 
     // setup PhotonVision's pose estimator,
-    robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP, camera_arducam, robotToCam);
+    robotPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera_arducam, robotToCam);
     previousPoseEstimate = new Pair<>(new Pose2d(), 0.0);
     currentPoseEstimate = new Pair<>(new Pose2d(), 0.0);
 
@@ -295,82 +292,82 @@ public class PhotonVision extends SubsystemBase {
   }
 
   /* Simulation stuff */
-  SimVisionSystem simVision1;
-  SimVisionSystem simVision2;
-  SimPhotonCamera sim_camera_global;
-  SimPhotonCamera sim_camera_microsoft;
-  SwerveDrivetrain sim_drivetrain; // ref the real one as WIP
-
-  public void simulationPeriodic() {
-
-    // Update PhotonVision based on our new robot position.
-    simVision1.processFrame(sim_drivetrain.getPose());
-    simVision2.processFrame(sim_drivetrain.getPose());
-
-    /*
-     * raw data mode - WIP
-     * ArrayList<PhotonTrackedTarget> visibleTgtList = new
-     * ArrayList<PhotonTrackedTarget>();
-     * var tags = fieldLayout.getTags();
-     * visibleTgtList.add(new PhotonTrackedTarget(yawDegrees, pitchDegrees, area,
-     * skew, camToTargetTrans)); // Repeat for each target that you see
-     * simCam.submitProcessedFrame(0.0, visibleTgtList);
-     */
-  }
-
-  public void simulationInit() {
-    sim_drivetrain = RobotContainer.RC().drivetrain;
-
-    // target size in inches TODO: these are bogus fix them
-    double targetWidth = Units.inchesToMeters(6.0); // Units.inchesToMeters(41.30) - Units.inchesToMeters(6.70); //
-                                                    // meter
-    double targetHeight = Units.inchesToMeters(6.0); // Units.inchesToMeters(98.19) - Units.inchesToMeters(81.19); //
-                                                     // meters
-
-    // Simulated Vision System.
-    // Configure these to match your PhotonVision Camera,
-    // pipeline, and LED setup.
-    double camDiagFOV = 170.0; // degrees - assume wide-angle camera
-    double camPitch = 0.0; // degrees
-    double camHeightOffGround = .5; // meters
-    double maxLEDRange = 20; // meters
-    int camResolutionWidth = 640; // pixels
-    int camResolutionHeight = 480; // pixels
-    double minTargetArea = 10; // square pixels
-
-    simVision1 = new SimVisionSystem(
-        camera1,
-        camDiagFOV,
-        new Transform3d(new Translation3d(0, 0, camHeightOffGround), new Rotation3d(0, camPitch, 0)),
-        maxLEDRange,
-        camResolutionWidth,
-        camResolutionHeight,
-        minTargetArea);
-
-    simVision2 = new SimVisionSystem(
-        camera2,
-        camDiagFOV,
-        new Transform3d(new Translation3d(0, 0, camHeightOffGround), new Rotation3d(0, camPitch, 0)),
-        maxLEDRange,
-        camResolutionWidth,
-        camResolutionHeight,
-        minTargetArea);
-
-    // add all the tags into the PV simu
-    var tags = fieldLayout.getTags();
-    for (AprilTag aprilTag : tags) {
-      var simVisionTarget = new SimVisionTarget(aprilTag.pose, targetWidth, targetHeight, aprilTag.ID);
-      simVision1.addSimVisionTarget(simVisionTarget);
-      simVision2.addSimVisionTarget(simVisionTarget);
-    }
-
-    // RAW WIP simCam = new SimPhotonCamera("MyCamera");
-    // Assemble the list of cameras & mount locations
-    /*
-     * WIP Raw data mode
-     * sim_camera_global = new SimPhotonCamera("Global_Shutter_Camera");
-     * sim_camera_microsoft = new SimPhotonCamera("Microsoft_LifeCam_HD-3000");
-     */
-  }
+//  SimVisionSystem simVision1;
+//  SimVisionSystem simVision2;
+//  SimPhotonCamera sim_camera_global;
+//  SimPhotonCamera sim_camera_microsoft;
+//  SwerveDrivetrain sim_drivetrain; // ref the real one as WIP
+//
+//  public void simulationPeriodic() {
+//
+//    // Update PhotonVision based on our new robot position.
+//    simVision1.processFrame(sim_drivetrain.getPose());
+//    simVision2.processFrame(sim_drivetrain.getPose());
+//
+//    /*
+//     * raw data mode - WIP
+//     * ArrayList<PhotonTrackedTarget> visibleTgtList = new
+//     * ArrayList<PhotonTrackedTarget>();
+//     * var tags = fieldLayout.getTags();
+//     * visibleTgtList.add(new PhotonTrackedTarget(yawDegrees, pitchDegrees, area,
+//     * skew, camToTargetTrans)); // Repeat for each target that you see
+//     * simCam.submitProcessedFrame(0.0, visibleTgtList);
+//     */
+//  }
+//
+//  public void simulationInit() {
+//    sim_drivetrain = RobotContainer.RC().drivetrain;
+//
+//    // target size in inches TODO: these are bogus fix them
+//    double targetWidth = Units.inchesToMeters(6.0); // Units.inchesToMeters(41.30) - Units.inchesToMeters(6.70); //
+//                                                    // meter
+//    double targetHeight = Units.inchesToMeters(6.0); // Units.inchesToMeters(98.19) - Units.inchesToMeters(81.19); //
+//                                                     // meters
+//
+//    // Simulated Vision System.
+//    // Configure these to match your PhotonVision Camera,
+//    // pipeline, and LED setup.
+//    double camDiagFOV = 170.0; // degrees - assume wide-angle camera
+//    double camPitch = 0.0; // degrees
+//    double camHeightOffGround = .5; // meters
+//    double maxLEDRange = 20; // meters
+//    int camResolutionWidth = 640; // pixels
+//    int camResolutionHeight = 480; // pixels
+//    double minTargetArea = 10; // square pixels
+//
+//    simVision1 = new SimVisionSystem(
+//        camera1,
+//        camDiagFOV,
+//        new Transform3d(new Translation3d(0, 0, camHeightOffGround), new Rotation3d(0, camPitch, 0)),
+//        maxLEDRange,
+//        camResolutionWidth,
+//        camResolutionHeight,
+//        minTargetArea);
+//
+//    simVision2 = new SimVisionSystem(
+//        camera2,
+//        camDiagFOV,
+//        new Transform3d(new Translation3d(0, 0, camHeightOffGround), new Rotation3d(0, camPitch, 0)),
+//        maxLEDRange,
+//        camResolutionWidth,
+//        camResolutionHeight,
+//        minTargetArea);
+//
+//    // add all the tags into the PV simu
+//    var tags = fieldLayout.getTags();
+//    for (AprilTag aprilTag : tags) {
+//      var simVisionTarget = new SimVisionTarget(aprilTag.pose, targetWidth, targetHeight, aprilTag.ID);
+//      simVision1.addSimVisionTarget(simVisionTarget);
+//      simVision2.addSimVisionTarget(simVisionTarget);
+//    }
+//
+//    // RAW WIP simCam = new SimPhotonCamera("MyCamera");
+//    // Assemble the list of cameras & mount locations
+//    /*
+//     * WIP Raw data mode
+//     * sim_camera_global = new SimPhotonCamera("Global_Shutter_Camera");
+//     * sim_camera_microsoft = new SimPhotonCamera("Microsoft_LifeCam_HD-3000");
+//     */
+//  }
 
 }
